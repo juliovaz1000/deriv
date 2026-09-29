@@ -1,0 +1,17 @@
+[build]
+  publish = "."
+  command = "npm install"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# o HTML sempre na versão mais nova (sem cache velho)
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"

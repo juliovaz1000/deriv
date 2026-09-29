@@ -1,0 +1,49 @@
+DÓLAR PAR/ÍMPAR — VERSÃO PARA A NETLIFY
+=======================================
+
+O que tem nesta pasta
+- index.html ............ o acumulador (mesma v3.14 + botão ☁ nuvem)
+- netlify/functions/estado.mts ... o "banco da nuvem" (Netlify Blobs)
+- netlify.toml, package.json ..... configuração da Netlify (não precisa mexer)
+- manifest.webmanifest, sw.js, icon.svg ... para instalar como app no celular
+
+Como funciona hospedado
+- Os resultados vêm DIRETO da Deriv pelo navegador (WebSocket oficial), igual no PC.
+  Não precisa de ponte Tampermonkey nem proxy.
+- Os jogos ficam no IndexedDB de cada aparelho. Ao abrir, ele repõe sozinho o que
+  faltar dos últimos dias direto da Deriv (aba ⚡ Deriv mostra o progresso).
+  Para meses de histórico, use a aba "📥 Histórico R_100" ou importe o arquivo de jogos
+  que você já salvou no PC.
+- O botão ☁ nuvem (aparece no topo quando está no site) guarda na Netlify:
+  robôs, relatórios das confluências 1 e 2, análise, banca virtual e configurações.
+  Assim o celular e o PC ficam iguais. O token da conta demo NUNCA sobe.
+
+PASSO A PASSO (pelo GitHub — o mais simples para atualizar depois)
+1. Crie um repositório no GitHub e envie todos os arquivos desta pasta.
+2. Na Netlify: Add new project > Import an existing project > GitHub > escolha o repositório.
+   As configurações de build já vêm do netlify.toml (é só clicar em Deploy).
+3. Na Netlify: Project configuration > Environment variables > Add a variable
+      Key:   SYNC_SENHA
+      Value: uma senha sua (ex.: umas 12 letras e números)
+   Depois: Deploys > Trigger deploy > Deploy project (para a senha valer).
+4. Abra o site, clique em ☁ nuvem, digite a mesma senha e clique em ⬆ Enviar agora.
+   No celular: abra o site, ☁ nuvem, a mesma senha, ⬇ Receber da nuvem.
+
+OU pelo Netlify CLI (no PC, dentro desta pasta)
+   npm install -g netlify-cli
+   netlify login
+   netlify deploy --prod        (na 1ª vez ele pergunta se cria um projeto novo)
+   netlify env:set SYNC_SENHA sua-senha
+   netlify deploy --prod        (de novo, para a senha valer)
+
+ATENÇÃO: arrastar a pasta no "Netlify Drop" publica o HTML, mas a nuvem (☁) NÃO funciona
+desse jeito, porque a função precisa ser montada no deploy. Use GitHub ou o CLI.
+
+Dicas
+- Com "sincronizar sozinho" ligado, ele recebe ao abrir e envia a cada 3 minutos.
+- Se usar dois aparelhos ao mesmo tempo, quando um ficar desatualizado o botão ☁ fica
+  amarelo com o aviso: abra ☁ e clique em ⬇ Receber — ele JUNTA os relatórios dos dois,
+  nada se perde. Robô apagado num aparelho pode voltar se o outro ainda tiver ele.
+- A Netlify guarda também a versão anterior (cópia de segurança) a cada envio.
+- No celular: menu do navegador > "Adicionar à tela inicial" para abrir como app.
+- O site fica público para quem tiver o endereço, mas os seus dados da nuvem só abrem com a senha.
