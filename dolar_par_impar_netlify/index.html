@@ -242,6 +242,9 @@ tr.cfa-best td{background:rgba(34,197,94,.12)}
 .pgc{width:18px;height:18px;border-radius:5px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:800}.pgc.ok{background:rgba(34,197,94,.25);color:#86efac}.pgc.no{background:rgba(239,68,68,.3);color:#fca5a5}
 .srdpanel{border-color:rgba(34,211,238,.45)!important}
 .espanel{border-color:rgba(56,189,248,.5)!important}
+#ilBtn{padding:3px 10px;border-radius:10px;font-size:12px;font-weight:800;border-color:#f59e0b;color:#fbbf24}#ilBtn.ilon{background:#f59e0b;color:#111;border-color:#f59e0b;box-shadow:0 0 10px rgba(245,158,11,.6)}
+.ilpanel{border-color:rgba(245,158,11,.55)!important}.ilpop{border:2px solid #f59e0b!important}.iltp{display:inline-block;font-size:10px;font-weight:800;padding:0 5px;border-radius:6px;background:rgba(245,158,11,.18);color:#fbbf24;margin-right:2px}
+.ilgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px;margin:8px 0}.ilgrid h4{margin:4px 0}
 .bvbox{border:1px solid rgba(245,197,24,.35);background:rgba(245,197,24,.05);border-radius:10px;padding:10px;margin:10px 0}
 .bvhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}.bvst{margin-left:auto;font-weight:700}
 .bvpop{margin-top:8px;padding:6px 9px;border-radius:8px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.35);font-size:13px}
@@ -341,6 +344,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
   <span id="ponte">ponte: —</span>
   <span id="status">pronto</span>
   <span id="repairBox" style="display:none"></span>
+  <button id="ilBtn" onclick="ilLigar(!cfg.il_on)" title="junta 5s + 10s + 20s só com fontes 100%">🔗 INTERLIGAR</button>
   <span id="demoBox" style="display:none"></span>
   <span id="atuBox" style="display:none" onclick="atuAbrir()" title="clique para ver todas as atualizações"></span>
   <span id="pgBox" style="display:none"></span>
@@ -405,7 +409,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.21 · 30/09/2026 · entrar com a Deriv pelo login novo (App ID com letras)';
+const VERSAO='v3.22 · 30/09/2026 · aba 10 segundos + 🔗 interligado 5s/10s/20s só 100%';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -421,7 +425,7 @@ const DEF = {
   limit: 5000, pages: 20, pip: 0, proxy: '', auto: 10, janela: 'n:2000', bank: 'Dólar', lastId: 0,
   padL: 3, padG: 1, padMin: 10, padAss: 80, padAlert: 1,
   bt_tipo: 'seq', bt_n: 4, bt_dir: 'contra', bt_pad: 'VVG', bt_cor: 'G', bt_dig: 0,
-  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, es_on: 0, es_estr: 'popup', es_base: 0.35, es_gale: 2, es_modo: 'rec', es_mult: 2.1, es_rec: 1, es_sw: 0, es_sl: 0, es_max: 0, es_aposRed: 0, es_aposWin: 0, dm_appId: '', srd_fonte: 'c1', srd_esp: 2, srd_para: 1, srd_pay: 85, srd_base: 1, srd_ini: 100, srd_gale: 2, srd_rec: 1, srd_conta: 0, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
+  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, es_on: 0, es_estr: 'popup', es_base: 0.35, es_gale: 2, es_modo: 'rec', es_mult: 2.1, es_rec: 1, es_sw: 0, es_sl: 0, es_max: 0, es_aposRed: 0, es_aposWin: 0, dm_appId: '', srd_fonte: 'c1', srd_esp: 2, srd_para: 1, srd_pay: 85, srd_base: 1, srd_ini: 100, srd_gale: 2, srd_rec: 1, srd_conta: 0, p10_on: 0, p10_cruz: 1, p10_n: 5000, p10_hpMin: 3, p10_rbMin: 30, p10_rbPulo: 20, ra_w10: 1, ra_min10: 25, il_on: 0, il_w5: 1, il_w10: 1, il_w20: 1, il_minF: 3, il_nivel: 0, il_gale: 0, il_lead: 3, il_sc: 1, il_rb: 1, il_hp: 1, il_minCasos: 12, il_pulo: 15, il_hpMin: 6, il_n: 5000, il_bloq: 1, il_dif: 0, il_pop: 1, il_horiz: 90, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
   sc_min: 20, sc_skip: 12, sc_top: 40, sc_digit: 5, sc_digit_skip: 3,
   sc_sum_min: 2, sc_sum_max: 5, sc_sum_skip: 8, autoOn: 1, derivFallback: 1,
   rb_popup: 1, rb_auto_min: 20, rb_auto_top: 100, rb_auto_only100: 1, rb_auto_family: 'ambos', rb_auto_pulo: 500, rb_manual_create: 1, rb_auto_nivel: 2, histShow: 1000, histFixed: 0, histCols: 20, hpMinSeq: 2, hpMinOc: 5, hpOrd: 'g2',
@@ -3797,7 +3801,7 @@ function cfCheck(){
       A.apoios.push({g:A.g,n:ap[decG.alvo].length,c:ap[1-decG.alvo].length,T:prox});
       cfDec(prox,ap,`${NIVEL[A.g]} ${decG.alvo?'ÍMPAR':'PAR'} (gale)`);
       try{ esSinal(A); }catch(e){ console.warn('estratégia',e); }
-      if(cfg.cf_pop??1) cfPopup(); beep();
+      if((cfg.cf_pop??1)&&!cfg.il_on) cfPopup(); if(!cfg.il_on) beep();
     } else {
       A.espera++;
       cfDec(prox,ap,`aguardando sinal p/ ${NIVEL[A.g]} · ${decG.motivo}`);
@@ -3815,7 +3819,7 @@ function cfCheck(){
     extras:(()=>{ try{ return cfExtras(prox).map(x=>({tipo:x.tipo,txt:x.txt,alvo:x.alvo})); }catch(e){ return []; } })()};
   try{ CF.ativo.forca=fzForca({alvo:dec.alvo,ap:CF.ativo.nCur,c:CF.ativo.contra,s100:cfTop(CF.ativo.sinais),extras:CF.ativo.extras}).forca; }catch(e){}
   try{ esSinal(CF.ativo); }catch(e){ console.warn('estratégia',e); }
-  if(cfg.cf_pop??1) cfPopup();
+  if((cfg.cf_pop??1)&&!cfg.il_on) cfPopup();
   beep();
   if(['scan','soma'].includes(S.tab)) cfLive();
 }
@@ -3904,6 +3908,7 @@ function cfExtras(Tms){
   }
   // ⏱ padrões de 5 segundos no segundo exato deste jogo
   if(cfg.p5_cruz??1) try{ out.push(...p5Resumo(p5Aponta(Tms))); }catch(e){ console.warn('5s',e); }
+  if(cfg.p10_cruz??1) try{ out.push(...p10Resumo(p10Aponta(Tms))); }catch(e){ console.warn('10s',e); }
   return out;
 }
 function cfExtrasHtml(Tms,alvo){
@@ -4173,7 +4178,7 @@ function cf2Fontes(s){ const sc=(s||[]).filter(x=>x.fonte==='Scanner').length, s
 
 // ---------- popup 2 (fica no canto, não tampa a tela nem o popup 1) ----------
 function cf2PopMostra(A,novo){
-  if(!(cfg.cf2_pop??1)) return;
+  if(!(cfg.cf2_pop??1) || cfg.il_on) return;
   if(novo){ CF2.oculto=null; beep(); }
   if(CF2.oculto===A.id) return;
   CF2.pop=A.id; cf2PopRender();
@@ -4525,12 +4530,168 @@ setInterval(()=>{
   try{ cfExtrasRefresh(); }catch(e){}
 },1000);
 
+// =================== ⏱ PADRÕES DE 10 SEGUNDOS (rodam sempre no banco de 10s, qualquer banco aberto em cima) ===================
+// Scanner, Somas, horas pagantes e robôs calculados no banco "DERIV <símbolo> · 10s".
+// Como o jogo de 10s no segundo X é o MESMO número do jogo de 20s no segundo X, um padrão de 10s que cai
+// no segundo exato da entrada do popup aponta a mesma coisa → aparece nos cruzamentos marcado "⏱ 10s".
+let P10={lista:null,listaKey:'',listaT:0,hp:[],hpT:0,hpKey:'',ultimoT:0,auto:[],autoInfo:null};
+function p10On(){ return !!cfg.p10_on; }
+function p10Bank(){ return d5BankName(10); }
+function p10W(){ const W=liveW(p10Bank())||[]; const n=Math.max(1000,+cfg.p10_n||5000); return W.length>n?W.slice(-n):W; }
+function p10Fresco(W){ return W.length>=200 && srvNow()*1000-W.at(-1).t<30000; }          // último jogo de 10s tem menos de 20s
+function p10Lista(W){
+  const key=[p10Bank(),cfg.p10_n,cfg.sc_min,cfg.sc_skip,cfg.sc_top,cfg.sc_sum_min,cfg.sc_sum_max,cfg.sc_sum_skip,cfg.rb_auto_nivel,cfg.cf_fontes].join('|');
+  if(P10.lista && P10.listaKey===key && Date.now()-P10.listaT<60000) return P10.lista;
+  const top=Math.max(5,Math.min(150,+cfg.sc_top||40)), f=cfg.cf_fontes||'ambos'; let L=[];
+  if(f!=='somas') L=L.concat(scScanDigits(W).slice(0,top).map(o=>({...o,fonte:'Scanner'})));
+  if(f!=='scanner') L=L.concat(scScanSums(W).slice(0,top).map(o=>({...o,fonte:'Somas'})));
+  P10.lista=L; P10.listaKey=key; P10.listaT=Date.now(); try{ atuLista('⏱ Scanner/Somas 10s',L); }catch(e){} return L;
+}
+// horas pagantes do banco de 10s (refeito a cada 10 min)
+function p10Hp(){
+  const W=liveW(p10Bank())||[]; if(W.length<500) return [];
+  const key=p10Bank()+'|'+cfg.hpPer+'|'+cfg.p10_hpMin;
+  if(P10.hpKey===key && Date.now()-P10.hpT<10*60*1000) return P10.hp;
+  P10.hpKey=key; P10.hpT=Date.now();
+  try{
+    const per=+cfg.hpPer||24, G=gridBuild(W,10,W.at(-1).t-per*3600e3); if(!G) return P10.hp=[];
+    const min=Math.max(1,+(cfg.p10_hpMin??3));
+    P10.hp=hpScan(G,'all').filter(r=>r.L[2].cur>=min).map(r=>({off:r.off,alvo:r.alvo,cur:r.L[2].cur,rate:r.L[2].rate,n:r.L[2].n,max:r.L[2].max}))
+      .sort((a,b)=>b.cur-a.cur||b.rate-a.rate);
+  }catch(e){ console.warn('horas pagantes 10s',e); P10.hp=[]; }
+  return P10.hp;
+}
+// tudo que os padrões de 10s apontam para o jogo T (ms): [{tipo:'p5',txt,alvo,fase,sub}]
+function p10Aponta(Tms){
+  if(!p10On() || cfg.bank===p10Bank()) return [];   // com o próprio banco de 10s aberto, a confluência já usa ele
+  const W=p10W(); if(!p10Fresco(W)) return [];
+  const out=[], nivel=scNivel(), C={};
+  // 🔬/➕ Scanner e Somas do 10s: armado para cair em T ou em jogo com a próxima tentativa em T
+  for(const o of p10Lista(W)){
+    for(const x of scLive(W,o,nivel,C,10000)){
+      if((x.st==='armado'||x.st==='jogo') && x.entT===Tms)
+        out.push({tipo:'p5',sub:'sc',txt:`⏱ 10s · ${o.fonte} ${cfNomeRow(o)} · ${(o.rate*100).toFixed(0)}%`,alvo:o.alvo,fase:x.st==='jogo'?NIVEL[x.prox]:'TS',taxa:o.rate});
+    }
+  }
+  // 🕐 horas pagantes do 10s (minuto:segundo exato), sem ter pago nas tentativas anteriores
+  const par=t=>{ const z=W.slice(-40).find(y=>y.t===t); return z?z.p:null; };
+  const off=(((Tms/1000)%3600)+3600)%3600;
+  for(const r of p10Hp()){
+    for(let g=0;g<=2;g++){
+      if(r.off+g*10!==off) continue;
+      let ok=true; for(let h=0;h<g;h++){ const p=par(Tms-(g-h)*10000); if(p===null||p===r.alvo){ ok=false; break; } }
+      if(ok) out.push({tipo:'p5',sub:'hp',txt:`⏱ 10s · Horas pagantes :${msOf(r.off)} · ${r.cur}h pagando · ${(r.rate*100).toFixed(0)}%`,alvo:r.alvo,fase:NIVEL[g],taxa:r.rate});
+    }
+  }
+  // 🤖 robôs criados no banco de 10s
+  for(const sig of RB_PENDING){
+    if(sig.done||sig.bank!==p10Bank()) continue;
+    const rb=RBOTS.find(r=>r.id===sig.rbId); if(!rb||!rb.on||rb.cfPop===false) continue;
+    for(let g=0;g<=sig.maxNivel;g++){
+      const Tg=sig.entryT+g*sig.stepMs; if(Tg>Tms) break;
+      if(Tg===Tms){ out.push({tipo:'p5',sub:'rb',txt:`⏱ 10s · 🤖 ${rbName(rb)}`,alvo:sig.alvo,fase:NIVEL[g],taxa:rb.taxaCriacao||0}); break; }
+      const p=par(Tg); if(p===null||p===sig.alvo) break;
+    }
+  }
+  return out;
+}
+// resumo por cor para o popup (as 3 mais fortes de cada cor + quantas outras)
+function p10Resumo(E){
+  const out=[];
+  for(const cor of [0,1]){
+    const L=E.filter(x=>x.alvo===cor).sort((a,b)=>(b.sub==='rb')-(a.sub==='rb')||b.taxa-a.taxa);
+    L.slice(0,3).forEach((x,i)=>out.push({...x,txt:x.txt+(i===2&&L.length>3?` <span class="mu">+${L.length-3} de 10s</span>`:'')}));
+  }
+  return out;
+}
+// ---------- criar robôs no banco de 10s (busca automática) ----------
+function p10Buscar(){
+  const W=p10W(); if(W.length<500){ status('⏱ Banco de 10s ainda com poucos jogos','err'); return; }
+  const t0=performance.now(), nivel=scNivel(), min=Math.max(5,+cfg.p10_rbMin||30), maxSkip=Math.max(0,Math.min(60,+cfg.p10_rbPulo||20));
+  let all=[]; for(const fam of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,0));
+  all.sort((a,b)=>b.rate-a.rate||b.done-a.done||a.skip-b.skip);
+  P10.auto=all.slice(0,60); P10.autoInfo={n:W.length,ms:Math.round(performance.now()-t0),achados:all.length,when:Date.now()};
+  fillRes();
+}
+function p10Criar(i){
+  const x=P10.auto[i]; if(!x) return;
+  const nivel=+cfg.rb_auto_nivel||0, bank=p10Bank(), id=rbIdOf(x,nivel,bank);
+  let rb=RBOTS.find(r=>r.id===id);
+  if(!rb){
+    const base={id,skip:x.skip,alvo:x.alvo,maxNivel:nivel,bank,on:true,popup:false,cfPop:true,criadoEm:Date.now(),minOcc:x.done||0,taxaCriacao:x.rate,p10:true};
+    rb=x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
+    RBOTS.unshift(rb); rbSave();
+  } else { rb.on=true; rbSave(); }
+  status(`⏱ Robô de 10s criado: ${rbName(rb)}`,'ok'); fillRes();
+}
+function p10CriarTop(k){ for(let i=0;i<Math.min(k,P10.auto.length);i++) p10Criar(i); }
+// ---------- aba ----------
+function p10RobosHtml(){
+  const L=RBOTS.filter(r=>r.bank===p10Bank());
+  if(!L.length) return '<div class="nota">Nenhum robô de 10s ainda. Use 🔎 Buscar padrões de 10s e crie abaixo.</div>';
+  return `<div class="tw" style="max-height:300px"><table><tr><th>Robô</th><th>Banco 10s</th><th>Ao vivo</th><th>Agora</th><th></th></tr>
+    ${L.map(rb=>{ const W=liveW(rb.bank), st=rbCurrentStats(rb,W), pl=rbPlacar(rb.id), pend=RB_PENDING.find(s=>s.rbId===rb.id&&!s.done);
+      return `<tr class="${pend?'scativo':''}"><td style="text-align:left">${rbName(rb)}</td><td>${st.done} casos · <b>${st.done?(st.rate*100).toFixed(1):'—'}%</b></td>
+        <td><b class="ok">${pl.g}</b> / <b class="ruim">${pl.r}</b></td><td>${pend?`<span class="sclive arm">entrada ${rbFmtClock(pend.entryT)}</span>`:'<span class="mu">—</span>'}</td>
+        <td><button onclick="rbToggle('${rb.id}','on')">${rb.on?'🟢':'⚫'}</button> ${cfRobBtn('rb',rb)} <button class="dan" onclick="rbDelete('${rb.id}')">🗑</button></td></tr>`; }).join('')}</table></div>`;
+}
+function p10HpHtml(){
+  const R=p10Hp(); if(!R.length) return `<div class="nota">Nenhum horário do 10s pagando há ${cfg.p10_hpMin??3}h ou mais (até G2) no período.</div>`;
+  const agora=Date.now()/1000, prox=R.map(r=>({...r,next:hpNext(r.off)})).filter(r=>r.next-agora<=15*60).sort((a,b)=>a.next-b.next).slice(0,30);
+  return `<div class="nota">${R.length} horário(s) do 10s pagando há ≥ ${cfg.p10_hpMin??3}h. Próximos 15 minutos:</div>
+    <div class="tw" style="max-height:260px"><table><tr><th>Próximo</th><th>Horário</th><th>Alvo</th><th>Pagando</th><th>Taxa</th><th>Máx</th></tr>
+    ${prox.map(r=>`<tr><td><b>${hmsOf(r.next)}</b></td><td>:${msOf(r.off)}</td><td>${tagc(r.alvo)}</td><td>${r.cur}h</td><td>${(r.rate*100).toFixed(0)}%</td><td>${r.max}h</td></tr>`).join('')}</table></div>`;
+}
+VIEWS.p10={nome:'⏱ 10 segundos',html(){
+  return `<div class="panel p5panel"><h3>⏱ Padrões de 10 segundos <small>rodam no banco ${p10Bank()} mesmo com outro banco aberto em cima</small></h3>
+    <div class="ctl">
+      <label class="p5sw"><input type="checkbox" ${cfg.p10_on?'checked':''} onchange="cfg.p10_on=this.checked?1:0;saveCfg();fillRes()"> <b>▶ rodar padrões de 10s</b></label>
+      <label><input type="checkbox" ${(cfg.p10_cruz??1)?'checked':''} onchange="cfg.p10_cruz=this.checked?1:0;saveCfg()"> levar para os cruzamentos do popup</label>
+      <label>Analisar ${sel('p10_n',[[2000,'últimos 2.000 (≈5,5h)'],[5000,'últimos 5.000 (≈14h)'],[8640,'último dia']])}</label>
+      <label>Horas pagantes ≥ ${sel('p10_hpMin',[[2,'2h'],[3,'3h'],[4,'4h'],[6,'6h']])}</label>
+    </div>
+    <div class="nota">Usa os mesmos ajustes das abas 🔬 Scanner e ➕ Somas (mín. ocorrências, pular até, entrada até ${NIVEL[scNivel()]}, top ${cfg.sc_top||40}) e o período das 🕐 Horas Pagantes, mas sempre com os jogos de 10 segundos.
+      Com os cruzamentos ligados, quando um padrão de 10s cai <b>no segundo exato</b> da entrada do popup da confluência, ele aparece lá marcado <span class="cfx cfx-p5" style="display:inline-block;padding:1px 6px">⏱ 10s</span>.</div>
+  </div><div id="res"></div>`;
+},res(){
+  const W=p10W();
+  if(!p10On()) return '<div class="panel"><div class="nota">Marque <b>▶ rodar padrões de 10s</b> para ligar.</div></div>';
+  if(W.length<200) return `<div class="panel"><div class="nota">O banco de 10s ainda tem ${W.length} jogos. Ele enche sozinho com a captura ao vivo e a reposição da Deriv.</div></div>`;
+  const list=p10Lista(W), top=Math.max(5,Math.min(150,+cfg.sc_top||40));
+  const prox=W.at(-1).t+10000, E=p10Aponta(prox);
+  const ai=P10.autoInfo;
+  return `<div class="cards">${card('Banco de 10s',num(W.length),`último ${rbFmtClock(W.at(-1).t)} ${p10Fresco(W)?'<span class="ok">● ao vivo</span>':'<span class="ruim">● parado</span>'}`)}
+    ${card('Próximo jogo 10s',hmsOf(prox/1000),`${E.filter(x=>x.alvo===0).length} apontam PAR · ${E.filter(x=>x.alvo===1).length} apontam ÍMPAR`)}
+    ${card('Padrões na lista',num(list.length),'Scanner + Somas do 10s')}
+    ${card('Robôs de 10s',num(RBOTS.filter(r=>r.bank===p10Bank()).length),'rodam sozinhos, sem popup próprio')}</div>
+  ${scAgoraPanel(list,top,W,10000).replace('⚡ Acontecendo agora','⚡ Acontecendo agora no 10s')}
+  <div class="panel"><h3>🕐 Horas pagantes do 10s</h3>${p10HpHtml()}</div>
+  ${raPanelHtml()}
+  <div class="panel"><h3>🤖 Robôs de 10s</h3>
+    <div class="ctl"><label>Mín. ocorrências ${inp('p10_rbMin',55)}</label><label>Pular até ${inp('p10_rbPulo',45)}</label>
+      <button class="pri" onclick="p10Buscar()">🔎 Buscar padrões de 10s</button>${P10.auto.length?`<button onclick="p10CriarTop(5)">➕ criar os 5 melhores</button>`:''}</div>
+    ${ai?`<div class="nota">${num(ai.achados)} padrões em ${num(ai.n)} jogos de 10s (${ai.ms} ms) · mostrando os 60 melhores</div>
+      <div class="tw" style="max-height:260px"><table><tr><th>#</th><th>Padrão</th><th>Pulo</th><th>Alvo</th><th>Casos</th><th>SG/G1/G2/R</th><th>Taxa</th><th></th></tr>
+      ${P10.auto.map((x,i)=>`<tr><td>${i+1}</td><td>${x.kind} ${x.gat||x.d||''}</td><td>${x.skip}</td><td>${tagc(x.alvo)}</td><td>${x.done}</td><td>${x.sg}/${x.g1}/${x.g2}/<span class="ruim">${x.red}</span></td><td><b>${(x.rate*100).toFixed(1)}%</b></td><td><button onclick="p10Criar(${i})">➕ criar</button></td></tr>`).join('')}</table></div>`:''}
+    ${p10RobosHtml()}
+    <div class="nota">Robôs de 10s não abrem popup próprio (seria um a cada poucos segundos). Eles entram nos cruzamentos da confluência quando caem no segundo da entrada, e o placar ao vivo fica na aba 🤖 Robôs.</div></div>
+  <div class="panel"><h3>Melhores combinações do 10s</h3><div class="tw"><table>${SC_HEAD}${scRows(list,top,W,10000)}</table></div></div>`;
+}};
+// a cada jogo novo de 10s: atualiza a aba e o popup aberto
+setInterval(()=>{
+  if(!p10On()) return;
+  const W=liveW(p10Bank()); const t=W&&W.length?W.at(-1).t:0;
+  if(t===P10.ultimoT) return; P10.ultimoT=t;
+  if(S.tab==='p10') fillRes();
+  try{ cfExtrasRefresh(); }catch(e){}
+},1000);
+
 // =================== 💪 FORÇA DO SINAL (aprende com as entradas que já fecharam) ===================
 // Cada entrada fechada (Confluência 1 e 2) guarda: quantos sinais apoiavam, quantos eram contra, quantos ⭐100%,
 // e o que apareceu junto no popup (robôs, horas pagantes, colunas, ⏱5s) a favor e contra.
 // Para cada faixa dessas o sistema vê quantas vezes deu green até G2. A força junta tudo isso (com amortecimento,
 // porque as confirmações andam juntas) e compara com a média geral.
-const FZ_TIPOS=[['rob','🤖 robôs'],['hp','⏰ horas pagantes'],['col','🧱 colunas'],['p5','⏱ 5s']];
+const FZ_TIPOS=[['rob','🤖 robôs'],['hp','⏰ horas pagantes'],['col','🧱 colunas'],['p5','⏱ 5s/10s']];
 let FZ={key:'',m:null};
 function fzFaixaAp(n){ return n<=3?'3':n<=5?'4–5':n<=9?'6–9':n<=15?'10–15':'16+'; }
 function fzFaixaEx(a,c){ if(!a&&!c) return 'nenhum'; const d=a-c; return d<0?'mais contra':d===0?'empatado':d===1?'+1 a favor':'+2 ou mais'; }
@@ -4611,6 +4772,327 @@ function fzResumoHtml(){
   </div>`;
 }
 
+// =================== 🔗 INTERLIGADO (5s + 10s + 20s juntos · só 100%) ===================
+// Junta os três tempos da Deriv (o jogo de 5s, 10s e 20s no mesmo segundo é o MESMO número).
+// Fontes aceitas, sempre com 100% (sem nenhum red) no nível escolhido (padrão: tiro seco):
+//   🔬 Scanner (somas, duplas, números) · 🤖 robôs · 🕐 horas pagantes — de cada tempo.
+// Quando ≥ N fontes 100% apontam a MESMA cor para o MESMO segundo (qualquer segundo, não só os de 20s),
+// abre a entrada com alguns segundos de antecedência no popup próprio. Enquanto ligado, desliga os popups da confluência.
+const IL_TEMPOS=[5,10,20];
+let IL={bk:{},hp:{},rbc:{},abertas:[],log:[],agenda:[],pop:null,popRes:null,k:'',scanT:0,fz:{key:'',m:null}};
+function ilLoad(){ try{ IL.log=JSON.parse(localStorage.getItem('dpi_il_log_v1')||'[]')||[]; }catch(e){ IL.log=[]; } }
+function ilSave(){ try{ localStorage.setItem('dpi_il_log_v1',JSON.stringify(IL.log.slice(-1500))); }catch(e){} }
+function ilOn(){ return !!cfg.il_on; }
+function ilTempos(){ return IL_TEMPOS.filter(s=>+(cfg['il_w'+s]??1)); }
+function ilNivel(){ return Math.max(0,Math.min(2,+(cfg.il_nivel??0))); }
+function ilGale(){ return Math.max(0,Math.min(2,+(cfg.il_gale??0))); }
+function ilMinF(){ return Math.max(2,+(cfg.il_minF??3)); }
+function ilMinCasos(){ return Math.max(5,+(cfg.il_minCasos??12)); }
+function ilW(s){ let W=liveW(d5BankName(s))||[]; const n=Math.max(1000,+cfg.il_n||5000); return W.length>n?W.slice(-n):W; }
+function ilFresco(W,s){ return W.length>=200 && srvNow()*1000-W.at(-1).t < s*1000+15000; }
+const IL_NT=['TS','G1','G2'];
+// ---------- 🔬 lista 100% de cada tempo (refeita a cada 3 min) ----------
+function ilLista(s,W){
+  const B=IL.bk[s]||(IL.bk[s]={});
+  const key=[ilNivel(),ilMinCasos(),cfg.il_pulo,cfg.sc_sum_min,cfg.sc_sum_max,cfg.il_n,curSym()].join('|');
+  if(B.lista && B.key===key && Date.now()-B.t<180000) return B.lista;
+  if(B.lista && Date.now()-(IL.calcT||0)<2000) return B.lista;           // um tempo por vez, para não travar a tela
+  const t0=performance.now(), nivel=ilNivel(), min=ilMinCasos(), pulo=Math.max(0,Math.min(40,+(cfg.il_pulo??15)));
+  let all=[]; for(const f of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,f,pulo,nivel,min,0));
+  B.lista=all.filter(x=>x.red===0 && x.done>=min).sort((a,b)=>b.done-a.done).slice(0,400);
+  B.key=key; B.t=Date.now(); B.n=W.length; B.ms=Math.round(performance.now()-t0); IL.calcT=Date.now();
+  return B.lista;
+}
+// ---------- 🕐 horas pagantes 100% de cada tempo (refeitas a cada 10 min) ----------
+function ilHp(s){
+  const H=IL.hp[s]||(IL.hp[s]={});
+  const key=[ilNivel(),cfg.il_hpMin,cfg.hpPer,curSym()].join('|');
+  if(H.rows && H.key===key && Date.now()-H.t<600000) return H.rows;
+  H.key=key; H.t=Date.now(); H.rows=[];
+  try{
+    const W=liveW(d5BankName(s))||[]; if(W.length<500) return H.rows;
+    const per=Math.max(6,+cfg.hpPer||24), G=gridBuild(W,s,W.at(-1).t-per*3600e3); if(!G) return H.rows;
+    const lv=ilNivel(), min=Math.max(2,+(cfg.il_hpMin??6));
+    H.rows=hpScan(G,'all').filter(r=>r.L[lv].n>=min && r.L[lv].ok===r.L[lv].n).map(r=>({off:r.off,alvo:r.alvo,n:r.L[lv].n}));
+  }catch(e){ console.warn('interligado horas',e); }
+  return H.rows;
+}
+// ---------- 🤖 robôs do tempo: só entram se estão 100% no nível escolhido ----------
+function ilRbOk(rb,W){
+  const k=rb.id+'|'+W.length+'|'+(W.at(-1)?.t||0)+'|'+ilNivel(), c=IL.rbc[rb.id];
+  if(c && c.k===k) return c.st;
+  const st=scEval(W,rbStarts(rb,W),rb.alvo,rb.skip,ilNivel());
+  st.ok=st.red===0 && st.done>=Math.max(5,Math.round(ilMinCasos()/2));
+  IL.rbc[rb.id]={k,st}; return st;
+}
+function ilChave(s,kind,id,skip,alvo){ return `${s}|${kind}|${id}|${skip}|${alvo}`; }
+// tudo que o tempo s aponta (entradas futuras no TS)
+function ilAponta(s){
+  const W=ilW(s); if(!ilFresco(W,s)) return [];
+  const out=[], stepMs=s*1000, C={}, vistos=new Set();
+  const add=(o,chave)=>{ if(vistos.has(chave)) return; vistos.add(chave); out.push(o); };
+  if(+(cfg.il_sc??1)) for(const o of ilLista(s,W)){
+    for(const x of scLive(W,o,0,C,stepMs)) if(x.st==='armado')
+      add({s,tipo:'sc',txt:`${o.kind} ${o.gat} · pula ${o.skip}`,alvo:o.alvo,T:x.entT,casos:o.done},ilChave(s,o.kind.startsWith('Soma')?'Soma':o.kind,o.pair||(o.d!=null?o.d:o.n+'/'+o.mod),o.skip,o.alvo)+'|'+x.entT);
+  }
+  if(+(cfg.il_rb??1)){
+    const bank=d5BankName(s);
+    for(const sig of RB_PENDING){
+      if(sig.done||sig.bank!==bank) continue;
+      const rb=RBOTS.find(r=>r.id===sig.rbId); if(!rb||!rb.on) continue;
+      const st=ilRbOk(rb,W); if(!st.ok) continue;
+      const kind=rb.tipo==='dupla'?'Dupla':rb.tipo==='num'?'Número':rb.tipo==='soma'?'Soma':rb.tipo, id=rb.tipo==='dupla'?`${rb.a}-${rb.b}`:rb.tipo==='num'?rb.d:rb.tipo==='soma'?rb.n+'/'+rb.mod:rb.id;
+      const ch=ilChave(s,kind,id,rb.skip,rb.alvo)+'|'+sig.entryT;
+      if(vistos.has(ch)){ const o=out.find(x=>x.T===sig.entryT&&x.tipo==='sc'&&x.alvo===rb.alvo&&x.s===s); if(o){ o.tipo='rb'; o.txt=`🤖 ${rbName(rb)}`; } continue; }  // mesmo padrão do scanner = conta uma vez só
+      add({s,tipo:'rb',txt:`🤖 ${rbName(rb)}`,alvo:sig.alvo,T:sig.entryT,casos:st.done},ch);
+    }
+  }
+  if(+(cfg.il_hp??1)){
+    const agora=Date.now()/1000, hz=Math.max(30,+(cfg.il_horiz??90));
+    for(const r of ilHp(s)){ const T=hpNext(r.off); if(T-agora<=hz) add({s,tipo:'hp',txt:`🕐 Horas pagantes :${msOf(r.off)} · ${r.n}h seguidas 100%`,alvo:r.alvo,T:T*1000,casos:r.n},`${s}|hp|${r.off}|${r.alvo}`); }
+  }
+  return out;
+}
+// junta os três tempos por segundo
+function ilColeta(){
+  const agora=srvNow()*1000, hz=agora+Math.max(30,+(cfg.il_horiz??90))*1000, M=new Map();
+  for(const s of ilTempos()){
+    let L=[]; try{ L=ilAponta(s); }catch(e){ console.warn('interligado '+s+'s',e); }
+    for(const x of L){
+      if(x.T<=agora||x.T>hz||x.T%5000) continue;
+      const g=M.get(x.T)||{T:x.T,f:{0:[],1:[]}}; g.f[x.alvo].push(x); M.set(x.T,g);
+    }
+  }
+  return [...M.values()].sort((a,b)=>a.T-b.T);
+}
+function ilCond(g,alvo){
+  const a=g.f[alvo], c=g.f[1-alvo], tempos=new Set(a.map(x=>x.s)).size;
+  if(a.length<ilMinF()) return false;
+  if((cfg.il_bloq??1) && c.length) return false;
+  if(+(cfg.il_dif??0) && tempos<2) return false;
+  return true;
+}
+// ---------- motor: roda a cada jogo novo de qualquer tempo ----------
+function ilScan(){
+  const G=ilColeta(); IL.agenda=G; IL.scanT=Date.now();
+  const agora=srvNow()*1000, lead=Math.max(1,+(cfg.il_lead??3))*1000;
+  for(const g of G){
+    const ab=IL.abertas.find(e=>e.T0===g.T);
+    if(ab){ if(!ab.fim && ab.g===0 && g.T-agora>1000){ const f=g.f[ab.alvo]; if(f.length>ab.fontes.length) ab.fontes=f.map(ilSlim); ab.contra=Math.max(ab.contra,g.f[1-ab.alvo].length); ilPopRefresh(); } continue; }
+    for(const alvo of [0,1]){
+      if(!ilCond(g,alvo)) continue;
+      if(g.T-agora<lead) continue;                                        // tarde demais para avisar
+      const E={id:'IL'+g.T,T0:g.T,alvo,g:0,tent:[],fim:false,abriu:Date.now(),fontes:g.f[alvo].map(ilSlim),n0:g.f[alvo].length,contra:g.f[1-alvo].length,gstep:5000};
+      E.forca=ilForca(ilFeatObj(E)).forca;
+      IL.abertas.push(E); IL.abertas.sort((a,b)=>a.T0-b.T0);
+      beep(); try{ atuAviso(`🔗 Interligado: ${E.fontes.length} fontes 100% → ${NOME(alvo)} às ${hmsOf(g.T/1000)}`,'il'); }catch(e){}
+      if(+(cfg.il_pop??1)) ilPopup();
+      break;
+    }
+  }
+}
+function ilSlim(x){ return {s:x.s,tipo:x.tipo,txt:x.txt,casos:x.casos}; }
+function ilDig(T){
+  for(const s of [5,10,20]){ const W=liveW(d5BankName(s))||[]; for(let i=W.length-1;i>=0&&i>=W.length-80;i--){ if(W[i].t===T) return W[i]; if(W[i].t<T) break; } }
+  return null;
+}
+function ilResolve(){
+  const agora=srvNow()*1000;
+  for(const E of IL.abertas){
+    if(E.fim) continue;
+    const Tg=E.T0+E.g*E.gstep; if(agora<Tg) continue;
+    const x=ilDig(Tg);
+    if(!x){ if(agora>Tg+25000) ilFecha(E,'sem dado'); continue; }
+    E.tent.push({g:E.g,T:Tg,d:x.d,p:x.p});
+    if(x.p===E.alvo) ilFecha(E,'green');
+    else if(E.g>=ilGale()) ilFecha(E,'red');
+    else { E.g++; ilPopRefresh(); }
+  }
+  IL.abertas=IL.abertas.filter(e=>!e.fim||Date.now()-e.fimT<8000);
+}
+function ilFecha(E,res){
+  E.fim=true; E.fimT=Date.now(); E.res=res;
+  IL.log.push({T0:E.T0,alvo:E.alvo,res,nivel:res==='green'?E.g:-1,gale:ilGale(),tent:E.tent,fontes:E.fontes,n0:E.n0,contra:E.contra,forca:E.forca,ant:Math.round((E.T0-E.abriu)/1000)});
+  ilSave(); IL.fz.key=''; ilPopRefresh();
+  if(S.tab==='il') fillRes();
+}
+// ---------- 💪 força do interligado (aprende com as entradas dele) ----------
+function ilFeatObj(E){ return {n:E.fontes.length,c:E.contra||0,tempos:[...new Set(E.fontes.map(f=>f.s))].sort((a,b)=>a-b),tipos:[...new Set(E.fontes.map(f=>f.tipo))].sort()}; }
+function ilFeat(o){
+  const n=o.n; return {n:'n:'+(n<=3?'3':n===4?'4':n<=6?'5–6':'7+'),c:'c:'+(o.c>=2?'2+':o.c),t:'t:'+o.tempos.join('+')+'s',k:'k:'+o.tipos.map(t=>({sc:'scanner',rb:'robô',hp:'horas'}[t]||t)).join('+')};
+}
+function ilModelo(){
+  const L=IL.log.filter(x=>x.res==='green'||x.res==='red'), key=L.length;
+  if(IL.fz.key===key && IL.fz.m) return IL.fz.m;
+  const n=L.length, g=L.filter(x=>x.res==='green').length, base=n?(g+1)/(n+2):0.5, K=8, B={};
+  for(const x of L){ const F=ilFeat(ilFeatObj(x)); for(const k in F){ const b=B[F[k]]||(B[F[k]]={n:0,g:0}); b.n++; b.g+=x.res==='green'?1:0; } }
+  for(const k in B){ const b=B[k]; b.rate=b.g/b.n; b.suave=(b.g+K*base)/(b.n+K); }
+  IL.fz={key,m:{n,g,base,B}}; return IL.fz.m;
+}
+function ilForca(o){
+  const M=ilModelo(), F=ilFeat(o), base=Math.min(0.995,Math.max(0.02,M.base));
+  let z=fzLogit(base); const peso=[];
+  for(const k in F){ const b=M.B[F[k]]; if(!b) continue; const p=Math.min(0.995,Math.max(0.02,b.suave)), d=0.6*(fzLogit(p)-fzLogit(base)); z+=d; peso.push({f:F[k],d,rate:b.rate,n:b.n}); }
+  return {forca:Math.round(Math.max(0,Math.min(100,50+30*(z-fzLogit(base))))),p:fzSig(z),base,n:M.n,peso:peso.sort((a,b)=>Math.abs(b.d)-Math.abs(a.d))};
+}
+function ilFzNome(f){ const [k,v]=f.split(':'); return k==='n'?`${v} fontes`:k==='c'?`${v} contra`:k==='t'?`tempos ${v}`:`tipos ${v}`; }
+function ilBarraHtml(E){
+  const M=ilModelo();
+  if(M.n<15) return `<div class="fzbox"><div class="fzt">💪 Força do interligado <span class="mu">aprendendo… ${M.n}/15 entradas fechadas</span></div><div class="fzbar"><i style="width:${Math.min(100,M.n*100/15)}%;background:#64748b"></i></div></div>`;
+  const R=ilForca(ilFeatObj(E)), N=fzNivel(R.forca);
+  const lista=R.peso.filter(x=>Math.abs(x.d)>0.05).slice(0,3).map(x=>`<span class="${x.d>0?'ok':'ruim'}">${x.d>0?'▲':'▼'} ${ilFzNome(x.f)}: ${(x.rate*100).toFixed(0)}% em ${x.n}</span>`).join(' · ');
+  return `<div class="fzbox"><div class="fzt">💪 Força <b style="color:${N.c}">${R.forca}</b> <b style="color:${N.c}">${N.t}</b> <span class="mu">· estimativa ${(R.p*100).toFixed(0)}% (média do interligado ${(R.base*100).toFixed(0)}% em ${R.n})</span></div>
+    <div class="fzbar"><i style="width:${R.forca}%;background:${N.c}"></i><span class="fzm" style="left:25%"></span><span class="fzm" style="left:43%"></span><span class="fzm" style="left:58%"></span><span class="fzm" style="left:75%"></span></div>
+    <div class="fzleg"><span>🔴 fraco</span><span>🟠 abaixo</span><span>⚪ média</span><span>🟢 bom</span><span>💎 forte</span></div>${lista?`<div style="font-size:11px;margin-top:2px">${lista}</div>`:''}</div>`;
+}
+// ---------- popup ----------
+function ilTemposTxt(F){ return [5,10,20].map(s=>{ const n=F.filter(f=>f.s===s).length; return n?`<span class="iltp">${s}s ×${n}</span>`:''; }).join(' '); }
+function ilPopup(){
+  const p=$('#rbPopDPI'); if(!p) return;
+  const E=IL.abertas.find(e=>!e.fim)||IL.abertas.at(-1); if(!E) return;
+  IL.pop=E.id; if(typeof CF!=='undefined') CF.pop=null; RB_OPEN_SIG=null; SR_POP_KEY=null; if(typeof UO_POP!=='undefined') UO_POP=null;
+  const outras=IL.abertas.filter(e=>!e.fim&&e!==E);
+  const tipo={sc:'🔬',rb:'🤖',hp:'🕐'};
+  p.innerHTML=`<div class="rbpc ilpop">
+    <div class="rbpt">🔗 INTERLIGADO · ${E.fontes.length} fontes 100% apontam ${tagc(E.alvo)}</div>
+    <div class="nota">${ilTemposTxt(E.fontes)} · ${E.contra?`<span class="ruim">${E.contra} contra</span>`:'nenhuma contra'} · ${ilGale()?`até ${IL_NT[ilGale()]} (de 5 em 5s)`:'tiro seco'}</div>
+    <div class="rbpbig">ENTRAR ${tagc(E.alvo)} às <b>${hmsOf(E.T0/1000)}</b></div>
+    <div id="ilFase" class="big"></div>
+    ${ilGale()?`<div class="rbsched">${[0,1,2].slice(0,ilGale()+1).map(g=>`<div>${g?IL_NT[g]:'🎯 TIRO SECO'}<b>${hmsOf((E.T0+g*E.gstep)/1000)}</b></div>`).join('')}</div>`:''}
+    <div id="ilForca">${ilBarraHtml(E)}</div>
+    <div id="ilRes" style="display:none;margin-top:10px;padding:10px;border-radius:9px;font-size:16px;font-weight:800"></div>
+    <div class="nota" style="margin-top:8px"><b>Fontes 100%:</b><br>${E.fontes.map(f=>`<span class="iltp">${f.s}s</span> ${tipo[f.tipo]||''} ${f.txt} <span class="mu">(${f.casos} ${f.tipo==='hp'?'h':'casos'})</span>`).join('<br>')}</div>
+    ${outras.length?`<div class="nota"><b>Próximas já avisadas:</b> ${outras.map(e=>`${hmsOf(e.T0/1000)} ${tagc(e.alvo)} (${e.fontes.length})`).join(' · ')}</div>`:''}
+    <div class="rbactions"><button onclick="rbPopupFechar();IL.pop=null">Fechar</button><button onclick="cfg.il_pop=0;saveCfg();rbPopupFechar();IL.pop=null">Desativar popup do interligado</button></div>
+  </div>`;
+  p.style.display='flex';
+  ilPopRefresh();
+}
+function ilPopRefresh(){
+  if(!IL.pop) return;
+  const E=IL.abertas.find(e=>e.id===IL.pop) || IL.log.find(x=>'IL'+x.T0===IL.pop);
+  const f=document.getElementById('ilFase'), r=document.getElementById('ilRes');
+  if(!E){ return; }
+  if(!E.fim && E.fontes){ const fz=document.getElementById('ilForca'); if(fz && Date.now()%3000<600) fz.innerHTML=ilBarraHtml(E); }
+  const Tg=(E.T0+(E.g||0)*(E.gstep||5000))/1000, falta=Math.ceil(Tg-srvNow());
+  if(f) f.textContent=E.fim?'':`${IL_NT[E.g]} ${hmsOf(Tg)} · `+(falta>0?`faltam ${falta}s`:'em jogo…');
+  if(r && E.fim){ r.style.display='block'; const g=E.res==='green'; r.style.border=`1px solid ${g?'var(--g)':'var(--v)'}`;
+    r.innerHTML=g?`<span class="ok">✅ GREEN ${IL_NT[E.g]} · ${E.tent.map(t=>t.d).join(' / ')}</span>`:E.res==='red'?`<span class="ruim">❌ RED · ${E.tent.map(t=>t.d??'?').join(' / ')}</span>`:'<span class="mu">sem dado</span>';
+    // depois de mostrar o resultado, passa para a próxima avisada
+    const prox=IL.abertas.find(e=>!e.fim);
+    if(prox && !E._pula){ E._pula=1; setTimeout(()=>{ if(IL.pop===E.id && +(cfg.il_pop??1)) ilPopup(); },4000); }
+  }
+}
+// ---------- liga / desliga ----------
+function ilLigar(on){
+  cfg.il_on=on?1:0;
+  if(on){ cfg.ra_on=1; cfg.ra_w5=1; cfg.ra_w10=1; cfg.ra_w20=1; cfg.p5_on=1; cfg.p10_on=1; IL.k=''; setTimeout(()=>{ try{ raRodar(false); }catch(e){} },500); }
+  saveCfg(); ilBtn();
+  try{ atuAviso(on?'🔗 Interligado LIGADO · popups da confluência desligados · robôs automáticos 5s/10s/20s ligados':'🔗 Interligado desligado · popups da confluência voltam','il'); }catch(e){}
+  if(!on && IL.pop){ rbPopupFechar(); IL.pop=null; }
+  if(S.tab==='il') renderTab();
+}
+function ilBtn(){ const b=$('#ilBtn'); if(!b) return; b.className=ilOn()?'ilon':''; b.textContent=ilOn()?'🔗 INTERLIGADO ●':'🔗 INTERLIGAR'; }
+// ---------- relatório ----------
+function ilSeqs(L){ let g=0,r=0,mg=0,mr=0; for(const x of L){ if(x.res==='green'){ g++; r=0; } else { r++; g=0; } mg=Math.max(mg,g); mr=Math.max(mr,r); } return {g,r,mg,mr}; }
+function ilTab(titulo,grupos){
+  return `<div class="tw"><table><tr><th style="text-align:left">${titulo}</th><th>Entradas</th><th>Green</th><th>TS</th><th>Red</th><th>Assert.</th></tr>
+    ${grupos.map(([k,L])=>{ const n=L.length, g=L.filter(x=>x.res==='green').length; return `<tr><td style="text-align:left">${k}</td><td>${n}</td><td class="ok">${g}</td><td>${L.filter(x=>x.nivel===0).length}</td><td class="ruim">${n-g}</td><td><b class="${n>=5?(g/n>=0.5?'ok':'ruim'):''}">${n?(100*g/n).toFixed(1)+'%':'—'}</b></td></tr>`; }).join('')}</table></div>`;
+}
+function ilAgrupa(L,fn){ const M=new Map(); for(const x of L){ const k=fn(x); if(!M.has(k)) M.set(k,[]); M.get(k).push(x); } return [...M.entries()].sort((a,b)=>b[1].length-a[1].length); }
+function ilRelatorio(){
+  const L=IL.log.filter(x=>x.res==='green'||x.res==='red'), n=L.length, g=L.filter(x=>x.res==='green').length, sq=ilSeqs(L);
+  const lv=[0,1,2].map(k=>L.filter(x=>x.nivel===k).length);
+  const R=IL.log.slice(-80).reverse(), tipo={sc:'🔬',rb:'🤖',hp:'🕐'};
+  const fx=[[0,25,'🔴 fraco'],[25,43,'🟠 abaixo'],[43,58,'⚪ média'],[58,75,'🟢 bom'],[75,101,'💎 forte']];
+  return `<div class="cards">${card('Entradas',num(n),'interligado fechadas')}${card('Green',`<span class="ok">${g}</span>`,`TS ${lv[0]}${ilGale()?` · G1 ${lv[1]} · G2 ${lv[2]}`:''}`)}
+    ${card('Red',`<span class="ruim">${n-g}</span>`,`maior sequência de red ${sq.mr}`)}${card('Assertividade',n?(100*g/n).toFixed(1)+'%':'—',`green seguidos agora ${sq.g} · máx ${sq.mg}`)}</div>
+  ${n?`<div class="ilgrid">
+    <div><h4>Por nº de fontes 100%</h4>${ilTab('Fontes',ilAgrupa(L,x=>{ const k=x.fontes.length; return k<=3?'3':k===4?'4':k<=6?'5–6':'7+'; }))}</div>
+    <div><h4>Por tempos que apontaram</h4>${ilTab('Tempos',ilAgrupa(L,x=>[...new Set(x.fontes.map(f=>f.s))].sort((a,b)=>a-b).join(' + ')+'s'))}</div>
+    <div><h4>Por tipo de fonte</h4>${ilTab('Tipos',ilAgrupa(L,x=>[...new Set(x.fontes.map(f=>tipo[f.tipo]))].join(' ')))}</div>
+    <div><h4>Pela barra de força</h4>${ilTab('Força',fx.map(([a,b,t])=>[t,L.filter(x=>x.forca!=null&&x.forca>=a&&x.forca<b)]))}</div>
+    <div><h4>Por cor</h4>${ilTab('Alvo',[['PAR',L.filter(x=>x.alvo===0)],['ÍMPAR',L.filter(x=>x.alvo===1)]])}</div>
+    <div><h4>Por hora do dia</h4>${ilTab('Hora',ilAgrupa(L,x=>p2d(new Date(x.T0).getHours())+'h').sort((a,b)=>a[0]<b[0]?-1:1))}</div>
+  </div>`:''}
+  ${R.length?`<div class="tw" style="max-height:380px"><table><tr><th>Entrada</th><th>Alvo</th><th>Fontes</th><th>Tempos</th><th>Aviso</th><th>Força</th><th>Dígito(s)</th><th>Resultado</th><th style="text-align:left">Quem apontou</th></tr>
+    ${R.map(x=>`<tr><td>${fmtT(x.T0)}</td><td>${tagc(x.alvo)}</td><td><b>${x.fontes.length}</b>${x.contra?` <span class="ruim">(${x.contra} contra)</span>`:''}</td><td>${ilTemposTxt(x.fontes)}</td><td>${x.ant??'—'}s antes</td><td>${x.forca??'—'}</td>
+      <td>${(x.tent||[]).map(t=>`<span class="b s2 ${t.d==null?'':t.d%2?'v':'g'}">${t.d??'?'}</span>`).join(' ')}</td>
+      <td class="${x.res==='green'?'ok':x.res==='red'?'ruim':'mu'}"><b>${x.res==='green'?'✅ '+IL_NT[x.nivel]:x.res==='red'?'❌ RED':'sem dado'}</b></td>
+      <td style="text-align:left;font-size:11px">${x.fontes.map(f=>`<span class="iltp">${f.s}s</span>${tipo[f.tipo]||''} ${f.txt}`).join(' · ')}</td></tr>`).join('')}</table></div>`:'<div class="nota">Nenhuma entrada do interligado fechada ainda.</div>'}`;
+}
+// ---------- aba ----------
+function ilStatusHtml(){
+  return `<div class="cards">${IL_TEMPOS.map(s=>{
+    const on=ilTempos().includes(s), W=ilW(s), fr=ilFresco(W,s), B=IL.bk[s]||{}, bank=d5BankName(s);
+    const rbs=RBOTS.filter(r=>r.bank===bank&&r.on), rb100=rbs.filter(r=>ilRbOk(r,W).ok).length;
+    return card(`${s} segundos ${on?'':'<span class="mu">(fora)</span>'}`,`${B.lista?B.lista.length:'—'} <span style="font-size:12px">100%</span>`,
+      `${fr?'<span class="ok">● ao vivo</span>':'<span class="ruim">● parado</span>'} · ${num(W.length)} jogos · 🤖 ${rb100}/${rbs.length} robôs 100% · 🕐 ${(IL.hp[s]?.rows||[]).length} horários 100%`);
+  }).join('')}</div>`;
+}
+function ilAgendaHtml(){
+  const agora=srvNow()*1000, G=IL.agenda.filter(g=>g.T>agora).slice(0,40), tipo={sc:'🔬',rb:'🤖',hp:'🕐'};
+  if(!G.length) return '<div class="nota">Nenhuma fonte 100% apontando para os próximos segundos.</div>';
+  return `<div class="tw" style="max-height:340px"><table><tr><th>Segundo</th><th>Falta</th><th>${tagc(0)}</th><th>${tagc(1)}</th><th>Situação</th><th style="text-align:left">Fontes</th></tr>
+    ${G.map(g=>{ const a0=g.f[0].length, a1=g.f[1].length, ok=[0,1].find(al=>ilCond(g,al)), ab=IL.abertas.find(e=>e.T0===g.T);
+      return `<tr class="${ab?'scativo':''}"><td><b>${hmsOf(g.T/1000)}</b></td><td>${Math.ceil((g.T-agora)/1000)}s</td><td>${a0||''}</td><td>${a1||''}</td>
+        <td>${ab?`<span class="ok">🔗 ENTRADA ${NOME(ab.alvo)}</span>`:ok!=null?`<span class="ok">bateu ${NOME(ok)}</span>`:`<span class="mu">precisa ${ilMinF()}${(cfg.il_bloq??1)?' sem contra':''}</span>`}</td>
+        <td style="text-align:left;font-size:11px">${[...g.f[0],...g.f[1]].map(x=>`<span class="${x.alvo?'ruim':'ok'}">${x.s}s ${tipo[x.tipo]} ${x.txt}</span>`).join(' · ')}</td></tr>`; }).join('')}</table></div>`;
+}
+function ilLive(){ const e=$('#ilAgenda'); if(e) e.innerHTML=ilAgendaHtml(); const s=$('#ilStatus'); if(s) s.innerHTML=ilStatusHtml(); }
+VIEWS.il={nome:'🔗 Interligado',html(){
+  return `<div class="panel ilpanel"><h3>🔗 Interligado 5s + 10s + 20s <small>só fontes 100% · qualquer segundo · popup próprio</small></h3>
+    <div class="ctl">
+      ${ilOn()?`<button class="ruimbtn" onclick="ilLigar(false)">⏸ DESINTERLIGAR</button>`:`<button class="okbtn" onclick="ilLigar(true)">🔗 INTERLIGAR</button>`}
+      ${IL_TEMPOS.map(s=>`<label><input type="checkbox" ${+(cfg['il_w'+s]??1)?'checked':''} onchange="cfg.il_w${s}=this.checked?1:0;saveCfg();IL.k='';fillRes()"> ${s}s</label>`).join('')}
+      <label>Mínimo de fontes ${sel('il_minF',[[2,'2'],[3,'3'],[4,'4'],[5,'5'],[6,'6']])}</label>
+      <label>100% em ${sel('il_nivel',[[0,'TS (sem gale)'],[1,'até G1'],[2,'até G2']])}</label>
+      <label>Entrada ${sel('il_gale',[[0,'tiro seco'],[1,'até G1'],[2,'até G2']])}</label>
+      <label>Avisar pelo menos ${sel('il_lead',[[2,'2s'],[3,'3s'],[5,'5s'],[8,'8s'],[10,'10s']])} antes</label>
+    </div>
+    <div class="ctl">
+      <label><input type="checkbox" ${+(cfg.il_sc??1)?'checked':''} onchange="cfg.il_sc=this.checked?1:0;saveCfg();IL.k=''"> 🔬 scanner</label>
+      <label><input type="checkbox" ${+(cfg.il_rb??1)?'checked':''} onchange="cfg.il_rb=this.checked?1:0;saveCfg();IL.k=''"> 🤖 robôs</label>
+      <label><input type="checkbox" ${+(cfg.il_hp??1)?'checked':''} onchange="cfg.il_hp=this.checked?1:0;saveCfg();IL.k=''"> 🕐 horas pagantes</label>
+      <label>Mín. casos ${inp('il_minCasos',45)}</label><label>Pular até ${inp('il_pulo',40)}</label>
+      <label>Horas 100% ≥ ${sel('il_hpMin',[[4,'4h'],[6,'6h'],[8,'8h'],[12,'12h']])}</label>
+      <label>Analisar ${sel('il_n',[[3000,'3.000 jogos'],[5000,'5.000'],[10000,'10.000']])}</label>
+      <label><input type="checkbox" ${(cfg.il_bloq??1)?'checked':''} onchange="cfg.il_bloq=this.checked?1:0;saveCfg();IL.k=''"> não entrar com fonte contra</label>
+      <label><input type="checkbox" ${+(cfg.il_dif??0)?'checked':''} onchange="cfg.il_dif=this.checked?1:0;saveCfg();IL.k=''"> exigir 2 tempos diferentes</label>
+      <label><input type="checkbox" ${+(cfg.il_pop??1)?'checked':''} onchange="cfg.il_pop=this.checked?1:0;saveCfg()"> popup</label>
+      <button onclick="IL.bk={};IL.hp={};IL.k='';status('🔗 recalculando as listas 100%…','ok')">↻ recalcular</button>
+      <button onclick="if(confirm('Limpar o relatório do interligado?')){IL.log=[];ilSave();IL.fz.key='';fillRes()}">🧹 limpar relatório</button>
+    </div>
+    <div class="nota">Com o <b>🔗 INTERLIGAR</b> ligado: os popups da Confluência 1 e 2 ficam desligados (os relatórios deles continuam), os robôs automáticos de 5s, 10s e 20s ficam ligados renovando a cada ${raMin()} min, e as listas 100% de cada tempo são refeitas a cada 3 min (horas pagantes a cada 10 min).
+      Uma fonte só conta se está <b>100% ${IL_NT[ilNivel()]==='TS'?'no tiro seco':'até '+IL_NT[ilNivel()]}</b> com pelo menos ${ilMinCasos()} casos (robôs: metade disso). Quando ${ilMinF()} ou mais apontam a mesma cor para o <b>mesmo segundo</b> — de qualquer tempo, não só os segundos de 20 — o popup avisa com antecedência.
+      O mesmo padrão aparecendo no scanner e num robô do mesmo tempo conta uma vez só.</div>
+  </div><div id="res"></div>`;
+},res(){
+  return `<div class="panel"><h3>Tempos</h3><div id="ilStatus">${ilStatusHtml()}</div></div>
+  <div class="panel"><h3>🗓 O que as fontes 100% apontam nos próximos ${Math.max(30,+(cfg.il_horiz??90))}s ${ilOn()?'':'<small class="ruim">interligado desligado — só visualização</small>'}</h3><div id="ilAgenda">${ilAgendaHtml()}</div></div>
+  <div class="panel"><h3>📋 Relatório do interligado</h3>${ilRelatorio()}</div>
+  ${(()=>{ const M=ilModelo(); if(M.n<15) return ''; const grupos=[['n','Nº de fontes'],['c','Contra'],['t','Tempos'],['k','Tipos']];
+    return `<div class="panel"><h3>💪 O que a força do interligado aprendeu <small>${M.n} entradas · média ${(M.base*100).toFixed(1)}%</small></h3><div class="tw"><table>
+      ${grupos.map(([k,t])=>`<tr><td style="text-align:left"><b>${t}</b></td><td style="text-align:left">${Object.entries(M.B).filter(([f])=>f.startsWith(k+':')).sort((a,b)=>b[1].n-a[1].n).map(([f,b])=>`<span class="fzchip ${b.n>=5&&b.rate>=M.base+0.03?'ok':b.n>=5&&b.rate<=M.base-0.03?'ruim':''}">${f.split(':')[1]}: <b>${(b.rate*100).toFixed(0)}%</b> <i>(${b.n})</i></span>`).join(' ')}</td></tr>`).join('')}</table></div></div>`; })()}`;
+}};
+// motor: a cada segundo confere resultados; a cada jogo novo de qualquer tempo, recoleta
+setInterval(()=>{
+  const vendo=S.tab==='il';
+  if(!ilOn() && !vendo) return;
+  try{
+    if(ilOn()) ilResolve();
+    const k=ilTempos().map(s=>{ const W=liveW(d5BankName(s)); return W&&W.length?W.at(-1).t:0; }).join('|');
+    if(k!==IL.k || Date.now()-IL.scanT>20000){
+      IL.k=k;
+      if(ilOn()) ilScan(); else { IL.agenda=ilColeta(); IL.scanT=Date.now(); }
+      if(vendo) ilLive();
+    }
+  }catch(e){ console.warn('interligado',e); }
+},1000);
+setInterval(()=>{ if(IL.pop) ilPopRefresh(); },500);
+ilLoad();
+setTimeout(ilBtn,1500);
+
 // =================== ♻ ROBÔS AUTOMÁTICOS (20s e 5s) — varre a cada N minutos e renova ===================
 // Procura padrões de somas, duplas e números com 100% (sem red) no banco de 20s e no de 5s.
 // Achou novos 100% → cria os robôs novos e apaga os automáticos antigos que saíram da lista.
@@ -4619,12 +5101,12 @@ function fzResumoHtml(){
 let RA={ultimo:0,rodando:false,log:[]};
 function raLoad(){ try{ RA.log=JSON.parse(localStorage.getItem('dpi_ra_log_v1')||'[]')||[]; RA.ultimo=+(localStorage.getItem('dpi_ra_ultimo')||0); }catch(e){} }
 function raSave(){ try{ localStorage.setItem('dpi_ra_log_v1',JSON.stringify(RA.log.slice(-60))); localStorage.setItem('dpi_ra_ultimo',String(RA.ultimo)); }catch(e){} }
-function raJanelas(){ const J=[]; if(cfg.ra_w20??1) J.push(20); if(cfg.ra_w5??1) J.push(5); return J; }
+function raJanelas(){ const J=[]; if(cfg.ra_w20??1) J.push(20); if(cfg.ra_w10??1) J.push(10); if(cfg.ra_w5??1) J.push(5); return J; }
 function raAchar(step){
   const bank=d5BankName(step); let W=liveW(bank)||[];
-  const lim=step===5?Math.max(2000,+cfg.p5_n||5000):5000; if(W.length>lim) W=W.slice(-lim);
+  const lim=step===5?Math.max(2000,+cfg.p5_n||5000):step===10?Math.max(2000,+cfg.p10_n||5000):5000; if(W.length>lim) W=W.slice(-lim);
   if(W.length<500) return {bank,W,lista:null,motivo:`só ${W.length} jogos`};
-  const nivel=scNivel(), min=Math.max(5,+(step===5?cfg.ra_min5:cfg.ra_min20)||(step===5?30:20)), maxSkip=Math.max(0,Math.min(60,+cfg.ra_pulo||20));
+  const nivel=scNivel(), min=Math.max(5,+(step===5?cfg.ra_min5:step===10?cfg.ra_min10:cfg.ra_min20)||(step===5?30:step===10?25:20)), maxSkip=Math.max(0,Math.min(60,+cfg.ra_pulo||20));
   const cut=(cfg.ra_valid??1)?Math.floor(W.length*0.7):0;
   let all=[]; for(const fam of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,cut));
   let L=all.filter(x=>x.red===0 && x.done>=min && (!cut || (x.test && x.test.done>=2 && x.test.red===0)));
@@ -4667,7 +5149,7 @@ async function raRodar(manual){
       try{ if(reg.novos||reg.removidos) atuAviso(`♻ Robôs ${step}s: ${reg.novos} criado(s) · ${reg.removidos} removido(s) · ${reg.mantidos} mantido(s)`,'ra'); else ATU.ult={T:Date.now(),txt:`♻ Varredura ${step}s: ${reg.obs||'nada mudou'}`}; atuRender(); }catch(e){}
     }
     rbSave(); raSave();
-    if(['robos','p5'].includes(S.tab)) renderTab();
+    if(['robos','p5','p10','il'].includes(S.tab)) renderTab();
   }catch(e){ console.warn('robôs automáticos',e); }
   finally{ RA.rodando=false; }
 }
@@ -4680,10 +5162,11 @@ function raPanelHtml(){
     <div class="ctl">
       <label class="p5sw"><input type="checkbox" ${(cfg.ra_on??1)?'checked':''} onchange="cfg.ra_on=this.checked?1:0;saveCfg();fillRes()"> <b>♻ ligado</b></label>
       <label><input type="checkbox" ${(cfg.ra_w20??1)?'checked':''} onchange="cfg.ra_w20=this.checked?1:0;saveCfg()"> 20 segundos (${cont(20)})</label>
+      <label><input type="checkbox" ${(cfg.ra_w10??1)?'checked':''} onchange="cfg.ra_w10=this.checked?1:0;saveCfg()"> 10 segundos (${cont(10)})</label>
       <label><input type="checkbox" ${(cfg.ra_w5??1)?'checked':''} onchange="cfg.ra_w5=this.checked?1:0;saveCfg()"> 5 segundos (${cont(5)})</label>
       <label>A cada ${sel('ra_int',[[5,'5 min'],[10,'10 min'],[15,'15 min'],[30,'30 min']])}</label>
       <label>Máx. por banco ${sel('ra_max',[[5,'5'],[10,'10'],[20,'20'],[30,'30']])}</label>
-      <label>Mín. casos 20s ${inp('ra_min20',45)}</label><label>5s ${inp('ra_min5',45)}</label>
+      <label>Mín. casos 20s ${inp('ra_min20',45)}</label><label>10s ${inp('ra_min10',45)}</label><label>5s ${inp('ra_min5',45)}</label>
       <label>Pular até ${inp('ra_pulo',40)}</label>
       <label title="separa os 30% mais recentes do banco e só aceita o padrão se ele também não tiver red neles"><input type="checkbox" ${(cfg.ra_valid??1)?'checked':''} onchange="cfg.ra_valid=this.checked?1:0;saveCfg()"> confirmar nos 30% mais recentes</label>
       <label><input type="checkbox" ${cfg.ra_pop?'checked':''} onchange="cfg.ra_pop=this.checked?1:0;saveCfg()"> popup próprio dos automáticos</label>
@@ -7077,7 +7560,7 @@ async function trocarBanco(b) {
 }
 
 // ---------- render ----------
-const TAB_ORDER = ['hist', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'p5', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'fonte'];
+const TAB_ORDER = ['hist', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
 let LAST_HEAVY = 0;
 function fillRes() {
