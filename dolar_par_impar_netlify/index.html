@@ -234,6 +234,7 @@ tr.cfa-best td{background:rgba(34,197,94,.12)}
 .bvhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}.bvst{margin-left:auto;font-weight:700}
 .bvpop{margin-top:8px;padding:6px 9px;border-radius:8px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.35);font-size:13px}
 button.okbtn{background:#15803d;color:#fff;border-color:#15803d}button.ruimbtn{background:#b91c1c;color:#fff;border-color:#b91c1c}
+.cfx-p5{color:#f9a8d4;background:rgba(236,72,153,.13);border-left:3px solid #ec4899}.p5sw{padding:4px 10px;border:1px solid #ec4899;border-radius:9px}
 .cfxbox{margin-top:8px;padding:8px;border:1px dashed var(--bd);border-radius:9px;font-size:13px}
 .cfx{padding:3px 6px;margin:3px 0;border-radius:6px;font-weight:700}
 .cfx-rob{color:#d8b4fe;background:rgba(168,85,247,.14);border-left:3px solid #a855f7}
@@ -390,7 +391,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.15 · 29/09/2026 · versão para Netlify (nuvem)';
+const VERSAO='v3.16 · 29/09/2026 · padrões de 5 segundos nos cruzamentos';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -406,7 +407,7 @@ const DEF = {
   limit: 5000, pages: 20, pip: 0, proxy: '', auto: 10, janela: 'n:2000', bank: 'Dólar', lastId: 0,
   padL: 3, padG: 1, padMin: 10, padAss: 80, padAlert: 1,
   bt_tipo: 'seq', bt_n: 4, bt_dir: 'contra', bt_pad: 'VVG', bt_cor: 'G', bt_dig: 0,
-  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
+  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
   sc_min: 20, sc_skip: 12, sc_top: 40, sc_digit: 5, sc_digit_skip: 3,
   sc_sum_min: 2, sc_sum_max: 5, sc_sum_skip: 8, autoOn: 1, derivFallback: 1,
   rb_popup: 1, rb_auto_min: 20, rb_auto_top: 100, rb_auto_only100: 1, rb_auto_family: 'ambos', rb_auto_pulo: 500, rb_manual_create: 1, rb_auto_nivel: 2, histShow: 1000, histFixed: 0, histCols: 20, hpMinSeq: 2, hpMinOc: 5, hpOrd: 'g2',
@@ -3637,8 +3638,8 @@ function scStartsOf(W,o,C){
   C.sum=C.sum||{}; const M=C.sum[o.n]||(C.sum[o.n]=scSumMap(W,o.n)); return M.get(o.mod)||[];
 }
 // devolve a lista de entradas vivas desta combinação (pode haver mais de uma quando o gatilho repete)
-function scLive(W,o,nivel,C){
-  const n=W.length, last=n-1, out=[], step=gameIntervalSec()*1000, lastT=W[last]?.t||Date.now();
+function scLive(W,o,nivel,C,stepMs){
+  const n=W.length, last=n-1, out=[], step=stepMs||gameIntervalSec()*1000, lastT=W[last]?.t||Date.now();
   const starts=scStartsOf(W,o,C);
   for(let k=starts.length-1;k>=0;k--){
     const ti=starts[k], base=ti+1+o.skip;
@@ -3673,10 +3674,10 @@ function scLiveTxt(x){
   if(x.st==='green') return `<span class="sclive ok">✅ pagou ${NIVEL[x.nivel]} agora</span>`;
   return `<span class="sclive red">❌ red agora <span class="mu">(${x.nums.join('/')})</span></span>`;
 }
-function scRows(list,top,W){
+function scRows(list,top,W,stepMs){
   const nivel=scNivel(), C={};
   return list.slice(0,top).map((o,i)=>{
-    const L=W?scLive(W,o,nivel,C):[];
+    const L=W?scLive(W,o,nivel,C,stepMs):[];
     const ativo=L.some(x=>x.st==='armado'||x.st==='jogo');
     return `<tr class="${ativo?'scativo':''}">
     <td>${i+1}</td><td>${o.kind}</td>
@@ -3688,9 +3689,9 @@ function scRows(list,top,W){
   }).join('');
 }
 // painel do topo: tudo o que está armado ou em jogo agora, entre as linhas mostradas
-function scAgoraPanel(list,top,W){
+function scAgoraPanel(list,top,W,stepMs){
   const nivel=scNivel(), C={}, A=[];
-  list.slice(0,top).forEach((o,i)=>{ for(const x of scLive(W,o,nivel,C)) if(x.st==='armado'||x.st==='jogo') A.push({o,i,x}); });
+  list.slice(0,top).forEach((o,i)=>{ for(const x of scLive(W,o,nivel,C,stepMs)) if(x.st==='armado'||x.st==='jogo') A.push({o,i,x}); });
   A.sort((a,b)=>(a.x.st==='jogo'?0:1)-(b.x.st==='jogo'?0:1)||(a.x.faltam||0)-(b.x.faltam||0));
   return `<div class="panel" style="border-color:${A.length?'var(--am)':'var(--bd)'}"><h3>⚡ Acontecendo agora <small>${A.length} entrada(s) · ${NIVEL[nivel]==='TS'?'tiro seco':'até '+NIVEL[nivel]} · último jogo ${rbFmtClock(W.at(-1)?.t)}</small></h3>
     ${A.length?`<div class="tw" style="max-height:300px"><table><tr><th>#</th><th>Gatilho</th><th>Pulo</th><th>Entrada</th><th>Taxa</th><th style="text-align:left">Situação</th></tr>
@@ -3882,6 +3883,8 @@ function cfExtras(Tms){
     if(G){ const T=Tms/1000, d=new Date(Tms), col=d.getMinutes()%10, j=d.getSeconds()/(step/1000);
       if(Number.isInteger(j)){ const r=c10Seq(G,col,j); if(r && r.len>=(+(cfg.cf_colMin??4)) && r.next===T) out.push({tipo:'col',txt:`🧱 Coluna ${col} · J${j+1}: ${r.len}× ${r.p?'ÍMPAR':'PAR'} seguidos (máx ${r.max})`,alvo:r.p,fase:'seq.'}); } }
   }
+  // ⏱ padrões de 5 segundos no segundo exato deste jogo
+  if(cfg.p5_cruz??1) try{ out.push(...p5Resumo(p5Aponta(Tms))); }catch(e){ console.warn('5s',e); }
   return out;
 }
 function cfExtrasHtml(Tms,alvo){
@@ -3889,6 +3892,14 @@ function cfExtrasHtml(Tms,alvo){
   const a=E.filter(x=>x.alvo===alvo), c=E.filter(x=>x.alvo!==alvo);
   const li=x=>`<div class="cfx cfx-${x.tipo}">${x.txt} <span class="mu">(${x.fase})</span> → ${tagc(x.alvo)}</div>`;
   return `<div class="cfxbox">${a.length?`<b>➕ Também apontam ${tagc(alvo)} neste jogo:</b>${a.map(li).join('')}`:''}${c.length?`<b class="ruim" style="display:block;margin-top:4px">⚠ Apontam a outra cor:</b>${c.map(li).join('')}`:''}</div>`;
+}
+function cfExtrasRefresh(){
+  const A=CF.ativo, e=document.getElementById('cfxWrap');
+  if(A && e && CF.pop===A.id && !A.fim && A.estado==='jogo'){
+    e.innerHTML=cfExtrasHtml(A.Tcur,A.alvoCur);
+    if(A.g===0) try{ A.extras=cfExtras(A.Tcur).map(x=>({tipo:x.tipo,txt:x.txt,alvo:x.alvo})); }catch(_){}
+  }
+  if(CF2.ativo && !CF2.ativo.fim && CF2.pop===CF2.ativo.id) cf2PopRender();
 }
 function cfToggleRob(tipo,id){ const L=tipo==='rb'?RBOTS:SRB, r=L.find(x=>x.id===id); if(!r) return; r.cfPop=r.cfPop===false; tipo==='rb'?rbSave():srSave(); fillRes(); }
 function cfRobBtn(tipo,r){ return `<button class="${r.cfPop===false?'':'cfon'}" onclick="cfToggleRob('${tipo}','${r.id}')" title="mostrar este robô no popup da confluência quando apontar o mesmo jogo">${r.cfPop===false?'➕ popup confl.':'➕ no popup confl.'}</button>`; }
@@ -3924,7 +3935,7 @@ function cfPopup(){
     ${tl?`<div class="rbsched">${tl}</div>`:''}
     <div id="cfRes" style="display:none;margin-top:10px;padding:10px;border-radius:9px;font-size:16px;font-weight:800"></div>
     ${bvC2()?'':bvPopupTxt(A)}
-    ${A.fim||A.estado==='aguardando'?'':cfExtrasHtml(A.Tcur,A.alvoCur)}
+    <div id="cfxWrap">${A.fim||A.estado==='aguardando'?'':cfExtrasHtml(A.Tcur,A.alvoCur)}</div>
     <div class="nota" style="margin-top:8px"><b>Sinais que apoiam ${A.g?'esta tentativa':'a entrada'}:</b><br>${(A.sinaisCur||A.sinais).slice().sort((a,b)=>b.taxa-a.taxa).map(s=>`${s.taxa>=cfP100()/100-1e-9?'<b style="color:#facc15">⭐ ':''}${s.fonte} · ${s.nome} <span class="mu">(${s.fase}, ${(s.taxa*100).toFixed(0)}%)</span>${s.taxa>=cfP100()/100-1e-9?'</b>':''}`).join('<br>')}</div>
     <div class="rbactions"><button onclick="rbPopupFechar();CF.pop=null">Fechar</button><button onclick="cfg.cf_pop=0;saveCfg();rbPopupFechar();CF.pop=null">Desativar popup de confluência</button></div>
   </div><div class="cf5s" id="cf5s"></div></div></div>`;
@@ -3989,7 +4000,7 @@ function cfRelatorio(){
   ${pag.length?`<div class="cfsim">📍 <b>Pagou no gale (seguindo direto a mesma cor):</b> ${Object.entries(dist).sort().map(([k,v])=>`${k}: ${v}`).join(' · ')}</div>`:''}
   <div class="nota" style="margin:2px 0 8px">Simulações não abrem popup — servem para comparar com a regra ao vivo (gale esperando o próximo sinal).</div>`:''}
   ${R.length?`<div class="tw" style="max-height:360px"><table><tr><th>Entrada</th><th>Alvo</th><th>Apoio</th><th>Tentativas (horário · cor · dígito · apoio)</th><th>Até onde foi</th><th style="text-align:left">Sinais da 1ª entrada</th></tr>
-  ${R.map(x=>`<tr><td>${fmtT(x.T0)}</td><td>${tagc(x.alvo)}</td><td>${x.sinais.length}${(x.extras||[]).length?`<div style="font-size:10px">${['rob','hp','col'].map(t=>{ const a=(x.extras||[]).filter(e=>e.tipo===t); if(!a.length) return ''; const iguais=a.filter(e=>e.alvo===x.alvo).length; return `<span class="cfx-${t}" title="${a.map(e=>e.txt).join(' | ')}">${t==='rob'?'🤖':t==='hp'?'⏰':'🧱'}${iguais}${a.length-iguais?'<span class=ruim>/'+(a.length-iguais)+'✗</span>':''}</span>`; }).join(' ')}</div>`:''}</td>
+  ${R.map(x=>`<tr><td>${fmtT(x.T0)}</td><td>${tagc(x.alvo)}</td><td>${x.sinais.length}${(x.extras||[]).length?`<div style="font-size:10px">${['rob','hp','col','p5'].map(t=>{ const a=(x.extras||[]).filter(e=>e.tipo===t); if(!a.length) return ''; const iguais=a.filter(e=>e.alvo===x.alvo).length; return `<span class="cfx-${t}" title="${a.map(e=>e.txt).join(' | ')}">${t==='rob'?'🤖':t==='hp'?'⏰':t==='p5'?'⏱':'🧱'}${iguais}${a.length-iguais?'<span class=ruim>/'+(a.length-iguais)+'✗</span>':''}</span>`; }).join(' ')}</div>`:''}</td>
     <td style="text-align:left">${x.tent.map((t,i)=>`<span class="mu" style="font-size:10px">${NIVEL[t.g]} ${hmsOf(t.T/1000).slice(3)}</span> <span class="b s2 ${t.d==null?'':t.d%2?'v':'g'}">${t.d??'?'}</span>${t.alvo!=null&&t.alvo!==x.alvo?`<span style="font-size:10px">(${t.alvo?'ÍMP':'PAR'})</span>`:''}<span class="mu" style="font-size:10px">·${x.apoios[i]?x.apoios[i].n:''}</span>`).join(' &nbsp;')}</td>
     <td class="${x.res==='green'?'ok':x.res==='red'?'ruim':'mu'}"><b>${x.res==='green'?'✅ '+NIVEL[x.nivel]:x.res==='red'?'❌ RED':'sem dado'}</b>${x.obs?`<div class="mu" style="font-size:10px">${x.obs}</div>`:''}${(()=>{ const t=cfPagouTxt(cfPagouNo(x,M)); return t?`<div class="cfpag">📍 ${t}</div>`:''; })()}</td>
     <td style="text-align:left;font-size:11px">${x.sinais.map(s=>`${s.nome} <span class="mu">${s.fase}</span>`).join(' · ')}</td></tr>`).join('')}</table></div>`:'<div class="nota">Nenhuma confluência fechada ainda.</div>'}`;
@@ -4153,6 +4164,7 @@ function cf2PopRender(){
   else cab=`<div class="cf2big">ENTRAR ${tagc(A.alvoCur)} ${A.g?`<b>${nvG(A.g)}</b>`:''} às <b>${hmsOf(A.Tcur/1000)}</b>${A.g?`<div style="font-size:12px" class="mu">sinal ${A.origemCur==='robô'?'🤖 de robô':'da confluência (popup 1)'}${A.alvoCur!==A.alvo?' · <b style="color:var(--am)">trocou de cor</b>':''}</div>`:''}<div id="cf2Fase" style="font-size:13px"></div></div>`;
   p.innerHTML=`<div class="cf2h">🟣 CONFLUÊNCIA 2 <span class="mu">· gale até ${cf2Max()<1e9?nvG(cf2Max()-1)+' (passou é RED)':'dar green'}</span><button onclick="CF2.oculto=CF2.pop;$('#cf2Pop').style.display='none'">✕</button></div>
     ${cab}${bvC2()?bvPopupTxt(A):''}${tl?`<div class="cf2tl">${tl}</div>`:''}
+    ${(()=>{ if(A.fim||A.estado!=='jogo'||!(cfg.p5_cruz??1)) return ''; let E=[]; try{ E=p5Aponta(A.Tcur); }catch(_){} if(!E.length) return ''; const a=E.filter(x=>x.alvo===A.alvoCur).length, c=E.length-a; return `<div class="cfx cfx-p5" style="margin-top:6px;font-size:12px">⏱ 5s neste segundo: <b>${a}</b> apontam ${tagc(A.alvoCur)}${c?` · <span class="ruim">${c} a outra cor</span>`:''}</div>`; })()}
     <div class="mu" style="font-size:11px;margin-top:4px">gale segue o próximo sinal do popup 1 em qualquer cor${(cfg.cf2_rob??1)?' (ou de robô)':''} · apoio da entrada: ${A.apoios[0]?.n||0} sinais${A.n100?` · <b style="color:#facc15">⭐${A.n100} de ${cfP100()}%</b>`:''}${A.contra?` · ${A.contra} contra`:''}</div>`;
   p.style.display='block';
   cf2Fase();
@@ -4332,6 +4344,161 @@ function perdasSeqHtml(A){
     ${card('Quantas vezes passou de…',`${cont(3)} · ${cont(6)} · ${cont(9)}`,`≥3 perdidas (G3+) · ≥6 (G6+) · ≥9 (G9+) em ${A.length} tentativas`)}</div>
     <div class="nota" style="font-size:11px">Conta tentativa por tentativa, juntando as entradas seguidas, como se você seguisse o gale até dar green. Um red por falta de sinal conta só as tentativas que foram jogadas.</div>`;
 }
+// =================== ⏱ PADRÕES DE 5 SEGUNDOS (rodam sempre no banco de 5s, qualquer banco aberto em cima) ===================
+// Scanner, Somas, horas pagantes e robôs calculados no banco "DERIV <símbolo> · 5s".
+// Como o jogo de 5s no segundo X é o MESMO número do jogo de 20s no segundo X, um padrão de 5s que cai
+// no segundo exato da entrada do popup aponta a mesma coisa → aparece nos cruzamentos marcado "⏱ 5s".
+let P5={lista:null,listaKey:'',listaT:0,hp:[],hpT:0,hpKey:'',ultimoT:0,auto:[],autoInfo:null};
+function p5On(){ return !!cfg.p5_on; }
+function p5Bank(){ return d5BankName(5); }
+function p5W(){ const W=liveW(p5Bank())||[]; const n=Math.max(1000,+cfg.p5_n||5000); return W.length>n?W.slice(-n):W; }
+function p5Fresco(W){ return W.length>=200 && srvNow()*1000-W.at(-1).t<20000; }          // último jogo de 5s tem menos de 20s
+function p5Lista(W){
+  const key=[p5Bank(),cfg.p5_n,cfg.sc_min,cfg.sc_skip,cfg.sc_top,cfg.sc_sum_min,cfg.sc_sum_max,cfg.sc_sum_skip,cfg.rb_auto_nivel,cfg.cf_fontes].join('|');
+  if(P5.lista && P5.listaKey===key && Date.now()-P5.listaT<60000) return P5.lista;
+  const top=Math.max(5,Math.min(150,+cfg.sc_top||40)), f=cfg.cf_fontes||'ambos'; let L=[];
+  if(f!=='somas') L=L.concat(scScanDigits(W).slice(0,top).map(o=>({...o,fonte:'Scanner'})));
+  if(f!=='scanner') L=L.concat(scScanSums(W).slice(0,top).map(o=>({...o,fonte:'Somas'})));
+  P5.lista=L; P5.listaKey=key; P5.listaT=Date.now(); return L;
+}
+// horas pagantes do banco de 5s (refeito a cada 10 min)
+function p5Hp(){
+  const W=liveW(p5Bank())||[]; if(W.length<500) return [];
+  const key=p5Bank()+'|'+cfg.hpPer+'|'+cfg.p5_hpMin;
+  if(P5.hpKey===key && Date.now()-P5.hpT<10*60*1000) return P5.hp;
+  P5.hpKey=key; P5.hpT=Date.now();
+  try{
+    const per=+cfg.hpPer||24, G=gridBuild(W,5,W.at(-1).t-per*3600e3); if(!G) return P5.hp=[];
+    const min=Math.max(1,+(cfg.p5_hpMin??3));
+    P5.hp=hpScan(G,'all').filter(r=>r.L[2].cur>=min).map(r=>({off:r.off,alvo:r.alvo,cur:r.L[2].cur,rate:r.L[2].rate,n:r.L[2].n,max:r.L[2].max}))
+      .sort((a,b)=>b.cur-a.cur||b.rate-a.rate);
+  }catch(e){ console.warn('horas pagantes 5s',e); P5.hp=[]; }
+  return P5.hp;
+}
+// tudo que os padrões de 5s apontam para o jogo T (ms): [{tipo:'p5',txt,alvo,fase,sub}]
+function p5Aponta(Tms){
+  if(!p5On() || cfg.bank===p5Bank()) return [];   // com o próprio banco de 5s aberto, a confluência já usa ele
+  const W=p5W(); if(!p5Fresco(W)) return [];
+  const out=[], nivel=scNivel(), C={};
+  // 🔬/➕ Scanner e Somas do 5s: armado para cair em T ou em jogo com a próxima tentativa em T
+  for(const o of p5Lista(W)){
+    for(const x of scLive(W,o,nivel,C,5000)){
+      if((x.st==='armado'||x.st==='jogo') && x.entT===Tms)
+        out.push({tipo:'p5',sub:'sc',txt:`⏱ 5s · ${o.fonte} ${cfNomeRow(o)} · ${(o.rate*100).toFixed(0)}%`,alvo:o.alvo,fase:x.st==='jogo'?NIVEL[x.prox]:'TS',taxa:o.rate});
+    }
+  }
+  // 🕐 horas pagantes do 5s (minuto:segundo exato), sem ter pago nas tentativas anteriores
+  const par=t=>{ const z=W.slice(-40).find(y=>y.t===t); return z?z.p:null; };
+  const off=(((Tms/1000)%3600)+3600)%3600;
+  for(const r of p5Hp()){
+    for(let g=0;g<=2;g++){
+      if(r.off+g*5!==off) continue;
+      let ok=true; for(let h=0;h<g;h++){ const p=par(Tms-(g-h)*5000); if(p===null||p===r.alvo){ ok=false; break; } }
+      if(ok) out.push({tipo:'p5',sub:'hp',txt:`⏱ 5s · Horas pagantes :${msOf(r.off)} · ${r.cur}h pagando · ${(r.rate*100).toFixed(0)}%`,alvo:r.alvo,fase:NIVEL[g],taxa:r.rate});
+    }
+  }
+  // 🤖 robôs criados no banco de 5s
+  for(const sig of RB_PENDING){
+    if(sig.done||sig.bank!==p5Bank()) continue;
+    const rb=RBOTS.find(r=>r.id===sig.rbId); if(!rb||!rb.on||rb.cfPop===false) continue;
+    for(let g=0;g<=sig.maxNivel;g++){
+      const Tg=sig.entryT+g*sig.stepMs; if(Tg>Tms) break;
+      if(Tg===Tms){ out.push({tipo:'p5',sub:'rb',txt:`⏱ 5s · 🤖 ${rbName(rb)}`,alvo:sig.alvo,fase:NIVEL[g],taxa:rb.taxaCriacao||0}); break; }
+      const p=par(Tg); if(p===null||p===sig.alvo) break;
+    }
+  }
+  return out;
+}
+// resumo por cor para o popup (as 3 mais fortes de cada cor + quantas outras)
+function p5Resumo(E){
+  const out=[];
+  for(const cor of [0,1]){
+    const L=E.filter(x=>x.alvo===cor).sort((a,b)=>(b.sub==='rb')-(a.sub==='rb')||b.taxa-a.taxa);
+    L.slice(0,3).forEach((x,i)=>out.push({...x,txt:x.txt+(i===2&&L.length>3?` <span class="mu">+${L.length-3} de 5s</span>`:'')}));
+  }
+  return out;
+}
+// ---------- criar robôs no banco de 5s (busca automática) ----------
+function p5Buscar(){
+  const W=p5W(); if(W.length<500){ status('⏱ Banco de 5s ainda com poucos jogos','err'); return; }
+  const t0=performance.now(), nivel=scNivel(), min=Math.max(5,+cfg.p5_rbMin||30), maxSkip=Math.max(0,Math.min(60,+cfg.p5_rbPulo||20));
+  let all=[]; for(const fam of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,0));
+  all.sort((a,b)=>b.rate-a.rate||b.done-a.done||a.skip-b.skip);
+  P5.auto=all.slice(0,60); P5.autoInfo={n:W.length,ms:Math.round(performance.now()-t0),achados:all.length,when:Date.now()};
+  fillRes();
+}
+function p5Criar(i){
+  const x=P5.auto[i]; if(!x) return;
+  const nivel=+cfg.rb_auto_nivel||0, bank=p5Bank(), id=rbIdOf(x,nivel,bank);
+  let rb=RBOTS.find(r=>r.id===id);
+  if(!rb){
+    const base={id,skip:x.skip,alvo:x.alvo,maxNivel:nivel,bank,on:true,popup:false,cfPop:true,criadoEm:Date.now(),minOcc:x.done||0,taxaCriacao:x.rate,p5:true};
+    rb=x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
+    RBOTS.unshift(rb); rbSave();
+  } else { rb.on=true; rbSave(); }
+  status(`⏱ Robô de 5s criado: ${rbName(rb)}`,'ok'); fillRes();
+}
+function p5CriarTop(k){ for(let i=0;i<Math.min(k,P5.auto.length);i++) p5Criar(i); }
+// ---------- aba ----------
+function p5RobosHtml(){
+  const L=RBOTS.filter(r=>r.bank===p5Bank());
+  if(!L.length) return '<div class="nota">Nenhum robô de 5s ainda. Use 🔎 Buscar padrões de 5s e crie abaixo.</div>';
+  return `<div class="tw" style="max-height:300px"><table><tr><th>Robô</th><th>Banco 5s</th><th>Ao vivo</th><th>Agora</th><th></th></tr>
+    ${L.map(rb=>{ const W=liveW(rb.bank), st=rbCurrentStats(rb,W), pl=rbPlacar(rb.id), pend=RB_PENDING.find(s=>s.rbId===rb.id&&!s.done);
+      return `<tr class="${pend?'scativo':''}"><td style="text-align:left">${rbName(rb)}</td><td>${st.done} casos · <b>${st.done?(st.rate*100).toFixed(1):'—'}%</b></td>
+        <td><b class="ok">${pl.g}</b> / <b class="ruim">${pl.r}</b></td><td>${pend?`<span class="sclive arm">entrada ${rbFmtClock(pend.entryT)}</span>`:'<span class="mu">—</span>'}</td>
+        <td><button onclick="rbToggle('${rb.id}','on')">${rb.on?'🟢':'⚫'}</button> ${cfRobBtn('rb',rb)} <button class="dan" onclick="rbDelete('${rb.id}')">🗑</button></td></tr>`; }).join('')}</table></div>`;
+}
+function p5HpHtml(){
+  const R=p5Hp(); if(!R.length) return `<div class="nota">Nenhum horário do 5s pagando há ${cfg.p5_hpMin??3}h ou mais (até G2) no período.</div>`;
+  const agora=Date.now()/1000, prox=R.map(r=>({...r,next:hpNext(r.off)})).filter(r=>r.next-agora<=15*60).sort((a,b)=>a.next-b.next).slice(0,30);
+  return `<div class="nota">${R.length} horário(s) do 5s pagando há ≥ ${cfg.p5_hpMin??3}h. Próximos 15 minutos:</div>
+    <div class="tw" style="max-height:260px"><table><tr><th>Próximo</th><th>Horário</th><th>Alvo</th><th>Pagando</th><th>Taxa</th><th>Máx</th></tr>
+    ${prox.map(r=>`<tr><td><b>${hmsOf(r.next)}</b></td><td>:${msOf(r.off)}</td><td>${tagc(r.alvo)}</td><td>${r.cur}h</td><td>${(r.rate*100).toFixed(0)}%</td><td>${r.max}h</td></tr>`).join('')}</table></div>`;
+}
+VIEWS.p5={nome:'⏱ 5 segundos',html(){
+  return `<div class="panel p5panel"><h3>⏱ Padrões de 5 segundos <small>rodam no banco ${p5Bank()} mesmo com outro banco aberto em cima</small></h3>
+    <div class="ctl">
+      <label class="p5sw"><input type="checkbox" ${cfg.p5_on?'checked':''} onchange="cfg.p5_on=this.checked?1:0;saveCfg();fillRes()"> <b>▶ rodar padrões de 5s</b></label>
+      <label><input type="checkbox" ${(cfg.p5_cruz??1)?'checked':''} onchange="cfg.p5_cruz=this.checked?1:0;saveCfg()"> levar para os cruzamentos do popup</label>
+      <label>Analisar ${sel('p5_n',[[2000,'últimos 2.000 (≈2,8h)'],[5000,'últimos 5.000 (≈7h)'],[10000,'últimos 10.000 (≈14h)'],[17280,'último dia']])}</label>
+      <label>Horas pagantes ≥ ${sel('p5_hpMin',[[2,'2h'],[3,'3h'],[4,'4h'],[6,'6h']])}</label>
+    </div>
+    <div class="nota">Usa os mesmos ajustes das abas 🔬 Scanner e ➕ Somas (mín. ocorrências, pular até, entrada até ${NIVEL[scNivel()]}, top ${cfg.sc_top||40}) e o período das 🕐 Horas Pagantes, mas sempre com os jogos de 5 segundos.
+      Com os cruzamentos ligados, quando um padrão de 5s cai <b>no segundo exato</b> da entrada do popup da confluência, ele aparece lá marcado <span class="cfx cfx-p5" style="display:inline-block;padding:1px 6px">⏱ 5s</span>.</div>
+  </div><div id="res"></div>`;
+},res(){
+  const W=p5W();
+  if(!p5On()) return '<div class="panel"><div class="nota">Marque <b>▶ rodar padrões de 5s</b> para ligar.</div></div>';
+  if(W.length<200) return `<div class="panel"><div class="nota">O banco de 5s ainda tem ${W.length} jogos. Ele enche sozinho com a captura ao vivo e a reposição da Deriv.</div></div>`;
+  const list=p5Lista(W), top=Math.max(5,Math.min(150,+cfg.sc_top||40));
+  const prox=W.at(-1).t+5000, E=p5Aponta(prox);
+  const ai=P5.autoInfo;
+  return `<div class="cards">${card('Banco de 5s',num(W.length),`último ${rbFmtClock(W.at(-1).t)} ${p5Fresco(W)?'<span class="ok">● ao vivo</span>':'<span class="ruim">● parado</span>'}`)}
+    ${card('Próximo jogo 5s',hmsOf(prox/1000),`${E.filter(x=>x.alvo===0).length} apontam PAR · ${E.filter(x=>x.alvo===1).length} apontam ÍMPAR`)}
+    ${card('Padrões na lista',num(list.length),'Scanner + Somas do 5s')}
+    ${card('Robôs de 5s',num(RBOTS.filter(r=>r.bank===p5Bank()).length),'rodam sozinhos, sem popup próprio')}</div>
+  ${scAgoraPanel(list,top,W,5000).replace('⚡ Acontecendo agora','⚡ Acontecendo agora no 5s')}
+  <div class="panel"><h3>🕐 Horas pagantes do 5s</h3>${p5HpHtml()}</div>
+  <div class="panel"><h3>🤖 Robôs de 5s</h3>
+    <div class="ctl"><label>Mín. ocorrências ${inp('p5_rbMin',55)}</label><label>Pular até ${inp('p5_rbPulo',45)}</label>
+      <button class="pri" onclick="p5Buscar()">🔎 Buscar padrões de 5s</button>${P5.auto.length?`<button onclick="p5CriarTop(5)">➕ criar os 5 melhores</button>`:''}</div>
+    ${ai?`<div class="nota">${num(ai.achados)} padrões em ${num(ai.n)} jogos de 5s (${ai.ms} ms) · mostrando os 60 melhores</div>
+      <div class="tw" style="max-height:260px"><table><tr><th>#</th><th>Padrão</th><th>Pulo</th><th>Alvo</th><th>Casos</th><th>SG/G1/G2/R</th><th>Taxa</th><th></th></tr>
+      ${P5.auto.map((x,i)=>`<tr><td>${i+1}</td><td>${x.kind} ${x.gat||x.d||''}</td><td>${x.skip}</td><td>${tagc(x.alvo)}</td><td>${x.done}</td><td>${x.sg}/${x.g1}/${x.g2}/<span class="ruim">${x.red}</span></td><td><b>${(x.rate*100).toFixed(1)}%</b></td><td><button onclick="p5Criar(${i})">➕ criar</button></td></tr>`).join('')}</table></div>`:''}
+    ${p5RobosHtml()}
+    <div class="nota">Robôs de 5s não abrem popup próprio (seria um a cada poucos segundos). Eles entram nos cruzamentos da confluência quando caem no segundo da entrada, e o placar ao vivo fica na aba 🤖 Robôs.</div></div>
+  <div class="panel"><h3>Melhores combinações do 5s</h3><div class="tw"><table>${SC_HEAD}${scRows(list,top,W,5000)}</table></div></div>`;
+}};
+// a cada jogo novo de 5s: atualiza a aba e o popup aberto
+setInterval(()=>{
+  if(!p5On()) return;
+  const W=liveW(p5Bank()); const t=W&&W.length?W.at(-1).t:0;
+  if(t===P5.ultimoT) return; P5.ultimoT=t;
+  if(S.tab==='p5') fillRes();
+  try{ cfExtrasRefresh(); }catch(e){}
+},1000);
+
 function cfPanelHtml(){
   const W=S.win, A=CF.ativo;
   let agora='';
@@ -6309,7 +6476,7 @@ async function trocarBanco(b) {
 }
 
 // ---------- render ----------
-const TAB_ORDER = ['hist', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'fonte'];
+const TAB_ORDER = ['hist', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'p5', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
 let LAST_HEAVY = 0;
 function fillRes() {
