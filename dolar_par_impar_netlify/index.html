@@ -405,7 +405,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.20 · 30/09/2026 · estratégias na DEMO (popup) + entrar com a Deriv';
+const VERSAO='v3.21 · 30/09/2026 · entrar com a Deriv pelo login novo (App ID com letras)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -5008,16 +5008,51 @@ function esPanelHtml(){
   </div>`;
 }
 // ---------- 🔐 entrar com a Deriv sem copiar token (OAuth) ----------
-function dmAppId(){ return String(cfg.dm_appId||'').replace(/\D/g,''); }
-function dmOAuth(){
+function dmAppId(){ return String(cfg.dm_appId||'').trim().replace(/[^A-Za-z0-9_-]/g,''); }
+function dmAppNovo(){ return /[A-Za-z]/.test(dmAppId()); }          // App ID com letras = portal novo (developers.deriv.com)
+function dmRedir(){ return location.origin+'/'; }
+function dmB64u(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+async function dmOAuth(){
   const id=dmAppId();
   if(!id){ alert('Primeiro coloque o App ID do seu aplicativo Deriv (veja o passo a passo logo abaixo do botão).'); return; }
-  location.href=`https://oauth.deriv.com/oauth2/authorize?app_id=${id}&l=PT`;
+  if(!dmAppNovo()){ location.href=`https://oauth.deriv.com/oauth2/authorize?app_id=${id}&l=PT`; return; }
+  if(!/^https:/.test(location.origin)){ alert('O login da Deriv só funciona com o site aberto pelo endereço da Netlify (https).'); return; }
+  const v=dmB64u(crypto.getRandomValues(new Uint8Array(48))), st=dmB64u(crypto.getRandomValues(new Uint8Array(16)));
+  const ch=dmB64u(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v)));
+  try{ localStorage.setItem('dpi_demo_tok_pkce',JSON.stringify({v,st,id,r:dmRedir(),t:Date.now()})); }catch(e){}
+  const q=new URLSearchParams({response_type:'code',client_id:id,redirect_uri:dmRedir(),scope:'trade',state:st,code_challenge:ch,code_challenge_method:'S256'});
+  location.href='https://auth.deriv.com/oauth2/auth?'+q.toString();
 }
-// volta do login da Deriv: ?acct1=VRTC…&token1=…&cur1=USD&acct2=CR…&token2=…
+async function dmApi(corpo){
+  const r=await fetch('/api/deriv',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(corpo)});
+  let j={}; try{ j=await r.json(); }catch(e){ j={erro:'função /api/deriv não respondeu ('+r.status+')'}; }
+  if(!r.ok||j.erro){ const e=new Error(j.erro||('erro '+r.status)); e.status=r.status; throw e; }
+  return j;
+}
+function dmOa2(){ try{ return JSON.parse(localStorage.getItem('dpi_demo_tok_oa2')||'null'); }catch(e){ return null; } }
+// volta do login da Deriv
 (function dmOAuthRetorno(){
   try{
-    const q=new URLSearchParams(location.search); if(!q.get('acct1')) return;
+    const q=new URLSearchParams(location.search);
+    // portal novo: ?code=…&state=…
+    if(q.get('code')||q.get('error')){
+      history.replaceState(null,'',location.pathname);
+      let pk=null; try{ pk=JSON.parse(localStorage.getItem('dpi_demo_tok_pkce')||'null'); localStorage.removeItem('dpi_demo_tok_pkce'); }catch(e){}
+      const aviso=m=>setTimeout(()=>{ S.tab='demo'; renderTab(); dmSet(m); },1500);
+      if(q.get('error')){ aviso('⛔ A Deriv recusou o login: '+(q.get('error_description')||q.get('error'))); return; }
+      if(!pk||pk.st!==q.get('state')){ aviso('⛔ Login da Deriv não confere (clique de novo em 🔐 ENTRAR COM A DERIV).'); return; }
+      setTimeout(async()=>{
+        S.tab='demo'; renderTab(); dmSet('🔐 Login feito, pegando o acesso da conta DEMO…');
+        try{
+          const j=await dmApi({acao:'token',client_id:pk.id,code:q.get('code'),verifier:pk.v,redirect:pk.r});
+          localStorage.setItem('dpi_demo_tok_oa2',JSON.stringify({at:j.access_token,rt:j.refresh_token,id:pk.id,exp:j.expires_in?Date.now()+j.expires_in*1000:0}));
+          dmConectar();
+        }catch(e){ dmSet('⛔ Não consegui trocar o login pelo acesso: '+e.message); }
+      },1500);
+      return;
+    }
+    // portal antigo: ?acct1=VRTC…&token1=…&cur1=USD&acct2=CR…&token2=…
+    if(!q.get('acct1')) return;
     let tok='', acct='';
     for(let i=1;i<20;i++){ const a=q.get('acct'+i), t=q.get('token'+i); if(!a) break; if(/^VR/i.test(a)){ acct=a; tok=t; break; } }
     history.replaceState(null,'',location.pathname);                 // tira os tokens da barra de endereço
@@ -5026,6 +5061,27 @@ function dmOAuth(){
     setTimeout(()=>{ DM._tok=tok; S.tab='demo'; renderTab(); dmConectar(); },1500);   // espera o módulo da conta demo carregar
   }catch(e){}
 })();
+// conecta pelo login novo: pede o link de uso único da conta DEMO e abre o websocket nele
+async function dmConectarNovo(oa){
+  dmSet('🔐 Pedindo à Deriv o acesso da conta DEMO…');
+  let j;
+  try{ j=await dmApi({acao:'otp',client_id:oa.id,token:oa.at}); }
+  catch(e){
+    if(e.status===401 && oa.rt){
+      try{ const n=await dmApi({acao:'renova',client_id:oa.id,refresh:oa.rt}); oa={...oa,at:n.access_token,rt:n.refresh_token||oa.rt}; localStorage.setItem('dpi_demo_tok_oa2',JSON.stringify(oa)); j=await dmApi({acao:'otp',client_id:oa.id,token:oa.at}); }
+      catch(e2){ dmSet('⛔ O acesso expirou — clique de novo em 🔐 ENTRAR COM A DERIV. ('+e2.message+')'); return; }
+    } else { dmSet('⛔ '+e.message+(e.status===401?' — clique de novo em 🔐 ENTRAR COM A DERIV.':'')); return; }
+  }
+  if(!/\/ws\/demo/.test(j.url)){ dmSet('⛔ Endereço recebido não é de conta DEMO — bloqueado.'); return; }
+  dmDesconectar(true);
+  try{ await dmAbrir(j.url); }catch(e){ dmSet('Falhou ao abrir a conexão DEMO: '+e.message); return; }
+  DM.novo=true; DM.ok=true; DM.virt=true; DM.loginid='DEMO '+j.account_id; DM.cur=j.currency||'USD'; DM.bal=+j.balance;
+  DM.sess={pl:0,n:0,g:0,r:0,ini:Date.now()}; DM.parado='';
+  try{ const b=await dmSend({balance:1,subscribe:1},8000); if(b.balance) DM.bal=+b.balance.balance; }catch(e){}
+  await dmSyncRelogio();
+  dmSet(`✅ Conectado pelo login da Deriv na conta <b>${DM.loginid}</b> · saldo ${isFinite(DM.bal)?DM.bal.toFixed(2):'—'} ${DM.cur}${DM.offOk?` · relógio do PC ${DM.off>=0?'atrasado':'adiantado'} ${Math.abs(DM.off).toFixed(2)}s (já corrigido)`:''}`);
+  if(S.tab==='demo') renderTab();
+}
 esLoad();
 
 function cfPanelHtml(){
@@ -6611,10 +6667,11 @@ function dmSend(o,timeout=20000){
 }
 async function dmConectar(){
   const tokIn=$('#dmTok')?.value?.trim(); if(tokIn) DM._tok=tokIn;
+  DM.novo=false; const oa=dmOa2(); if(!tokIn && oa && oa.at) return dmConectarNovo(oa);
   const tok=dmToken(); if(!tok){ dmSet('Cole o token da conta DEMO.'); return; }
   if($('#dmLembrar')?.checked){ try{ localStorage.setItem('dpi_demo_tok',tok); }catch(e){} }
   dmDesconectar(true);
-  const aid=dmAppId(); const urls=(cfg.dm_url?[cfg.dm_url]:[]).concat(aid?[`wss://ws.derivws.com/websockets/v3?app_id=${aid}`,`wss://ws.binaryws.com/websockets/v3?app_id=${aid}`]:DM_URLS_DEF);
+  const aid=dmAppNovo()?'':dmAppId(); const urls=(cfg.dm_url?[cfg.dm_url]:[]).concat(aid?[`wss://ws.derivws.com/websockets/v3?app_id=${aid}`,`wss://ws.binaryws.com/websockets/v3?app_id=${aid}`]:DM_URLS_DEF);
   for(const url of urls){
     dmSet(`Conectando em ${url.replace(/\?.*/,'')}…`);
     try{ await dmAbrir(url); break; }catch(e){ dmSet('Falhou: '+e.message); }
@@ -6650,7 +6707,7 @@ function dmAbrir(url){
   });
 }
 function dmDesconectar(silencioso){ try{ DM.ws?.close(); }catch(e){} DM.ws=null; DM.ok=false; DM.virt=false; if(!silencioso){ dmSet('desconectado'); if(S.tab==='demo') fillRes(); } dmHeader(); }
-function dmEsquecer(){ try{ localStorage.removeItem('dpi_demo_tok'); }catch(e){} DM._tok=''; dmDesconectar(); dmSet('Token apagado deste navegador.'); }
+function dmEsquecer(){ try{ localStorage.removeItem('dpi_demo_tok'); localStorage.removeItem('dpi_demo_tok_oa2'); }catch(e){} DM._tok=''; dmDesconectar(); dmSet('Token apagado deste navegador.'); }
 // ---------- ordens ----------
 function dmStake0(){ return Math.max(0.35,Math.round((+cfg.dm_stake||0.35)*100)/100); }
 function dmPodeOperar(o){
@@ -6681,13 +6738,17 @@ async function dmComprar(o){
   }
   stake=Math.max(0.35,Math.round(stake*100)/100);
   const maxS=+cfg.dm_maxStake||0; if(maxS>0 && stake>maxS){ o.estado='parado'; dmAddLog({...o,res:'não enviada',obs:`stake ${stake} acima do máximo ${maxS}`,stake,profit:0,nivel:g}); return; }
-  const params={amount:stake,basis:'stake',contract_type:o.ct,currency:DM.cur||'USD',duration:1,duration_unit:'t',symbol:o.sym};
+  const params={amount:stake,basis:'stake',contract_type:o.ct,currency:DM.cur||'USD',duration:1,duration_unit:'t'};
+  params[DM.novo?'underlying_symbol':'symbol']=o.sym;                 // API nova usa underlying_symbol
   if(o.barrier!=null) params.barrier=String(o.barrier);
   const J=dmEnvio(o.sym,o.T+g*o.step);
   const t={g,stake,envioS:dmNow(),alvo:J.alvo,iniJan:J.iniJan,fimJan:J.fimJan,N:J.N};
   o.tent.push(t); o.estado='comprando';
   try{
-    const j=await dmSend({buy:1,price:stake,parameters:params});
+    let j;
+    if(DM.novo && DM.buyProp){ const p=await dmSend({proposal:1,...params}); j=await dmSend({buy:p.proposal.id,price:stake}); }
+    else try{ j=await dmSend({buy:1,price:stake,parameters:params}); }
+    catch(e){ if(!DM.novo) throw e; DM.buyProp=true; const p=await dmSend({proposal:1,...params}); j=await dmSend({buy:p.proposal.id,price:stake}); }   // API nova pode exigir proposta antes
     const b=j.buy||{};
     t.cid=b.contract_id; t.pago=+b.buy_price; t.payout=+b.payout;
     t.pt=+(b.purchase_time||b.start_time||0);
@@ -6810,12 +6871,12 @@ VIEWS.demo={nome:'💼 Conta Demo',live:dmLive,html(){
       <label><input type="checkbox" id="dmLembrar" ${localStorage.getItem('dpi_demo_tok')?'checked':''}> lembrar neste navegador</label>
       <button class="pri" onclick="dmConectar()">🔌 CONECTAR</button><button onclick="dmDesconectar()">desconectar</button><button class="dan" onclick="dmEsquecer()">apagar token</button>
     </div>
-    <div class="ctl"><button class="pri" onclick="dmOAuth()">🔐 ENTRAR COM A DERIV (sem token)</button><label>App ID ${inp('dm_appId',90,'placeholder="ex.: 12345"')}</label></div>
+    <div class="ctl"><button class="pri" onclick="dmOAuth()">🔐 ENTRAR COM A DERIV (sem token)</button><label>App ID ${inp('dm_appId',190,'placeholder="cole o App ID"')}</label>${dmOa2()?`<button onclick="dmConectar()">🔌 reconectar pelo login</button>`:''}</div>
     <details class="nota"><summary><b>Como liberar o "Entrar com a Deriv"</b> (uma vez só)</summary>
-      1) Entre em <b>developers.deriv.com</b> (ou api.deriv.com) com sua conta e crie um aplicativo (Register application / Create app).<br>
-      2) Em <b>Redirect URL</b> coloque o endereço do site: <b>${location.origin.startsWith('http')?location.origin+'/':'https://dolar-par-impar-julio.netlify.app/'}</b> · permissões <b>Read</b> e <b>Trade</b>.<br>
-      3) Copie o número do <b>App ID</b> e cole no campo acima.<br>
-      4) Clique em 🔐 ENTRAR COM A DERIV, faça o login e autorize. A Deriv devolve para o site com as contas; o HTML pega <b>só a conta DEMO (VRTC…)</b>, descarta a real e conecta sozinho.
+      1) Entre em <b>developers.deriv.com</b> com sua conta e crie um aplicativo (Create app) com <b>OAuth</b> e escopo <b>trade</b>.<br>
+      2) Em <b>Redirect URL / Redirect URI</b> coloque exatamente: <b>https://dolar-par-impar-julio.netlify.app/</b> (com a barra no final). Se não bater letra por letra, a Deriv fica parada na tela dela e não volta.<br>
+      3) Copie o <b>App ID</b> (pode ter letras, ex.: 34xVURg…) e cole no campo acima.<br>
+      4) Clique em 🔐 ENTRAR COM A DERIV, faça o login e autorize. A Deriv volta para o site, o servidor da Netlify troca o login pelo acesso e o HTML conecta <b>só na conta DEMO</b> (a real é ignorada).
     </details>
     <div id="dmMsg" class="nota">${DM.msg}</div>
     <div class="nota">Como pegar o token: entre na Deriv, <b>troque para a conta Demo</b> (login VRTC…), vá em Configurações da conta → Segurança → <b>Token da API</b>, marque <b>Ler</b> e <b>Negociar</b> e crie. O token fica só neste navegador. <b>Trava:</b> se o token for de conta real, o HTML não compra nada.</div>
