@@ -234,6 +234,12 @@ tr.cfa-best td{background:rgba(34,197,94,.12)}
 .fzt{font-size:13px;margin-bottom:5px}.fzbar{position:relative;height:14px;border-radius:7px;background:linear-gradient(90deg,rgba(239,68,68,.25),rgba(245,158,11,.25) 35%,rgba(163,163,163,.2) 50%,rgba(132,204,22,.25) 66%,rgba(34,197,94,.3));overflow:hidden}
 .fzbar i{position:absolute;left:0;top:0;bottom:0;border-radius:7px;opacity:.9;transition:width .4s}.fzm{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.35)}
 .fzleg{display:flex;justify-content:space-between;font-size:10px;color:var(--mu);margin:2px 0}.fzchip{display:inline-block;margin:2px 3px;padding:1px 6px;border:1px solid var(--bd);border-radius:8px;font-size:11px}.fzchip i{color:var(--mu);font-style:normal}
+#atuBox{align-items:center;gap:6px;font-size:12px;padding:3px 10px;border-radius:8px;border:1px solid rgba(59,130,246,.5);background:rgba(59,130,246,.1);cursor:pointer;max-width:520px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.atudot{width:7px;height:7px;border-radius:50%;background:#3b82f6;flex:none;animation:atupisca 2s infinite}@keyframes atupisca{50%{opacity:.3}}
+#pgBox{align-items:center;gap:5px;font-size:12px;padding:3px 10px;border-radius:8px;border:1px solid}
+.pgwarn{margin:6px 0;padding:6px 10px;border:1px solid;border-radius:8px;font-weight:700;font-size:13px;background:rgba(239,68,68,.08)}
+.pgpanel{margin:6px 0;padding:8px 10px;border:1px solid;border-radius:10px;background:rgba(255,255,255,.02)}.pgrow{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.pgc{width:18px;height:18px;border-radius:5px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:800}.pgc.ok{background:rgba(34,197,94,.25);color:#86efac}.pgc.no{background:rgba(239,68,68,.3);color:#fca5a5}
 .bvbox{border:1px solid rgba(245,197,24,.35);background:rgba(245,197,24,.05);border-radius:10px;padding:10px;margin:10px 0}
 .bvhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}.bvst{margin-left:auto;font-weight:700}
 .bvpop{margin-top:8px;padding:6px 9px;border-radius:8px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.35);font-size:13px}
@@ -334,6 +340,8 @@ tr.scativo td{background:rgba(245,197,24,.07)}
   <span id="status">pronto</span>
   <span id="repairBox" style="display:none"></span>
   <span id="demoBox" style="display:none"></span>
+  <span id="atuBox" style="display:none" onclick="atuAbrir()" title="clique para ver todas as atualizações"></span>
+  <span id="pgBox" style="display:none"></span>
   <button id="nuvemBtn" style="display:none" onclick="nvAbrir()" title="nuvem">☁ nuvem</button>
   <div id="clockBox" title="Relógio local sincronizado com o intervalo selecionado">
     <span id="clockDot"></span>
@@ -395,7 +403,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.17 · 30/09/2026 · força do sinal + robôs automáticos 20s/5s';
+const VERSAO='v3.18 · 30/09/2026 · aviso de atualizações + medidor de pegadinha';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -411,7 +419,7 @@ const DEF = {
   limit: 5000, pages: 20, pip: 0, proxy: '', auto: 10, janela: 'n:2000', bank: 'Dólar', lastId: 0,
   padL: 3, padG: 1, padMin: 10, padAss: 80, padAlert: 1,
   bt_tipo: 'seq', bt_n: 4, bt_dir: 'contra', bt_pad: 'VVG', bt_cor: 'G', bt_dig: 0,
-  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
+  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
   sc_min: 20, sc_skip: 12, sc_top: 40, sc_digit: 5, sc_digit_skip: 3,
   sc_sum_min: 2, sc_sum_max: 5, sc_sum_skip: 8, autoOn: 1, derivFallback: 1,
   rb_popup: 1, rb_auto_min: 20, rb_auto_top: 100, rb_auto_only100: 1, rb_auto_family: 'ambos', rb_auto_pulo: 500, rb_manual_create: 1, rb_auto_nivel: 2, histShow: 1000, histFixed: 0, histCols: 20, hpMinSeq: 2, hpMinOc: 5, hpOrd: 'g2',
@@ -3722,7 +3730,7 @@ function cfLista(W){
   let L=[];
   if(f!=='somas') L=L.concat(scScanDigits(W).slice(0,top).map(o=>({...o,fonte:'Scanner'})));
   if(f!=='scanner') L=L.concat(scScanSums(W).slice(0,top).map(o=>({...o,fonte:'Somas'})));
-  CF.lista=L; CF.listaKey=key; CF.listaT=Date.now(); return L;
+  CF.lista=L; CF.listaKey=key; CF.listaT=Date.now(); try{ atuLista(`Scanner/Somas ${gameIntervalSec()}s`,L); }catch(e){} return L;
 }
 function cfNomeRow(o){ return o.kind==='Número'?`Nº ${o.d} pula ${o.skip}`:`${o.gat} pula ${o.skip}`; }
 // quem aponta para o PRÓXIMO jogo (armado entrando agora ou em jogo), separado por cor
@@ -3827,7 +3835,8 @@ function cfDec(T,ap,motivo){ CF.dec=(CF.dec||[]); if(CF.dec.length&&CF.dec.at(-1
 function cfFecha(A,res,obs=''){
   A.fim=true; A.res=res; A.obs=obs;
   CF.log.push({forca:A.forca,n100:A.n100??cfTop(A.sinais),T0:A.T0,step:A.step,alvo:A.alvo,res,nivel:res==='green'?A.g:-1,tent:A.tent,sinais:A.sinais,apoios:A.apoios,obs,bank:A.bank,extras:A.extras||[]});
-  cfSave(); try{ if(!bvC2()) bvProcessa(CF.log.at(-1)); cfaAuto(); }catch(e){ console.warn('banca virtual',e); } if(CF.pop===A.id) cfPopup();
+  cfSave(); try{ ATU.ult={T:Date.now(),txt:`💪 Força aprendeu com a entrada ${hmsOf(A.T0/1000)} (${res==='green'?'✅ '+NIVEL[A.g]:res}) · ${fzModelo().n} entradas`}; atuRender(); pgChip(); }catch(e){}
+  try{ if(!bvC2()) bvProcessa(CF.log.at(-1)); cfaAuto(); }catch(e){ console.warn('banca virtual',e); } if(CF.pop===A.id) cfPopup();
   if(['scan','soma'].includes(S.tab)){ cfLive(); cf2Live(); }
 }
 
@@ -3937,6 +3946,7 @@ function cfPopup(){
     <div class="rbpt">🎯 CONFLUÊNCIA · ${(A.sinaisCur||A.sinais).length} sinais apontam ${tagc(A.alvoCur)}${cfTop(A.sinaisCur||A.sinais)?` <span style="color:#facc15;font-size:15px">⭐${cfTop(A.sinaisCur||A.sinais)} de ${cfP100()}%</span>`:''}</div>
     <div class="nota">${A.bank} · entrada até G2 · se perder, o gale espera a próxima confluência${cfg.cf_galeCor==='mesma'?' da mesma cor':''} (até ${cfEsperaMax()<1e9?cfEsperaMax()+' jogos':'sem limite'})</div>
     <div id="cfForca">${A.fim?'':fzBarraHtml(fzDoAtivo(A))}</div>
+    ${A.fim?'':pgHtml(true)}
     ${cab}
     <div id="cfFase" class="big"></div>
     ${tl?`<div class="rbsched">${tl}</div>`:''}
@@ -4171,7 +4181,7 @@ function cf2PopRender(){
   else if(A.estado==='aguardando') cab=`<div class="cf2big" style="color:var(--am)">⏳ ${A.g===3||A.red2?'<span class="ruim">RED até G2</span> — seguindo · ':''}aguardando sinal para o <b>${nvG(A.g)}</b><div id="cf2Fase" style="font-size:12px"></div></div>`;
   else cab=`<div class="cf2big">ENTRAR ${tagc(A.alvoCur)} ${A.g?`<b>${nvG(A.g)}</b>`:''} às <b>${hmsOf(A.Tcur/1000)}</b>${A.g?`<div style="font-size:12px" class="mu">sinal ${A.origemCur==='robô'?'🤖 de robô':'da confluência (popup 1)'}${A.alvoCur!==A.alvo?' · <b style="color:var(--am)">trocou de cor</b>':''}</div>`:''}<div id="cf2Fase" style="font-size:13px"></div></div>`;
   p.innerHTML=`<div class="cf2h">🟣 CONFLUÊNCIA 2 <span class="mu">· gale até ${cf2Max()<1e9?nvG(cf2Max()-1)+' (passou é RED)':'dar green'}</span><button onclick="CF2.oculto=CF2.pop;$('#cf2Pop').style.display='none'">✕</button></div>
-    ${A.fim?'':fzBarraHtml(fzDoAtivo(A),true)}${cab}${bvC2()?bvPopupTxt(A):''}${tl?`<div class="cf2tl">${tl}</div>`:''}
+    ${A.fim?'':fzBarraHtml(fzDoAtivo(A),true)+pgHtml(true)}${cab}${bvC2()?bvPopupTxt(A):''}${tl?`<div class="cf2tl">${tl}</div>`:''}
     ${(()=>{ if(A.fim||A.estado!=='jogo'||!(cfg.p5_cruz??1)) return ''; let E=[]; try{ E=p5Aponta(A.Tcur); }catch(_){} if(!E.length) return ''; const a=E.filter(x=>x.alvo===A.alvoCur).length, c=E.length-a; return `<div class="cfx cfx-p5" style="margin-top:6px;font-size:12px">⏱ 5s neste segundo: <b>${a}</b> apontam ${tagc(A.alvoCur)}${c?` · <span class="ruim">${c} a outra cor</span>`:''}</div>`; })()}
     <div class="mu" style="font-size:11px;margin-top:4px">gale segue o próximo sinal do popup 1 em qualquer cor${(cfg.cf2_rob??1)?' (ou de robô)':''} · apoio da entrada: ${A.apoios[0]?.n||0} sinais${A.n100?` · <b style="color:#facc15">⭐${A.n100} de ${cfP100()}%</b>`:''}${A.contra?` · ${A.contra} contra`:''}</div>`;
   p.style.display='block';
@@ -4368,7 +4378,7 @@ function p5Lista(W){
   const top=Math.max(5,Math.min(150,+cfg.sc_top||40)), f=cfg.cf_fontes||'ambos'; let L=[];
   if(f!=='somas') L=L.concat(scScanDigits(W).slice(0,top).map(o=>({...o,fonte:'Scanner'})));
   if(f!=='scanner') L=L.concat(scScanSums(W).slice(0,top).map(o=>({...o,fonte:'Somas'})));
-  P5.lista=L; P5.listaKey=key; P5.listaT=Date.now(); return L;
+  P5.lista=L; P5.listaKey=key; P5.listaT=Date.now(); try{ atuLista('⏱ Scanner/Somas 5s',L); }catch(e){} return L;
 }
 // horas pagantes do banco de 5s (refeito a cada 10 min)
 function p5Hp(){
@@ -4648,6 +4658,7 @@ async function raRodar(manual){
       }
       reg.ms=Math.round(performance.now()-t0);
       RA.log.push(reg);
+      try{ if(reg.novos||reg.removidos) atuAviso(`♻ Robôs ${step}s: ${reg.novos} criado(s) · ${reg.removidos} removido(s) · ${reg.mantidos} mantido(s)`,'ra'); else ATU.ult={T:Date.now(),txt:`♻ Varredura ${step}s: ${reg.obs||'nada mudou'}`}; atuRender(); }catch(e){}
     }
     rbSave(); raSave();
     if(['robos','p5'].includes(S.tab)) renderTab();
@@ -4681,6 +4692,99 @@ function raPanelHtml(){
 raLoad();
 setTimeout(()=>{ if((cfg.ra_on??1) && Date.now()-RA.ultimo>=raMin()*60000) raRodar(false); },25000);
 
+// =================== 📣 AVISO NO TOPO: o que o sistema atualizou sozinho ===================
+let ATU={log:[],ult:null,prev:{}};
+function atuLoad(){ try{ ATU.log=JSON.parse(localStorage.getItem('dpi_atu_v1')||'[]')||[]; }catch(e){} }
+function atuSave(){ try{ localStorage.setItem('dpi_atu_v1',JSON.stringify(ATU.log.slice(-80))); }catch(e){} }
+function atuAviso(txt,tipo='info'){
+  const x={T:Date.now(),txt,tipo}; ATU.log.push(x); ATU.ult=x; atuSave(); atuRender();
+}
+// compara a lista nova com a anterior (quantos padrões entraram e saíram)
+function atuLista(nome,L){
+  const ids=new Set(L.map(o=>`${o.kind}|${o.gat||o.d}|${o.skip}|${o.alvo}`)), ant=ATU.prev[nome];
+  ATU.prev[nome]=ids;
+  if(!ant) return;
+  let novos=0,sairam=0; for(const i of ids) if(!ant.has(i)) novos++; for(const i of ant) if(!ids.has(i)) sairam++;
+  if(novos||sairam) atuAviso(`🔬 ${nome}: ${novos} padrão(ões) novo(s) na lista · ${sairam} saíram`,'sc');
+}
+function atuRender(){
+  const e=$('#atuBox'); if(!e) return;
+  const x=ATU.ult||ATU.log.at(-1);
+  if(!x){ e.style.display='none'; return; }
+  const min=Math.round((Date.now()-x.T)/60000);
+  e.style.display='inline-flex';
+  e.innerHTML=`<span class="atudot"></span>${x.txt} <span class="mu">· ${min<1?'agora':min+' min'}</span>`;
+}
+function atuAbrir(){
+  const p=$('#nuvemPop'); if(!p) return;
+  const L=ATU.log.slice(-40).reverse();
+  p.innerHTML=`<div class="rbpc" style="width:min(640px,94vw)"><div class="rbpt">📣 Atualizações automáticas</div>
+    <div class="nota">O que o sistema fez sozinho: robôs criados/removidos, padrões do Scanner/Somas que entraram e saíram, horas pagantes refeitas, força do sinal aprendendo e alertas de pegadinha.</div>
+    <div class="tw" style="max-height:60vh"><table><tr><th>Quando</th><th style="text-align:left">O quê</th></tr>
+    ${L.map(x=>`<tr><td>${rbFmtDateClock(x.T)}</td><td style="text-align:left">${x.txt}</td></tr>`).join('')||'<tr><td colspan=2>nada ainda</td></tr>'}</table></div>
+    <div class="rbactions"><button onclick="$('#nuvemPop').style.display='none'">Fechar</button><button onclick="ATU.log=[];ATU.ult=null;atuSave();atuRender();$('#nuvemPop').style.display='none'">Limpar</button></div></div>`;
+  p.style.display='flex';
+}
+setInterval(atuRender,30000);
+
+// =================== 🪤 PEGADINHA: sinais fortes pagando o contrário ===================
+// Para cada jogo o sistema guarda quantos sinais (Scanner+Somas) apontavam PAR e ÍMPAR.
+// "Sinal forte" = tinha o mínimo de sinais E a cor tinha pelo menos o dobro da outra.
+// Mede, nos últimos sinais fortes, quantas vezes o jogo saiu da cor CONTRÁRIA (no tiro seco)
+// e compara com o normal dos últimos 2 dias. Muito acima do normal ou vários seguidos = possível pegadinha.
+let PG={key:'',r:null,nivelAnt:''};
+function pgCalc(){
+  const W=S.all; if(!W||W.length<50) return null;
+  if(!CF.hist) cfHistLoad();
+  const step=gameIntervalSec()*1000, key=W.at(-1).t+'|'+Object.keys(CF.hist||{}).length+'|'+cfg.pg_n;
+  if(PG.key===key && PG.r) return PG.r;
+  const M=new Map(W.slice(-20000).map(x=>[x.t,x])), m=cfMin(), rows=[];
+  for(const k of Object.keys(CF.hist||{})){
+    const T=+k; if(T%step) continue;
+    const r=M.get(T); if(!r||r.p==null) continue;
+    const [n0,n1]=CF.hist[k], a=n1>n0?1:0, forte=Math.max(n0,n1), fraco=Math.min(n0,n1);
+    if(forte<m || forte<2*fraco) continue;
+    rows.push({T,alvo:a,n:forte,c:fraco,ok:r.p===a});
+  }
+  rows.sort((x,y)=>x.T-y.T);
+  const N=Math.max(6,+cfg.pg_n||15), rec=rows.slice(-N), base=rows.length?rows.filter(x=>!x.ok).length/rows.length:0.5;
+  const contra=rec.filter(x=>!x.ok).length, r=rec.length?contra/rec.length:0;
+  let seq=0; for(let i=rec.length-1;i>=0&&!rec[i].ok;i--) seq++;
+  // entradas de verdade dos popups (Confluência 1 e 2): quantas perderam o TS nas últimas 10
+  const E=CF.log.concat(typeof CF2!=='undefined'?CF2.log:[]).filter(x=>x.tent&&x.tent[0]&&x.tent[0].d!=null).sort((a,b)=>a.T0-b.T0).slice(-10);
+  const eTs=E.filter(x=>x.tent[0].p!==x.tent[0].alvo).length;
+  let nivel='aprendendo', cor='#64748b';
+  if(rec.length>=6){
+    const dif=r-base;
+    if(dif>=0.20||seq>=4){ nivel='ALTA'; cor='#ef4444'; }
+    else if(dif>=0.10||seq>=3){ nivel='MÉDIA'; cor='#f59e0b'; }
+    else if(dif<=-0.10){ nivel='mercado a favor'; cor='#22c55e'; }
+    else { nivel='normal'; cor='#a3a3a3'; }
+  }
+  PG.key=key; PG.r={nivel,cor,rec,contra,r,base,seq,total:rows.length,eTs,eN:E.length};
+  if(PG.nivelAnt && PG.nivelAnt!==nivel && ['ALTA','MÉDIA'].includes(nivel)) atuAviso(`🪤 Pegadinha ${nivel}: ${contra} de ${rec.length} sinais fortes pagaram o contrário (normal ${(base*100).toFixed(0)}%)`,'pg');
+  else if(PG.nivelAnt && ['ALTA','MÉDIA'].includes(PG.nivelAnt) && !['ALTA','MÉDIA'].includes(nivel)) atuAviso(`🪤 Pegadinha voltou ao ${nivel}`,'pg');
+  PG.nivelAnt=nivel;
+  return PG.r;
+}
+function pgChip(){
+  const e=$('#pgBox'); if(!e) return;
+  const R=pgCalc(); if(!R){ e.style.display='none'; return; }
+  e.style.display='inline-flex'; e.style.borderColor=R.cor; e.style.color=R.cor;
+  e.innerHTML=`🪤 Pegadinha: <b>${R.nivel}</b>${R.rec.length?` · ${R.contra}/${R.rec.length} contrário`:''}`;
+  e.title=`Últimos ${R.rec.length} sinais fortes: ${R.contra} pagaram a cor contrária no tiro seco (${(R.r*100).toFixed(0)}%). Normal dos últimos 2 dias: ${(R.base*100).toFixed(0)}% em ${R.total}. ${R.seq?R.seq+' seguidos agora.':''}`;
+}
+function pgHtml(compacto){
+  const R=pgCalc(); if(!R||R.nivel==='aprendendo') return '';
+  if(compacto) return ['ALTA','MÉDIA'].includes(R.nivel)?`<div class="pgwarn" style="border-color:${R.cor};color:${R.cor}">🪤 Possível pegadinha ${R.nivel}: ${R.contra} de ${R.rec.length} sinais fortes pagaram o contrário${R.seq>=2?` · ${R.seq} seguidos`:''} (normal ${(R.base*100).toFixed(0)}%)</div>`:'';
+  return `<div class="pgpanel" style="border-color:${R.cor}"><b style="color:${R.cor}">🪤 Pegadinha: ${R.nivel}</b>
+    <span class="mu"> · últimos ${R.rec.length} sinais fortes: <b>${R.contra}</b> pagaram o contrário no TS (${(R.r*100).toFixed(0)}%) · normal ${(R.base*100).toFixed(0)}% em ${R.total} · ${R.seq?`<b>${R.seq} seguidos agora</b>`:'nenhum contrário agora'}${R.eN?` · popups: ${R.eTs} de ${R.eN} perderam o TS`:''}</span>
+    <div class="pgrow">${R.rec.map(x=>`<span class="pgc ${x.ok?'ok':'no'}" title="${rbFmtClock(x.T)} · ${x.n} x ${x.c} → ${x.alvo?'ÍMPAR':'PAR'}">${x.ok?'✓':'✗'}</span>`).join('')}</div>
+    <div class="nota" style="margin:2px 0 0">Sinal forte = mínimo de ${cfMin()} sinais e a cor com pelo menos o dobro da outra. ✗ = saiu a cor contrária. Olhar dos últimos ${sel('pg_n',[[10,'10'],[15,'15'],[20,'20'],[30,'30']])} sinais.</div></div>`;
+}
+atuLoad();
+setInterval(()=>{ try{ pgChip(); }catch(e){} },4000);
+
 function cfPanelHtml(){
   const W=S.win, A=CF.ativo;
   let agora='';
@@ -4708,6 +4812,7 @@ function cfPanelHtml(){
       <label><input type="checkbox" ${(cfg.cf_exCol??1)?'checked':''} onchange="cfg.cf_exCol=this.checked?1:0;saveCfg()"> 🧱 colunas 10 min ≥ ${sel('cf_colMin',[[3,'3×'],[4,'4×'],[5,'5×'],[6,'6×']])}</label>
       <button onclick="if(confirm('Limpar o relatório de confluência?')){CF.log=[];cfSave();cfLive()}">🧹 limpar relatório</button>
     </div>
+    ${pgHtml()}
     <div id="cfAgora">${agora}${at}</div>
     ${dec.length?`<div class="cfdec">${dec.map(d=>`<span><b>${hmsOf(d.T/1000)}</b> PAR ${d.p} · ÍMP ${d.i} → ${d.motivo}</span>`).join('')}</div>`:''}
     <div class="nota">Conta os sinais das listas 🔬 Scanner e ➕ Somas (top ${cfg.sc_top||40} de cada, entrada ${NIVEL[scNivel()]==='TS'?'tiro seco':'até '+NIVEL[scNivel()]}) que estão <b>em jogo</b> ou <b>armados para entrar no próximo jogo</b> — não importa se cada um está no TS, G1 ou G2. Se a entrada perder, o popup mostra "aguardando" e o G1 (depois o G2) entra no <b>próximo jogo que tiver confluência</b>. RED só no G2 ou se passar o limite de espera. Funciona com a aba fechada também (banco aberto).</div>
