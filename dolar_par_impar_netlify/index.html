@@ -240,6 +240,7 @@ tr.cfa-best td{background:rgba(34,197,94,.12)}
 .pgwarn{margin:6px 0;padding:6px 10px;border:1px solid;border-radius:8px;font-weight:700;font-size:13px;background:rgba(239,68,68,.08)}
 .pgpanel{margin:6px 0;padding:8px 10px;border:1px solid;border-radius:10px;background:rgba(255,255,255,.02)}.pgrow{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
 .pgc{width:18px;height:18px;border-radius:5px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:800}.pgc.ok{background:rgba(34,197,94,.25);color:#86efac}.pgc.no{background:rgba(239,68,68,.3);color:#fca5a5}
+.srdpanel{border-color:rgba(34,211,238,.45)!important}
 .bvbox{border:1px solid rgba(245,197,24,.35);background:rgba(245,197,24,.05);border-radius:10px;padding:10px;margin:10px 0}
 .bvhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}.bvst{margin-left:auto;font-weight:700}
 .bvpop{margin-top:8px;padding:6px 9px;border-radius:8px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.35);font-size:13px}
@@ -403,7 +404,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.18 · 30/09/2026 · aviso de atualizações + medidor de pegadinha';
+const VERSAO='v3.19 · 30/09/2026 · simulador esperar reds → entrar até red';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -419,7 +420,7 @@ const DEF = {
   limit: 5000, pages: 20, pip: 0, proxy: '', auto: 10, janela: 'n:2000', bank: 'Dólar', lastId: 0,
   padL: 3, padG: 1, padMin: 10, padAss: 80, padAlert: 1,
   bt_tipo: 'seq', bt_n: 4, bt_dir: 'contra', bt_pad: 'VVG', bt_cor: 'G', bt_dig: 0,
-  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
+  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, srd_fonte: 'c1', srd_esp: 2, srd_para: 1, srd_pay: 85, srd_base: 1, srd_ini: 100, srd_gale: 2, srd_rec: 1, srd_conta: 0, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
   sc_min: 20, sc_skip: 12, sc_top: 40, sc_digit: 5, sc_digit_skip: 3,
   sc_sum_min: 2, sc_sum_max: 5, sc_sum_skip: 8, autoOn: 1, derivFallback: 1,
   rb_popup: 1, rb_auto_min: 20, rb_auto_top: 100, rb_auto_only100: 1, rb_auto_family: 'ambos', rb_auto_pulo: 500, rb_manual_create: 1, rb_auto_nivel: 2, histShow: 1000, histFixed: 0, histCols: 20, hpMinSeq: 2, hpMinOc: 5, hpOrd: 'g2',
@@ -4785,6 +4786,88 @@ function pgHtml(compacto){
 atuLoad();
 setInterval(()=>{ try{ pgChip(); }catch(e){} },4000);
 
+// =================== 🧪 SIMULADOR: esperar X reds seguidos → entrar até tomar Y red(s) → recuperar ===================
+// Roda em cima das entradas reais dos popups (Confluência 1 ou 2).
+// Esperando: só observa (não aposta) até sair X reds seguidos.
+// Apostando: entra em todas as entradas; o gale recupera o que perdeu na entrada; se "recuperar red" estiver ligado,
+// a próxima aposta também embute o red que ficou para trás. Ao tomar Y red(s) volta a esperar.
+function srdSeq(){
+  const fonte=cfg.srd_fonte||'c1', G=Math.max(0,+(cfg.srd_gale??2));
+  if(fonte==='c2') return (typeof CF2!=='undefined'?CF2.log:[]).filter(x=>x.res!=='sem dado').map(x=>({T:x.T0,alvo:x.alvo,nv:x.res==='green'?x.nivel:99}))
+    .sort((a,b)=>a.T-b.T).map(x=>({...x,red:x.nv>G}));
+  return CF.log.filter(x=>x.res==='green'||x.res==='red').map(x=>({T:x.T0,alvo:x.alvo,nv:x.res==='green'?x.nivel:99}))
+    .sort((a,b)=>a.T-b.T).map(x=>({...x,red:x.nv>Math.min(G,2)}));
+}
+function srdRodar(L,opt){
+  const {esp,para,pay,base,G,rec,conta,ini}=opt;
+  let st='esperando', seq=0, reds=0, pend=0, saldo=ini, minS=ini, pico=ini, maxDD=0, maxAp=0, maxRisco=0;
+  const R=[]; let ap=0, gr=0, rd=0;
+  for(const x of L){
+    if(st==='esperando'){
+      if(x.red) seq++; else seq=0;
+      R.push({x,st:'👀 esperando',obs:`${seq} red(s) seguidos`,saldo});
+      if(seq>=esp){ st='apostando'; seq=0; reds=0; }
+      continue;
+    }
+    // apostando: monta as apostas da escada TS..G
+    const st0=[]; let perdido=pend;
+    for(let g=0;g<=G;g++){ const s=Math.max(0.01,Math.round(((perdido+base*pay)/pay)*100)/100); st0.push(s); perdido+=s; }
+    const risco=st0.reduce((a,b)=>a+b,0); maxRisco=Math.max(maxRisco,risco);
+    ap++;
+    let gasto=0, lucro=0, nivel=-1;
+    for(let g=0;g<=G;g++){
+      gasto+=st0[g]; maxAp=Math.max(maxAp,st0[g]);
+      if(!x.red && x.nv===g){ lucro=st0[g]*pay-(gasto-st0[g]); nivel=g; break; }
+    }
+    if(nivel<0) lucro=-gasto;
+    saldo=Math.round((saldo+lucro)*100)/100;
+    if(nivel>=0){ gr++; pend=0; }
+    else { rd++; reds++; pend=rec?Math.round((pend+gasto)*100)/100:0; }
+    pico=Math.max(pico,saldo); minS=Math.min(minS,saldo); maxDD=Math.max(maxDD,pico-saldo);
+    R.push({x,st:'💰 apostando',stakes:st0,nivel,gasto,lucro,saldo,pend});
+    if(nivel<0 && reds>=para){ st='esperando'; seq=conta?1:0; reds=0; }
+  }
+  return {R,ap,gr,rd,saldo,lucro:saldo-ini,minS,maxDD,maxAp,maxRisco,pend,st};
+}
+function srdOpt(){ return {esp:Math.max(0,+(cfg.srd_esp??2)),para:Math.max(1,+(cfg.srd_para??1)),pay:Math.max(0.05,(+(cfg.srd_pay??85))/100),base:Math.max(0.01,+(cfg.srd_base??1)),
+  G:Math.max(0,Math.min((cfg.srd_fonte||'c1')==='c2'?9:2,+(cfg.srd_gale??2))),rec:(cfg.srd_rec??1)?1:0,conta:cfg.srd_conta?1:0,ini:+(cfg.srd_ini??100)||100}; }
+function srdPanelHtml(){
+  const L=srdSeq(), o=srdOpt();
+  const S1=srdRodar(L,o), S0=srdRodar(L,{...o,esp:0,para:1e9});   // comparação: apostando em tudo, mesma regra de aposta
+  const $$=v=>(v<0?'-':'')+'$ '+Math.abs(v).toFixed(2);
+  // escada de exemplo (sem red pendente e com 1 red pendente)
+  const escada=pend=>{ const a=[]; let p=pend; for(let g=0;g<=o.G;g++){ const s=Math.round(((p+o.base*o.pay)/o.pay)*100)/100; a.push(s); p+=s; } return a; };
+  const e0=escada(0), e1=escada(e0.reduce((a,b)=>a+b,0));
+  const ult=S1.R.slice(-60).reverse();
+  return `<div class="panel srdpanel"><h3>🧪 Simulador: esperar ${o.esp} red(s) seguidos → entrar até tomar ${o.para} red <small>nas entradas reais dos popups</small></h3>
+    <div class="ctl">
+      <label>Entradas ${sel('srd_fonte',[['c1','🎯 Confluência 1'],['c2','🟣 Confluência 2']])}</label>
+      <label>Esperar ${sel('srd_esp',[[0,'0 (sempre)'],[1,'1 red'],[2,'2 reds'],[3,'3 reds'],[4,'4 reds']])} seguidos</label>
+      <label>Parar após ${sel('srd_para',[[1,'1 red'],[2,'2 reds'],[3,'3 reds']])}</label>
+      <label>Gale até ${sel('srd_gale',[[0,'TS'],[1,'G1'],[2,'G2']].concat((cfg.srd_fonte||'c1')==='c2'?[[3,'G3'],[4,'G4'],[5,'G5'],[6,'G6']]:[]))}</label>
+      <label>Payout % ${inp('srd_pay',45)}</label>
+      <label>Entrada base ${inp('srd_base',55)}</label>
+      <label>Banca ${inp('srd_ini',60)}</label>
+      <label><input type="checkbox" ${(cfg.srd_rec??1)?'checked':''} onchange="cfg.srd_rec=this.checked?1:0;saveCfg();fillRes()"> próxima entrada recupera o red</label>
+      <label title="o red que fez parar já conta como o 1º dos reds da espera"><input type="checkbox" ${cfg.srd_conta?'checked':''} onchange="cfg.srd_conta=this.checked?1:0;saveCfg();fillRes()"> red que parou conta na espera</label>
+    </div>
+    <div class="nota">Escada de apostas (payout ${(o.pay*100).toFixed(0)}%, entrada ${$$(o.base)}): ${e0.map((v,g)=>`${nvG(g)} <b>${$$(v)}</b>`).join(' · ')} → red custa <b class="ruim">${$$(e0.reduce((a,b)=>a+b,0))}</b>.
+      ${o.rec?`Depois de 1 red a próxima entrada fica: ${e1.map((v,g)=>`${nvG(g)} <b>${$$(v)}</b>`).join(' · ')} → se der red de novo custa <b class="ruim">${$$(e1.reduce((a,b)=>a+b,0))}</b>.`:''}
+      Todo green devolve a perda pendente + ${$$(o.base*o.pay)}.</div>
+    ${L.length<5?`<div class="nota">Ainda poucas entradas fechadas (${L.length}) para simular.</div>`:`
+    <div class="cards">${card('Resultado da estratégia',`<span class="${S1.lucro>=0?'ok':'ruim'}">${S1.lucro>=0?'+':''}${$$(S1.lucro)}</span>`,`${S1.ap} entradas apostadas de ${L.length} · ${S1.gr} green · ${S1.rd} red`)}
+      ${card('Pior momento',`<span class="ruim">${$$(S1.maxDD)}</span>`,`queda máxima · banca mínima ${$$(S1.minS)}`)}
+      ${card('Maior aposta',$$(S1.maxAp),`risco máx. numa entrada ${$$(S1.maxRisco)}${S1.pend?` · pendente agora ${$$(S1.pend)}`:''}`)}
+      ${card('Apostando em tudo',`<span class="${S0.lucro>=0?'ok':'ruim'}">${S0.lucro>=0?'+':''}${$$(S0.lucro)}</span>`,`mesma aposta sem esperar · ${S0.gr} green · ${S0.rd} red · pior ${$$(S0.maxDD)}`)}</div>
+    <div class="nota">Agora: <b>${S1.st==='esperando'?'👀 esperando '+o.esp+' reds seguidos':'💰 apostando'}</b>. Nas entradas reais, depois de ${o.esp} reds seguidos a próxima deu red em
+      ${(()=>{ let n=0,r=0,s=0; for(const x of L){ if(s>=o.esp && o.esp>0){ n++; if(x.red) r++; } s=x.red?s+1:0; } return n?`<b>${r} de ${n}</b> (${(100*r/n).toFixed(0)}%) — em todas as entradas o red foi ${(100*L.filter(x=>x.red).length/L.length).toFixed(0)}%`:'nenhum caso ainda'; })()}.</div>
+    <div class="tw" style="max-height:340px"><table><tr><th>Entrada</th><th>Estado</th><th>Resultado</th><th style="text-align:left">Apostas (TS→G)</th><th>Lucro</th><th>Saldo</th><th>Pendente</th></tr>
+      ${ult.map(r=>`<tr class="${r.stakes?'scativo':''}"><td>${fmtT(r.x.T)}</td><td>${r.st}</td><td class="${r.x.red?'ruim':'ok'}"><b>${r.x.red?'❌ RED':'✅ '+nvG(r.x.nv)}</b></td>
+        <td style="text-align:left;font-size:11px">${r.stakes?r.stakes.map((s,g)=>`<span class="${g===r.nivel?'ok':g<(r.nivel<0?99:r.nivel)?'ruim':'mu'}">${nvG(g)} ${s.toFixed(2)}</span>`).join(' · '):`<span class="mu">${r.obs}</span>`}</td>
+        <td class="${(r.lucro||0)>=0?'ok':'ruim'}">${r.stakes?((r.lucro>=0?'+':'')+r.lucro.toFixed(2)):''}</td><td>${r.saldo.toFixed(2)}</td><td>${r.stakes&&r.pend?r.pend.toFixed(2):''}</td></tr>`).join('')}</table></div>`}
+  </div>`;
+}
+
 function cfPanelHtml(){
   const W=S.win, A=CF.ativo;
   let agora='';
@@ -4839,7 +4922,7 @@ VIEWS.scan={nome:'🔬 Scanner',html(){
     ${card(`Nº ${d} → PAR`,pa.done?`${(pa.rate*100).toFixed(1)}%`:'—',`${pa.done} casos · SG ${pa.sg} · G1 ${pa.g1} · G2 ${pa.g2} · R ${pa.red}`)}
     ${card(`Nº ${d} → ÍMPAR`,im.done?`${(im.rate*100).toFixed(1)}%`:'—',`${im.done} casos · SG ${im.sg} · G1 ${im.g1} · G2 ${im.g2} · R ${im.red}`)}
     ${card('Padrões encontrados',num(list.length),`mínimo ${cfg.sc_min} casos`)}
-  </div>${cfPanelHtml()}${cf2PanelHtml()}${cfaPanelHtml()}${scAgoraPanel(list,top,W)}<div class="panel"><h3>Melhores combinações históricas</h3><div class="tw"><table>
+  </div>${cfPanelHtml()}${cf2PanelHtml()}${cfaPanelHtml()}${srdPanelHtml()}${scAgoraPanel(list,top,W)}<div class="panel"><h3>Melhores combinações históricas</h3><div class="tw"><table>
     ${SC_HEAD}${scRows(list,top,W)}</table></div></div>`;
 }};
 
@@ -4855,7 +4938,7 @@ VIEWS.soma={nome:'➕ Somas',html(){
   const W=S.win;if(!W.length)return vazio();
   const list=scScanSums(W),top=Math.max(5,Math.min(150,+cfg.sc_top||40));
   return `<div class="cards">${card('Padrões de soma',num(list.length),`mínimo ${cfg.sc_min} casos`)}</div>
-  ${cfPanelHtml()}${cf2PanelHtml()}${cfaPanelHtml()}${scAgoraPanel(list,top,W)}
+  ${cfPanelHtml()}${cf2PanelHtml()}${cfaPanelHtml()}${srdPanelHtml()}${scAgoraPanel(list,top,W)}
   <div class="panel"><h3>Melhores somas históricas</h3><div class="tw"><table>
     ${SC_HEAD}${scRows(list,top,W)}</table></div></div>`;
 }};
