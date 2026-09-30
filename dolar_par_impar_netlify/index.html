@@ -230,6 +230,10 @@ tr.cfa-best td{background:rgba(34,197,94,.12)}
 .cf5i{display:flex;align-items:center;gap:6px;font-size:12px;padding:2px 4px;border-radius:6px}.cf5i span:first-child{font-variant-numeric:tabular-nums;width:62px}
 .cf5i.cf5antes{opacity:.45}.cf5div{font-size:10px;color:var(--am);text-align:center;border-top:1px dashed var(--am);margin:3px 0;padding-top:2px}.cf5i.cf5alvo{outline:2px solid #facc15;background:rgba(250,204,21,.1)}
 @media(max-width:700px){.cfwrap{flex-direction:column}.cf5s{width:auto;border-left:0;border-top:1px solid var(--bd);padding:8px 0 0;max-height:220px}}
+.fzbox{margin:8px 0;padding:8px 10px;border:1px solid var(--bd);border-radius:10px;background:rgba(255,255,255,.03)}
+.fzt{font-size:13px;margin-bottom:5px}.fzbar{position:relative;height:14px;border-radius:7px;background:linear-gradient(90deg,rgba(239,68,68,.25),rgba(245,158,11,.25) 35%,rgba(163,163,163,.2) 50%,rgba(132,204,22,.25) 66%,rgba(34,197,94,.3));overflow:hidden}
+.fzbar i{position:absolute;left:0;top:0;bottom:0;border-radius:7px;opacity:.9;transition:width .4s}.fzm{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.35)}
+.fzleg{display:flex;justify-content:space-between;font-size:10px;color:var(--mu);margin:2px 0}.fzchip{display:inline-block;margin:2px 3px;padding:1px 6px;border:1px solid var(--bd);border-radius:8px;font-size:11px}.fzchip i{color:var(--mu);font-style:normal}
 .bvbox{border:1px solid rgba(245,197,24,.35);background:rgba(245,197,24,.05);border-radius:10px;padding:10px;margin:10px 0}
 .bvhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}.bvst{margin-left:auto;font-weight:700}
 .bvpop{margin-top:8px;padding:6px 9px;border-radius:8px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.35);font-size:13px}
@@ -391,7 +395,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.16 · 29/09/2026 · padrões de 5 segundos nos cruzamentos';
+const VERSAO='v3.17 · 30/09/2026 · força do sinal + robôs automáticos 20s/5s';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -407,7 +411,7 @@ const DEF = {
   limit: 5000, pages: 20, pip: 0, proxy: '', auto: 10, janela: 'n:2000', bank: 'Dólar', lastId: 0,
   padL: 3, padG: 1, padMin: 10, padAss: 80, padAlert: 1,
   bt_tipo: 'seq', bt_n: 4, bt_dir: 'contra', bt_pad: 'VVG', bt_cor: 'G', bt_dig: 0,
-  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
+  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
   sc_min: 20, sc_skip: 12, sc_top: 40, sc_digit: 5, sc_digit_skip: 3,
   sc_sum_min: 2, sc_sum_max: 5, sc_sum_skip: 8, autoOn: 1, derivFallback: 1,
   rb_popup: 1, rb_auto_min: 20, rb_auto_top: 100, rb_auto_only100: 1, rb_auto_family: 'ambos', rb_auto_pulo: 500, rb_manual_create: 1, rb_auto_nivel: 2, histShow: 1000, histFixed: 0, histCols: 20, hpMinSeq: 2, hpMinOc: 5, hpOrd: 'g2',
@@ -3798,6 +3802,7 @@ function cfCheck(){
   CF.ativo={id:'CF'+prox,T0:prox,Tcur:prox,step,alvo:dec.alvo,alvoCur:dec.alvo,g:0,estado:'jogo',espera:0,tent:[],fim:false,bank:cfg.bank,
     n100:cfTop(ap[dec.alvo]),sinais:ap[dec.alvo].slice(),sinaisCur:ap[dec.alvo].slice(),nCur:ap[dec.alvo].length,contra:ap[1-dec.alvo].length,apoios:[{g:0,n:ap[dec.alvo].length,c:ap[1-dec.alvo].length,T:prox}],
     extras:(()=>{ try{ return cfExtras(prox).map(x=>({tipo:x.tipo,txt:x.txt,alvo:x.alvo})); }catch(e){ return []; } })()};
+  try{ CF.ativo.forca=fzForca({alvo:dec.alvo,ap:CF.ativo.nCur,c:CF.ativo.contra,s100:cfTop(CF.ativo.sinais),extras:CF.ativo.extras}).forca; }catch(e){}
   if(cfg.cf_pop??1) cfPopup();
   beep();
   if(['scan','soma'].includes(S.tab)) cfLive();
@@ -3821,7 +3826,7 @@ function cfPagouTxt(o){ return o.k==null?(o.ate?`seguindo direto: sem pagar até
 function cfDec(T,ap,motivo){ CF.dec=(CF.dec||[]); if(CF.dec.length&&CF.dec.at(-1).T===T) CF.dec.pop(); CF.dec.push({T,p:ap[0].length,i:ap[1].length,motivo}); if(CF.dec.length>12) CF.dec.shift(); }
 function cfFecha(A,res,obs=''){
   A.fim=true; A.res=res; A.obs=obs;
-  CF.log.push({n100:A.n100??cfTop(A.sinais),T0:A.T0,step:A.step,alvo:A.alvo,res,nivel:res==='green'?A.g:-1,tent:A.tent,sinais:A.sinais,apoios:A.apoios,obs,bank:A.bank,extras:A.extras||[]});
+  CF.log.push({forca:A.forca,n100:A.n100??cfTop(A.sinais),T0:A.T0,step:A.step,alvo:A.alvo,res,nivel:res==='green'?A.g:-1,tent:A.tent,sinais:A.sinais,apoios:A.apoios,obs,bank:A.bank,extras:A.extras||[]});
   cfSave(); try{ if(!bvC2()) bvProcessa(CF.log.at(-1)); cfaAuto(); }catch(e){ console.warn('banca virtual',e); } if(CF.pop===A.id) cfPopup();
   if(['scan','soma'].includes(S.tab)){ cfLive(); cf2Live(); }
 }
@@ -3897,6 +3902,7 @@ function cfExtrasRefresh(){
   const A=CF.ativo, e=document.getElementById('cfxWrap');
   if(A && e && CF.pop===A.id && !A.fim && A.estado==='jogo'){
     e.innerHTML=cfExtrasHtml(A.Tcur,A.alvoCur);
+    const fz=document.getElementById('cfForca'); if(fz) fz.innerHTML=fzBarraHtml(fzDoAtivo(A));
     if(A.g===0) try{ A.extras=cfExtras(A.Tcur).map(x=>({tipo:x.tipo,txt:x.txt,alvo:x.alvo})); }catch(_){}
   }
   if(CF2.ativo && !CF2.ativo.fim && CF2.pop===CF2.ativo.id) cf2PopRender();
@@ -3930,6 +3936,7 @@ function cfPopup(){
   p.innerHTML=`<div class="rbpc cfwide"><div class="cfwrap"><div class="cfmain">
     <div class="rbpt">🎯 CONFLUÊNCIA · ${(A.sinaisCur||A.sinais).length} sinais apontam ${tagc(A.alvoCur)}${cfTop(A.sinaisCur||A.sinais)?` <span style="color:#facc15;font-size:15px">⭐${cfTop(A.sinaisCur||A.sinais)} de ${cfP100()}%</span>`:''}</div>
     <div class="nota">${A.bank} · entrada até G2 · se perder, o gale espera a próxima confluência${cfg.cf_galeCor==='mesma'?' da mesma cor':''} (até ${cfEsperaMax()<1e9?cfEsperaMax()+' jogos':'sem limite'})</div>
+    <div id="cfForca">${A.fim?'':fzBarraHtml(fzDoAtivo(A))}</div>
     ${cab}
     <div id="cfFase" class="big"></div>
     ${tl?`<div class="rbsched">${tl}</div>`:''}
@@ -4134,12 +4141,13 @@ function cf2Check(W,last,step,prox,ap,dec,decG=dec){
   CF2.ativo={id:'CF2'+prox,origemCur:'conf',T0:prox,Tcur:prox,step,alvo:dec.alvo,alvoCur:dec.alvo,g:0,estado:'jogo',espera:0,esperaG:0,esperaTot:0,tent:[],fim:false,red2:false,bank:cfg.bank,
     n100:cfTop(ap[dec.alvo]),sinais:ap[dec.alvo].slice(),nCur:ap[dec.alvo].length,contra:ap[1-dec.alvo].length,apoios:[{g:0,n:ap[dec.alvo].length,c:ap[1-dec.alvo].length,T:prox}],
     extras:(()=>{ try{ return cfExtras(prox).map(x=>({tipo:x.tipo,alvo:x.alvo})); }catch(e){ return []; } })()};
+  try{ CF2.ativo.forca=fzForca({alvo:dec.alvo,ap:CF2.ativo.nCur,c:CF2.ativo.contra,s100:CF2.ativo.n100,extras:CF2.ativo.extras}).forca; }catch(e){}
   cf2PopMostra(CF2.ativo,true);
 }
 function cf2Fecha(A,res,obs=''){
   A.fim=true; A.res=res; A.obs=obs;
   const jog=A.tent.filter(t=>t.d!=null);
-  CF2.log.push({n100:A.n100??cfTop(A.sinais),T0:A.T0,Tfim:A.tent.at(-1)?.T||A.T0,step:A.step,alvo:A.alvo,res,nivel:res==='green'?A.g:-1,gMax:A.g,red2:A.red2||A.g>2,
+  CF2.log.push({forca:A.forca,n100:A.n100??cfTop(A.sinais),T0:A.T0,Tfim:A.tent.at(-1)?.T||A.T0,step:A.step,alvo:A.alvo,res,nivel:res==='green'?A.g:-1,gMax:A.g,red2:A.red2||A.g>2,
     tent:A.tent.map(t=>({g:t.g,T:t.T,d:t.d,p:t.p,alvo:t.alvo,n:t.n,esp:t.esp||0,o:t.o||'conf'})),
     apoio0:A.apoios[0]?.n||0,contra:A.contra||0,fontes:cf2Fontes(A.sinais),extras:A.extras||[],esperaTot:A.esperaTot||0,obs,bank:A.bank,
     seq:jog.slice(1).every(t=>!t.esp)});
@@ -4163,7 +4171,7 @@ function cf2PopRender(){
   else if(A.estado==='aguardando') cab=`<div class="cf2big" style="color:var(--am)">⏳ ${A.g===3||A.red2?'<span class="ruim">RED até G2</span> — seguindo · ':''}aguardando sinal para o <b>${nvG(A.g)}</b><div id="cf2Fase" style="font-size:12px"></div></div>`;
   else cab=`<div class="cf2big">ENTRAR ${tagc(A.alvoCur)} ${A.g?`<b>${nvG(A.g)}</b>`:''} às <b>${hmsOf(A.Tcur/1000)}</b>${A.g?`<div style="font-size:12px" class="mu">sinal ${A.origemCur==='robô'?'🤖 de robô':'da confluência (popup 1)'}${A.alvoCur!==A.alvo?' · <b style="color:var(--am)">trocou de cor</b>':''}</div>`:''}<div id="cf2Fase" style="font-size:13px"></div></div>`;
   p.innerHTML=`<div class="cf2h">🟣 CONFLUÊNCIA 2 <span class="mu">· gale até ${cf2Max()<1e9?nvG(cf2Max()-1)+' (passou é RED)':'dar green'}</span><button onclick="CF2.oculto=CF2.pop;$('#cf2Pop').style.display='none'">✕</button></div>
-    ${cab}${bvC2()?bvPopupTxt(A):''}${tl?`<div class="cf2tl">${tl}</div>`:''}
+    ${A.fim?'':fzBarraHtml(fzDoAtivo(A),true)}${cab}${bvC2()?bvPopupTxt(A):''}${tl?`<div class="cf2tl">${tl}</div>`:''}
     ${(()=>{ if(A.fim||A.estado!=='jogo'||!(cfg.p5_cruz??1)) return ''; let E=[]; try{ E=p5Aponta(A.Tcur); }catch(_){} if(!E.length) return ''; const a=E.filter(x=>x.alvo===A.alvoCur).length, c=E.length-a; return `<div class="cfx cfx-p5" style="margin-top:6px;font-size:12px">⏱ 5s neste segundo: <b>${a}</b> apontam ${tagc(A.alvoCur)}${c?` · <span class="ruim">${c} a outra cor</span>`:''}</div>`; })()}
     <div class="mu" style="font-size:11px;margin-top:4px">gale segue o próximo sinal do popup 1 em qualquer cor${(cfg.cf2_rob??1)?' (ou de robô)':''} · apoio da entrada: ${A.apoios[0]?.n||0} sinais${A.n100?` · <b style="color:#facc15">⭐${A.n100} de ${cfP100()}%</b>`:''}${A.contra?` · ${A.contra} contra`:''}</div>`;
   p.style.display='block';
@@ -4282,6 +4290,7 @@ function cfaPanelHtml(){
       <button onclick="cfaRegistrar()">💾 registrar análise agora</button><button onclick="cfaCSV()">⬇ exportar CSV</button></div>
     <div class="nota">Mínimo de 5 entradas para aparecer como "melhor". Na Confluência 1 o red conta como "passou do G2". Uma análise é registrada sozinha a cada 50 entradas novas.</div>
     ${body}
+    ${fzResumoHtml()}
     ${snaps.length?`<details style="margin-top:8px"><summary><b>🗂 Registros salvos (${snaps.length})</b></summary><div class="tw" style="max-height:240px"><table><tr><th>Quando</th><th>Entradas</th><th>até G2</th><th>Melhor faixa de apoio</th><th>Melhor hora</th><th>Apoio médio TS / G1 / G2 / +G2</th></tr>
       ${snaps.slice().reverse().map(s=>`<tr><td>${fmtT(s.T)}</td><td>${s.n}</td><td>${s.pct}%</td><td>${s.bestAp||'—'}</td><td>${s.bestH||'—'}</td><td>${s.med}</td></tr>`).join('')}</table></div></details>`:''}
   </div>`;
@@ -4480,6 +4489,7 @@ VIEWS.p5={nome:'⏱ 5 segundos',html(){
     ${card('Robôs de 5s',num(RBOTS.filter(r=>r.bank===p5Bank()).length),'rodam sozinhos, sem popup próprio')}</div>
   ${scAgoraPanel(list,top,W,5000).replace('⚡ Acontecendo agora','⚡ Acontecendo agora no 5s')}
   <div class="panel"><h3>🕐 Horas pagantes do 5s</h3>${p5HpHtml()}</div>
+  ${raPanelHtml()}
   <div class="panel"><h3>🤖 Robôs de 5s</h3>
     <div class="ctl"><label>Mín. ocorrências ${inp('p5_rbMin',55)}</label><label>Pular até ${inp('p5_rbPulo',45)}</label>
       <button class="pri" onclick="p5Buscar()">🔎 Buscar padrões de 5s</button>${P5.auto.length?`<button onclick="p5CriarTop(5)">➕ criar os 5 melhores</button>`:''}</div>
@@ -4498,6 +4508,178 @@ setInterval(()=>{
   if(S.tab==='p5') fillRes();
   try{ cfExtrasRefresh(); }catch(e){}
 },1000);
+
+// =================== 💪 FORÇA DO SINAL (aprende com as entradas que já fecharam) ===================
+// Cada entrada fechada (Confluência 1 e 2) guarda: quantos sinais apoiavam, quantos eram contra, quantos ⭐100%,
+// e o que apareceu junto no popup (robôs, horas pagantes, colunas, ⏱5s) a favor e contra.
+// Para cada faixa dessas o sistema vê quantas vezes deu green até G2. A força junta tudo isso (com amortecimento,
+// porque as confirmações andam juntas) e compara com a média geral.
+const FZ_TIPOS=[['rob','🤖 robôs'],['hp','⏰ horas pagantes'],['col','🧱 colunas'],['p5','⏱ 5s']];
+let FZ={key:'',m:null};
+function fzFaixaAp(n){ return n<=3?'3':n<=5?'4–5':n<=9?'6–9':n<=15?'10–15':'16+'; }
+function fzFaixaEx(a,c){ if(!a&&!c) return 'nenhum'; const d=a-c; return d<0?'mais contra':d===0?'empatado':d===1?'+1 a favor':'+2 ou mais'; }
+// características de uma entrada (do relatório ou ao vivo)
+function fzFeat(o){
+  const ex=o.extras||[], F={};
+  F.ap='ap:'+fzFaixaAp(o.ap||0);
+  F.c='c:'+(o.c>=2?'2+':o.c||0);
+  F.s='s:'+(o.s100>=2?'2+':o.s100||0);
+  for(const [t] of FZ_TIPOS){ const a=ex.filter(e=>e.tipo===t&&e.alvo===o.alvo).length, c=ex.filter(e=>e.tipo===t&&e.alvo!==o.alvo).length; F[t]=t+':'+fzFaixaEx(a,c); }
+  return F;
+}
+function fzRows(){
+  const r1=CF.log.filter(x=>x.res==='green'||x.res==='red').map(x=>({T:x.T0,alvo:x.alvo,ap:x.apoios?.[0]?.n??x.sinais.length,c:x.apoios?.[0]?.c||0,s100:x.n100??cfTop(x.sinais),extras:x.extras||[],y:x.res==='green'?1:0,nv:x.res==='green'?x.nivel:3,forca:x.forca}));
+  const r2=(typeof CF2!=='undefined'?CF2.log:[]).filter(x=>x.res!=='sem dado').map(x=>({T:x.T0,alvo:x.alvo,ap:x.apoio0,c:x.contra||0,s100:x.n100||0,extras:x.extras||[],y:x.res==='green'&&x.nivel<=2?1:0,nv:x.res==='green'?x.nivel:9,forca:x.forca}));
+  return r1.concat(r2);
+}
+const fzLogit=p=>Math.log(p/(1-p)), fzSig=z=>1/(1+Math.exp(-z));
+function fzModelo(){
+  const key=CF.log.length+'|'+(typeof CF2!=='undefined'?CF2.log.length:0);
+  if(FZ.key===key && FZ.m) return FZ.m;
+  const R=fzRows(), n=R.length, g=R.filter(r=>r.y).length;
+  const base=n?(g+1)/(n+2):0.85, K=8, B={};
+  for(const r of R){ const F=fzFeat(r); for(const k in F){ const b=B[F[k]]||(B[F[k]]={n:0,g:0}); b.n++; b.g+=r.y; } }
+  for(const k in B){ const b=B[k]; b.rate=b.g/b.n; b.suave=(b.g+K*base)/(b.n+K); }
+  FZ={key,m:{n,g,base,B}}; return FZ.m;
+}
+// força de 0 a 100 + estimativa de green até G2 + o que pesou
+function fzForca(o){
+  const M=fzModelo(), F=fzFeat(o), base=Math.min(0.995,Math.max(0.02,M.base));
+  let z=fzLogit(base); const peso=[];
+  for(const k in F){
+    const b=M.B[F[k]]; if(!b) continue;
+    const p=Math.min(0.995,Math.max(0.02,b.suave)), d=0.6*(fzLogit(p)-fzLogit(base));
+    z+=d; peso.push({f:F[k],d,rate:b.rate,n:b.n});
+  }
+  const p=fzSig(z), forca=Math.round(Math.max(0,Math.min(100,50+30*(z-fzLogit(base)))));
+  return {forca,p,base,n:M.n,peso:peso.sort((a,b)=>Math.abs(b.d)-Math.abs(a.d))};
+}
+function fzNivel(f){ return f>=75?{t:'💎 FORTE',c:'#22c55e',d:'confirmações que mais pagaram até agora'}:f>=58?{t:'🟢 BOM',c:'#84cc16',d:'acima da média do histórico'}:f>=43?{t:'⚪ NA MÉDIA',c:'#a3a3a3',d:'parecido com a média'}:f>=25?{t:'🟠 ABAIXO DA MÉDIA',c:'#f59e0b',d:'essas confirmações falharam mais que o normal'}:{t:'🔴 FRACO',c:'#ef4444',d:'historicamente esse tipo de sinal falha — cuidado'}; }
+function fzNome(f){
+  const [k,v]=f.split(':'), T=Object.fromEntries(FZ_TIPOS);
+  if(k==='ap') return `${v} sinais de apoio`; if(k==='c') return `${v} sinal(is) contra`; if(k==='s') return `${v} ⭐100%`;
+  return `${T[k]||k} ${v}`;
+}
+// entrada ao vivo → o que o modelo precisa
+function fzDoAtivo(A){
+  const sin=A.sinaisCur||A.sinais||[], ap=A.nCur??sin.length, c=(A.apoios?.at(-1)?.c)??A.contra??0;
+  let ex=[]; try{ ex=cfExtras(A.Tcur).map(x=>({tipo:x.tipo,alvo:x.alvo})); }catch(e){ ex=A.extras||[]; }
+  return {alvo:A.alvoCur??A.alvo,ap,c,s100:cfTop(sin),extras:ex};
+}
+function fzBarraHtml(o,compacta){
+  const M=fzModelo();
+  if(M.n<20) return `<div class="fzbox"><div class="fzt">💪 Força do sinal <span class="mu">aprendendo… ${M.n}/20 entradas fechadas</span></div><div class="fzbar"><i style="width:${M.n*5}%;background:#64748b"></i></div></div>`;
+  const R=fzForca(o), N=fzNivel(R.forca);
+  const lista=R.peso.filter(x=>Math.abs(x.d)>0.05).slice(0,compacta?2:4).map(x=>`<span class="${x.d>0?'ok':'ruim'}">${x.d>0?'▲':'▼'} ${fzNome(x.f)}: ${(x.rate*100).toFixed(0)}% em ${x.n}</span>`).join(' · ');
+  return `<div class="fzbox"><div class="fzt">💪 Força <b style="color:${N.c}">${R.forca}</b> <b style="color:${N.c}">${N.t}</b> <span class="mu">· estimativa ${(R.p*100).toFixed(0)}% até G2 (média ${(R.base*100).toFixed(0)}% em ${R.n})</span></div>
+    <div class="fzbar"><i style="width:${R.forca}%;background:${N.c}"></i><span class="fzm" style="left:25%"></span><span class="fzm" style="left:43%"></span><span class="fzm" style="left:58%"></span><span class="fzm" style="left:75%"></span></div>
+    <div class="fzleg"><span>🔴 fraco</span><span>🟠 abaixo</span><span>⚪ média</span><span>🟢 bom</span><span>💎 forte</span></div>
+    ${compacta?'':`<div class="mu" style="font-size:11px">${N.d}</div>`}${lista?`<div style="font-size:11px;margin-top:2px">${lista}</div>`:''}</div>`;
+}
+// resumão para a aba de análise
+function fzResumoHtml(){
+  const M=fzModelo(), R=fzRows();
+  if(M.n<20) return `<div class="nota">💪 Força do sinal: aprendendo (${M.n}/20 entradas fechadas).</div>`;
+  const comF=R.filter(r=>r.forca!=null), faixas=[[0,25,'🔴 fraco'],[25,43,'🟠 abaixo'],[43,58,'⚪ média'],[58,75,'🟢 bom'],[75,101,'💎 forte']];
+  const cal=faixas.map(([a,b,t])=>{ const L=comF.filter(r=>r.forca>=a&&r.forca<b); return {t,n:L.length,g:L.filter(r=>r.y).length,ts:L.filter(r=>r.nv===0).length}; });
+  const grupos=[['ap','Sinais de apoio'],['c','Sinais contra'],['s','⭐ 100%'],...FZ_TIPOS.map(([k,t])=>[k,t])];
+  const linhas=grupos.map(([k,t])=>{ const L=Object.entries(M.B).filter(([f])=>f.startsWith(k+':')).sort((a,b)=>b[1].n-a[1].n);
+    return `<tr><td style="text-align:left"><b>${t}</b></td><td style="text-align:left">${L.map(([f,b])=>`<span class="fzchip ${b.n>=5&&b.rate>=M.base+0.03?'ok':b.n>=5&&b.rate<=M.base-0.03?'ruim':''}">${f.split(':')[1]}: <b>${(b.rate*100).toFixed(0)}%</b> <i>(${b.n})</i></span>`).join(' ')}</td></tr>`; }).join('');
+  return `<div class="panel" style="margin:8px 0"><h3>💪 Resumão da força do sinal <small>${M.n} entradas · média ${(M.base*100).toFixed(1)}% green até G2</small></h3>
+    ${comF.length?`<div class="tw"><table><tr><th>Barra marcou</th>${cal.map(c=>`<th>${c.t}</th>`).join('')}</tr>
+      <tr><td>entradas</td>${cal.map(c=>`<td>${c.n}</td>`).join('')}</tr>
+      <tr><td>green até G2</td>${cal.map(c=>`<td class="${c.n>=5?(c.g/c.n>=M.base?'ok':'ruim'):''}"><b>${c.n?(100*c.g/c.n).toFixed(0)+'%':'—'}</b></td>`).join('')}</tr>
+      <tr><td>green no TS</td>${cal.map(c=>`<td>${c.n?(100*c.ts/c.n).toFixed(0)+'%':'—'}</td>`).join('')}</tr></table></div>
+      <div class="nota">Confere se a barra acerta: o ideal é o "green até G2" subir da esquerda (fraco) para a direita (forte). Só conta entradas abertas depois desta versão.</div>`:''}
+    <div class="tw"><table><tr><th>Confirmação</th><th style="text-align:left">Faixa: green até G2 (entradas) — verde = acima da média, vermelho = abaixo</th></tr>${linhas}</table></div>
+  </div>`;
+}
+
+// =================== ♻ ROBÔS AUTOMÁTICOS (20s e 5s) — varre a cada N minutos e renova ===================
+// Procura padrões de somas, duplas e números com 100% (sem red) no banco de 20s e no de 5s.
+// Achou novos 100% → cria os robôs novos e apaga os automáticos antigos que saíram da lista.
+// Não achou nenhum 100% → mantém os antigos ligados até aparecerem outros.
+// Robôs criados à mão nunca são mexidos. Robô com entrada em andamento só sai depois que ela fecha.
+let RA={ultimo:0,rodando:false,log:[]};
+function raLoad(){ try{ RA.log=JSON.parse(localStorage.getItem('dpi_ra_log_v1')||'[]')||[]; RA.ultimo=+(localStorage.getItem('dpi_ra_ultimo')||0); }catch(e){} }
+function raSave(){ try{ localStorage.setItem('dpi_ra_log_v1',JSON.stringify(RA.log.slice(-60))); localStorage.setItem('dpi_ra_ultimo',String(RA.ultimo)); }catch(e){} }
+function raJanelas(){ const J=[]; if(cfg.ra_w20??1) J.push(20); if(cfg.ra_w5??1) J.push(5); return J; }
+function raAchar(step){
+  const bank=d5BankName(step); let W=liveW(bank)||[];
+  const lim=step===5?Math.max(2000,+cfg.p5_n||5000):5000; if(W.length>lim) W=W.slice(-lim);
+  if(W.length<500) return {bank,W,lista:null,motivo:`só ${W.length} jogos`};
+  const nivel=scNivel(), min=Math.max(5,+(step===5?cfg.ra_min5:cfg.ra_min20)||(step===5?30:20)), maxSkip=Math.max(0,Math.min(60,+cfg.ra_pulo||20));
+  const cut=(cfg.ra_valid??1)?Math.floor(W.length*0.7):0;
+  let all=[]; for(const fam of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,cut));
+  let L=all.filter(x=>x.red===0 && x.done>=min && (!cut || (x.test && x.test.done>=2 && x.test.red===0)));
+  L.sort((a,b)=>(b.done+(b.test?.done||0))-(a.done+(a.test?.done||0))||b.sg-a.sg||a.skip-b.skip);
+  return {bank,W,lista:L.slice(0,Math.max(1,Math.min(40,+cfg.ra_max||10))),achados:L.length};
+}
+function raNovoRobo(x,bank){
+  const nivel=scNivel(), id=rbIdOf(x,nivel,bank);
+  const base={id,skip:x.skip,alvo:x.alvo,maxNivel:nivel,bank,on:true,popup:!!cfg.ra_pop,cfPop:true,auto:true,criadoEm:Date.now(),minOcc:x.done||0,taxaCriacao:x.rate,casos:x.done+(x.test?.done||0)};
+  return x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
+}
+async function raRodar(manual){
+  if(RA.rodando) return; if(!(cfg.ra_on??1) && !manual) return;
+  RA.rodando=true; RA.ultimo=Date.now();
+  try{
+    for(const step of raJanelas()){
+      await new Promise(r=>setTimeout(r,30));                         // deixa a tela respirar entre os bancos
+      const t0=performance.now(), R=raAchar(step), bank=R.bank;
+      const velhos=RBOTS.filter(r=>r.auto && r.bank===bank);
+      const reg={T:Date.now(),w:step,jogos:R.W.length,achados:R.achados||0,novos:0,removidos:0,mantidos:0,ms:0,obs:''};
+      // limpa os que já estavam aposentados e sem entrada aberta
+      for(const r of velhos.filter(r=>r.aposentar && !RB_PENDING.some(s=>s.rbId===r.id&&!s.done))){ RBOTS=RBOTS.filter(x=>x.id!==r.id); reg.removidos++; }
+      if(!R.lista){ reg.obs=`não varreu: ${R.motivo}`; }
+      else if(!R.lista.length){ reg.mantidos=RBOTS.filter(r=>r.auto&&r.bank===bank).length; reg.obs='nenhum 100% novo · antigos continuam'; }
+      else{
+        const ids=new Set();
+        for(const x of R.lista){
+          const rb=raNovoRobo(x,bank); ids.add(rb.id);
+          const ja=RBOTS.find(r=>r.id===rb.id);
+          if(ja){ ja.on=true; ja.aposentar=false; if(ja.auto) ja.casos=rb.casos; reg.mantidos++; }
+          else { RBOTS.unshift(rb); reg.novos++; }
+        }
+        for(const r of RBOTS.filter(r=>r.auto && r.bank===bank && !ids.has(r.id))){
+          if(RB_PENDING.some(s=>s.rbId===r.id&&!s.done)) r.aposentar=true;         // sai quando a entrada fechar
+          else { RBOTS=RBOTS.filter(x=>x.id!==r.id); reg.removidos++; }
+        }
+      }
+      reg.ms=Math.round(performance.now()-t0);
+      RA.log.push(reg);
+    }
+    rbSave(); raSave();
+    if(['robos','p5'].includes(S.tab)) renderTab();
+  }catch(e){ console.warn('robôs automáticos',e); }
+  finally{ RA.rodando=false; }
+}
+function raMin(){ return Math.max(1,+(cfg.ra_int??5)); }
+setInterval(()=>{ if((cfg.ra_on??1) && Date.now()-RA.ultimo>=raMin()*60000) raRodar(false); },20000);
+function raPanelHtml(){
+  const L=RA.log.slice(-12).reverse(), falta=Math.max(0,Math.round((RA.ultimo+raMin()*60000-Date.now())/1000));
+  const cont=w=>RBOTS.filter(r=>r.auto&&r.bank===d5BankName(w)).length;
+  return `<div class="panel rapanel"><h3>♻ Robôs automáticos <small>varre a cada ${raMin()} min · deixa só os 100% · renova sozinho</small></h3>
+    <div class="ctl">
+      <label class="p5sw"><input type="checkbox" ${(cfg.ra_on??1)?'checked':''} onchange="cfg.ra_on=this.checked?1:0;saveCfg();fillRes()"> <b>♻ ligado</b></label>
+      <label><input type="checkbox" ${(cfg.ra_w20??1)?'checked':''} onchange="cfg.ra_w20=this.checked?1:0;saveCfg()"> 20 segundos (${cont(20)})</label>
+      <label><input type="checkbox" ${(cfg.ra_w5??1)?'checked':''} onchange="cfg.ra_w5=this.checked?1:0;saveCfg()"> 5 segundos (${cont(5)})</label>
+      <label>A cada ${sel('ra_int',[[5,'5 min'],[10,'10 min'],[15,'15 min'],[30,'30 min']])}</label>
+      <label>Máx. por banco ${sel('ra_max',[[5,'5'],[10,'10'],[20,'20'],[30,'30']])}</label>
+      <label>Mín. casos 20s ${inp('ra_min20',45)}</label><label>5s ${inp('ra_min5',45)}</label>
+      <label>Pular até ${inp('ra_pulo',40)}</label>
+      <label title="separa os 30% mais recentes do banco e só aceita o padrão se ele também não tiver red neles"><input type="checkbox" ${(cfg.ra_valid??1)?'checked':''} onchange="cfg.ra_valid=this.checked?1:0;saveCfg()"> confirmar nos 30% mais recentes</label>
+      <label><input type="checkbox" ${cfg.ra_pop?'checked':''} onchange="cfg.ra_pop=this.checked?1:0;saveCfg()"> popup próprio dos automáticos</label>
+      <button class="pri" onclick="raRodar(true)">▶ varrer agora</button>
+    </div>
+    <div class="nota">${RA.rodando?'⏳ varrendo…':RA.ultimo?`Última varredura ${rbFmtClock(RA.ultimo)} · próxima em ${Math.floor(falta/60)}:${p2d(falta%60)}`:'Ainda não varreu.'}
+      Somas, duplas e números com <b>100% até ${NIVEL[scNivel()]}</b>. Os automáticos entram nos cruzamentos do popup da confluência (🤖 / ⏱ 5s). Robôs criados à mão não são mexidos.</div>
+    ${L.length?`<div class="tw" style="max-height:200px"><table><tr><th>Quando</th><th>Banco</th><th>Jogos</th><th>100% achados</th><th>Novos</th><th>Removidos</th><th>Mantidos</th><th style="text-align:left">Obs.</th></tr>
+      ${L.map(r=>`<tr><td>${rbFmtDateClock(r.T)}</td><td>${r.w}s</td><td>${num(r.jogos)}</td><td>${r.achados}</td><td class="ok">${r.novos}</td><td class="ruim">${r.removidos}</td><td>${r.mantidos}</td><td style="text-align:left" class="mu">${r.obs||''} <span style="font-size:10px">${r.ms} ms</span></td></tr>`).join('')}</table></div>`:''}
+  </div>`;
+}
+raLoad();
+setTimeout(()=>{ if((cfg.ra_on??1) && Date.now()-RA.ultimo>=raMin()*60000) raRodar(false); },25000);
 
 function cfPanelHtml(){
   const W=S.win, A=CF.ativo;
@@ -4644,7 +4826,7 @@ function rbGat(rb){
   if(rb.tipo==='seq') return `${rb.x}× ${rb.c?'ÍMPAR':'PAR'} seguidos`;
   return `Σ${rb.n} %10 = ${rb.mod}`;
 }
-function rbName(rb){ return `${rbGat(rb)} · pula ${rb.skip} · ${NOME(rb.alvo)} · ${rbNivelNome(rb)}`; }
+function rbName(rb){ return `${rb.auto?'♻ ':''}${rbGat(rb)} · pula ${rb.skip} · ${NOME(rb.alvo)} · ${rbNivelNome(rb)}`; }
 function rbBankTag(rb){ return rb.bank?`<span class="scanbadge">${rb.bank.replace('DERIV R_100 · ','R_100 ')}</span>`:'<span class="scanbadge">banco aberto</span>'; }
 function rbIdOf(x,nivel,bank){
   const base = (x.kind==='Dupla'||x.tipo==='dupla') ? `D|${x.a}|${x.b}` : (x.kind==='Número'||x.tipo==='num') ? `N|${x.d}` : (x.kind==='Sequência'||x.tipo==='seq') ? `Q|${x.c}|${x.x}` : `S|${x.n}|${x.mod}`;
@@ -4939,7 +5121,7 @@ function rbLogHtml(){
   </table></div>`;
 }
 VIEWS.robos={nome:'🤖 Robôs',live:rbLive,html(){
-  return `<div class="panel"><h3>🤖 Robôs de soma, dupla e número</h3>
+  return `${raPanelHtml()}<div class="panel"><h3>🤖 Robôs de soma, dupla e número</h3>
     <div class="ctl">
       <label><input type="checkbox" ${cfg.rb_popup?'checked':''} onchange="rbToggleGlobal(this)"> Popup geral</label>
       <button onclick="rbClearLog()">🧹 Limpar placar ao vivo</button>
