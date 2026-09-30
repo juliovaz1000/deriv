@@ -241,6 +241,7 @@ tr.cfa-best td{background:rgba(34,197,94,.12)}
 .pgpanel{margin:6px 0;padding:8px 10px;border:1px solid;border-radius:10px;background:rgba(255,255,255,.02)}.pgrow{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
 .pgc{width:18px;height:18px;border-radius:5px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:800}.pgc.ok{background:rgba(34,197,94,.25);color:#86efac}.pgc.no{background:rgba(239,68,68,.3);color:#fca5a5}
 .srdpanel{border-color:rgba(34,211,238,.45)!important}
+.espanel{border-color:rgba(56,189,248,.5)!important}
 .bvbox{border:1px solid rgba(245,197,24,.35);background:rgba(245,197,24,.05);border-radius:10px;padding:10px;margin:10px 0}
 .bvhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}.bvst{margin-left:auto;font-weight:700}
 .bvpop{margin-top:8px;padding:6px 9px;border-radius:8px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.35);font-size:13px}
@@ -404,7 +405,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.19 · 30/09/2026 · simulador esperar reds → entrar até red';
+const VERSAO='v3.20 · 30/09/2026 · estratégias na DEMO (popup) + entrar com a Deriv';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -420,7 +421,7 @@ const DEF = {
   limit: 5000, pages: 20, pip: 0, proxy: '', auto: 10, janela: 'n:2000', bank: 'Dólar', lastId: 0,
   padL: 3, padG: 1, padMin: 10, padAss: 80, padAlert: 1,
   bt_tipo: 'seq', bt_n: 4, bt_dir: 'contra', bt_pad: 'VVG', bt_cor: 'G', bt_dig: 0,
-  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, srd_fonte: 'c1', srd_esp: 2, srd_para: 1, srd_pay: 85, srd_base: 1, srd_ini: 100, srd_gale: 2, srd_rec: 1, srd_conta: 0, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
+  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, es_on: 0, es_estr: 'popup', es_base: 0.35, es_gale: 2, es_modo: 'rec', es_mult: 2.1, es_rec: 1, es_sw: 0, es_sl: 0, es_max: 0, es_aposRed: 0, es_aposWin: 0, dm_appId: '', srd_fonte: 'c1', srd_esp: 2, srd_para: 1, srd_pay: 85, srd_base: 1, srd_ini: 100, srd_gale: 2, srd_rec: 1, srd_conta: 0, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
   sc_min: 20, sc_skip: 12, sc_top: 40, sc_digit: 5, sc_digit_skip: 3,
   sc_sum_min: 2, sc_sum_max: 5, sc_sum_skip: 8, autoOn: 1, derivFallback: 1,
   rb_popup: 1, rb_auto_min: 20, rb_auto_top: 100, rb_auto_only100: 1, rb_auto_family: 'ambos', rb_auto_pulo: 500, rb_manual_create: 1, rb_auto_nivel: 2, histShow: 1000, histFixed: 0, histCols: 20, hpMinSeq: 2, hpMinOc: 5, hpOrd: 'g2',
@@ -3795,6 +3796,7 @@ function cfCheck(){
       A.estado='jogo'; A.Tcur=prox; A.alvoCur=decG.alvo; A.nCur=ap[decG.alvo].length; A.sinaisCur=ap[decG.alvo].slice();
       A.apoios.push({g:A.g,n:ap[decG.alvo].length,c:ap[1-decG.alvo].length,T:prox});
       cfDec(prox,ap,`${NIVEL[A.g]} ${decG.alvo?'ÍMPAR':'PAR'} (gale)`);
+      try{ esSinal(A); }catch(e){ console.warn('estratégia',e); }
       if(cfg.cf_pop??1) cfPopup(); beep();
     } else {
       A.espera++;
@@ -3812,6 +3814,7 @@ function cfCheck(){
     n100:cfTop(ap[dec.alvo]),sinais:ap[dec.alvo].slice(),sinaisCur:ap[dec.alvo].slice(),nCur:ap[dec.alvo].length,contra:ap[1-dec.alvo].length,apoios:[{g:0,n:ap[dec.alvo].length,c:ap[1-dec.alvo].length,T:prox}],
     extras:(()=>{ try{ return cfExtras(prox).map(x=>({tipo:x.tipo,txt:x.txt,alvo:x.alvo})); }catch(e){ return []; } })()};
   try{ CF.ativo.forca=fzForca({alvo:dec.alvo,ap:CF.ativo.nCur,c:CF.ativo.contra,s100:cfTop(CF.ativo.sinais),extras:CF.ativo.extras}).forca; }catch(e){}
+  try{ esSinal(CF.ativo); }catch(e){ console.warn('estratégia',e); }
   if(cfg.cf_pop??1) cfPopup();
   beep();
   if(['scan','soma'].includes(S.tab)) cfLive();
@@ -3837,6 +3840,7 @@ function cfFecha(A,res,obs=''){
   A.fim=true; A.res=res; A.obs=obs;
   CF.log.push({forca:A.forca,n100:A.n100??cfTop(A.sinais),T0:A.T0,step:A.step,alvo:A.alvo,res,nivel:res==='green'?A.g:-1,tent:A.tent,sinais:A.sinais,apoios:A.apoios,obs,bank:A.bank,extras:A.extras||[]});
   cfSave(); try{ ATU.ult={T:Date.now(),txt:`💪 Força aprendeu com a entrada ${hmsOf(A.T0/1000)} (${res==='green'?'✅ '+NIVEL[A.g]:res}) · ${fzModelo().n} entradas`}; atuRender(); pgChip(); }catch(e){}
+  try{ esFechou(CF.log.at(-1)); }catch(e){ console.warn('estratégia',e); }
   try{ if(!bvC2()) bvProcessa(CF.log.at(-1)); cfaAuto(); }catch(e){ console.warn('banca virtual',e); } if(CF.pop===A.id) cfPopup();
   if(['scan','soma'].includes(S.tab)){ cfLive(); cf2Live(); }
 }
@@ -3953,6 +3957,7 @@ function cfPopup(){
     ${tl?`<div class="rbsched">${tl}</div>`:''}
     <div id="cfRes" style="display:none;margin-top:10px;padding:10px;border-radius:9px;font-size:16px;font-weight:800"></div>
     ${bvC2()?'':bvPopupTxt(A)}
+    ${cfg.es_on&&A.esStake&&!A.fim&&A.estado==='jogo'?`<div class="bvpop" style="border-color:#38bdf8;background:rgba(56,189,248,.1)">🧠 DEMO: estratégia apostando <b>${A.esStake.toFixed(2)}</b> no ${NIVEL[A.g]} · resultado ${ES.pl>=0?'+':''}${ES.pl.toFixed(2)}</div>`:''}
     <div id="cfxWrap">${A.fim||A.estado==='aguardando'?'':cfExtrasHtml(A.Tcur,A.alvoCur)}</div>
     <div class="nota" style="margin-top:8px"><b>Sinais que apoiam ${A.g?'esta tentativa':'a entrada'}:</b><br>${(A.sinaisCur||A.sinais).slice().sort((a,b)=>b.taxa-a.taxa).map(s=>`${s.taxa>=cfP100()/100-1e-9?'<b style="color:#facc15">⭐ ':''}${s.fonte} · ${s.nome} <span class="mu">(${s.fase}, ${(s.taxa*100).toFixed(0)}%)</span>${s.taxa>=cfP100()/100-1e-9?'</b>':''}`).join('<br>')}</div>
     <div class="rbactions"><button onclick="rbPopupFechar();CF.pop=null">Fechar</button><button onclick="cfg.cf_pop=0;saveCfg();rbPopupFechar();CF.pop=null">Desativar popup de confluência</button></div>
@@ -4867,6 +4872,161 @@ function srdPanelHtml(){
         <td class="${(r.lucro||0)>=0?'ok':'ruim'}">${r.stakes?((r.lucro>=0?'+':'')+r.lucro.toFixed(2)):''}</td><td>${r.saldo.toFixed(2)}</td><td>${r.stakes&&r.pend?r.pend.toFixed(2):''}</td></tr>`).join('')}</table></div>`}
   </div>`;
 }
+
+// =================== 🧠 ESTRATÉGIAS NA CONTA DEMO (1ª: "popup" = entradas da Confluência 1) ===================
+// Cada estratégia recebe os sinais, decide se entra (esperar X reds, depois do red esperar X wins, stops)
+// e manda a ordem pelo motor da conta DEMO (que acerta o segundo do jogo). Só opera em conta DEMO.
+const ES_ESTR={ popup:{nome:'🎯 Popup (Confluência 1)',desc:'entra em cada tentativa que o popup da confluência abre (TS, G1, G2 esperando o próximo sinal)'} };
+let ES={estado:'desligada',seqR:0,seqW:0,pend:0,perdEnt:0,entId:null,pl:0,n:0,g:0,r:0,pay:0.95,log:[],ini:null,motivo:''};
+function esLoad(){ try{ Object.assign(ES,JSON.parse(localStorage.getItem('dpi_es_v1')||'{}')); }catch(e){} }
+function esSave(){ try{ localStorage.setItem('dpi_es_v1',JSON.stringify({...ES,log:ES.log.slice(-300)})); }catch(e){} }
+function esBase(){ return Math.max(0.35,Math.round((+cfg.es_base||0.35)*100)/100); }
+function esGale(){ return Math.max(0,Math.min(2,+(cfg.es_gale??2))); }
+function esStake(g,perdEnt,pend){
+  const b=esBase(), pay=ES.pay||0.95;
+  if(g===0 && !pend) return b;
+  if((cfg.es_modo||'rec')==='rec') return Math.max(0.35,Math.round(((pend+perdEnt+b*pay)/pay)*100)/100);
+  return Math.max(0.35,Math.round(b*Math.pow(+cfg.es_mult||2.1,g)*100)/100);
+}
+function esEstadoInicial(){ return (+cfg.es_aposRed||0)>0?'esperando reds':'livre'; }
+function esLigar(on){
+  cfg.es_on=on?1:0; saveCfg();
+  if(on){ ES.estado=esEstadoInicial(); ES.seqR=0; ES.seqW=0; ES.motivo=''; if(!ES.ini){ ES.ini=Date.now(); } atuAviso(`🧠 Estratégia ${ES_ESTR[cfg.es_estr||'popup'].nome} ligada · ${ES.estado}`,'es'); }
+  else { ES.estado='desligada'; atuAviso('🧠 Estratégia desligada','es'); }
+  esSave(); if(S.tab==='demo') renderTab();
+}
+function esZerar(){ Object.assign(ES,{pend:0,perdEnt:0,entId:null,pl:0,n:0,g:0,r:0,log:[],ini:Date.now(),motivo:'',seqR:0,seqW:0,estado:cfg.es_on?esEstadoInicial():'desligada'}); esSave(); if(S.tab==='demo') renderTab(); }
+// o que impede de entrar agora
+function esPode(){
+  if(!cfg.es_on) return 'estratégia desligada';
+  if(!DM.ok||!DM.virt) return 'conta DEMO não conectada';
+  const sw=+cfg.es_sw||0, sl=+cfg.es_sl||0;
+  if(sw>0 && ES.pl>=sw){ esParar(`🏁 stop win +${ES.pl.toFixed(2)}`); return ES.motivo; }
+  if(sl>0 && ES.pl<=-sl){ esParar(`🛑 stop loss ${ES.pl.toFixed(2)}`); return ES.motivo; }
+  if(ES.estado==='parado') return ES.motivo||'parada';
+  return '';
+}
+function esParar(m){ if(ES.estado!=='parado') atuAviso(`🧠 Estratégia parou: ${m}`,'es'); ES.estado='parado'; ES.motivo=m; esSave(); }
+// chamado quando o popup abre uma tentativa (entrada nova ou gale)
+function esSinal(A){
+  if((cfg.es_estr||'popup')!=='popup' || !cfg.es_on || !A || A.fim) return;
+  const bloq=esPode(); if(bloq) return;
+  if(ES.estado!=='livre') return;                                   // esperando reds / wins
+  if(A.g>esGale()) return;
+  if(!/^DERIV /.test(cfg.bank)){ ES.motivo='abra um banco DERIV (ex.: R_100 · 20s)'; return; }
+  if(ES.entId!==A.id){ ES.entId=A.id; ES.perdEnt=0; }
+  const stake=esStake(A.g,ES.perdEnt,+(cfg.es_rec??1)?ES.pend:0), max=+cfg.es_max||0;
+  if(max>0 && stake>max){ esParar(`aposta ${stake.toFixed(2)} passaria do máximo ${max}`); return; }
+  A.esStake=stake;
+  dmRegistrar({key:'es|'+A.id+'|'+A.g,src:'estratégia',es:true,esEnt:A.id,nome:`🧠 popup ${NIVEL[A.g]}`,sym:curSym(),T:A.Tcur/1000,step:gameIntervalSec(),maxN:0,ct:A.alvoCur?'DIGITODD':'DIGITEVEN',stakeFix:stake,ratio:ES.pay});
+  esSave();
+}
+// resultado de cada contrato comprado pela estratégia
+function esResultado(o,t,won){
+  ES.n++; ES.pl=Math.round((ES.pl+t.profit)*100)/100;
+  if(t.payout&&t.pago) ES.pay=(t.payout-t.pago)/t.pago;
+  if(won){ ES.g++; ES.pend=0; ES.perdEnt=0; }
+  else { ES.r++; ES.perdEnt=Math.round((ES.perdEnt+t.stake)*100)/100; }
+  ES.log.push({t:Date.now(),nome:o.nome,stake:t.stake,profit:t.profit,won,bal:DM.bal,pl:ES.pl});
+  esSave(); esPode(); if(S.tab==='demo') esLive();
+}
+// quando a entrada do popup fecha (green/red até G2): anda os contadores e decide o próximo estado
+function esFechou(x){
+  if(!cfg.es_on || !x) return;
+  const red=x.res==='red'||(x.res==='green'&&x.nivel>esGale()), green=!red && x.res==='green';
+  if(ES.entId && x.T0 && ES.perdEnt>0 && red){ if(+(cfg.es_rec??1)) ES.pend=Math.round((ES.pend+ES.perdEnt)*100)/100; ES.perdEnt=0; }
+  const aR=+cfg.es_aposRed||0, aW=+cfg.es_aposWin||0;
+  if(ES.estado==='esperando reds'){ ES.seqR=red?ES.seqR+1:0; if(ES.seqR>=aR){ ES.estado='livre'; ES.seqR=0; atuAviso(`🧠 ${aR} reds seguidos → estratégia entra na próxima`,'es'); } }
+  else if(ES.estado==='esperando wins'){ ES.seqW=green?ES.seqW+1:0; if(ES.seqW>=aW){ ES.estado=aR>0?'esperando reds':'livre'; ES.seqW=0; atuAviso(`🧠 ${aW} wins seguidos → ${ES.estado}`,'es'); } }
+  else if(ES.estado==='livre' && red){
+    if(aW>0){ ES.estado='esperando wins'; ES.seqW=0; }
+    else if(aR>0){ ES.estado='esperando reds'; ES.seqR=0; }
+  }
+  esSave(); if(S.tab==='demo') esLive();
+}
+// ---------- simulação da mesma estratégia no histórico do popup (dinheiro de mentira) ----------
+function esSimular(){
+  const L=CF.log.filter(x=>x.res==='green'||x.res==='red').sort((a,b)=>a.T0-b.T0), pay=ES.pay||0.95, b=esBase(), G=esGale();
+  const aR=+cfg.es_aposRed||0, aW=+cfg.es_aposWin||0, sw=+cfg.es_sw||0, sl=+cfg.es_sl||0, rec=+(cfg.es_rec??1);
+  let st=aR>0?'esperando reds':'livre', sR=0, sW=0, pend=0, pl=0, n=0, g=0, r=0, maxAp=0, pico=0, dd=0, parou='';
+  for(const x of L){
+    if(parou) break;
+    const tent=(x.tent||[]).filter(t=>t.d!=null);
+    let hit=-1; for(let i=0;i<tent.length&&i<=G;i++) if(tent[i].p===tent[i].alvo){ hit=i; break; }
+    const red=hit<0;
+    if(st==='livre'){
+      let perd=0;
+      for(let i=0;i<tent.length&&i<=G;i++){
+        const s=i===0&&!pend?b:(cfg.es_modo||'rec')==='rec'?Math.max(0.35,(pend+perd+b*pay)/pay):b*Math.pow(+cfg.es_mult||2.1,i);
+        maxAp=Math.max(maxAp,s); n++;
+        if(i===hit){ pl+=s*pay; g++; pend=0; perd=0; break; } else { pl-=s; perd+=s; r++; }
+      }
+      if(red){ if(rec) pend+=perd; if(aW>0){ st='esperando wins'; sW=0; } else if(aR>0){ st='esperando reds'; sR=0; } }
+      pico=Math.max(pico,pl); dd=Math.max(dd,pico-pl);
+      if(sw>0&&pl>=sw) parou='stop win'; if(sl>0&&pl<=-sl) parou='stop loss';
+    } else if(st==='esperando reds'){ sR=red?sR+1:0; if(sR>=aR){ st='livre'; sR=0; } }
+    else if(st==='esperando wins'){ sW=!red?sW+1:0; if(sW>=aW){ st=aR>0?'esperando reds':'livre'; sW=0; } }
+  }
+  return {L:L.length,n,g,r,pl,maxAp,dd,parou,pend};
+}
+function esLive(){ const e=$('#esBox'); if(e) e.innerHTML=esBoxHtml(); }
+function esBoxHtml(){
+  const pode=esPode(), cor=ES.estado==='livre'?'var(--g)':ES.estado==='parado'?'var(--v)':ES.estado==='desligada'?'var(--mu)':'var(--am)';
+  const L=ES.log.slice(-15).reverse(), sim=esSimular();
+  const prox=esStake(0,0,+(cfg.es_rec??1)?ES.pend:0);
+  return `<div class="cards">
+    ${card('Banca da Deriv (DEMO)',DM.ok&&DM.virt&&DM.bal!=null?`${DM.bal.toFixed(2)} ${DM.cur}`:'—',DM.ok&&DM.virt?`conta ${DM.loginid} · ao vivo`:'conecte a conta demo')}
+    ${card('Estado',`<span style="color:${cor}">${ES.estado}</span>`,ES.estado==='esperando reds'?`${ES.seqR}/${cfg.es_aposRed} reds seguidos`:ES.estado==='esperando wins'?`${ES.seqW}/${cfg.es_aposWin} wins seguidos`:pode&&cfg.es_on?pode:(ES.motivo||'—'))}
+    ${card('Resultado da estratégia',`<span class="${ES.pl>=0?'ok':'ruim'}">${ES.pl>=0?'+':''}${ES.pl.toFixed(2)}</span>`,`${ES.n} contratos · ${ES.g} ✅ · ${ES.r} ❌${ES.pend?` · recuperar ${ES.pend.toFixed(2)}`:''}`)}
+    ${card('Próxima entrada',prox.toFixed(2),`payout ${(ES.pay*100).toFixed(0)}% ${ES.pend?'(já recupera o red)':''}`)}</div>
+    <div class="cfsim">🧪 <b>Simulação desta configuração no histórico do popup</b> (${sim.L} entradas): ${sim.n} contratos · ${sim.g} ✅ · ${sim.r} ❌ · resultado <b class="${sim.pl>=0?'ok':'ruim'}">${sim.pl>=0?'+':''}${sim.pl.toFixed(2)}</b> · maior aposta ${sim.maxAp.toFixed(2)} · pior queda ${sim.dd.toFixed(2)}${sim.parou?` · parou por <b>${sim.parou}</b>`:''}</div>
+    ${L.length?`<div class="tw" style="max-height:220px"><table><tr><th>Hora</th><th>Entrada</th><th>Aposta</th><th>Resultado</th><th>Estratégia</th><th>Banca</th></tr>
+      ${L.map(x=>`<tr><td>${rbFmtClock(x.t)}</td><td>${x.nome}</td><td>${(+x.stake).toFixed(2)}</td><td class="${x.won?'ok':'ruim'}">${x.won?'✅':'❌'} ${x.profit>=0?'+':''}${(+x.profit).toFixed(2)}</td><td>${x.pl>=0?'+':''}${x.pl.toFixed(2)}</td><td>${x.bal!=null?(+x.bal).toFixed(2):'—'}</td></tr>`).join('')}</table></div>`:''}`;
+}
+function esPanelHtml(){
+  return `<div class="panel espanel"><h3>🧠 Estratégias automáticas na DEMO <small>escolha a estratégia · ela manda as ordens sozinha</small></h3>
+    <div class="ctl">
+      <label>Estratégia ${sel('es_estr',Object.entries(ES_ESTR).map(([k,v])=>[k,v.nome]))}</label>
+      ${cfg.es_on?`<button class="ruimbtn" onclick="esLigar(false)">⏸ DESLIGAR</button>`:`<button class="okbtn" onclick="esLigar(true)">▶ LIGAR</button>`}
+      <button onclick="if(confirm('Zerar resultado e estado da estratégia?'))esZerar()">🔄 zerar</button>
+    </div>
+    <div class="nota">${ES_ESTR[cfg.es_estr||'popup'].desc}.</div>
+    <div class="ctl">
+      <label>Entrada ${inp('es_base',55)}</label>
+      <label>Gale até ${sel('es_gale',[[0,'TS'],[1,'G1'],[2,'G2']])}</label>
+      <label>Gale ${sel('es_modo',[['rec','recupera + lucro'],['mult','multiplicar']])}</label>
+      ${cfg.es_modo==='mult'?`<label>× ${inp('es_mult',40)}</label>`:''}
+      <label><input type="checkbox" ${(cfg.es_rec??1)?'checked':''} onchange="cfg.es_rec=this.checked?1:0;saveCfg();esLive()"> próxima entrada recupera o red</label>
+      <label>Stop win ${inp('es_sw',55)}</label>
+      <label>Stop loss ${inp('es_sl',55)}</label>
+      <label>Aposta máxima ${inp('es_max',55)}</label>
+      <label>Entrar após ${sel('es_aposRed',[[0,'— (sempre)'],[1,'1 red'],[2,'2 reds'],[3,'3 reds'],[4,'4 reds']])} seguidos</label>
+      <label>Depois do red, voltar após ${sel('es_aposWin',[[0,'— (na hora)'],[1,'1 win'],[2,'2 wins'],[3,'3 wins'],[4,'4 wins']])} seguidos</label>
+    </div>
+    <div class="nota">"Entrar após X reds" = espera o popup dar X reds seguidos (sem apostar) e aí entra. "Depois do red, voltar após X wins" = quando a estratégia tomar um red, fica olhando até o popup dar X wins seguidos antes de voltar. Stop win/loss valem para o resultado da estratégia desde o último "zerar". Tudo só na conta DEMO — se o token for de conta real nada é enviado.</div>
+    <div id="esBox">${esBoxHtml()}</div>
+  </div>`;
+}
+// ---------- 🔐 entrar com a Deriv sem copiar token (OAuth) ----------
+function dmAppId(){ return String(cfg.dm_appId||'').replace(/\D/g,''); }
+function dmOAuth(){
+  const id=dmAppId();
+  if(!id){ alert('Primeiro coloque o App ID do seu aplicativo Deriv (veja o passo a passo logo abaixo do botão).'); return; }
+  location.href=`https://oauth.deriv.com/oauth2/authorize?app_id=${id}&l=PT`;
+}
+// volta do login da Deriv: ?acct1=VRTC…&token1=…&cur1=USD&acct2=CR…&token2=…
+(function dmOAuthRetorno(){
+  try{
+    const q=new URLSearchParams(location.search); if(!q.get('acct1')) return;
+    let tok='', acct='';
+    for(let i=1;i<20;i++){ const a=q.get('acct'+i), t=q.get('token'+i); if(!a) break; if(/^VR/i.test(a)){ acct=a; tok=t; break; } }
+    history.replaceState(null,'',location.pathname);                 // tira os tokens da barra de endereço
+    if(!tok){ setTimeout(()=>{ dmSet('⛔ O login da Deriv não devolveu conta DEMO (VRTC…). Nada foi salvo.'); },1500); return; }
+    try{ localStorage.setItem('dpi_demo_tok',tok); }catch(e){}
+    setTimeout(()=>{ DM._tok=tok; S.tab='demo'; renderTab(); dmConectar(); },1500);   // espera o módulo da conta demo carregar
+  }catch(e){}
+})();
+esLoad();
 
 function cfPanelHtml(){
   const W=S.win, A=CF.ativo;
@@ -6454,7 +6614,7 @@ async function dmConectar(){
   const tok=dmToken(); if(!tok){ dmSet('Cole o token da conta DEMO.'); return; }
   if($('#dmLembrar')?.checked){ try{ localStorage.setItem('dpi_demo_tok',tok); }catch(e){} }
   dmDesconectar(true);
-  const urls=(cfg.dm_url?[cfg.dm_url]:[]).concat(DM_URLS_DEF);
+  const aid=dmAppId(); const urls=(cfg.dm_url?[cfg.dm_url]:[]).concat(aid?[`wss://ws.derivws.com/websockets/v3?app_id=${aid}`,`wss://ws.binaryws.com/websockets/v3?app_id=${aid}`]:DM_URLS_DEF);
   for(const url of urls){
     dmSet(`Conectando em ${url.replace(/\?.*/,'')}…`);
     try{ await dmAbrir(url); break; }catch(e){ dmSet('Falhou: '+e.message); }
@@ -6493,8 +6653,9 @@ function dmDesconectar(silencioso){ try{ DM.ws?.close(); }catch(e){} DM.ws=null;
 function dmEsquecer(){ try{ localStorage.removeItem('dpi_demo_tok'); }catch(e){} DM._tok=''; dmDesconectar(); dmSet('Token apagado deste navegador.'); }
 // ---------- ordens ----------
 function dmStake0(){ return Math.max(0.35,Math.round((+cfg.dm_stake||0.35)*100)/100); }
-function dmPodeOperar(){
+function dmPodeOperar(o){
   if(!DM.ok||!DM.virt) return 'conta demo não conectada';
+  if(o&&o.es) return esPode();                                   // ordens da estratégia usam os stops dela
   if(!cfg.dm_on) return 'operação automática desligada';
   const sl=+cfg.dm_stopLoss||0, sw=+cfg.dm_stopWin||0;
   if(sl>0 && DM.sess.pl<=-sl){ DM.parado=`stop loss (${DM.sess.pl.toFixed(2)})`; return DM.parado; }
@@ -6504,7 +6665,7 @@ function dmPodeOperar(){
 // registra uma entrada vinda de qualquer robô (par/ímpar, segundos ou Under/Over)
 function dmRegistrar(o){
   if(!o.sym){ dmAddLog({...o,res:'não enviada',obs:'banco sem mercado Deriv (use um banco DERIV …)',stake:0,profit:0}); return; }
-  const motivo=dmPodeOperar();
+  const motivo=dmPodeOperar(o);
   if(motivo){ dmAddLog({...o,res:'não enviada',obs:motivo,stake:0,profit:0}); return; }
   if(DM.orders.some(x=>x.key===o.key)) return;
   DM.orders.push({...o,g:0,tent:[],perda:0,estado:'aguardando',criado:Date.now()});
@@ -6513,8 +6674,8 @@ function dmRegistrar(o){
 function dmCtLabel(o){ return {DIGITEVEN:'PAR',DIGITODD:'ÍMPAR',DIGITUNDER:'UNDER '+o.barrier,DIGITOVER:'OVER '+o.barrier}[o.ct]||o.ct; }
 async function dmComprar(o){
   const g=o.g, r0=o.ratio||(o.ct==='DIGITEVEN'||o.ct==='DIGITODD'?0.95:null);
-  let stake=dmStake0();
-  if(g>0){
+  let stake=o.stakeFix&&g===0?o.stakeFix:dmStake0();
+  if(g>0 && !o.stakeFix){
     if((cfg.dm_galeModo||'auto')==='auto' && o.ratio) stake=(o.perda+dmStake0()*o.ratio)/o.ratio;       // recupera as perdas + o lucro da 1ª entrada
     else stake=dmStake0()*Math.pow(+cfg.dm_mult||2.1,g);
   }
@@ -6556,6 +6717,7 @@ function dmPoc(c){
     t.bateu=jb&&dSaida!=null?(jb.d===dSaida):null; t.dJogo=jb?jb.d:null; t.dSaida=dSaida;
     const won=t.profit>0;
     DM.sess.pl+=t.profit; won?DM.sess.g++:DM.sess.r++;
+    if(o.es) try{ esResultado(o,t,won); }catch(e){ console.warn('estratégia',e); }
     dmAddLog({...o,res:won?'green':'red',nivel:t.g,stake:t.stake,profit:t.profit,cid:t.cid,exitT:t.exitT,exitQ:t.exitQ,entryT:t.entryT,planT:o.T+t.g*o.step,alvo:t.alvo,pt:t.pt,certo:t.certo,bateu:t.bateu,dJogo:t.dJogo,dSaida:t.dSaida});
     if(won){ o.estado='green'; }
     else{ o.perda+=t.stake; if(t.g<o.maxN){ o.g=t.g+1; o.estado='aguardando'; } else o.estado='red'; }
@@ -6573,7 +6735,7 @@ setInterval(()=>{
       // modo estrito: se já passou do ponto de acertar o tick do jogo, não entra
       if((cfg.dm_estrito??1) && now+dmLat()>J.fimJan-0.15){ o.estado='perdido'; dmAddLog({...o,res:'não enviada',obs:`sem tempo para acertar o tick ${hmsOf(J.alvo)} (${o.g?'G'+o.g:'TS'}) — modo estrito`,stake:0,profit:0,nivel:o.g,planT:Tg,alvo:J.alvo}); continue; }
       if(!(cfg.dm_estrito??1) && now>Tg+1){ o.estado='perdido'; dmAddLog({...o,res:'não enviada',obs:`perdeu o horário (${hmsOf(Tg)})`,stake:0,profit:0,nivel:o.g}); continue; }
-      const m=dmPodeOperar(); if(m){ o.estado='parado'; dmAddLog({...o,res:'não enviada',obs:m,stake:0,profit:0,nivel:o.g}); continue; }
+      const m=dmPodeOperar(o); if(m){ o.estado='parado'; dmAddLog({...o,res:'não enviada',obs:m,stake:0,profit:0,nivel:o.g}); continue; }
       dmComprar(o);
     }
   }
@@ -6622,7 +6784,7 @@ function dmSyncHtml(){
     ${card('Exemplo agora',hmsOf(ex.alvo),`para o jogo ${hmsOf(ex.alvo)} envia às ${hmsOf(ex.envio)}.${String(Math.round((ex.envio%1)*10))} (janela ${hmsOf(ex.iniJan)}→${hmsOf(ex.fimJan)})`)}
   </div>`;
 }
-function dmLive(){ const sy=$('#dmSync'); if(sy) sy.innerHTML=dmSyncHtml(); const r=$('#dmRobos'); if(r) r.innerHTML=dmRobosHtml(); const a=$('#dmLog'); if(a) a.innerHTML=dmLogHtml(); const b=$('#dmResumo'); if(b) b.innerHTML=dmResumoHtml(); const c=$('#dmOrd'); if(c) c.innerHTML=dmOrdHtml(); }
+function dmLive(){ try{ esLive(); }catch(e){} const sy=$('#dmSync'); if(sy) sy.innerHTML=dmSyncHtml(); const r=$('#dmRobos'); if(r) r.innerHTML=dmRobosHtml(); const a=$('#dmLog'); if(a) a.innerHTML=dmLogHtml(); const b=$('#dmResumo'); if(b) b.innerHTML=dmResumoHtml(); const c=$('#dmOrd'); if(c) c.innerHTML=dmOrdHtml(); }
 function dmResumoHtml(){
   const s=DM.sess;
   return `<div class="cards">${card('Conta',DM.ok?(DM.virt?'DEMO '+DM.loginid:'⛔ REAL'):'—',DM.ok?DM.cur:'desconectada')}${card('Saldo',DM.bal!=null?DM.bal.toFixed(2):'—',DM.cur)}
@@ -6648,10 +6810,18 @@ VIEWS.demo={nome:'💼 Conta Demo',live:dmLive,html(){
       <label><input type="checkbox" id="dmLembrar" ${localStorage.getItem('dpi_demo_tok')?'checked':''}> lembrar neste navegador</label>
       <button class="pri" onclick="dmConectar()">🔌 CONECTAR</button><button onclick="dmDesconectar()">desconectar</button><button class="dan" onclick="dmEsquecer()">apagar token</button>
     </div>
+    <div class="ctl"><button class="pri" onclick="dmOAuth()">🔐 ENTRAR COM A DERIV (sem token)</button><label>App ID ${inp('dm_appId',90,'placeholder="ex.: 12345"')}</label></div>
+    <details class="nota"><summary><b>Como liberar o "Entrar com a Deriv"</b> (uma vez só)</summary>
+      1) Entre em <b>developers.deriv.com</b> (ou api.deriv.com) com sua conta e crie um aplicativo (Register application / Create app).<br>
+      2) Em <b>Redirect URL</b> coloque o endereço do site: <b>${location.origin.startsWith('http')?location.origin+'/':'https://dolar-par-impar-julio.netlify.app/'}</b> · permissões <b>Read</b> e <b>Trade</b>.<br>
+      3) Copie o número do <b>App ID</b> e cole no campo acima.<br>
+      4) Clique em 🔐 ENTRAR COM A DERIV, faça o login e autorize. A Deriv devolve para o site com as contas; o HTML pega <b>só a conta DEMO (VRTC…)</b>, descarta a real e conecta sozinho.
+    </details>
     <div id="dmMsg" class="nota">${DM.msg}</div>
     <div class="nota">Como pegar o token: entre na Deriv, <b>troque para a conta Demo</b> (login VRTC…), vá em Configurações da conta → Segurança → <b>Token da API</b>, marque <b>Ler</b> e <b>Negociar</b> e crie. O token fica só neste navegador. <b>Trava:</b> se o token for de conta real, o HTML não compra nada.</div>
   </div>
-  <div class="panel"><h3>Gestão</h3><div class="ctl">
+  ${esPanelHtml()}
+  <div class="panel"><h3>Gestão dos robôs</h3><div class="ctl">
     <label><input type="checkbox" ${cfg.dm_on?'checked':''} onchange="cfg.dm_on=this.checked?1:0;DM.parado='';saveCfg();dmLive();dmHeader()"> <b>OPERAR AUTOMÁTICO NA DEMO</b></label>
     <label>Stake inicial (mín. 0,35) ${inp('dm_stake',60)}</label>
     <label>Gale ${sel('dm_galeModo',[['auto','automático (recupera + lucro)'],['mult','multiplicador fixo']])}</label>
