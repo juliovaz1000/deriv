@@ -409,7 +409,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.22 · 30/09/2026 · aba 10 segundos + 🔗 interligado 5s/10s/20s só 100%';
+const VERSAO='v3.24 · 30/09/2026 · com o interligado ligado só ele avisa (robôs calados)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -425,7 +425,7 @@ const DEF = {
   limit: 5000, pages: 20, pip: 0, proxy: '', auto: 10, janela: 'n:2000', bank: 'Dólar', lastId: 0,
   padL: 3, padG: 1, padMin: 10, padAss: 80, padAlert: 1,
   bt_tipo: 'seq', bt_n: 4, bt_dir: 'contra', bt_pad: 'VVG', bt_cor: 'G', bt_dig: 0,
-  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, es_on: 0, es_estr: 'popup', es_base: 0.35, es_gale: 2, es_modo: 'rec', es_mult: 2.1, es_rec: 1, es_sw: 0, es_sl: 0, es_max: 0, es_aposRed: 0, es_aposWin: 0, dm_appId: '', srd_fonte: 'c1', srd_esp: 2, srd_para: 1, srd_pay: 85, srd_base: 1, srd_ini: 100, srd_gale: 2, srd_rec: 1, srd_conta: 0, p10_on: 0, p10_cruz: 1, p10_n: 5000, p10_hpMin: 3, p10_rbMin: 30, p10_rbPulo: 20, ra_w10: 1, ra_min10: 25, il_on: 0, il_w5: 1, il_w10: 1, il_w20: 1, il_minF: 3, il_nivel: 0, il_gale: 0, il_lead: 3, il_sc: 1, il_rb: 1, il_hp: 1, il_minCasos: 12, il_pulo: 15, il_hpMin: 6, il_n: 5000, il_bloq: 1, il_dif: 0, il_pop: 1, il_horiz: 90, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
+  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, es_on: 0, es_estr: 'popup', es_base: 0.35, es_gale: 2, es_modo: 'rec', es_mult: 2.1, es_rec: 1, es_sw: 0, es_sl: 0, es_max: 0, es_aposRed: 0, es_aposWin: 0, dm_appId: '', srd_fonte: 'c1', srd_esp: 2, srd_para: 1, srd_pay: 85, srd_base: 1, srd_ini: 100, srd_gale: 2, srd_rec: 1, srd_conta: 0, p10_on: 0, p10_cruz: 1, p10_n: 5000, p10_hpMin: 3, p10_rbMin: 30, p10_rbPulo: 20, ra_w10: 1, ra_min10: 25, il_on: 0, il_w5: 1, il_w10: 1, il_w20: 1, il_minF: 3, il_nivel: 0, il_gale: 0, il_lead: 3, il_sc: 1, il_rb: 1, il_hp: 1, il_minCasos: 12, il_pulo: 15, il_hpMin: 6, il_n: 5000, il_bloq: 1, il_dif: 0, il_pop: 1, il_horiz: 90, il_alvo: 20, il_so: 1, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
   sc_min: 20, sc_skip: 12, sc_top: 40, sc_digit: 5, sc_digit_skip: 3,
   sc_sum_min: 2, sc_sum_max: 5, sc_sum_skip: 8, autoOn: 1, derivFallback: 1,
   rb_popup: 1, rb_auto_min: 20, rb_auto_top: 100, rb_auto_only100: 1, rb_auto_family: 'ambos', rb_auto_pulo: 500, rb_manual_create: 1, rb_auto_nivel: 2, histShow: 1000, histFixed: 0, histCols: 20, hpMinSeq: 2, hpMinOc: 5, hpOrd: 'g2',
@@ -3790,7 +3790,7 @@ function cfCheck(){
       A.tent.push({g:A.g,T:A.Tcur,d:x.d,p:x.p,alvo:A.alvoCur,n:A.nCur});
       if(x.p===A.alvoCur) cfFecha(A,'green');
       else if(A.g>=2) cfFecha(A,'red','perdeu no G2');
-      else { A.g++; A.estado='aguardando'; A.espera=0; if(CF.pop===A.id) cfPopup(); }
+      else { A.g++; A.estado='aguardando'; A.espera=0; if(CF.pop===A.id&&!cfg.il_on) cfPopup(); }
     }
   }
   // 2) aguardando o gale: entra quando aparecer a próxima confluência
@@ -3820,7 +3820,7 @@ function cfCheck(){
   try{ CF.ativo.forca=fzForca({alvo:dec.alvo,ap:CF.ativo.nCur,c:CF.ativo.contra,s100:cfTop(CF.ativo.sinais),extras:CF.ativo.extras}).forca; }catch(e){}
   try{ esSinal(CF.ativo); }catch(e){ console.warn('estratégia',e); }
   if((cfg.cf_pop??1)&&!cfg.il_on) cfPopup();
-  beep();
+  if(!cfg.il_on) beep();
   if(['scan','soma'].includes(S.tab)) cfLive();
 }
 // apoio (quantos sinais de cada cor) de cada jogo — guardado para a simulação com troca de cor
@@ -3843,9 +3843,9 @@ function cfDec(T,ap,motivo){ CF.dec=(CF.dec||[]); if(CF.dec.length&&CF.dec.at(-1
 function cfFecha(A,res,obs=''){
   A.fim=true; A.res=res; A.obs=obs;
   CF.log.push({forca:A.forca,n100:A.n100??cfTop(A.sinais),T0:A.T0,step:A.step,alvo:A.alvo,res,nivel:res==='green'?A.g:-1,tent:A.tent,sinais:A.sinais,apoios:A.apoios,obs,bank:A.bank,extras:A.extras||[]});
-  cfSave(); try{ ATU.ult={T:Date.now(),txt:`💪 Força aprendeu com a entrada ${hmsOf(A.T0/1000)} (${res==='green'?'✅ '+NIVEL[A.g]:res}) · ${fzModelo().n} entradas`}; atuRender(); pgChip(); }catch(e){}
+  cfSave(); try{ if(!ilSo()) ATU.ult={T:Date.now(),txt:`💪 Força aprendeu com a entrada ${hmsOf(A.T0/1000)} (${res==='green'?'✅ '+NIVEL[A.g]:res}) · ${fzModelo().n} entradas`}; atuRender(); pgChip(); }catch(e){}
   try{ esFechou(CF.log.at(-1)); }catch(e){ console.warn('estratégia',e); }
-  try{ if(!bvC2()) bvProcessa(CF.log.at(-1)); cfaAuto(); }catch(e){ console.warn('banca virtual',e); } if(CF.pop===A.id) cfPopup();
+  try{ if(!bvC2()) bvProcessa(CF.log.at(-1)); cfaAuto(); }catch(e){ console.warn('banca virtual',e); } if(CF.pop===A.id&&!cfg.il_on) cfPopup();
   if(['scan','soma'].includes(S.tab)){ cfLive(); cf2Live(); }
 }
 
@@ -3924,7 +3924,7 @@ function cfExtrasRefresh(){
     const fz=document.getElementById('cfForca'); if(fz) fz.innerHTML=fzBarraHtml(fzDoAtivo(A));
     if(A.g===0) try{ A.extras=cfExtras(A.Tcur).map(x=>({tipo:x.tipo,txt:x.txt,alvo:x.alvo})); }catch(_){}
   }
-  if(CF2.ativo && !CF2.ativo.fim && CF2.pop===CF2.ativo.id) cf2PopRender();
+  if(CF2.ativo && !CF2.ativo.fim && CF2.pop===CF2.ativo.id && !cfg.il_on) cf2PopRender();
 }
 function cfToggleRob(tipo,id){ const L=tipo==='rb'?RBOTS:SRB, r=L.find(x=>x.id===id); if(!r) return; r.cfPop=r.cfPop===false; tipo==='rb'?rbSave():srSave(); fillRes(); }
 function cfRobBtn(tipo,r){ return `<button class="${r.cfPop===false?'':'cfon'}" onclick="cfToggleRob('${tipo}','${r.id}')" title="mostrar este robô no popup da confluência quando apontar o mesmo jogo">${r.cfPop===false?'➕ popup confl.':'➕ no popup confl.'}</button>`; }
@@ -4204,7 +4204,7 @@ function cf2Fase(){
   else { const falta=Math.ceil(A.Tcur/1000-srvNow()); f.textContent=(falta>0?`faltam ${falta}s`:'em jogo…')+` · apoio ${A.nCur}`; }
 }
 setInterval(cf2Fase,500);
-function cf2Refresh(){ if(CF2.pop) cf2PopRender(); if(['scan','soma'].includes(S.tab)) cf2Live(); }
+function cf2Refresh(){ if(CF2.pop && !cfg.il_on) cf2PopRender(); if(['scan','soma'].includes(S.tab)) cf2Live(); }
 
 // ---------- relatório 2 ----------
 function cf2Relatorio(){
@@ -4787,6 +4787,8 @@ function ilTempos(){ return IL_TEMPOS.filter(s=>+(cfg['il_w'+s]??1)); }
 function ilNivel(){ return Math.max(0,Math.min(2,+(cfg.il_nivel??0))); }
 function ilGale(){ return Math.max(0,Math.min(2,+(cfg.il_gale??0))); }
 function ilMinF(){ return Math.max(2,+(cfg.il_minF??3)); }
+function ilSo(){ return !!cfg.il_on && +(cfg.il_so??1)===1; }   // interligado ligado = só ele avisa
+function ilAlvoS(){ return +(cfg.il_alvo??20)===5?5:+(cfg.il_alvo??20)===10?10:20; }   // segundos em que o interligado entra
 function ilMinCasos(){ return Math.max(5,+(cfg.il_minCasos??12)); }
 function ilW(s){ let W=liveW(d5BankName(s))||[]; const n=Math.max(1000,+cfg.il_n||5000); return W.length>n?W.slice(-n):W; }
 function ilFresco(W,s){ return W.length>=200 && srvNow()*1000-W.at(-1).t < s*1000+15000; }
@@ -4859,7 +4861,7 @@ function ilColeta(){
   for(const s of ilTempos()){
     let L=[]; try{ L=ilAponta(s); }catch(e){ console.warn('interligado '+s+'s',e); }
     for(const x of L){
-      if(x.T<=agora||x.T>hz||x.T%5000) continue;
+      if(x.T<=agora||x.T>hz||x.T%(ilAlvoS()*1000)) continue;            // só os segundos do jogo alvo (padrão: 20s)
       const g=M.get(x.T)||{T:x.T,f:{0:[],1:[]}}; g.f[x.alvo].push(x); M.set(x.T,g);
     }
   }
@@ -4882,7 +4884,7 @@ function ilScan(){
     for(const alvo of [0,1]){
       if(!ilCond(g,alvo)) continue;
       if(g.T-agora<lead) continue;                                        // tarde demais para avisar
-      const E={id:'IL'+g.T,T0:g.T,alvo,g:0,tent:[],fim:false,abriu:Date.now(),fontes:g.f[alvo].map(ilSlim),n0:g.f[alvo].length,contra:g.f[1-alvo].length,gstep:5000};
+      const E={id:'IL'+g.T,T0:g.T,alvo,g:0,tent:[],fim:false,abriu:Date.now(),fontes:g.f[alvo].map(ilSlim),n0:g.f[alvo].length,contra:g.f[1-alvo].length,gstep:ilAlvoS()*1000};
       E.forca=ilForca(ilFeatObj(E)).forca;
       IL.abertas.push(E); IL.abertas.sort((a,b)=>a.T0-b.T0);
       beep(); try{ atuAviso(`🔗 Interligado: ${E.fontes.length} fontes 100% → ${NOME(alvo)} às ${hmsOf(g.T/1000)}`,'il'); }catch(e){}
@@ -4955,7 +4957,7 @@ function ilPopup(){
   const tipo={sc:'🔬',rb:'🤖',hp:'🕐'};
   p.innerHTML=`<div class="rbpc ilpop">
     <div class="rbpt">🔗 INTERLIGADO · ${E.fontes.length} fontes 100% apontam ${tagc(E.alvo)}</div>
-    <div class="nota">${ilTemposTxt(E.fontes)} · ${E.contra?`<span class="ruim">${E.contra} contra</span>`:'nenhuma contra'} · ${ilGale()?`até ${IL_NT[ilGale()]} (de 5 em 5s)`:'tiro seco'}</div>
+    <div class="nota">${ilTemposTxt(E.fontes)} · ${E.contra?`<span class="ruim">${E.contra} contra</span>`:'nenhuma contra'} · jogo de ${ilAlvoS()}s · ${ilGale()?`até ${IL_NT[ilGale()]} (de ${ilAlvoS()} em ${ilAlvoS()}s)`:'tiro seco'}</div>
     <div class="rbpbig">ENTRAR ${tagc(E.alvo)} às <b>${hmsOf(E.T0/1000)}</b></div>
     <div id="ilFase" class="big"></div>
     ${ilGale()?`<div class="rbsched">${[0,1,2].slice(0,ilGale()+1).map(g=>`<div>${g?IL_NT[g]:'🎯 TIRO SECO'}<b>${hmsOf((E.T0+g*E.gstep)/1000)}</b></div>`).join('')}</div>`:''}
@@ -4986,7 +4988,8 @@ function ilPopRefresh(){
 // ---------- liga / desliga ----------
 function ilLigar(on){
   cfg.il_on=on?1:0;
-  if(on){ cfg.ra_on=1; cfg.ra_w5=1; cfg.ra_w10=1; cfg.ra_w20=1; cfg.p5_on=1; cfg.p10_on=1; IL.k=''; setTimeout(()=>{ try{ raRodar(false); }catch(e){} },500); }
+  if(on){ try{ if(CF.pop){ CF.pop=null; if(!IL.pop) rbPopupFechar(); } if(typeof CF2!=='undefined'){ CF2.pop=null; const c2=$('#cf2Pop'); if(c2) c2.style.display='none'; } }catch(e){}
+    cfg.ra_on=1; cfg.ra_w5=1; cfg.ra_w10=1; cfg.ra_w20=1; cfg.p5_on=1; cfg.p10_on=1; IL.k=''; setTimeout(()=>{ try{ raRodar(false); }catch(e){} },500); }
   saveCfg(); ilBtn();
   try{ atuAviso(on?'🔗 Interligado LIGADO · popups da confluência desligados · robôs automáticos 5s/10s/20s ligados':'🔗 Interligado desligado · popups da confluência voltam','il'); }catch(e){}
   if(!on && IL.pop){ rbPopupFechar(); IL.pop=null; }
@@ -5041,10 +5044,11 @@ function ilAgendaHtml(){
 }
 function ilLive(){ const e=$('#ilAgenda'); if(e) e.innerHTML=ilAgendaHtml(); const s=$('#ilStatus'); if(s) s.innerHTML=ilStatusHtml(); }
 VIEWS.il={nome:'🔗 Interligado',html(){
-  return `<div class="panel ilpanel"><h3>🔗 Interligado 5s + 10s + 20s <small>só fontes 100% · qualquer segundo · popup próprio</small></h3>
+  return `<div class="panel ilpanel"><h3>🔗 Interligado 5s + 10s + 20s <small>só fontes 100% · entra no jogo de ${ilAlvoS()}s · popup próprio</small></h3>
     <div class="ctl">
       ${ilOn()?`<button class="ruimbtn" onclick="ilLigar(false)">⏸ DESINTERLIGAR</button>`:`<button class="okbtn" onclick="ilLigar(true)">🔗 INTERLIGAR</button>`}
       ${IL_TEMPOS.map(s=>`<label><input type="checkbox" ${+(cfg['il_w'+s]??1)?'checked':''} onchange="cfg.il_w${s}=this.checked?1:0;saveCfg();IL.k='';fillRes()"> ${s}s</label>`).join('')}
+      <label>Entrar no jogo de ${sel('il_alvo',[[20,'20s (:00 :20 :40)'],[10,'10s'],[5,'5s (qualquer segundo)']])}</label>
       <label>Mínimo de fontes ${sel('il_minF',[[2,'2'],[3,'3'],[4,'4'],[5,'5'],[6,'6']])}</label>
       <label>100% em ${sel('il_nivel',[[0,'TS (sem gale)'],[1,'até G1'],[2,'até G2']])}</label>
       <label>Entrada ${sel('il_gale',[[0,'tiro seco'],[1,'até G1'],[2,'até G2']])}</label>
@@ -5060,11 +5064,12 @@ VIEWS.il={nome:'🔗 Interligado',html(){
       <label><input type="checkbox" ${(cfg.il_bloq??1)?'checked':''} onchange="cfg.il_bloq=this.checked?1:0;saveCfg();IL.k=''"> não entrar com fonte contra</label>
       <label><input type="checkbox" ${+(cfg.il_dif??0)?'checked':''} onchange="cfg.il_dif=this.checked?1:0;saveCfg();IL.k=''"> exigir 2 tempos diferentes</label>
       <label><input type="checkbox" ${+(cfg.il_pop??1)?'checked':''} onchange="cfg.il_pop=this.checked?1:0;saveCfg()"> popup</label>
+      <label title="desmarque para os robôs, robôs de segundos e Under/Over voltarem a abrir popup próprio"><input type="checkbox" ${+(cfg.il_so??1)?'checked':''} onchange="cfg.il_so=this.checked?1:0;saveCfg()"> só o interligado avisa</label>
       <button onclick="IL.bk={};IL.hp={};IL.k='';status('🔗 recalculando as listas 100%…','ok')">↻ recalcular</button>
       <button onclick="if(confirm('Limpar o relatório do interligado?')){IL.log=[];ilSave();IL.fz.key='';fillRes()}">🧹 limpar relatório</button>
     </div>
-    <div class="nota">Com o <b>🔗 INTERLIGAR</b> ligado: os popups da Confluência 1 e 2 ficam desligados (os relatórios deles continuam), os robôs automáticos de 5s, 10s e 20s ficam ligados renovando a cada ${raMin()} min, e as listas 100% de cada tempo são refeitas a cada 3 min (horas pagantes a cada 10 min).
-      Uma fonte só conta se está <b>100% ${IL_NT[ilNivel()]==='TS'?'no tiro seco':'até '+IL_NT[ilNivel()]}</b> com pelo menos ${ilMinCasos()} casos (robôs: metade disso). Quando ${ilMinF()} ou mais apontam a mesma cor para o <b>mesmo segundo</b> — de qualquer tempo, não só os segundos de 20 — o popup avisa com antecedência.
+    <div class="nota">Com o <b>🔗 INTERLIGAR</b> ligado: os popups da Confluência 1 e 2 ficam desligados (os relatórios deles continuam)${+(cfg.il_so??1)?', os robôs, robôs de segundos e Under/Over param de abrir popup e bipar (continuam rodando por trás e contando no interligado)':''}, os robôs automáticos de 5s, 10s e 20s ficam ligados renovando a cada ${raMin()} min, e as listas 100% de cada tempo são refeitas a cada 3 min (horas pagantes a cada 10 min).
+      Uma fonte só conta se está <b>100% ${IL_NT[ilNivel()]==='TS'?'no tiro seco':'até '+IL_NT[ilNivel()]}</b> com pelo menos ${ilMinCasos()} casos (robôs: metade disso). Quando ${ilMinF()} ou mais apontam a mesma cor para o <b>mesmo segundo</b> de um jogo de <b>${ilAlvoS()}s</b>${ilAlvoS()===20?' (:00, :20 e :40)':''} — as fontes de 5s e 10s contam como confirmação quando caem nesse segundo — o popup avisa com antecedência.
       O mesmo padrão aparecendo no scanner e num robô do mesmo tempo conta uma vez só.</div>
   </div><div id="res"></div>`;
 },res(){
@@ -5871,6 +5876,7 @@ function rbPlacar(rbId){
   return {g,r,n:g+r,L};
 }
 function rbPopup(rb,sig){
+  if(ilSo()) return;                                             // só o interligado avisa
   if(!cfg.rb_popup||rb.popup===false||rb.on===false) return;
   const p=$('#rbPopDPI'); if(!p) return;
   RB_OPEN_POPUP_ID=rb.id; RB_OPEN_SIG=sig.key;
@@ -6241,6 +6247,7 @@ function srExcelente(r){
 function srPodePopup(r){ return cfg.sr_popup && r.popup!==false && (!cfg.sr_popSoExc || srExcelente(r)); }
 function srHms(T){ return hmsOf(T); }
 function srPopup(r,s){
+  if(ilSo()) return;
   const p=$('#rbPopDPI'); if(!p) return;
   SR_POP_KEY=s.key; RB_OPEN_SIG=null;
   const pl=srPlacar(r.id);
@@ -6672,6 +6679,7 @@ function uoResolve(){
 }
 function uoOnSlots(recs){ if(UOB.length) uoResolve(); }
 function uoPopup(rb,s){
+  if(ilSo()) return;
   const p=$('#rbPopDPI'); if(!p) return;
   UO_POP=s.key; RB_OPEN_SIG=null; SR_POP_KEY=null;
   const st=UO_STATS[rb.id], pl=uoPlacar(rb.id);
@@ -7559,8 +7567,780 @@ async function trocarBanco(b) {
   renderTab();          // redesenha a aba inteira (os textos com o intervalo mudam junto)
 }
 
+// =================== 🧠 INTELIGÊNCIA ===================
+// Analisa automaticamente o histórico dos relatórios (CF1, CF2, IL)
+// e devolve diagnóstico: o que causou red, padrões perigosos e
+// nível de confiança dos próximos sinais.
+
+(function(){
+// ---- helpers internos ----
+function iaAllLogs(){
+  const c1=(typeof CF!=='undefined'?CF.log:[]).filter(x=>x.res==='green'||x.res==='red').map(x=>({...x,_src:'CF1'}));
+  const c2=(typeof CF2!=='undefined'?CF2.log:[]).filter(x=>x.res==='green'||x.res==='red').map(x=>({...x,_src:'CF2'}));
+  const il=(typeof IL!=='undefined'?IL.log:[]).filter(x=>x.res==='green'||x.res==='red').map(x=>({...x,_src:'IL'}));
+  return [...c1,...c2,...il].sort((a,b)=>a.T0-b.T0);
+}
+
+function iaSeqs(L){
+  // retorna array de sequências: {cor, len, inicio, fim, items}
+  const seqs=[]; let cur=null;
+  for(const x of L){
+    if(!cur||cur.cor!==x.res){ if(cur) seqs.push(cur); cur={cor:x.res,len:1,inicio:x.T0,fim:x.T0,items:[x]}; }
+    else{ cur.len++; cur.fim=x.T0; cur.items.push(x); }
+  }
+  if(cur) seqs.push(cur);
+  return seqs;
+}
+
+// Detecta se a entrada tinha excesso de confirmação (muitas fontes apontando)
+// ---- soma dos últimos 5 resultados antes de cada sinal ----
+function iaSoma5(L,idx){
+  // soma de greens nos 5 resultados anteriores ao índice idx (0–5)
+  const pre=L.slice(Math.max(0,idx-5),idx);
+  return pre.reduce((s,x)=>s+(x.res==='green'?1:0),0);
+}
+
+function iaSomaGrupos(L){
+  // anota cada entrada com _soma5 e agrupa por valor
+  const La=L.map((x,i)=>({...x,_soma5:iaSoma5(L,i)}));
+  const grupos={};
+  for(const x of La){
+    const k=x._soma5;
+    if(!grupos[k]) grupos[k]={soma:k,n:0,greens:0};
+    grupos[k].n++; if(x.res==='green') grupos[k].greens++;
+  }
+  return {
+    grupos:Object.values(grupos).sort((a,b)=>a.soma-b.soma).map(g=>({...g,taxa:g.n?g.greens/g.n:0})),
+    La
+  };
+}
+
+function iaSomaAnalise(L){
+  // análise completa: soma atual, coincidências históricas, alerta
+  if(L.length<3) return null;
+  const somaAtual=iaSoma5(L,L.length); // soma dos últimos 5
+  const {grupos}=iaSomaGrupos(L);
+  const MARGEM=1;
+  const coincidentes=grupos.filter(g=>Math.abs(g.soma-somaAtual)<=MARGEM);
+  const totalCasos=coincidentes.reduce((s,g)=>s+g.n,0);
+  const totalGreens=coincidentes.reduce((s,g)=>s+g.greens,0);
+  const taxaCoincid=totalCasos?totalGreens/totalCasos:null;
+  // só é relevante com >=5 casos coincidentes
+  const relevante=totalCasos>=5;
+  return {somaAtual,grupos,coincidentes,totalCasos,taxaCoincid,relevante};
+}
+
+function iaNivelConf(x){
+  const f=x.fontes||0; const ap=x.apoio0||x.n100||0; const c=x.contra||0;
+  const forca=x.forca||0;
+  if(forca>=5||ap>=8||f>=5) return 'excessiva';
+  if(forca>=3||ap>=5||f>=3) return 'alta';
+  if(forca>=1||ap>=2||f>=1) return 'normal';
+  return 'baixa';
+}
+
+function iaCausaRed(x){
+  const causas=[];
+  const seqAntes=(x._seqAntesTam||0);
+  if(seqAntes>=3) causas.push(`sequência de ${seqAntes} greens antes`);
+  if(iaNivelConf(x)==='excessiva') causas.push('excesso de confirmação');
+  if((x.contra||0)>=3) causas.push(`${x.contra} sinais contra`);
+  if((x.nivel!=null&&x.nivel<0)&&(x.gMax||0)>=3) causas.push('forçou até gale alto');
+  const minuto=x.T0?new Date(x.T0).getMinutes():-1;
+  if([0,15,30,45].includes(minuto)) causas.push('entrada em minuto "cheio" (00/15/30/45)');
+  if(x.red2) causas.push('entrada já sinalizada como arriscada (red2)');
+  return causas.length?causas:['sem causa clara identificada'];
+}
+
+function iaProximoNivel(L){
+  // Avalia se os próximos sinais estão num ambiente confiável ou perigoso
+  if(!L.length) return {nivel:'sem dados',score:0,motivos:[]};
+  const recentes=L.slice(-20);
+  const ultimos5=L.slice(-5);
+  const gr5=ultimos5.filter(x=>x.res==='green').length;
+  const rd5=ultimos5.filter(x=>x.res==='red').length;
+  const seqs=iaSeqs(L); const ultima=seqs.at(-1);
+  const motivos=[];
+  let score=50; // 0=perigoso 100=confiável
+
+  // sequência atual de green aumenta confiança mas com ressalva
+  if(ultima&&ultima.cor==='green'){
+    if(ultima.len>=5){ score-=15; motivos.push(`⚠ ${ultima.len} greens seguidos — risco de virada`); }
+    else if(ultima.len>=3){ score+=5; motivos.push(`✅ ${ultima.len} greens seguidos — momento bom`); }
+  }
+  // sequência atual de red → cautela mas pode ser oportunidade
+  if(ultima&&ultima.cor==='red'){
+    if(ultima.len>=3){ score-=20; motivos.push(`🔴 ${ultima.len} reds seguidos — evitar entrar agora`); }
+    else{ score-=5; motivos.push(`⚠ Último resultado foi red`); }
+  }
+  // taxa nos últimos 5
+  if(gr5>=4){ score+=10; motivos.push(`✅ ${gr5}/5 greens recentes`); }
+  else if(rd5>=3){ score-=15; motivos.push(`🔴 ${rd5}/5 reds recentes`); }
+
+  // excesso de confiança nos últimos reds
+  const reds=recentes.filter(x=>x.res==='red');
+  const redsExcesso=reds.filter(x=>iaNivelConf(x)==='excessiva').length;
+  if(redsExcesso>=2){ score-=10; motivos.push(`⚠ ${redsExcesso} reds recentes com excesso de confirmação — padrão perigoso`); }
+
+  // taxa geral
+  const totR=recentes.length; const grR=recentes.filter(x=>x.res==='green').length;
+  const taxaR=totR?grR/totR:0;
+  if(taxaR>=0.75) { score+=8; motivos.push(`📈 Taxa recente: ${(taxaR*100).toFixed(0)}%`); }
+  else if(taxaR<0.5) { score-=8; motivos.push(`📉 Taxa recente: ${(taxaR*100).toFixed(0)}%`); }
+
+  // ---- soma dos últimos 5 ----
+  const sa=iaSomaAnalise(L);
+  let somaInfo=null;
+  if(sa&&sa.relevante&&sa.taxaCoincid!=null){
+    const pct=(sa.taxaCoincid*100).toFixed(0);
+    const label=`soma ${sa.somaAtual}/5`; // ex: "soma 3/5"
+    if(sa.taxaCoincid>=0.70){
+      score+=12; motivos.push(`🔢 Padrão soma ${sa.somaAtual}/5 → ${pct}% greens (${sa.totalCasos} casos) — padrão FAVORÁVEL`);
+    } else if(sa.taxaCoincid>=0.55){
+      score+=5; motivos.push(`🔢 Padrão soma ${sa.somaAtual}/5 → ${pct}% greens (${sa.totalCasos} casos)`);
+    } else if(sa.taxaCoincid<0.40){
+      score-=12; motivos.push(`🔢 Padrão soma ${sa.somaAtual}/5 → ${pct}% greens (${sa.totalCasos} casos) — padrão DESFAVORÁVEL`);
+    } else {
+      motivos.push(`🔢 Padrão soma ${sa.somaAtual}/5 → ${pct}% greens (${sa.totalCasos} casos)`);
+    }
+    somaInfo=sa;
+  }
+
+  score=Math.max(0,Math.min(100,score));
+  const nivel=score>=70?'confiável':score>=45?'moderado':'perigoso';
+  return {nivel,score,motivos,somaInfo};
+}
+
+function iaResumo(L){
+  const n=L.length; if(!n) return null;
+  const greens=L.filter(x=>x.res==='green');
+  const reds=L.filter(x=>x.res==='red');
+  const taxa=greens.length/n;
+  const seqs=iaSeqs(L);
+  const maxG=Math.max(0,...seqs.filter(s=>s.cor==='green').map(s=>s.len));
+  const maxR=Math.max(0,...seqs.filter(s=>s.cor==='red').map(s=>s.len));
+  // Anotar seq antes de cada entrada
+  let seqAntes=0; let corAntes=null;
+  const Lanotado=L.map(x=>{ const sa=corAntes===x.res?0:seqAntes; const r={...x,_seqAntesTam:corAntes&&corAntes!==x.res?seqAntes:0}; if(corAntes!==x.res){corAntes=x.res;seqAntes=1;}else{seqAntes++;} return r; });
+  // causas dos reds
+  const redsCausas=Lanotado.filter(x=>x.res==='red').map(x=>({T0:x.T0,_src:x._src,causas:iaCausaRed(x),conf:iaNivelConf(x)}));
+  // padrão: red após sequência de greens
+  const redAposSeq=redsCausas.filter(x=>x.causas.some(c=>c.startsWith('sequência')));
+  // padrão: excesso de confirmação
+  const redExcesso=redsCausas.filter(x=>x.conf==='excessiva');
+  // melhor cenário: onde o green aconteceu
+  const bonsGreens=greens.filter(x=>(x.nivel>=0&&x.nivel<=1));
+  return {n,greens:greens.length,reds:reds.length,taxa,maxG,maxR,redsCausas,redAposSeq,redExcesso,bonsGreens,Lanotado};
+}
+
+// ---- memória localStorage ----
+const IA_MEM_KEY='dpi_ia_memoria_v1';
+const IA_MEM_MAX=30;
+
+function iaMemLer(){ try{ return JSON.parse(localStorage.getItem(IA_MEM_KEY)||'[]')||[]; }catch(e){ return []; } }
+
+function iaMemSalvar(R,prox){
+  if(!R||!R.n) return;
+  // lê dados CFA se disponível
+  let cfaBestAp='—',cfaBestH='—',cfaBestF='—';
+  try{
+    if(typeof cfaRows==='function'){
+      const rows=cfaRows();
+      if(rows.length>=5){
+        const best=(G,rot)=>{ const b=G.filter(g=>g.n>=5).sort((a,b2)=>b2.g2/b2.n-a.g2/a.n||a.media-b2.media)[0]; return b?`${rot(b.k)}(${(100*b.g2/b.n).toFixed(0)}%)`:null; };
+        cfaBestAp=best(cfaGrupo(rows,r=>cfaFaixa(r.ap)),k=>k+' sinais')||'—';
+        cfaBestH=best(cfaGrupo(rows,r=>new Date(r.T).getHours()),k=>String(k).padStart(2,'0')+'h')||'—';
+        cfaBestF=best(cfaGrupo(rows,r=>r.fontes),k=>k+' fontes')||'—';
+      }
+    }
+  }catch(e){}
+  const seqs=iaSeqs(R.Lanotado||[]); const ultima=seqs.at(-1);
+  const snap={
+    T:Date.now(),
+    n:R.n,
+    greens:R.greens,
+    reds:R.reds,
+    taxa:+R.taxa.toFixed(4),
+    score:prox.score,
+    nivel:prox.nivel,
+    seqAtual:ultima?`${ultima.len}x ${ultima.cor}`:'—',
+    cfaBestAp,cfaBestH,cfaBestF,
+    redExcesso:R.redExcesso.length,
+    redAposSeq:R.redAposSeq.length
+  };
+  const arr=iaMemLer();
+  arr.push(snap);
+  try{ localStorage.setItem(IA_MEM_KEY,JSON.stringify(arr.slice(-IA_MEM_MAX))); }catch(e){}
+}
+
+// ---- painel CFA integrado ----
+function iaCfaPainel(){
+  if(typeof cfaRows!=='function') return '';
+  let rows;
+  try{ rows=cfaRows(); }catch(e){ return ''; }
+  if(!rows||rows.length<5) return `<div class="panel"><h3>📊 CFA — Dados das Confluências</h3><div class="nota">Mínimo de 5 entradas para análise CFA (${rows?rows.length:0} até agora).</div></div>`;
+
+  const best=(G,rot)=>{
+    const b=G.filter(g=>g.n>=5).sort((a,b)=>b.g2/b.n-a.g2/a.n||a.media-b.media)[0];
+    return b?{label:rot(b.k),pct:(100*b.g2/b.n).toFixed(0),n:b.n,media:b.media.toFixed(2)}:null;
+  };
+  const porAp=cfaGrupo(rows,r=>cfaFaixa(r.ap)).sort((a,b)=>{const O=['3','4','5','6–7','8–10','11–15','16+']; return O.indexOf(a.k)-O.indexOf(b.k);});
+  const porH=cfaGrupo(rows,r=>new Date(r.T).getHours()).sort((a,b)=>a.k-b.k);
+  const porF=cfaGrupo(rows,r=>r.fontes).sort((a,b)=>a.k-b.k);
+  const porCor=cfaGrupo(rows,r=>r.alvo);
+  const bestAp=best(porAp,k=>k+' sinais');
+  const bestH=best(porH,k=>String(k).padStart(2,'0')+'h');
+  const bestF=best(porF,k=>k+' fontes');
+  const bestCor=best(porCor,k=>k?'ÍMPAR':'PAR');
+
+  const mkCard=(titulo,b)=>b?
+    `<div style="background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px">
+      <div style="font-size:11px;color:var(--mu);margin-bottom:2px">${titulo}</div>
+      <div style="font-size:16px;font-weight:700;color:var(--g)">${b.label}</div>
+      <div style="font-size:12px;color:var(--mu)">${b.pct}% até G2 · ${b.n} entradas · gale médio ${b.media}</div>
+    </div>`
+    :`<div style="background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;color:var(--mu);font-size:12px">${titulo}: insuficiente</div>`;
+
+  // tabela nº confirmações
+  const tblAp=porAp.map(g=>{
+    const pct=(100*g.g2/g.n).toFixed(0);
+    const col=g.g2/g.n>=0.85?'var(--g)':g.g2/g.n>=0.70?'var(--am)':'var(--v)';
+    return `<tr><td><b>${g.k} sinais</b></td><td>${g.n}</td><td style="color:${col}"><b>${pct}%</b></td><td>${g.red}</td><td>${g.media.toFixed(2)}</td></tr>`;
+  }).join('');
+  // tabela hora
+  const tblH=porH.map(g=>{
+    const pct=(100*g.g2/g.n).toFixed(0);
+    const col=g.g2/g.n>=0.85?'var(--g)':g.g2/g.n>=0.70?'var(--am)':'var(--v)';
+    return `<tr><td><b>${String(g.k).padStart(2,'0')}h</b></td><td>${g.n}</td><td style="color:${col}"><b>${pct}%</b></td><td>${g.red}</td></tr>`;
+  }).join('');
+
+  return `<div class="panel" style="border-color:var(--az)">
+    <h3>📊 CFA — Condições mais favoráveis (lido ao vivo)</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-bottom:14px">
+      ${mkCard('🏆 Melhor faixa de apoio',bestAp)}
+      ${mkCard('🕐 Melhor hora',bestH)}
+      ${mkCard('📡 Melhor nº de fontes',bestF)}
+      ${mkCard('🎯 Cor que mais green',bestCor)}
+    </div>
+    <div class="grid2">
+      <div>
+        <b style="font-size:12px;color:var(--mu)">Por nº de confirmações</b>
+        <div class="tw" style="max-height:220px;margin-top:6px"><table>
+          <tr><th>Confirmações</th><th>Entradas</th><th>até G2</th><th>Reds</th><th>Gale médio</th></tr>
+          ${tblAp}
+        </table></div>
+      </div>
+      <div>
+        <b style="font-size:12px;color:var(--mu)">Por hora do dia</b>
+        <div class="tw" style="max-height:220px;margin-top:6px"><table>
+          <tr><th>Hora</th><th>Entradas</th><th>até G2</th><th>Reds</th></tr>
+          ${tblH}
+        </table></div>
+      </div>
+    </div>
+    <div class="nota" style="margin-top:8px">💡 Use essas condições para filtrar quando entrar: prefira horas e faixas de apoio com alta taxa até G2.</div>
+  </div>`;
+}
+
+// ---- painel histórico de memória ----
+function iaHistoricoHtml(){
+  const arr=iaMemLer();
+  if(arr.length<2) return `<div class="panel"><h3>🗂 Histórico de análises salvas</h3>
+    <div class="nota">Ainda sem histórico suficiente para comparação. Volte a esta aba em sessões futuras — cada visita salva um snapshot automático.</div></div>`;
+
+  const recentes=arr.slice().reverse().slice(0,10);
+  const primeiro=arr[0]; const ultimo=arr.at(-1);
+  const tendTaxa=((ultimo.taxa-primeiro.taxa)*100).toFixed(1);
+  const tendScore=ultimo.score-primeiro.score;
+  const tendCol=(v)=>v>0?'var(--g)':v<0?'var(--v)':'var(--mu)';
+
+  const linhas=recentes.map(s=>{
+    const dt=new Date(s.T);
+    const dtStr=`${dt.toLocaleDateString('pt-BR')} ${dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    const nivelCol=s.nivel==='confiável'?'var(--g)':s.nivel==='moderado'?'var(--am)':'var(--v)';
+    return `<tr>
+      <td style="font-size:11px;color:var(--mu)">${dtStr}</td>
+      <td>${s.n}</td>
+      <td style="color:${s.taxa>=0.6?'var(--g)':s.taxa>=0.45?'var(--am)':'var(--v)'}">${(s.taxa*100).toFixed(1)}%</td>
+      <td style="color:${nivelCol}"><b>${s.nivel}</b> (${s.score})</td>
+      <td style="font-size:11px">${s.seqAtual}</td>
+      <td style="font-size:11px;color:var(--mu)">${s.cfaBestH}</td>
+      <td style="font-size:11px;color:var(--mu)">${s.cfaBestAp}</td>
+      <td style="font-size:11px">${s.redExcesso>0?`<span class="ruim">${s.redExcesso} exc.</span>`:'—'}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="panel" style="border-color:var(--az)">
+    <h3>🗂 Histórico de análises salvas <span style="font-size:12px;font-weight:400;color:var(--mu)">(${arr.length} snapshots · últimos 10 exibidos)</span></h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:14px">
+      ${card('Evolução da taxa',`<span style="color:${tendCol(+tendTaxa)}">${tendTaxa>0?'+':''}${tendTaxa}%</span>`,`do 1º ao último snapshot`)}
+      ${card('Evolução do score',`<span style="color:${tendCol(tendScore)}">${tendScore>0?'+':''}${tendScore} pts</span>`,`do 1º ao último snapshot`)}
+      ${card('Snapshots salvos',String(arr.length),`máx ${IA_MEM_MAX} · salva a cada visita`)}
+    </div>
+    <div class="tw" style="max-height:320px"><table>
+      <tr><th>Quando</th><th>Entradas</th><th>Taxa</th><th>Nível (score)</th><th>Sequência</th><th>Melhor hora</th><th>Melhor apoio</th><th>Reds excess.</th></tr>
+      ${linhas}
+    </table></div>
+    <div class="nota" style="margin-top:8px">
+      <button onclick="(function(){try{localStorage.removeItem('${IA_MEM_KEY}');renderTab('ia');}catch(e){}})()">🗑 Limpar histórico</button>
+      <span style="margin-left:10px">Snapshot salvo automaticamente toda vez que a aba 🧠 é aberta.</span>
+    </div>
+  </div>`;
+}
+
+// ---- relatório hora a hora ----
+function iaRelatorioPorHora(L){
+  if(!L.length) return '';
+
+  // agrupa por hora
+  const porHora={};
+  for(const x of L){
+    const h=x.T0?new Date(x.T0).getHours():-1;
+    if(h<0) continue;
+    if(!porHora[h]) porHora[h]={h,E:[],n:0,greens:0,reds:0};
+    porHora[h].E.push(x); porHora[h].n++;
+    x.res==='green'?porHora[h].greens++:porHora[h].reds++;
+  }
+  const horas=Object.values(porHora).sort((a,b)=>a.h-b.h);
+
+  for(const H of horas){
+    H.E.sort((a,b)=>a.T0-b.T0);
+    H.taxa=H.greens/H.n;
+    // tiro seco: resultado isolado (viz. anterior e posterior de cor diferente ou ausentes)
+    H.tiroSecoG=0; H.tiroSecoR=0;
+    for(let i=0;i<H.E.length;i++){
+      const prev=i>0?H.E[i-1].res:null;
+      const next=i<H.E.length-1?H.E[i+1].res:null;
+      const iso=(prev===null||prev!==H.E[i].res)&&(next===null||next!==H.E[i].res);
+      if(iso) H.E[i].res==='green'?H.tiroSecoG++:H.tiroSecoR++;
+    }
+    H.tiroSeco=H.tiroSecoG+H.tiroSecoR;
+    // sequências internas à hora
+    const seqs=iaSeqs(H.E);
+    H.maxSeqG=Math.max(0,...seqs.filter(s=>s.cor==='green').map(s=>s.len));
+    H.maxSeqR=Math.max(0,...seqs.filter(s=>s.cor==='red').map(s=>s.len));
+    // fontes da hora
+    const fsrc=[...new Set(H.E.map(x=>x._src))].join(',');
+    H.fsrc=fsrc;
+  }
+
+  const comDados=horas.filter(h=>h.n>=2);
+  const rankTaxa=[...comDados].sort((a,b)=>b.taxa-a.taxa);
+  const melhor=rankTaxa[0]; const pior=rankTaxa.at(-1);
+
+  // totalizadores
+  const totN=horas.reduce((s,h)=>s+h.n,0);
+  const totG=horas.reduce((s,h)=>s+h.greens,0);
+  const totR=horas.reduce((s,h)=>s+h.reds,0);
+  const totTS=horas.reduce((s,h)=>s+h.tiroSeco,0);
+  const maxSeqGGlobal=Math.max(0,...horas.map(h=>h.maxSeqG));
+  const maxSeqRGlobal=Math.max(0,...horas.map(h=>h.maxSeqR));
+
+  // linha de cada hora
+  const linhas=horas.map(H=>{
+    const taxaCor=H.taxa>=0.65?'var(--g)':H.taxa<0.45?'var(--v)':'var(--am)';
+    const destMelhor=melhor&&H.h===melhor.h?'background:rgba(34,197,94,.08);outline:1px solid rgba(34,197,94,.3);':'';
+    const destPior=pior&&H.h===pior.h&&pior.h!==melhor?.h?'background:rgba(239,68,68,.07);outline:1px solid rgba(239,68,68,.25);':'';
+    const tag=melhor&&H.h===melhor.h?`<span class="ia-badge-safe">★ melhor</span>`:
+              pior&&H.h===pior.h&&H.n>=2?`<span class="ia-badge-risk">▼ pior</span>`:'';
+    const seqGTag=H.maxSeqG>=3?`<span style="color:var(--g);font-size:11px">+${H.maxSeqG}🟢</span>`:`${H.maxSeqG}`;
+    const seqRTag=H.maxSeqR>=3?`<span style="color:var(--v);font-size:11px;font-weight:700">${H.maxSeqR}🔴!</span>`:`${H.maxSeqR}`;
+    const tsTag=H.tiroSeco>0?`<span style="font-size:11px">${H.tiroSecoG>0?`<span style="color:var(--g)">${H.tiroSecoG}G</span>`:''}${H.tiroSecoR>0?`<span style="color:var(--v);margin-left:3px">${H.tiroSecoR}R</span>`:''}</span>`:'—';
+    return `<tr style="${destMelhor||destPior}">
+      <td style="text-align:center;font-weight:700">${String(H.h).padStart(2,'0')}h</td>
+      <td style="text-align:center">${H.n}</td>
+      <td style="text-align:center;color:var(--g)">${H.greens}</td>
+      <td style="text-align:center;color:var(--v)">${H.reds}</td>
+      <td style="text-align:center;font-weight:700;color:${taxaCor}">${(H.taxa*100).toFixed(0)}%</td>
+      <td style="text-align:center">${seqGTag}</td>
+      <td style="text-align:center">${seqRTag}</td>
+      <td style="text-align:center">${tsTag}</td>
+      <td style="text-align:center;font-size:11px;color:var(--mu)">${H.fsrc}</td>
+      <td style="text-align:center">${tag}</td>
+    </tr>`;
+  }).join('');
+
+  // linha de totais
+  const totTaxa=totN?totG/totN:0;
+  const totTaxaCor=totTaxa>=0.65?'var(--g)':totTaxa<0.45?'var(--v)':'var(--am)';
+  const rodape=`<tr style="font-weight:700;border-top:2px solid var(--bd)">
+    <td style="text-align:center">TOTAL</td>
+    <td style="text-align:center">${totN}</td>
+    <td style="text-align:center;color:var(--g)">${totG}</td>
+    <td style="text-align:center;color:var(--v)">${totR}</td>
+    <td style="text-align:center;color:${totTaxaCor}">${(totTaxa*100).toFixed(0)}%</td>
+    <td style="text-align:center;color:var(--g)">${maxSeqGGlobal}</td>
+    <td style="text-align:center;color:var(--v)">${maxSeqRGlobal}</td>
+    <td style="text-align:center">${totTS}</td>
+    <td></td><td></td>
+  </tr>`;
+
+  // destaques melhor/pior
+  const mBox=melhor?`<div style="border:1px solid var(--g);background:rgba(34,197,94,.07);border-radius:8px;padding:10px 14px">
+    <b>🏆 Melhor hora: ${String(melhor.h).padStart(2,'0')}h</b> — ${melhor.n} entradas · taxa <b style="color:var(--g)">${(melhor.taxa*100).toFixed(0)}%</b>
+    · máx seq. green: ${melhor.maxSeqG} · seq. red: ${melhor.maxSeqR} · tiros secos: ${melhor.tiroSeco}
+  </div>`:'' ;
+  const pBox=pior&&pior.h!==melhor?.h?`<div style="border:1px solid var(--v);background:rgba(239,68,68,.06);border-radius:8px;padding:10px 14px;margin-top:6px">
+    <b>🛑 Pior hora: ${String(pior.h).padStart(2,'0')}h</b> — ${pior.n} entradas · taxa <b style="color:var(--v)">${(pior.taxa*100).toFixed(0)}%</b>
+    · máx seq. green: ${pior.maxSeqG} · seq. red: ${pior.maxSeqR} · tiros secos: ${pior.tiroSeco}
+  </div>`:'';
+
+  return `<div class="panel" id="ia-hora-painel">
+    <h3>⏰ Relatório hora a hora <span style="font-size:12px;font-weight:400;color:var(--mu)">${horas.length} horas com entradas</span></h3>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">${mBox}${pBox}</div>
+    <div class="tw"><table>
+      <tr>
+        <th>Hora</th><th>Entradas</th><th style="color:var(--g)">Green</th><th style="color:var(--v)">Red</th>
+        <th>Taxa</th><th title="Maior sequência de greens seguidos nesta hora">Seq.G</th>
+        <th title="Maior sequência de reds seguidos nesta hora">Seq.R</th>
+        <th title="Tiro seco = resultado isolado, sem vizinhos da mesma cor">Tiro seco</th>
+        <th>Fontes</th><th></th>
+      </tr>
+      ${linhas}
+      ${rodape}
+    </table></div>
+    <div class="nota" style="margin-top:8px">
+      <b>Tiro seco</b> = resultado isolado — nem o anterior nem o próximo têm a mesma cor (G=green isolado, R=red isolado).<br>
+      <b>Seq.G/R</b> = maior sequência consecutiva de greens ou reds dentro daquela hora.<br>
+      ★ melhor = maior taxa de green (mín. 2 entradas) · ▼ pior = menor taxa de green.
+    </div>
+  </div>`;
+}
+
+// ---- download PDF ----
+function iaGerarPDF(){
+  // captura apenas o conteúdo do relatório IA
+  const el=document.getElementById('ia-relatorio-pdf');
+  if(!el){ alert('Conteúdo não encontrado.'); return; }
+  const titulo=`Relatório IA — Dólar Par/Ímpar · ${new Date().toLocaleString('pt-BR')}`;
+  const estilos=`
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,sans-serif;font-size:12px;background:#fff;color:#111;padding:16px}
+    h1{font-size:16px;margin-bottom:4px;color:#111}
+    .sub{font-size:11px;color:#666;margin-bottom:16px}
+    h3{font-size:13px;font-weight:700;margin:0 0 8px}
+    .panel{border:1px solid #ddd;border-radius:6px;padding:12px;margin-bottom:12px;page-break-inside:avoid}
+    table{border-collapse:collapse;width:100%;font-size:11px}
+    th,td{border:1px solid #ddd;padding:4px 7px}
+    th{background:#f5f5f5;font-weight:600}
+    .tag{display:inline-block;padding:1px 6px;border-radius:4px;font-weight:700;font-size:10px}
+    .tag.g{background:#dcfce7;color:#15803d}
+    .tag.v{background:#fee2e2;color:#b91c1c}
+    .nota{font-size:10px;color:#666;margin-top:6px;line-height:1.5}
+    .dvconfirmed{background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:8px;margin-bottom:8px}
+    .dvbad{background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;padding:8px;margin-bottom:8px}
+    .ruim{color:#b91c1c;font-weight:700}
+    @page{margin:15mm}
+  `;
+  const w=window.open('','_blank','width=960,height=750');
+  if(!w||w.closed){
+    alert('⚠ Pop-up bloqueado!\n\nLibere pop-ups para este site no seu navegador e tente novamente.\n(ícone de pop-up bloqueado na barra de endereço → "Sempre permitir")');
+    return;
+  }
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${titulo}</title><style>${estilos}</style></head><body>
+    <h1>🧠 Relatório Inteligência — Dólar Par/Ímpar</h1>
+    <div class="sub">Gerado em ${new Date().toLocaleString('pt-BR')}</div>
+    ${el.innerHTML}
+    <script>setTimeout(()=>{window.print();},600);<\/script>
+  </body></html>`);
+  w.document.close();
+}
+
+// ---- painel: padrão de soma dos últimos 5 ----
+function iaSomaPainel(sa,grupos){
+  const MARGEM=1;
+  const somaAtual=sa?sa.somaAtual:null;
+
+  // barra visual de distribuição
+  const maxN=Math.max(1,...grupos.map(g=>g.n));
+  const linhas=grupos.map(g=>{
+    const isCurr=somaAtual!=null&&Math.abs(g.soma-somaAtual)<=MARGEM;
+    const taxaCor=g.taxa>=0.65?'var(--g)':g.taxa<0.45?'var(--v)':'var(--am)';
+    const barW=Math.round(100*g.n/maxN);
+    const alerta=isCurr&&g.n>=5&&(g.taxa>=0.70||g.taxa<0.40);
+    const alertTag=alerta?`<span style="font-size:10px;padding:1px 5px;border-radius:4px;background:${g.taxa>=0.70?'rgba(34,197,94,.2)':'rgba(239,68,68,.2)'};color:${taxaCor};margin-left:4px">${g.taxa>=0.70?'✅ favorável':'🛑 desfavorável'}</span>`:'';
+    return `<tr style="${isCurr?`background:rgba(168,85,247,.08);outline:1px solid rgba(168,85,247,.35);`:''}">
+      <td style="text-align:center;font-weight:${isCurr?'900':'400'};color:${isCurr?'#a855f7':'inherit'}">${g.soma}/5 ${isCurr?'◀':''}</td>
+      <td style="text-align:center">${g.n}</td>
+      <td style="text-align:center;color:${taxaCor};font-weight:700">${(g.taxa*100).toFixed(0)}%</td>
+      <td style="text-align:center">${g.greens} green / ${g.n-g.greens} red</td>
+      <td><div style="height:10px;background:var(--p2);border-radius:4px;overflow:hidden"><div style="width:${barW}%;height:100%;background:${taxaCor};border-radius:4px"></div></div></td>
+      <td>${alertTag}</td>
+    </tr>`;
+  }).join('');
+
+  // resumo do momento atual
+  let alertHtml='';
+  if(sa&&sa.relevante&&sa.taxaCoincid!=null){
+    const pct=(sa.taxaCoincid*100).toFixed(0);
+    const cor=sa.taxaCoincid>=0.65?'var(--g)':sa.taxaCoincid<0.45?'var(--v)':'var(--am)';
+    const bg=sa.taxaCoincid>=0.65?'rgba(34,197,94,.07)':sa.taxaCoincid<0.45?'rgba(239,68,68,.07)':'rgba(245,197,24,.07)';
+    const ico=sa.taxaCoincid>=0.65?'📈':sa.taxaCoincid<0.45?'📉':'📊';
+    alertHtml=`<div style="border:1px solid ${cor};background:${bg};border-radius:10px;padding:12px;margin-bottom:10px">
+      <b>${ico} Padrão atual — soma ${sa.somaAtual}/5</b><br>
+      <span style="font-size:13px">Com esta soma <span style="color:var(--mu)">(±1)</span> foram encontradas
+      <b>${sa.totalCasos} entradas históricas</b> com taxa de <b style="color:${cor};font-size:16px">${pct}%</b> de green.<br>
+      ${sa.taxaCoincid>=0.70?'<b>Padrão altamente favorável</b> — historicamente este contexto converte bem.':
+        sa.taxaCoincid<0.40?'<b>Padrão desfavorável</b> — historicamente este contexto tem alta taxa de red.':
+        'Padrão neutro — taxa próxima à média.'}
+      </span>
+    </div>`;
+  } else if(sa&&!sa.relevante&&somaAtual!=null){
+    alertHtml=`<div class="nota">Soma atual: <b>${somaAtual}/5</b> — ainda poucos casos históricos com esta soma (${sa.totalCasos} casos ±1). Dados insuficientes para predição confiável.</div>`;
+  }
+
+  return `<div class="panel" style="border-color:#a855f7">
+    <h3>🔢 Padrão de Soma — Últimos 5 Resultados <span style="font-size:12px;font-weight:400;color:var(--mu)">contexto histórico antes de cada sinal</span></h3>
+    ${alertHtml}
+    <div class="nota" style="margin-bottom:8px">Para cada sinal registrado, conta-se quantos <b>greens ocorreram nos 5 resultados anteriores</b> (soma 0–5). A tabela mostra qual padrão pré-sinal gerou mais greens.</div>
+    ${grupos.length?`<div class="tw"><table>
+      <tr><th>Soma pré-sinal</th><th>Entradas</th><th>Taxa green</th><th>Detalhes</th><th style="width:120px">Freq.</th><th>Alerta</th></tr>
+      ${linhas}
+    </table></div>`:`<div class="nota">Dados insuficientes para análise de soma.</div>`}
+    <div class="nota" style="margin-top:8px">▶ A linha com <span style="color:#a855f7;font-weight:700">◀</span> é a soma atual dos últimos 5 resultados. Margem de ±1 usada para coincidências.</div>
+  </div>`;
+}
+
+// ---- HTML da aba ----
+function iaHtml(){
+  const L=iaAllLogs();
+  if(!L.length) return `<div class="panel"><h3>🧠 Inteligência — Análise dos Relatórios</h3>
+    <div class="nota" style="font-size:14px;margin-top:16px">Nenhuma entrada registrada ainda nos relatórios.<br>
+    Use as abas <b>🔬 Scanner</b>, <b>➕ Somas</b> ou <b>🔗 Interligado</b> para gerar entradas — a inteligência analisa automaticamente o histórico.</div></div>`;
+
+  const R=iaResumo(L);
+  const prox=iaProximoNivel(L);
+  const corNivel=prox.nivel==='confiável'?'var(--g)':prox.nivel==='moderado'?'var(--am)':'var(--v)';
+  const ultimos=L.slice(-10).reverse();
+
+  // scoreBar
+  const barColor=prox.score>=70?'var(--g)':prox.score>=45?'var(--am)':'var(--v)';
+  const scoreBar=`<div style="height:14px;background:var(--p2);border:1px solid var(--bd);border-radius:999px;overflow:hidden;margin:6px 0">
+    <div style="height:100%;width:${prox.score}%;background:${barColor};transition:width .4s;border-radius:999px"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mu)"><span>Perigoso</span><span>Moderado</span><span>Confiável</span></div>`;
+
+  // cards
+  const taxaPct=(R.taxa*100).toFixed(1);
+  const taxaCol=R.taxa>=0.6?'var(--g)':R.taxa>=0.45?'var(--am)':'var(--v)';
+
+  // causas dos reds
+  const causaMap={};
+  for(const rd of R.redsCausas) for(const c of rd.causas){ causaMap[c]=(causaMap[c]||0)+1; }
+  const causasOrdem=Object.entries(causaMap).sort((a,b)=>b[1]-a[1]);
+
+  // greens que deram bem (TS ou G1)
+  const melhorCenario=R.bonsGreens.length?`<div class="dvconfirmed"><b>✅ Melhor cenário de entrada</b> — ${R.bonsGreens.length} entradas resolvidas em TS/G1 (${(100*R.bonsGreens.length/R.greens).toFixed(0)}% dos greens):
+    <ul style="margin:6px 0 0;padding-left:18px;font-size:12px">
+      <li>Taxa geral de resolução rápida: <b>${(100*R.bonsGreens.length/R.n).toFixed(1)}%</b></li>
+      ${R.bonsGreens.slice(-5).map(x=>`<li>${hmsOf(x.T0/1000)} · ${x._src} · ${x.alvo?'ÍMPAR':'PAR'} → ✅ ${nvG?nvG(x.nivel):('G'+x.nivel)}</li>`).join('')}
+    </ul></div>`:'';
+
+  // ---- análise de soma (calcula uma vez) ----
+  const somaAnalise=iaSomaAnalise(L);
+  const {grupos:somaGrupos}=iaSomaGrupos(L);
+
+  // últimas 10 entradas — com destaque por nível IA + coluna soma pré-sinal
+  // ultimos = L.slice(-10).reverse() → ultimos[0] é o mais recente = L[L.length-1]
+  // ultimos[ri] corresponde ao índice real L[L.length-1-ri]
+  const ulHtml=ultimos.map((x,ri)=>{
+    const ok=x.res==='green';
+    const conf=iaNivelConf(x);
+    // classificação da linha
+    const segura=ok&&(conf==='normal'||conf==='baixa');
+    const risco=!ok||(ok&&conf==='excessiva');
+    const trClass=segura?'ia-segura':risco?'ia-risco':'';
+    // badge na coluna de confiança
+    const badgeCls=conf==='normal'||conf==='baixa'?'ia-badge-safe':conf==='alta'?'ia-badge-mod':'ia-badge-risk';
+    const badge=`<span class="${badgeCls}">${conf}</span>`;
+    // dica rápida de segurança
+    const dica=segura?`<span class="ia-badge-safe">🛡 entrada segura</span>`:
+                conf==='excessiva'&&ok?`<span class="ia-badge-risk">⚠ excesso</span>`:'';
+    // soma dos 5 resultados ANTES deste sinal
+    const realIdx=L.length-1-ri; // índice no array L
+    const s5=iaSoma5(L,realIdx);  // calcula soma[0..realIdx-1]
+    const s5g=somaGrupos.find(g=>g.soma===s5);
+    const s5Cor=s5g?(s5g.taxa>=0.65?'var(--g)':s5g.taxa<0.45?'var(--v)':'var(--am)'):'var(--mu)';
+    const s5Title=s5g?`${s5g.n} casos históricos com esta soma · taxa ${(s5g.taxa*100).toFixed(0)}%`:'poucos dados';
+    const s5Badge=`<span title="${s5Title}" style="font-size:11px;font-weight:700;color:${s5Cor};cursor:default">${s5}/5</span>`;
+    return `<tr class="${trClass}">
+      <td style="color:var(--mu);font-size:11px">${x.T0?hmsOf(x.T0/1000):'—'}</td>
+      <td><span class="tag ${ok?'g':'v'}">${ok?'GREEN':'RED'}</span></td>
+      <td>${x._src}</td>
+      <td>${x.alvo!=null?(x.alvo?'ÍMPAR':'PAR'):'—'}</td>
+      <td>${badge}</td>
+      <td style="text-align:center">${s5Badge}</td>
+      <td style="font-size:11px">${ok?dica:(iaCausaRed(x).join(', '))}</td></tr>`;
+  }).join('');
+
+  // salvar snapshot na memória (executa ao renderizar a aba)
+  iaMemSalvar(R,prox);
+
+  const horaHtml=iaRelatorioPorHora(L);
+
+  return `
+  <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+    <button onclick="window.iaGerarPDF&&window.iaGerarPDF()" style="display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;border:1px solid #a855f7;background:rgba(168,85,247,.1);color:#a855f7;font-size:13px;font-weight:600;cursor:pointer">
+      📄 Baixar PDF / Imprimir
+    </button>
+  </div>
+  <div id="ia-relatorio-pdf">
+  <div class="panel" style="border-color:#a855f7;background:linear-gradient(135deg,rgba(168,85,247,.08),var(--p1))">
+    <h3>🧠 Inteligência — Análise dos Relatórios</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:14px">
+      ${card('Entradas analisadas',String(R.n),`${R.greens} greens · ${R.reds} reds`)}
+      ${card('Taxa geral',`<span style="color:${taxaCol}">${taxaPct}%</span>`,`máx ${R.maxG} greens seguidos`)}
+      ${card('Máx. reds seguidos',`<span class="ruim">${R.maxR}</span>`,R.maxR>=3?'⚠ Risco alto':'Dentro do normal')}
+      ${card('Fontes analisadas',L.map(x=>x._src).filter((v,i,a)=>a.indexOf(v)===i).join(' · '),`CF1 + CF2 + Interligado`)}
+    </div>
+  </div>
+
+  <div class="panel" style="border-color:${corNivel}">
+    <h3>📡 Momento atual — próximos sinais</h3>
+    <div style="font-size:22px;font-weight:900;color:${corNivel};margin-bottom:4px">${prox.nivel.toUpperCase()} <span style="font-size:14px;font-weight:400;color:var(--mu)">(score ${prox.score}/100)</span></div>
+    ${scoreBar}
+    <div style="display:flex;flex-direction:column;gap:5px;margin-top:10px">
+      ${prox.motivos.map(m=>`<div style="padding:6px 10px;border-radius:8px;background:var(--p2);border:1px solid var(--bd);font-size:13px">${m}</div>`).join('')}
+    </div>
+  </div>
+
+  <div class="grid2">
+  <div class="panel">
+    <h3>🔴 O que causou os reds?</h3>
+    ${R.redsCausas.length?`
+    <table style="margin-top:4px">
+      <tr><th style="text-align:left">Causa identificada</th><th>Ocorrências</th><th>% dos reds</th></tr>
+      ${causasOrdem.map(([c,qt])=>`<tr><td>${c}</td><td style="text-align:center"><b>${qt}</b></td><td style="text-align:center">${(100*qt/R.reds).toFixed(0)}%</td></tr>`).join('')}
+    </table>
+    <div class="nota" style="margin-top:8px">
+      ${R.redExcesso.length?`⚠ <b>${R.redExcesso.length} reds</b> ocorreram com <b>excesso de confirmação</b> — muitas fontes apontando pode ser armadilha.<br>`:''}
+      ${R.redAposSeq.length?`⚠ <b>${R.redAposSeq.length} reds</b> ocorreram após uma sequência de greens — cuidado com euforia.<br>`:''}
+    </div>`:'<div class="nota">Nenhum red registrado ainda.</div>'}
+  </div>
+
+  <div class="panel">
+    <h3>✅ O que deu certo?</h3>
+    ${melhorCenario||'<div class="nota">Dados insuficientes para análise de boas entradas.</div>'}
+    ${R.greens>0?`<div class="nota" style="margin-top:8px">
+      🏆 <b>${R.bonsGreens.length} de ${R.greens}</b> greens resolvidos logo (TS ou G1) — ideal para entrar com confiança.<br>
+      Condições mais frequentes nos greens: <b>${(()=>{ const g=L.filter(x=>x.res==='green'); const imp=g.filter(x=>x.alvo).length; return imp>g.length-imp?'ÍMPAR':'PAR'; })()}</b> como alvo predominante.
+    </div>`:''}
+  </div>
+  </div>
+
+  <div class="panel">
+    <h3>🕐 Últimas 10 entradas analisadas</h3>
+    <div class="tw" style="max-height:320px">
+      <table>
+        <tr><th>Hora</th><th>Resultado</th><th>Fonte</th><th>Alvo</th><th>Confiança</th><th title="Soma de greens nos 5 resultados antes do sinal (0–5)">Soma 5</th><th style="text-align:left">Causa do red</th></tr>
+        ${ulHtml}
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>💡 Recomendações para próximas entradas</h3>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${prox.nivel==='perigoso'?`<div class="dvbad">🛑 <b>Evite entrar agora.</b> O histórico recente mostra padrão de instabilidade. Espere pelo menos 3 greens consecutivos antes de retomar.</div>`:''}
+      ${prox.nivel==='moderado'?`<div style="border:1px solid var(--am);background:rgba(245,197,24,.07);border-radius:10px;padding:12px">⏳ <b>Momento moderado.</b> Entre com cautela, preferindo sinais com baixa ou normal confirmação — excessos de confirmação têm falhado.</div>`:''}
+      ${prox.nivel==='confiável'?`<div class="dvconfirmed">✅ <b>Bom momento para entrar.</b> O histórico recente está positivo. Mantenha gestão de banca e não force gales além do G1.</div>`:''}
+      ${R.maxR>=3?`<div class="dvbad">⚠ O máximo de reds seguidos chegou a <b>${R.maxR}</b> — sua estratégia precisa suportar essa variação na banca.</div>`:''}
+      ${R.redExcesso.length>=2?`<div style="border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.05);border-radius:10px;padding:12px">⚠ <b>Excesso de confirmação falhou ${R.redExcesso.length} vezes.</b> Quando todas as fontes apontam igual, é sinal de armadilha — prefira entradas com 2–4 fontes, não mais.</div>`:''}
+      ${R.bonsGreens.length>=3?`<div class="dvconfirmed">💡 <b>Entradas que resolvem em TS/G1</b> são o seu melhor cenário (${R.bonsGreens.length} ocorrências). Não aumente gale além do G1 — a taxa de recuperação no G2+ é menor.</div>`:''}
+    </div>
+  </div>
+  ${iaSomaPainel(somaAnalise,somaGrupos)}
+  ${horaHtml}
+  ${iaCfaPainel()}
+  ${iaHistoricoHtml()}
+  </div>`;
+}
+
+window.VIEWS=window.VIEWS||{};
+VIEWS.ia={
+  nome:'🧠 Inteligência',
+  html(){return iaHtml();},
+  after(){}
+};
+
+// ---- expõe funções para uso externo ----
+window._iaScore=function(){
+  const L=iaAllLogs(); if(!L.length) return null;
+  return iaProximoNivel(L);
+};
+window._iaNivelConf=iaNivelConf;
+window.iaGerarPDF=iaGerarPDF;
+
+// ---- badge IA: função reutilizável ----
+function _iaInjetaBadge(){
+  const old=document.getElementById('ia-popup-badge');
+  if(old) old.remove();
+  const sc=window._iaScore();
+  if(!sc) return;
+  const cor=sc.nivel==='confiável'?'#22c55e':sc.nivel==='moderado'?'#f5c518':'#ef4444';
+  const bg=sc.nivel==='confiável'?'rgba(34,197,94,.12)':sc.nivel==='moderado'?'rgba(245,197,24,.10)':'rgba(239,68,68,.10)';
+  const ico=sc.nivel==='confiável'?'✅':sc.nivel==='moderado'?'⚠':'🛑';
+  const motivo=sc.motivos.length?sc.motivos[0].replace(/[✅⚠🔴📈📉🔢]/g,'').trim():'';
+  // soma info para o badge
+  const si=sc.somaInfo;
+  const somaLine=si&&si.relevante&&si.taxaCoincid!=null?
+    `<div style="font-size:11px;font-weight:400;color:#9ca3af;margin-top:3px">🔢 Padrão soma ${si.somaAtual}/5 → ${(si.taxaCoincid*100).toFixed(0)}% greens (${si.totalCasos} casos)</div>`:'';
+  const badge=document.createElement('div');
+  badge.id='ia-popup-badge';
+  badge.style.cssText=`padding:7px 12px;margin:6px 0;border-radius:8px;border:1px solid ${cor};background:${bg};font-size:13px;font-weight:600`;
+  badge.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
+    <span style="font-size:15px">${ico}</span>
+    <span>🧠 IA: <b style="color:${cor}">${sc.nivel.toUpperCase()}</b></span>
+    <span style="margin-left:auto;font-size:12px;font-weight:400">
+      <span style="color:${cor}">${sc.score}/100</span>
+      ${motivo?`<span style="color:#6b7280;margin-left:4px">· ${motivo}</span>`:''}
+    </span></div>${somaLine}`;
+  const tit=document.querySelector('#rbPopDPI .rbpt');
+  if(tit) tit.insertAdjacentElement('afterend',badge);
+}
+
+// ---- monkey-patch: cfPopup (Confluência 1) ----
+(function(){
+  const _orig=window.cfPopup;
+  if(typeof _orig!=='function') return;
+  window.cfPopup=function(){ _orig.apply(this,arguments); setTimeout(_iaInjetaBadge,0); };
+})();
+
+// ---- monkey-patch: ilPopup (Interligado) ----
+(function(){
+  const _orig=window.ilPopup;
+  if(typeof _orig!=='function') return;
+  window.ilPopup=function(){ _orig.apply(this,arguments); setTimeout(_iaInjetaBadge,0); };
+})();
+
+// ---- monkey-patch: cf2PopRender (Confluência 2 — popup lateral grande) ----
+(function(){
+  const fn='cf2PopRender';
+  const _orig=window[fn];
+  if(typeof _orig!=='function') return;
+  window[fn]=function(){ _orig.apply(this,arguments); setTimeout(_iaInjetaBadge,0); };
+})();
+
+// ---- destaque de entradas seguras na tabela de últimas entradas ----
+// Adiciona CSS global para destacar linhas marcadas como .ia-segura / .ia-risco
+(function(){
+  const s=document.createElement('style');
+  s.id='ia-highlight-style';
+  s.textContent=`
+    tr.ia-segura td:first-child::before{ content:'🛡 '; }
+    tr.ia-segura{ background:rgba(34,197,94,.06) !important; outline:1px solid rgba(34,197,94,.25); }
+    tr.ia-risco td:first-child::before{ content:'⚠ '; }
+    tr.ia-risco{ background:rgba(239,68,68,.06) !important; outline:1px solid rgba(239,68,68,.18); }
+    .ia-badge-safe{ display:inline-block;padding:1px 7px;border-radius:999px;background:rgba(34,197,94,.15);color:#22c55e;font-size:11px;font-weight:700;border:1px solid rgba(34,197,94,.3); }
+    .ia-badge-risk{ display:inline-block;padding:1px 7px;border-radius:999px;background:rgba(239,68,68,.12);color:#ef4444;font-size:11px;font-weight:700;border:1px solid rgba(239,68,68,.25); }
+    .ia-badge-mod { display:inline-block;padding:1px 7px;border-radius:999px;background:rgba(245,197,24,.12);color:#f5c518;font-size:11px;font-weight:700;border:1px solid rgba(245,197,24,.3); }
+  `;
+  document.head.appendChild(s);
+})();
+
+})(); // =================== fim do IIFE 🧠 INTELIGÊNCIA ===================
+
 // ---------- render ----------
-const TAB_ORDER = ['hist', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'fonte'];
+const TAB_ORDER = ['hist', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
 let LAST_HEAVY = 0;
 function fillRes() {
