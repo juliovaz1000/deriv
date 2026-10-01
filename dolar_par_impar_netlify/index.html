@@ -409,7 +409,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.24 · 30/09/2026 · com o interligado ligado só ele avisa (robôs calados)';
+const VERSAO='v3.25 · 01/10/2026 · exportar/importar dados entre PCs';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8178,7 +8178,13 @@ function iaHtml(){
   const horaHtml=iaRelatorioPorHora(L);
 
   return `
-  <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+  <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+    <button onclick="window.iaExportarDados&&window.iaExportarDados()" style="display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;border:1px solid #22c55e;background:rgba(34,197,94,.1);color:#22c55e;font-size:13px;font-weight:600;cursor:pointer">
+      📤 Exportar dados
+    </button>
+    <button onclick="window.iaImportarDados&&window.iaImportarDados()" style="display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;border:1px solid #f59e0b;background:rgba(245,158,11,.1);color:#f59e0b;font-size:13px;font-weight:600;cursor:pointer">
+      📥 Importar dados
+    </button>
     <button onclick="window.iaGerarPDF&&window.iaGerarPDF()" style="display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;border:1px solid #a855f7;background:rgba(168,85,247,.1);color:#a855f7;font-size:13px;font-weight:600;cursor:pointer">
       📄 Baixar PDF / Imprimir
     </button>
@@ -8269,6 +8275,66 @@ window._iaScore=function(){
 };
 window._iaNivelConf=iaNivelConf;
 window.iaGerarPDF=iaGerarPDF;
+
+// ---- Exportar / Importar localStorage ----
+function iaExportarDados(){
+  try{
+    const dados={};
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k) dados[k]=localStorage.getItem(k);
+    }
+    const qtd=Object.keys(dados).length;
+    const json=JSON.stringify({_versao:1,_exportado:new Date().toISOString(),_total:qtd,dados},null,0);
+    const blob=new Blob([json],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    const dt=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+    a.download=`dpi_backup_${dt}.json`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },1000);
+    alert(`✅ Exportados ${qtd} registros!\n\nSalve o arquivo .json e importe-o no outro PC abrindo o HTML e clicando em 📥 Importar.`);
+  }catch(e){
+    alert('❌ Erro ao exportar: '+e.message);
+  }
+}
+function iaImportarDados(){
+  const inp=document.getElementById('ia-importar-input');
+  if(inp){ inp.value=''; inp.click(); return; }
+  const i=document.createElement('input');
+  i.type='file'; i.accept='.json'; i.id='ia-importar-input';
+  i.style.display='none';
+  i.onchange=function(){
+    const file=i.files&&i.files[0];
+    if(!file){ document.body.removeChild(i); return; }
+    const reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        const obj=JSON.parse(e.target.result);
+        const dados=obj.dados||obj;
+        const chaves=Object.keys(dados);
+        if(!chaves.length){ alert('⚠ Arquivo vazio ou inválido.'); return; }
+        if(!confirm(`Importar ${chaves.length} registros?\n\nATENÇÃO: Os dados atuais serão substituídos pelos do arquivo.\n\nContinuar?`)) return;
+        let ok=0,err=0;
+        for(const k of chaves){
+          try{ localStorage.setItem(k,dados[k]); ok++; }catch(ex){ err++; }
+        }
+        alert(`✅ Importação concluída!\n${ok} registros restaurados${err?`\n⚠ ${err} erros`:''}.\nA página será recarregada agora.`);
+        setTimeout(()=>location.reload(),500);
+      }catch(ex){
+        alert('❌ Erro ao ler arquivo: '+ex.message);
+      }
+    };
+    reader.readAsText(file);
+    document.body.appendChild(i);
+  };
+  document.body.appendChild(i);
+  i.click();
+}
+window.iaExportarDados=iaExportarDados;
+window.iaImportarDados=iaImportarDados;
 
 // ---- badge IA: função reutilizável ----
 function _iaInjetaBadge(){
