@@ -409,7 +409,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.25 · 01/10/2026 · exportar/importar dados entre PCs';
+const VERSAO='v3.26 · 01/10/2026 · exportar/importar dados + trios de números';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -3652,6 +3652,7 @@ function scScanSums(W){
 function scNivel(){ return Math.max(0,Math.min(2,+cfg.rb_auto_nivel||0)); }
 function scStartsOf(W,o,C){
   if(o.kind==='Número'){ C.dig=C.dig||{}; return C.dig[o.d]||(C.dig[o.d]=scDigitStarts(W,o.d)); }
+  if(o.kind==='Trio'){ C.trio=C.trio||scTrioMap(W); return C.trio.get(`${o.a}-${o.b}-${o.c}`)||[]; }
   if(o.kind==='Dupla'){ C.pair=C.pair||scPairMap(W); return C.pair.get(o.pair||`${o.a}-${o.b}`)||[]; }
   C.sum=C.sum||{}; const M=C.sum[o.n]||(C.sum[o.n]=scSumMap(W,o.n)); return M.get(o.mod)||[];
 }
@@ -3679,6 +3680,7 @@ function scLive(W,o,nivel,C,stepMs){
 }
 function scGatTxt(W,o,ti){
   if(o.kind==='Número') return `nº ${W[ti].d}`;
+  if(o.kind==='Trio') return `${W[ti-2]?.d}-${W[ti-1]?.d}-${W[ti].d}`;
   if(o.kind==='Dupla') return `${W[ti-1]?.d}-${W[ti].d}`;
   const g=[]; for(let k=ti-o.n+1;k<=ti;k++) g.push(W[k]?.d);
   return `${g.join('+')}=${g.reduce((a,b)=>a+b,0)}`;
@@ -4452,7 +4454,7 @@ function p5Resumo(E){
 function p5Buscar(){
   const W=p5W(); if(W.length<500){ status('⏱ Banco de 5s ainda com poucos jogos','err'); return; }
   const t0=performance.now(), nivel=scNivel(), min=Math.max(5,+cfg.p5_rbMin||30), maxSkip=Math.max(0,Math.min(60,+cfg.p5_rbPulo||20));
-  let all=[]; for(const fam of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,0));
+  let all=[]; for(const fam of ['somas','duplas','trios','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,0));
   all.sort((a,b)=>b.rate-a.rate||b.done-a.done||a.skip-b.skip);
   P5.auto=all.slice(0,60); P5.autoInfo={n:W.length,ms:Math.round(performance.now()-t0),achados:all.length,when:Date.now()};
   fillRes();
@@ -4463,7 +4465,7 @@ function p5Criar(i){
   let rb=RBOTS.find(r=>r.id===id);
   if(!rb){
     const base={id,skip:x.skip,alvo:x.alvo,maxNivel:nivel,bank,on:true,popup:false,cfPop:true,criadoEm:Date.now(),minOcc:x.done||0,taxaCriacao:x.rate,p5:true};
-    rb=x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
+    rb=x.kind==='Trio'?{...base,tipo:'trio',a:x.a,b:x.b,c:x.c}:x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
     RBOTS.unshift(rb); rbSave();
   } else { rb.on=true; rbSave(); }
   status(`⏱ Robô de 5s criado: ${rbName(rb)}`,'ok'); fillRes();
@@ -4608,7 +4610,7 @@ function p10Resumo(E){
 function p10Buscar(){
   const W=p10W(); if(W.length<500){ status('⏱ Banco de 10s ainda com poucos jogos','err'); return; }
   const t0=performance.now(), nivel=scNivel(), min=Math.max(5,+cfg.p10_rbMin||30), maxSkip=Math.max(0,Math.min(60,+cfg.p10_rbPulo||20));
-  let all=[]; for(const fam of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,0));
+  let all=[]; for(const fam of ['somas','duplas','trios','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,0));
   all.sort((a,b)=>b.rate-a.rate||b.done-a.done||a.skip-b.skip);
   P10.auto=all.slice(0,60); P10.autoInfo={n:W.length,ms:Math.round(performance.now()-t0),achados:all.length,when:Date.now()};
   fillRes();
@@ -4619,7 +4621,7 @@ function p10Criar(i){
   let rb=RBOTS.find(r=>r.id===id);
   if(!rb){
     const base={id,skip:x.skip,alvo:x.alvo,maxNivel:nivel,bank,on:true,popup:false,cfPop:true,criadoEm:Date.now(),minOcc:x.done||0,taxaCriacao:x.rate,p10:true};
-    rb=x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
+    rb=x.kind==='Trio'?{...base,tipo:'trio',a:x.a,b:x.b,c:x.c}:x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
     RBOTS.unshift(rb); rbSave();
   } else { rb.on=true; rbSave(); }
   status(`⏱ Robô de 10s criado: ${rbName(rb)}`,'ok'); fillRes();
@@ -4800,7 +4802,7 @@ function ilLista(s,W){
   if(B.lista && B.key===key && Date.now()-B.t<180000) return B.lista;
   if(B.lista && Date.now()-(IL.calcT||0)<2000) return B.lista;           // um tempo por vez, para não travar a tela
   const t0=performance.now(), nivel=ilNivel(), min=ilMinCasos(), pulo=Math.max(0,Math.min(40,+(cfg.il_pulo??15)));
-  let all=[]; for(const f of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,f,pulo,nivel,min,0));
+  let all=[]; for(const f of ['somas','duplas','trios','numeros']) all=all.concat(scScanFamily(W,f,pulo,nivel,min,0));
   B.lista=all.filter(x=>x.red===0 && x.done>=min).sort((a,b)=>b.done-a.done).slice(0,400);
   B.key=key; B.t=Date.now(); B.n=W.length; B.ms=Math.round(performance.now()-t0); IL.calcT=Date.now();
   return B.lista;
@@ -4843,7 +4845,7 @@ function ilAponta(s){
       if(sig.done||sig.bank!==bank) continue;
       const rb=RBOTS.find(r=>r.id===sig.rbId); if(!rb||!rb.on) continue;
       const st=ilRbOk(rb,W); if(!st.ok) continue;
-      const kind=rb.tipo==='dupla'?'Dupla':rb.tipo==='num'?'Número':rb.tipo==='soma'?'Soma':rb.tipo, id=rb.tipo==='dupla'?`${rb.a}-${rb.b}`:rb.tipo==='num'?rb.d:rb.tipo==='soma'?rb.n+'/'+rb.mod:rb.id;
+      const kind=rb.tipo==='trio'?'Trio':rb.tipo==='dupla'?'Dupla':rb.tipo==='num'?'Número':rb.tipo==='soma'?'Soma':rb.tipo, id=rb.tipo==='trio'?`${rb.a}-${rb.b}-${rb.c}`:rb.tipo==='dupla'?`${rb.a}-${rb.b}`:rb.tipo==='num'?rb.d:rb.tipo==='soma'?rb.n+'/'+rb.mod:rb.id;
       const ch=ilChave(s,kind,id,rb.skip,rb.alvo)+'|'+sig.entryT;
       if(vistos.has(ch)){ const o=out.find(x=>x.T===sig.entryT&&x.tipo==='sc'&&x.alvo===rb.alvo&&x.s===s); if(o){ o.tipo='rb'; o.txt=`🤖 ${rbName(rb)}`; } continue; }  // mesmo padrão do scanner = conta uma vez só
       add({s,tipo:'rb',txt:`🤖 ${rbName(rb)}`,alvo:sig.alvo,T:sig.entryT,casos:st.done},ch);
@@ -5113,7 +5115,7 @@ function raAchar(step){
   if(W.length<500) return {bank,W,lista:null,motivo:`só ${W.length} jogos`};
   const nivel=scNivel(), min=Math.max(5,+(step===5?cfg.ra_min5:step===10?cfg.ra_min10:cfg.ra_min20)||(step===5?30:step===10?25:20)), maxSkip=Math.max(0,Math.min(60,+cfg.ra_pulo||20));
   const cut=(cfg.ra_valid??1)?Math.floor(W.length*0.7):0;
-  let all=[]; for(const fam of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,cut));
+  let all=[]; for(const fam of ['somas','duplas','trios','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,cut));
   let L=all.filter(x=>x.red===0 && x.done>=min && (!cut || (x.test && x.test.done>=2 && x.test.red===0)));
   L.sort((a,b)=>(b.done+(b.test?.done||0))-(a.done+(a.test?.done||0))||b.sg-a.sg||a.skip-b.skip);
   return {bank,W,lista:L.slice(0,Math.max(1,Math.min(40,+cfg.ra_max||10))),achados:L.length};
@@ -5121,7 +5123,7 @@ function raAchar(step){
 function raNovoRobo(x,bank){
   const nivel=scNivel(), id=rbIdOf(x,nivel,bank);
   const base={id,skip:x.skip,alvo:x.alvo,maxNivel:nivel,bank,on:true,popup:!!cfg.ra_pop,cfPop:true,auto:true,criadoEm:Date.now(),minOcc:x.done||0,taxaCriacao:x.rate,casos:x.done+(x.test?.done||0)};
-  return x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
+  return x.kind==='Trio'?{...base,tipo:'trio',a:x.a,b:x.b,c:x.c}:x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
 }
 async function raRodar(manual){
   if(RA.rodando) return; if(!(cfg.ra_on??1) && !manual) return;
@@ -5669,6 +5671,17 @@ function scPairMap(W){
   }
   return M;
 }
+// ---------- trios de números ----------
+function scTrioMap(W){
+  const M=new Map();
+  for(let i=2;i<W.length;i++){
+    if(W[i-2].d==null||W[i-1].d==null||W[i].d==null) continue;
+    const key=`${W[i-2].d}-${W[i-1].d}-${W[i].d}`;
+    if(!M.has(key))M.set(key,[]);
+    M.get(key).push(i); // gatilho termina na 3ª pedra
+  }
+  return M;
+}
 function scScanPairs(W, maxSkipOverride=null){
   const out=[];
   const minOcc=Math.max(3,+cfg.rb_auto_min||+cfg.sc_min||3);
@@ -5714,6 +5727,7 @@ function rbNivel(rb){ return rb.maxNivel==null?2:+rb.maxNivel; }
 function rbNivelNome(rb){ const n=rbNivel(rb); return n===0?'TIRO SECO':(n===1?'até G1':'até G2'); }
 function rbGat(rb){
   if(rb.tipo==='dupla') return `Dupla ${rb.a}-${rb.b}`;
+  if(rb.tipo==='trio') return `Trio ${rb.a}-${rb.b}-${rb.c}`;
   if(rb.tipo==='num') return `Número ${rb.d}`;
   if(rb.tipo==='seq') return `${rb.x}× ${rb.c?'ÍMPAR':'PAR'} seguidos`;
   return `Σ${rb.n} %10 = ${rb.mod}`;
@@ -5721,7 +5735,7 @@ function rbGat(rb){
 function rbName(rb){ return `${rb.auto?'♻ ':''}${rbGat(rb)} · pula ${rb.skip} · ${NOME(rb.alvo)} · ${rbNivelNome(rb)}`; }
 function rbBankTag(rb){ return rb.bank?`<span class="scanbadge">${rb.bank.replace('DERIV R_100 · ','R_100 ')}</span>`:'<span class="scanbadge">banco aberto</span>'; }
 function rbIdOf(x,nivel,bank){
-  const base = (x.kind==='Dupla'||x.tipo==='dupla') ? `D|${x.a}|${x.b}` : (x.kind==='Número'||x.tipo==='num') ? `N|${x.d}` : (x.kind==='Sequência'||x.tipo==='seq') ? `Q|${x.c}|${x.x}` : `S|${x.n}|${x.mod}`;
+  const base = (x.kind==='Trio'||x.tipo==='trio') ? `T|${x.a}|${x.b}|${x.c}` : (x.kind==='Dupla'||x.tipo==='dupla') ? `D|${x.a}|${x.b}` : (x.kind==='Número'||x.tipo==='num') ? `N|${x.d}` : (x.kind==='Sequência'||x.tipo==='seq') ? `Q|${x.c}|${x.x}` : `S|${x.n}|${x.mod}`;
   return `${base}|${x.skip}|${x.alvo}|${nivel}|${bank||''}`;
 }
 function rbCreate(x){
@@ -5730,7 +5744,8 @@ function rbCreate(x){
   let rb=RBOTS.find(r=>r.id===id);
   if(rb){ rb.on=true; rbSave(); return rb; }
   const base={id,skip:x.skip,alvo:x.alvo,maxNivel:nivel,bank,on:true,popup:true,criadoEm:Date.now(),minOcc:x.done||0,taxaCriacao:x.rate};
-  if(x.kind==='Dupla') rb={...base,tipo:'dupla',a:x.a,b:x.b};
+  if(x.kind==='Trio') rb={...base,tipo:'trio',a:x.a,b:x.b,c:x.c};
+  else if(x.kind==='Dupla') rb={...base,tipo:'dupla',a:x.a,b:x.b};
   else if(x.kind==='Número') rb={...base,tipo:'num',d:x.d};
   else if(x.kind==='Sequência') rb={...base,tipo:'seq',c:x.c,x:x.x};
   else rb={...base,tipo:'soma',n:x.n,mod:x.mod};
@@ -5751,12 +5766,14 @@ function rbPopupFechar(){ RB_OPEN_POPUP_ID=null; RB_OPEN_SIG=null; const e=$('#r
 function rbFmtClock(t){ if(!t)return '—'; const d=new Date(t); return `${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
 function rbFmtDateClock(t){ if(!t)return '—'; const d=new Date(t); return `${p2d(d.getDate())}/${p2d(d.getMonth()+1)} ${rbFmtClock(t)}`; }
 function rbStarts(rb,W){
+  if(rb.tipo==='trio') return scTrioMap(W).get(`${rb.a}-${rb.b}-${rb.c}`)||[];
   if(rb.tipo==='dupla') return scPairMap(W).get(`${rb.a}-${rb.b}`)||[];
   if(rb.tipo==='num') return scDigitStarts(W,rb.d);
   if(rb.tipo==='seq') return scSeqMap(W,rb.x).get(`${rb.c}|${rb.x}`)||[];
   return scSumMap(W,rb.n).get(rb.mod)||[];
 }
 function rbGatTexto(rb,W,ti){
+  if(rb.tipo==='trio') return `${W[ti-2]?.d ?? '?'} - ${W[ti-1]?.d ?? '?'} - ${W[ti]?.d ?? '?'}`;
   if(rb.tipo==='dupla') return `${W[ti-1]?.d ?? '?'} - ${W[ti]?.d ?? '?'}`;
   if(rb.tipo==='num') return `${W[ti]?.d ?? '?'}`;
   if(rb.tipo==='seq') return `${rb.x}× ${rb.c?'ÍMPAR':'PAR'}: ${W.slice(Math.max(0,ti-rb.x+1),ti+1).map(x=>x.d).join(' ')}`;
@@ -5791,6 +5808,7 @@ function rbCurrentStats(rb,W){ return scEval(W,rbStarts(rb,W),rb.alvo,rb.skip,rb
 function rbCurrentTrigger(W,rb){
   if(!W.length) return null;
   const y=W.at(-1);
+  if(rb.tipo==='trio'){ const x=W.at(-2),z=W.at(-3); return (z?.d===rb.a && x?.d===rb.b && y?.d===rb.c)?y:null; }
   if(rb.tipo==='dupla'){ const x=W.at(-2); return (x?.d===rb.a && y?.d===rb.b)?y:null; }
   if(rb.tipo==='num') return y?.d===rb.d?y:null;
   if(rb.tipo==='seq'){ let k=0; for(let i=W.length-1;i>=0&&W[i].p===y.p;i--) k++; return (y.p===rb.c && k===rb.x)?y:null; }
@@ -5949,6 +5967,7 @@ function scScanFamily(W,fam,maxSkip,nivel,minOcc,cut){
     for(let n=minN;n<=maxN;n++) for(const [mod,starts] of scSumMap(W,n)) push({kind:`Soma ${n}`,gat:`Σ${n}%10=${mod}`,n,mod},starts);
   }
   if(fam==='duplas') for(const [pair,starts] of scPairMap(W)){ const [a,b]=pair.split('-').map(Number); push({kind:'Dupla',pair,a,b,gat:pair},starts); }
+  if(fam==='trios') for(const [trio,starts] of scTrioMap(W)){ const [a,b,c]=trio.split('-').map(Number); push({kind:'Trio',trio,a,b,c,gat:trio},starts); }
   if(fam==='numeros') for(let d=0;d<=9;d++) push({kind:'Número',d,gat:String(d)},scDigitStarts(W,d));
   if(fam==='seq'){ const mx=Math.max(1,Math.min(15,+cfg.rb_seqMax||8)); for(const [key,starts] of scSeqMap(W,mx)){ const [c,x]=key.split('|').map(Number); push({kind:'Sequência',c,x,gat:`${x}× ${c?'ÍMPAR':'PAR'}`},starts); } }
   return out;
@@ -5958,7 +5977,7 @@ function rbFind100(){
   const t0=performance.now();
   const min=Math.max(3,+cfg.rb_auto_min||20), nivel=+cfg.rb_auto_nivel||0, maxSkip=Math.max(0,Math.min(500,+cfg.rb_auto_pulo||50));
   const fam=cfg.rb_auto_family||'ambos';
-  const fams=fam==='ambos'?['somas','duplas']:fam==='tudo'?['somas','duplas','numeros','seq']:[fam];
+  const fams=fam==='ambos'?['somas','duplas']:fam==='tudo'?['somas','duplas','trios','numeros','seq']:[fam];
   const cut=cfg.rb_valid?Math.floor(W.length*0.7):0;
   let all=[]; for(const f of fams) all=all.concat(scScanFamily(W,f,maxSkip,nivel,min,cut));
   if(cfg.rb_auto_only100) all=all.filter(x=>x.red===0&&x.done>0);
@@ -6025,7 +6044,7 @@ VIEWS.robos={nome:'🤖 Robôs',live:rbLive,html(){
   <div class="panel"><h3>🔎 Criar sozinho <small>varre o banco aberto: ${cfg.bank} · janela atual</small></h3>
     <div class="ctl">
       <label>Família <select onchange="rbAutoSet('rb_auto_family',this.value)">
-        ${[['ambos','somas + duplas'],['somas','só somas'],['duplas','só duplas'],['numeros','só números'],['seq','sequências (X× par/ímpar)'],['tudo','somas + duplas + números + sequências']].map(([v,t])=>`<option value="${v}" ${cfg.rb_auto_family===v?'selected':''}>${t}</option>`).join('')}
+        ${[['ambos','somas + duplas'],['somas','só somas'],['duplas','só duplas'],['trios','só trios'],['numeros','só números'],['seq','sequências (X× par/ímpar)'],['tudo','somas + duplas + trios + números + sequências']].map(([v,t])=>`<option value="${v}" ${cfg.rb_auto_family===v?'selected':''}>${t}</option>`).join('')}
       </select></label>
       <label>Somar de ${inp('sc_sum_min',40)} até ${inp('sc_sum_max',40)} números</label>
       <label>Sequência até ${inp('rb_seqMax',40)} vezes</label>
@@ -6051,7 +6070,7 @@ VIEWS.robos={nome:'🤖 Robôs',live:rbLive,html(){
     const conf=t?(t.done?`<span class="${t.red===0?'ok':(t.rate>=x.rate-0.05?'':'ruim')}">${(t.rate*100).toFixed(0)}% <span class="mu">${t.done}c ${t.red}R</span></span>`:'<span class="mu">sem casos</span>'):'';
     return `<div class="rb100row" style="grid-template-columns:28px 1fr 70px 80px 60px 70px ${cfg.rb_valid?'110px':''}">
       <div><input class="rb-auto-check" type="checkbox" ${RB_CHECKED.has(i)?'checked':''} onchange="rbCheck(${i},this.checked)"></div>
-      <div><b>${x.kind==='Dupla'?`Dupla ${x.a}-${x.b}`:x.kind==='Número'?`Número ${x.d}`:x.kind==='Sequência'?`Depois de ${x.x}× ${x.c?'ÍMPAR':'PAR'} seguidos`:`${x.kind} · final ${x.mod}`}</b> · pula ${x.skip} · ${NOME(x.alvo)}</div>
+      <div><b>${x.kind==='Trio'?`Trio ${x.a}-${x.b}-${x.c}`:x.kind==='Dupla'?`Dupla ${x.a}-${x.b}`:x.kind==='Número'?`Número ${x.d}`:x.kind==='Sequência'?`Depois de ${x.x}× ${x.c?'ÍMPAR':'PAR'} seguidos`:`${x.kind} · final ${x.mod}`}</b> · pula ${x.skip} · ${NOME(x.alvo)}</div>
       <div>${x.done} casos</div><div class="hide-sm">${x.sg}/${x.g1}/${x.g2}</div><div class="hide-sm ruim">${x.red} R</div>
       <div><b>${(x.rate*100).toFixed(1)}%</b></div>${cfg.rb_valid?`<div>${conf}</div>`:''}</div>`;
   }).join('');
@@ -6146,6 +6165,7 @@ function srEntries(){
 function srCond(x,e){
   const dig=e.dig;
   if(x.tipo==='seq') return e.lp===x.c && e.run===x.x;
+  if(x.tipo==='trio') return dig[dig.length-3]===x.a && dig[dig.length-2]===x.b && dig[dig.length-1]===x.c;
   if(x.tipo==='dupla') return dig[dig.length-2]===x.a && dig[dig.length-1]===x.b;
   let s=0; for(let i=dig.length-x.k;i<dig.length;i++) s+=dig[i];
   return s%10===x.mod;
@@ -6164,7 +6184,7 @@ function srEval(A,x,nivel,i0=0,i1=A.length){
   }
   const done=sg+g1+g2+red; return {sg,g1,g2,red,done,rate:done?(sg+g1+g2)/done:0};
 }
-function srNome(x){ if(x.tipo==='seq') return `Depois de ${x.x}× ${x.c?'ÍMPAR':'PAR'} seguidos · ${x.skip?`pula ${x.skip} jogo${x.skip>1?'s':''}`:'sem pular'}`; return x.tipo==='dupla'?`Dupla ${x.a}-${x.b}`:`Σ${x.k} ${x.k>1?'últimos ticks':'último tick'} final ${x.mod}`; }
+function srNome(x){ if(x.tipo==='seq') return `Depois de ${x.x}× ${x.c?'ÍMPAR':'PAR'} seguidos · ${x.skip?`pula ${x.skip} jogo${x.skip>1?'s':''}`:'sem pular'}`; if(x.tipo==='trio') return `Trio ${x.a}-${x.b}-${x.c}`; return x.tipo==='dupla'?`Dupla ${x.a}-${x.b}`:`Σ${x.k} ${x.k>1?'últimos ticks':'último tick'} final ${x.mod}`; }
 function srScan(){
   const A=srEntries(); const nivel=+cfg.sr_nivel||0;
   if(A.length<50){ SR_SCAN={erro:`Poucas entradas (${A.length}). Carregue mais horas de ticks.`}; fillRes(); return; }
@@ -6172,6 +6192,7 @@ function srScan(){
   const combos=[];
   if(fam==='ambos'||fam==='somas'||fam==='tudo') for(let k=1;k<=kmax;k++) for(let m=0;m<10;m++) combos.push({tipo:'soma',k,mod:m});
   if(fam==='ambos'||fam==='duplas'||fam==='tudo') for(let a=0;a<10;a++) for(let b=0;b<10;b++) combos.push({tipo:'dupla',a,b});
+  if(fam==='trios'||fam==='tudo') for(let a=0;a<10;a++) for(let b=0;b<10;b++) for(let c=0;c<10;c++) combos.push({tipo:'trio',a,b,c});
   if(fam==='seq'||fam==='tudo'){ const mx=Math.max(1,Math.min(15,+cfg.sr_seqMax||6)), pk=Math.max(0,Math.min(10,+cfg.sr_pulo||3));
     for(let xx=1;xx<=mx;xx++) for(const c of [0,1]) for(let sk=0;sk<=pk;sk++) combos.push({tipo:'seq',x:xx,c,skip:sk}); }
   for(const c of combos) for(const alvo of [0,1]){
@@ -6332,7 +6353,7 @@ VIEWS.srob={nome:'⏱ Robôs de segundos',live:srLive,html(){
       <label>Jogo de ${sel('sr_E',[[10,'10s'],[20,'20s'],[30,'30s']])}</label>
       <label>Decidir ${sel('sr_L',[[2,'2s antes'],[4,'4s antes'],[6,'6s antes'],[8,'8s antes']])}</label>
       <label>Entrada ${sel('sr_nivel',[[0,'tiro seco'],[1,'até G1'],[2,'até G2']])}</label>
-      <label>Família ${sel('sr_fam',[['ambos','somas + duplas'],['somas','só somas'],['duplas','só duplas'],['seq','sequências (X× par/ímpar)'],['tudo','somas + duplas + sequências']])}</label>
+      <label>Família ${sel('sr_fam',[['ambos','somas + duplas'],['somas','só somas'],['duplas','só duplas'],['trios','só trios'],['seq','sequências (X× par/ímpar)'],['tudo','somas + duplas + trios + sequências']])}</label>
       <label>Sequência até ${inp('sr_seqMax',40)}× · pular até ${inp('sr_pulo',40)} jogos</label>
       <label>Somar até ${sel('sr_kmax',[[1,'1 tick'],[2,'2 ticks'],[3,'3 ticks'],[4,'4 ticks'],[5,'5 ticks']])}</label>
       <label>Mín. casos ${inp('sr_min',50)}</label>
@@ -8313,7 +8334,7 @@ function iaImportarDados(){
     reader.onload=function(e){
       try{
         const obj=JSON.parse(e.target.result);
-        const dados=obj.dados||obj;
+        const dados=obj.dados||obj; // suporta formato com wrapper ou raw
         const chaves=Object.keys(dados);
         if(!chaves.length){ alert('⚠ Arquivo vazio ou inválido.'); return; }
         if(!confirm(`Importar ${chaves.length} registros?\n\nATENÇÃO: Os dados atuais serão substituídos pelos do arquivo.\n\nContinuar?`)) return;
