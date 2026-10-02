@@ -417,7 +417,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.30b · 02/10/2026 · fix cor ticks 5s (PAR verde / ÍMPAR vermelho)';
+const VERSAO='v3.31 · 02/10/2026 · análise de padrões de formação nos ticks 5s (streak/alternado/bloco)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -4943,7 +4943,8 @@ function ilResolve(){
 function ilFecha(E,res){
   E.fim=true; E.fimT=Date.now(); E.res=res;
   const _d5ante=ilDig5Recent(E.T0).ante; const _d5pct=ilDig5Pct(_d5ante,E.alvo);
-  ilLogArr().push({T0:E.T0,alvo:E.alvo,res,nivel:res==='green'?E.g:-1,gale:ilGale(),tent:E.tent,fontes:E.fontes,n0:E.n0,contra:E.contra,forca:E.forca,ant:Math.round((E.T0-E.abriu)/1000),ilN:ilLogN(),dig5pct:_d5pct?_d5pct.pct:null,dig5n:_d5pct?_d5pct.n:0});
+  const _d5seq=ilDig5Seq(_d5ante,6);
+  ilLogArr().push({T0:E.T0,alvo:E.alvo,res,nivel:res==='green'?E.g:-1,gale:ilGale(),tent:E.tent,fontes:E.fontes,n0:E.n0,contra:E.contra,forca:E.forca,ant:Math.round((E.T0-E.abriu)/1000),ilN:ilLogN(),dig5pct:_d5pct?_d5pct.pct:null,dig5n:_d5pct?_d5pct.n:0,dig5seq:_d5seq});
   ilSave(); IL.fz.key=''; ilPopRefresh();
   if(S.tab==='il') fillRes();
 }
@@ -5049,6 +5050,51 @@ function ilDig5Pct(ticks,alvo){
   const match=ticks.filter(x=>+x.p===alvo).length;
   return {match,n:ticks.length,pct:Math.round(100*match/ticks.length)};
 }
+function ilDig5Seq(ticks,n){
+  const last=ticks.slice(-n);
+  if(last.length<n) return null;
+  return last.map(x=>''+((+x.p)?1:0)).join('');
+}
+function ilDig5DetectPat(ps){
+  const n=ps.length; if(n<3) return null;
+  let streak=1;
+  for(let i=n-2;i>=0;i--){ if(ps[i]===ps[n-1]) streak++; else break; }
+  if(streak>=3) return {type:'streak',streak,cor:ps[n-1],next:1-ps[n-1]};
+  if(n>=4){
+    const l4=ps.slice(-4);
+    if(l4.every((v,i)=>i===0||v!==l4[i-1])) return {type:'alt',next:1-ps[n-1]};
+    if(l4[0]===l4[1]&&l4[2]===l4[3]&&l4[0]!==l4[2]) return {type:'block2',next:l4[0]};
+    if(l4[0]===l4[1]&&l4[0]===l4[2]&&l4[3]!==l4[0]) return {type:'quebra',next:l4[3]};
+  }
+  return null;
+}
+function ilDig5PadraoHtml(ante,alvo){
+  if(ante.length<3) return '';
+  const ps=ante.map(x=>((+x.p)?1:0));
+  const pat=ilDig5DetectPat(ps);
+  if(!pat) return '';
+  const NC=c=>c===0?'PAR':'ÍMPAR';
+  const isFav=(pat.next===alvo);
+  const cls=isFav?'ok':'ruim';
+  let desc='';
+  if(pat.type==='streak') desc=`🔥 ${pat.streak}× ${NC(pat.cor)} seguidos → quebra esperada: <b>${NC(pat.next)}</b>`;
+  else if(pat.type==='alt') desc=`🔄 Alternado (P↔I) → próximo seria: <b>${NC(pat.next)}</b>`;
+  else if(pat.type==='block2') desc=`🔁 Bloco 2+2 → próximo bloco: <b>${NC(pat.next)}</b>`;
+  else if(pat.type==='quebra') desc=`↩ Quebrou sequência → possível continuação: <b>${NC(pat.next)}</b>`;
+  let histHtml='';
+  const seq3=ilDig5Seq(ante,3);
+  const allLog=Object.values(IL.log).flat().filter(x=>(x.res==='green'||x.res==='red')&&x.dig5seq&&x.alvo===alvo);
+  if(allLog.length>=5&&seq3){
+    const sim=allLog.filter(x=>x.dig5seq.slice(-3)===seq3);
+    if(sim.length>=3){
+      const hg=sim.filter(x=>x.res==='green').length, hp=Math.round(100*hg/sim.length);
+      const hn=hp>=60?'ok':hp>=40?'mu':'ruim';
+      histHtml=` · <span class="${hn}">hist padrão: ${hg}/${sim.length} green (${hp}%)</span>`;
+    }
+  }
+  const bgPat=isFav?'rgba(34,197,94,.08)':'rgba(239,68,68,.08)';
+  return `<div style="font-size:10px;padding:3px 8px;border-radius:4px;background:${bgPat};margin-top:3px;border-left:2px solid ${isFav?'var(--g)':'var(--v)'}">📐 Padrão: <span class="${cls}">${desc}</span> <span class="mu">${isFav?'→ '+NC(alvo)+' favorável':'→ '+NC(1-alvo)+' esperado (contra)'}</span>${histHtml}</div>`;
+}
 function ilDig5TiraHtml(ticks,alvo){
   return ticks.map(x=>{
     const cls=+x.p===alvo?'ok':'ruim';
@@ -5101,6 +5147,7 @@ function ilDig5Html(E){
     if(sWait&&sWait.n>0) html+=` · <span style="color:var(--am)">espera: ${sWait.match}/${sWait.n} ${alvoNome}</span>`;
     html+=histHtml;
     html+=`</div>`;
+    html+=ilDig5PadraoHtml(ante,alvo);
   }
   html+=`</div>`;
   return html;
