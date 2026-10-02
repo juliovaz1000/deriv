@@ -443,7 +443,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.32b · 02/10/2026 · Somente Robô: apenas robôs 100% de acerto';
+const VERSAO='v3.33 · 02/10/2026 · Relatório Contrário: padrões 100% vs direção oposta';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -5346,6 +5346,7 @@ VIEWS.il={nome:'🔗 Interligado',html(){
   return `<div class="panel"><h3>Tempos</h3><div id="ilStatus">${ilStatusHtml()}</div></div>
   <div class="panel"><h3>🗓 O que as fontes 100% apontam nos próximos ${Math.max(30,+(cfg.il_horiz??90))}s ${ilOn()?'':'<small class="ruim">interligado desligado — só visualização</small>'}</h3><div id="ilAgenda">${ilAgendaHtml()}</div></div>
   <div class="panel"><h3>📋 Relatório do interligado</h3>${ilRelatorio()}</div>
+  ${(()=>{ var b=Object.keys(LIVE||{}).find(function(bk){return LIVE[bk]&&LIVE[bk].length>10;}); var h=b?srobContrarioHtml(b,true):''; return h?'<div class="panel" style="border-color:#f59e0b"><h3>🔄 Contrário — e se entrasse ao contrário?</h3>'+h+'</div>':''; })()}
   ${(()=>{ const M=ilModelo(); if(M.n<15) return ''; const grupos=[['n','Nº de fontes'],['c','Contra'],['t','Tempos'],['k','Tipos']];
     return `<div class="panel"><h3>💪 O que a força do interligado aprendeu <small>${M.n} entradas · média ${(M.base*100).toFixed(1)}%</small></h3><div class="tw"><table>
       ${grupos.map(([k,t])=>`<tr><td style="text-align:left"><b>${t}</b></td><td style="text-align:left">${Object.entries(M.B).filter(([f])=>f.startsWith(k+':')).sort((a,b)=>b[1].n-a[1].n).map(([f,b])=>`<span class="fzchip ${b.n>=5&&b.rate>=M.base+0.03?'ok':b.n>=5&&b.rate<=M.base-0.03?'ruim':''}">${f.split(':')[1]}: <b>${(b.rate*100).toFixed(0)}%</b> <i>(${b.n})</i></span>`).join(' ')}</td></tr>`).join('')}</table></div></div>`; })()}`;
@@ -8546,6 +8547,7 @@ function iaHtml(){
   ${iaSomaPainel(somaAnalise,somaGrupos)}
   ${horaHtml}
   ${iaCfaPainel()}
+  ${(()=>{ var b=Object.keys(LIVE||{}).find(function(bk){return LIVE[bk]&&LIVE[bk].length>10;}); return b?srobContrarioHtml(b,false):''; })()}
   ${iaHistoricoHtml()}
   </div>`;
 }
@@ -8738,6 +8740,78 @@ function srobLog(msg, tipo) {
   SROB_LOG.push({ ts, msg, tipo });
   if (SROB_LOG.length > 300) SROB_LOG.splice(0, SROB_LOG.length - 200);
 }
+// ---- RELATÓRIO CONTRÁRIO: padrões 100% vs direção oposta ----
+function srobContrarioHtml(bank, compact) {
+  var W = LIVE[bank];
+  if (!W || W.length < 15) return compact ? '' : '<div class="nota">Dados insuficientes para análise contrária.</div>';
+  function getStarts(c) {
+    if (c.kind === 'Dupla') return scPairMap(W).get(c.pair) || [];
+    if (c.kind && c.kind.startsWith('Soma')) return (scSumMap(W, c.n) || new Map()).get(c.mod) || [];
+    if (c.kind === 'Número') return scDigitStarts(W, c.d);
+    return [];
+  }
+  var cands = [];
+  var pairMap = scPairMap(W);
+  pairMap.forEach(function(starts, pair) {
+    for (var skip = 0; skip <= 3; skip++) {
+      [0, 1].forEach(function(alvo) {
+        var s = scEval(W, starts, alvo, skip, 2);
+        if (s.sg + s.g1 === s.done && s.done >= 3) cands.push(Object.assign({ kind:'Dupla', pair:pair, gat:'Dupla '+pair, skip:skip, alvo:alvo }, s));
+      });
+    }
+  });
+  for (var n = 2; n <= 4; n++) {
+    var sumM = scSumMap(W, n);
+    sumM.forEach(function(starts, mod) {
+      for (var skip = 0; skip <= 3; skip++) {
+        [0, 1].forEach(function(alvo) {
+          var s = scEval(W, starts, alvo, skip, 2);
+          if (s.sg + s.g1 === s.done && s.done >= 3) cands.push(Object.assign({ kind:'Soma '+n, n:n, mod:mod, gat:'S'+n+'%10='+mod, skip:skip, alvo:alvo }, s));
+        });
+      }
+    });
+  }
+  for (var d = 0; d <= 9; d++) {
+    var dstarts = scDigitStarts(W, d);
+    for (var skip = 0; skip <= 3; skip++) {
+      [0, 1].forEach(function(alvo) {
+        var s = scEval(W, dstarts, alvo, skip, 2);
+        if (s.sg + s.g1 === s.done && s.done >= 3) cands.push(Object.assign({ kind:'Número', d:d, gat:'Nº '+d, skip:skip, alvo:alvo }, s));
+      });
+    }
+  }
+  cands.sort(function(a, b) { return b.done - a.done; });
+  var top = cands.slice(0, compact ? 8 : 20);
+  if (!top.length) return compact ? '' : '<div class="nota">Nenhum padrão 100% encontrado no histórico atual.</div>';
+  var rowsHtml = top.map(function(c) {
+    var starts = getStarts(c);
+    var inv = scEval(W, starts, 1 - c.alvo, c.skip, 2);
+    var alvoLabel = c.alvo ? 'ÍMPAR' : 'PAR';
+    var invLabel  = c.alvo ? 'PAR'   : 'ÍMPAR';
+    var normRate  = (100*(c.sg+c.g1)/c.done).toFixed(0);
+    var invRate   = inv.done ? (100*(inv.sg+inv.g1)/inv.done).toFixed(0) : '—';
+    var invCol    = inv.done && (inv.sg+inv.g1)/inv.done >= 0.6 ? 'var(--g)' : inv.done && (inv.sg+inv.g1)/inv.done >= 0.4 ? 'var(--am)' : 'var(--v)';
+    var skipLbl   = c.skip ? ' s'+c.skip : '';
+    return '<tr><td style="font-size:12px;white-space:nowrap">'+c.gat+skipLbl+'</td>'
+      +'<td><span class="tag g" style="font-size:10px">'+alvoLabel+'</span></td>'
+      +'<td style="text-align:center;color:var(--g);font-weight:700">'+normRate+'%</td>'
+      +'<td style="text-align:center">'+c.sg+'/'+c.g1+'/'+(c.done-c.sg-c.g1)+'</td>'
+      +'<td><span class="tag v" style="font-size:10px">'+invLabel+'</span></td>'
+      +'<td style="text-align:center;color:'+invCol+';font-weight:700">'+invRate+'%</td>'
+      +'<td style="text-align:center">'+inv.sg+'/'+inv.g1+'/'+inv.red+'</td></tr>';
+  }).join('');
+  var tbl = '<div class="tw" style="max-height:'+(compact?'260px':'400px')+'">'
+    +'<table><tr><th>Padrão</th><th>Alvo normal</th><th>Taxa</th><th title="TS/G1/red">TS/G1/red</th>'
+    +'<th>Ao contrário</th><th>Taxa inv.</th><th>TS/G1/red inv.</th></tr>'
+    +rowsHtml+'</table></div>'
+    +'<div class="nota" style="margin-top:6px">Coluna <b>Ao contrário</b>: se o sinal entrar na direção <b>oposta</b>, quantos TS/G1/reds ocorreriam. Taxa verde = o contrário também pagaria; vermelho = ruim nos dois lados.</div>';
+  if (compact) return tbl;
+  return '<div class="panel" style="border-color:#f59e0b;background:linear-gradient(135deg,rgba(245,158,11,.06),var(--p1))">'
+    +'<h3>🔄 Relatório Contrário — e se entrasse ao contrário?</h3>'
+    +'<p style="font-size:13px;color:var(--mu);margin:0 0 10px">Padrões com <b>100% de acerto</b> no histórico. A coluna "Ao contrário" mostra o que aconteceria ao entrar na direção oposta do sinal.</p>'
+    +tbl+'</div>';
+}
+
 function srobScanBest(bank, topN) {
   topN = topN || 15;
   const W = LIVE[bank]; if (!W || W.length < 10) return [];
