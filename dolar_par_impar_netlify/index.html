@@ -409,7 +409,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.27 · 01/10/2026 · interligado 30s + trios de números + exportar/importar';
+const VERSAO='v3.28 · 02/10/2026 · interligado relatório separado por qtd de jogos + 30s + trios';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -4781,9 +4781,27 @@ function fzResumoHtml(){
 // Quando ≥ N fontes 100% apontam a MESMA cor para o MESMO segundo (qualquer segundo, não só os de 20s),
 // abre a entrada com alguns segundos de antecedência no popup próprio. Enquanto ligado, desliga os popups da confluência.
 const IL_TEMPOS=[5,10,20,30];
-let IL={bk:{},hp:{},rbc:{},abertas:[],log:[],agenda:[],pop:null,popRes:null,k:'',scanT:0,fz:{key:'',m:null}};
-function ilLoad(){ try{ IL.log=JSON.parse(localStorage.getItem('dpi_il_log_v1')||'[]')||[]; }catch(e){ IL.log=[]; } }
-function ilSave(){ try{ localStorage.setItem('dpi_il_log_v1',JSON.stringify(IL.log.slice(-1500))); }catch(e){} }
+let IL={bk:{},hp:{},rbc:{},abertas:[],log:{},agenda:[],pop:null,popRes:null,k:'',scanT:0,fz:{key:'',m:null}};
+function ilLogN(){ return +(cfg.il_n||5000); }
+function ilLogArr(n){ n=n||ilLogN(); if(!IL.log[n]) IL.log[n]=[]; return IL.log[n]; }
+function ilLoad(){
+  try{
+    const v2=JSON.parse(localStorage.getItem('dpi_il_log_v2')||'null');
+    if(v2&&typeof v2==='object'&&!Array.isArray(v2)){ IL.log=v2; }
+    else{
+      // migrar v1 (array) para v2 com chave 5000
+      const v1=JSON.parse(localStorage.getItem('dpi_il_log_v1')||'[]')||[];
+      IL.log=v1.length?{5000:v1}:{};
+    }
+  }catch(e){ IL.log={}; }
+}
+function ilSave(){
+  try{
+    const out={};
+    for(const k of Object.keys(IL.log)){ if(IL.log[k]&&IL.log[k].length) out[k]=IL.log[k].slice(-1500); }
+    localStorage.setItem('dpi_il_log_v2',JSON.stringify(out));
+  }catch(e){}
+}
 function ilOn(){ return !!cfg.il_on; }
 function ilTempos(){ return IL_TEMPOS.filter(s=>+(cfg['il_w'+s]??1)); }
 function ilNivel(){ return Math.max(0,Math.min(2,+(cfg.il_nivel??0))); }
@@ -4916,7 +4934,7 @@ function ilResolve(){
 }
 function ilFecha(E,res){
   E.fim=true; E.fimT=Date.now(); E.res=res;
-  IL.log.push({T0:E.T0,alvo:E.alvo,res,nivel:res==='green'?E.g:-1,gale:ilGale(),tent:E.tent,fontes:E.fontes,n0:E.n0,contra:E.contra,forca:E.forca,ant:Math.round((E.T0-E.abriu)/1000)});
+  ilLogArr().push({T0:E.T0,alvo:E.alvo,res,nivel:res==='green'?E.g:-1,gale:ilGale(),tent:E.tent,fontes:E.fontes,n0:E.n0,contra:E.contra,forca:E.forca,ant:Math.round((E.T0-E.abriu)/1000),ilN:ilLogN()});
   ilSave(); IL.fz.key=''; ilPopRefresh();
   if(S.tab==='il') fillRes();
 }
@@ -4926,7 +4944,7 @@ function ilFeat(o){
   const n=o.n; return {n:'n:'+(n<=3?'3':n===4?'4':n<=6?'5–6':'7+'),c:'c:'+(o.c>=2?'2+':o.c),t:'t:'+o.tempos.join('+')+'s',k:'k:'+o.tipos.map(t=>({sc:'scanner',rb:'robô',hp:'horas'}[t]||t)).join('+')};
 }
 function ilModelo(){
-  const L=IL.log.filter(x=>x.res==='green'||x.res==='red'), key=L.length;
+  const L=ilLogArr().filter(x=>x.res==='green'||x.res==='red'), key=L.length;
   if(IL.fz.key===key && IL.fz.m) return IL.fz.m;
   const n=L.length, g=L.filter(x=>x.res==='green').length, base=n?(g+1)/(n+2):0.5, K=8, B={};
   for(const x of L){ const F=ilFeat(ilFeatObj(x)); for(const k in F){ const b=B[F[k]]||(B[F[k]]={n:0,g:0}); b.n++; b.g+=x.res==='green'?1:0; } }
@@ -4974,7 +4992,8 @@ function ilPopup(){
 }
 function ilPopRefresh(){
   if(!IL.pop) return;
-  const E=IL.abertas.find(e=>e.id===IL.pop) || IL.log.find(x=>'IL'+x.T0===IL.pop);
+  const _allIlLog=Object.values(IL.log).flat();
+  const E=IL.abertas.find(e=>e.id===IL.pop) || _allIlLog.find(x=>'IL'+x.T0===IL.pop);
   const f=document.getElementById('ilFase'), r=document.getElementById('ilRes');
   if(!E){ return; }
   if(!E.fim && E.fontes){ const fz=document.getElementById('ilForca'); if(fz && Date.now()%3000<600) fz.innerHTML=ilBarraHtml(E); }
@@ -5005,13 +5024,14 @@ function ilTab(titulo,grupos){
     ${grupos.map(([k,L])=>{ const n=L.length, g=L.filter(x=>x.res==='green').length; return `<tr><td style="text-align:left">${k}</td><td>${n}</td><td class="ok">${g}</td><td>${L.filter(x=>x.nivel===0).length}</td><td class="ruim">${n-g}</td><td><b class="${n>=5?(g/n>=0.5?'ok':'ruim'):''}">${n?(100*g/n).toFixed(1)+'%':'—'}</b></td></tr>`; }).join('')}</table></div>`;
 }
 function ilAgrupa(L,fn){ const M=new Map(); for(const x of L){ const k=fn(x); if(!M.has(k)) M.set(k,[]); M.get(k).push(x); } return [...M.entries()].sort((a,b)=>b[1].length-a[1].length); }
-function ilRelatorio(){
-  const L=IL.log.filter(x=>x.res==='green'||x.res==='red'), n=L.length, g=L.filter(x=>x.res==='green').length, sq=ilSeqs(L);
+function ilRelatorioPainel(L,nJogos){
+  const tipo={sc:'🔬',rb:'🤖',hp:'🕐'};
+  const n=L.length, g=L.filter(x=>x.res==='green').length, sq=ilSeqs(L);
   const lv=[0,1,2].map(k=>L.filter(x=>x.nivel===k).length);
-  const R=IL.log.slice(-80).reverse(), tipo={sc:'🔬',rb:'🤖',hp:'🕐'};
+  const R=L.slice(-80).reverse();
   const fx=[[0,25,'🔴 fraco'],[25,43,'🟠 abaixo'],[43,58,'⚪ média'],[58,75,'🟢 bom'],[75,101,'💎 forte']];
-  return `<div class="cards">${card('Entradas',num(n),'interligado fechadas')}${card('Green',`<span class="ok">${g}</span>`,`TS ${lv[0]}${ilGale()?` · G1 ${lv[1]} · G2 ${lv[2]}`:''}`)}
-    ${card('Red',`<span class="ruim">${n-g}</span>`,`maior sequência de red ${sq.mr}`)}${card('Assertividade',n?(100*g/n).toFixed(1)+'%':'—',`green seguidos agora ${sq.g} · máx ${sq.mg}`)}</div>
+  return `<div class="cards">${card('Entradas',num(n),'fechadas')}${card('Green',`<span class="ok">${g}</span>`,`TS ${lv[0]}${ilGale()?` · G1 ${lv[1]} · G2 ${lv[2]}`:''}`)}
+    ${card('Red',`<span class="ruim">${n-g}</span>`,`maior seq. de red ${sq.mr}`)}${card('Assertividade',n?(100*g/n).toFixed(1)+'%':'—',`green seguidos agora ${sq.g} · máx ${sq.mg}`)}</div>
   ${n?`<div class="ilgrid">
     <div><h4>Por nº de fontes 100%</h4>${ilTab('Fontes',ilAgrupa(L,x=>{ const k=x.fontes.length; return k<=3?'3':k===4?'4':k<=6?'5–6':'7+'; }))}</div>
     <div><h4>Por tempos que apontaram</h4>${ilTab('Tempos',ilAgrupa(L,x=>[...new Set(x.fontes.map(f=>f.s))].sort((a,b)=>a-b).join(' + ')+'s'))}</div>
@@ -5024,7 +5044,30 @@ function ilRelatorio(){
     ${R.map(x=>`<tr><td>${fmtT(x.T0)}</td><td>${tagc(x.alvo)}</td><td><b>${x.fontes.length}</b>${x.contra?` <span class="ruim">(${x.contra} contra)</span>`:''}</td><td>${ilTemposTxt(x.fontes)}</td><td>${x.ant??'—'}s antes</td><td>${x.forca??'—'}</td>
       <td>${(x.tent||[]).map(t=>`<span class="b s2 ${t.d==null?'':t.d%2?'v':'g'}">${t.d??'?'}</span>`).join(' ')}</td>
       <td class="${x.res==='green'?'ok':x.res==='red'?'ruim':'mu'}"><b>${x.res==='green'?'✅ '+IL_NT[x.nivel]:x.res==='red'?'❌ RED':'sem dado'}</b></td>
-      <td style="text-align:left;font-size:11px">${x.fontes.map(f=>`<span class="iltp">${f.s}s</span>${tipo[f.tipo]||''} ${f.txt}`).join(' · ')}</td></tr>`).join('')}</table></div>`:'<div class="nota">Nenhuma entrada do interligado fechada ainda.</div>'}`;
+      <td style="text-align:left;font-size:11px">${x.fontes.map(f=>`<span class="iltp">${f.s}s</span>${tipo[f.tipo]||''} ${f.txt}`).join(' · ')}</td></tr>`).join('')}</table></div>`:'<div class="nota">Nenhuma entrada fechada ainda.</div>'}`;
+}
+function ilRelatorio(){
+  // coleta todas as chaves que têm entradas, ordena numericamente
+  const chaves=[1000,2000,3000,5000,10000].filter(k=>IL.log[k]&&IL.log[k].length);
+  const cur=ilLogN();
+  if(!chaves.length) return '<div class="nota">Nenhuma entrada do interligado fechada ainda.</div>';
+  // se só há uma, mostra direto sem painel separado
+  if(chaves.length===1){
+    const k=chaves[0];
+    const L=IL.log[k].filter(x=>x.res==='green'||x.res==='red');
+    const lbl=k>=1000?`${k/1000}k`:`${k}`;
+    return `<details open><summary style="cursor:pointer;font-weight:bold;padding:4px 0">${k===cur?'▶ ':''}📊 Analisando ${lbl} jogos${k===cur?' (atual)':''} — ${L.length} entradas
+      <button style="margin-left:8px;font-size:11px" onclick="event.stopPropagation();if(confirm('Limpar relatório de ${lbl} jogos?')){IL.log[${k}]=[];ilSave();IL.fz.key='';fillRes()}">🧹</button></summary>
+      <div style="padding-top:8px">${ilRelatorioPainel(L,k)}</div></details>`;
+  }
+  return chaves.map(k=>{
+    const L=IL.log[k].filter(x=>x.res==='green'||x.res==='red');
+    const lbl=k>=1000?`${k/1000}k`:`${k}`;
+    const taxa=L.length?(100*L.filter(x=>x.res==='green').length/L.length).toFixed(1)+'%':'—';
+    return `<details${k===cur?' open':''}><summary style="cursor:pointer;font-weight:bold;padding:4px 0">${k===cur?'▶ ':''}📊 Analisando ${lbl} jogos${k===cur?' (atual)':''} — ${L.length} entradas · ${taxa}
+      <button style="margin-left:8px;font-size:11px" onclick="event.stopPropagation();if(confirm('Limpar relatório de ${lbl} jogos?')){IL.log[${k}]=[];ilSave();IL.fz.key='';fillRes()}">🧹</button></summary>
+      <div style="padding-top:8px">${ilRelatorioPainel(L,k)}</div></details>`;
+  }).join('<hr style="margin:8px 0;opacity:.3">');
 }
 // ---------- aba ----------
 function ilStatusHtml(){
@@ -5062,13 +5105,13 @@ VIEWS.il={nome:'🔗 Interligado',html(){
       <label><input type="checkbox" ${+(cfg.il_hp??1)?'checked':''} onchange="cfg.il_hp=this.checked?1:0;saveCfg();IL.k=''"> 🕐 horas pagantes</label>
       <label>Mín. casos ${inp('il_minCasos',45)}</label><label>Pular até ${inp('il_pulo',40)}</label>
       <label>Horas 100% ≥ ${sel('il_hpMin',[[4,'4h'],[6,'6h'],[8,'8h'],[12,'12h']])}</label>
-      <label>Analisar ${sel('il_n',[[3000,'3.000 jogos'],[5000,'5.000'],[10000,'10.000']])}</label>
+      <label>Analisar ${sel('il_n',[[1000,'1.000 jogos'],[2000,'2.000'],[3000,'3.000'],[5000,'5.000'],[10000,'10.000']])}</label>
       <label><input type="checkbox" ${(cfg.il_bloq??1)?'checked':''} onchange="cfg.il_bloq=this.checked?1:0;saveCfg();IL.k=''"> não entrar com fonte contra</label>
       <label><input type="checkbox" ${+(cfg.il_dif??0)?'checked':''} onchange="cfg.il_dif=this.checked?1:0;saveCfg();IL.k=''"> exigir 2 tempos diferentes</label>
       <label><input type="checkbox" ${+(cfg.il_pop??1)?'checked':''} onchange="cfg.il_pop=this.checked?1:0;saveCfg()"> popup</label>
       <label title="desmarque para os robôs, robôs de segundos e Under/Over voltarem a abrir popup próprio"><input type="checkbox" ${+(cfg.il_so??1)?'checked':''} onchange="cfg.il_so=this.checked?1:0;saveCfg()"> só o interligado avisa</label>
       <button onclick="IL.bk={};IL.hp={};IL.k='';status('🔗 recalculando as listas 100%…','ok')">↻ recalcular</button>
-      <button onclick="if(confirm('Limpar o relatório do interligado?')){IL.log=[];ilSave();IL.fz.key='';fillRes()}">🧹 limpar relatório</button>
+      <button onclick="(()=>{const cur=ilLogN(),lbl=cur>=1000?cur/1000+'k':cur,ch=Object.keys(IL.log).filter(k=>IL.log[k]&&IL.log[k].length);if(!ch.length)return;const op=ch.length>1?confirm('Limpar TODOS os relatórios?\nOK = todos · Cancelar = só '+lbl+' jogos (atual)'):true;if(op===null||op===undefined)return;if(op){IL.log={}}else{IL.log[cur]=[]}ilSave();IL.fz.key='';fillRes()})()">🧹 limpar relatório</button>
     </div>
     <div class="nota">Com o <b>🔗 INTERLIGAR</b> ligado: os popups da Confluência 1 e 2 ficam desligados (os relatórios deles continuam)${+(cfg.il_so??1)?', os robôs, robôs de segundos e Under/Over param de abrir popup e bipar (continuam rodando por trás e contando no interligado)':''}, os robôs automáticos de 5s, 10s, 20s e 30s ficam ligados renovando a cada ${raMin()} min, e as listas 100% de cada tempo são refeitas a cada 3 min (horas pagantes a cada 10 min).
       Uma fonte só conta se está <b>100% ${IL_NT[ilNivel()]==='TS'?'no tiro seco':'até '+IL_NT[ilNivel()]}</b> com pelo menos ${ilMinCasos()} casos (robôs: metade disso). Quando ${ilMinF()} ou mais apontam a mesma cor para o <b>mesmo segundo</b> de um jogo de <b>${ilAlvoS()}s</b>${ilAlvoS()===20?' (:00, :20 e :40)':ilAlvoS()===30?' (:00 e :30)':''} — as fontes dos outros tempos contam como confirmação quando caem nesse segundo — o popup avisa com antecedência.
@@ -7598,7 +7641,7 @@ async function trocarBanco(b) {
 function iaAllLogs(){
   const c1=(typeof CF!=='undefined'?CF.log:[]).filter(x=>x.res==='green'||x.res==='red').map(x=>({...x,_src:'CF1'}));
   const c2=(typeof CF2!=='undefined'?CF2.log:[]).filter(x=>x.res==='green'||x.res==='red').map(x=>({...x,_src:'CF2'}));
-  const il=(typeof IL!=='undefined'?IL.log:[]).filter(x=>x.res==='green'||x.res==='red').map(x=>({...x,_src:'IL'}));
+  const il=(typeof IL!=='undefined'?Object.values(IL.log).flat():[]).filter(x=>x.res==='green'||x.res==='red').map(x=>({...x,_src:'IL'}));
   return [...c1,...c2,...il].sort((a,b)=>a.T0-b.T0);
 }
 
