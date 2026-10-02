@@ -268,6 +268,30 @@ button.cfon{background:linear-gradient(90deg,#0891b2,#7c3aed);border-color:trans
 .cfativo{margin:6px 0;padding:8px 10px;border:1px solid var(--az);border-radius:9px;background:rgba(59,130,246,.15);font-weight:700;animation:piscaAz 1.2s infinite}
 .histzoom .b{width:calc(24px*var(--z,1));height:calc(24px*var(--z,1));font-size:calc(11px*var(--z,1))}
 .histzoom .ticktime{font-size:calc(9px*var(--z,1))}
+/* ===== SOMENTE ROBÔ ===== */
+#srobBtn{padding:3px 10px;border-radius:10px;font-size:12px;font-weight:800;border:1px solid #8b5cf6;color:#a78bfa;background:transparent;cursor:pointer}
+#srobBtn.son{background:#8b5cf6;color:#fff;border-color:#8b5cf6;box-shadow:0 0 10px rgba(139,92,246,.5)}
+#srobPop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:9999;overflow-y:auto}
+.srobpc{background:var(--p1);border:1px solid #8b5cf6;border-radius:14px;padding:18px 20px;width:min(580px,98vw);max-height:90vh;overflow-y:auto}
+.srobpt{font-size:15px;font-weight:800;color:#a78bfa;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.srobslot{background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.srobslot.dormindo{border-color:#f59e0b;opacity:.75}
+.srobslot.deletado{border-color:var(--v);opacity:.4;text-decoration:line-through}
+.srobslot.ativo{border-color:#8b5cf6}
+.srobslot.vazio{border-style:dashed;opacity:.4}
+.srobnum{width:22px;height:22px;border-radius:50%;background:#8b5cf6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.srobnum.dormindo{background:#f59e0b}.srobnum.deletado{background:var(--v)}
+.srobinfo{flex:1;min-width:0}
+.srobtag{font-size:10px;font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:5px;background:rgba(139,92,246,.2);color:#a78bfa}
+.srobtag.dormindo{background:rgba(245,158,11,.2);color:#f59e0b}
+.srobtag.deletado{background:rgba(239,68,68,.2);color:#ef4444}
+.srobgr{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.srobg{padding:2px 8px;border-radius:6px;font-size:12px;font-weight:800;background:rgba(34,197,94,.2);color:#4ade80}
+.srobr{padding:2px 8px;border-radius:6px;font-size:12px;font-weight:800;background:rgba(239,68,68,.2);color:#f87171}
+.srobrd{padding:2px 8px;border-radius:6px;font-size:12px;font-weight:800;background:rgba(245,158,11,.15);color:#fbbf24}
+.srob-log-box{margin-top:12px;border-top:1px solid var(--bd);padding-top:10px}
+.srob-log-line{font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.srob-log-g{color:#4ade80}.srob-log-r{color:#f87171}.srob-log-rd{color:#fbbf24}.srob-log-evt{color:#a78bfa}
 .histzoom .tickitem{min-width:calc(34px*var(--z,1))}
 .balls.fixed.histzoom{grid-template-columns:repeat(var(--hist-cols,20),minmax(calc(34px*var(--z,1)),1fr))}
 #demoBox{align-items:center;font-size:12px;font-weight:800;padding:4px 10px;border-radius:8px;border:1px solid var(--bd)}
@@ -353,6 +377,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
   <span id="status">pronto</span>
   <span id="repairBox" style="display:none"></span>
   <button id="ilBtn" onclick="ilLigar(!cfg.il_on)" title="junta 5s + 10s + 20s só com fontes 100%">🔗 INTERLIGAR</button>
+  <button id="srobBtn" onclick="srobOpen()" title="5 robôs automáticos com regra de sono/deleção">🎯 SOMENTE ROBÔ</button>
   <span id="demoBox" style="display:none"></span>
   <span id="atuBox" style="display:none" onclick="atuAbrir()" title="clique para ver todas as atualizações"></span>
   <span id="pgBox" style="display:none"></span>
@@ -375,6 +400,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 <nav id="tabs"></nav>
 <main id="view"></main>
 <div id="rbPopDPI" onclick="if(event.target===this)rbPopupFechar()"></div>
+<div id="srobPop" onclick="if(event.target===this)srobPopClose()"></div>
 <div id="nuvemPop" onclick="if(event.target===this)this.style.display='none'"></div>
 <div id="cf2Pop"></div>
 
@@ -417,7 +443,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.31 · 02/10/2026 · análise de padrões de formação nos ticks 5s (streak/alternado/bloco)';
+const VERSAO='v3.32 · 02/10/2026 · botão Somente Robô: 5 slots com regras de sono/deleção';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8687,12 +8713,110 @@ function renderTab() {
   $('#view').innerHTML = v.html ? v.html() : '<div id="res"></div>';
   fillRes();
 }
+// ===================== 🎯 SOMENTE ROBÔ (SROB) =====================
+const SROB_N = 5;
+let SROB_SLOTS = [], SROB_LOG = [], SROB_PEND = [];
+let SROB_OPEN = false;
+const SROB_KEY = 'srob_v1';
+
+function srobSlotVazio(id) {
+  return { id, rb: null, estado: 'vazio', greensConsec: 0, primeiroGreen: false, redsBefore: 0, greens: 0, reds: 0, redsD: 0, tsAtivado: 0 };
+}
+function srobLoad() {
+  try { const raw = localStorage.getItem(SROB_KEY); if (raw) { const d = JSON.parse(raw); SROB_SLOTS = d.slots || []; SROB_LOG = d.log || []; } } catch(e) {}
+  while (SROB_SLOTS.length < SROB_N) SROB_SLOTS.push(srobSlotVazio(SROB_SLOTS.length));
+  SROB_SLOTS = SROB_SLOTS.slice(0, SROB_N).map((s,i) => ({...srobSlotVazio(i), ...s, id: i}));
+}
+function srobSave() { try { localStorage.setItem(SROB_KEY, JSON.stringify({ slots: SROB_SLOTS, log: SROB_LOG.slice(-200) })); } catch(e) {} }
+function srobBtn() {
+  const el = document.querySelector('#srobBtn'); if (!el) return;
+  if (SROB_SLOTS.filter(s => s.estado !== 'vazio').length > 0) el.classList.add('son'); else el.classList.remove('son');
+}
+function srobPct(a, b) { return b ? Math.round(a / b * 100) + '%' : '-'; }
+function srobLog(msg, tipo) {
+  const ts = new Date().toLocaleTimeString('pt-BR');
+  SROB_LOG.push({ ts, msg, tipo });
+  if (SROB_LOG.length > 300) SROB_LOG.splice(0, SROB_LOG.length - 200);
+}
+function srobScanBest(bank, topN) {
+  topN = topN || 15;
+  const W = LIVE[bank]; if (!W || W.length < 10) return [];
+  const cands = [];
+  const pm = scPairMap(W);
+  for (const [pair, starts] of pm) for (let sk=0;sk<=3;sk++) for (const alvo of [0,1]) { const s=scEval(W,starts,alvo,sk,2); if(s.done>=5) cands.push({kind:'Dupla',pair,gat:'Dupla '+pair,skip:sk,alvo,bank,...s}); }
+  for (let n=2;n<=4;n++) { const sm=scSumMap(W,n); for (const [mod,starts] of sm) for (let sk=0;sk<=3;sk++) for (const alvo of [0,1]) { const s=scEval(W,starts,alvo,sk,2); if(s.done>=5) cands.push({kind:'Soma '+n,n,mod,gat:'Σ'+n+'%10='+mod,skip:sk,alvo,bank,...s}); } }
+  for (let d=0;d<=9;d++) { const starts=scDigitStarts(W,d); for (let sk=0;sk<=3;sk++) for (const alvo of [0,1]) { const s=scEval(W,starts,alvo,sk,2); if(s.done>=5) cands.push({kind:'Número',d,gat:'Nº '+d,skip:sk,alvo,bank,...s}); } }
+  cands.sort((a,b) => { const ra=(a.sg+a.g1)/(a.done||1),rb2=(b.sg+b.g1)/(b.done||1); return rb2-ra||b.done-a.done; });
+  return cands.slice(0, topN);
+}
+function srobFillSlots(bank) {
+  const W = LIVE[bank]; if (!W || W.length < 10) return;
+  const best = srobScanBest(bank, 30);
+  const emUso = new Set(SROB_SLOTS.filter(s=>s.estado!=='vazio'&&s.estado!=='deletado').map(s=>s.rb&&s.rb.gat+s.rb.skip+s.rb.alvo));
+  for (let i=0;i<SROB_N;i++) {
+    const slot=SROB_SLOTS[i]; if (slot.estado!=='vazio'&&slot.estado!=='deletado') continue;
+    for (const c of best) { const key=c.gat+c.skip+c.alvo; if(emUso.has(key)) continue; SROB_SLOTS[i]={...srobSlotVazio(i),rb:c,estado:'ativo',tsAtivado:srvNow()}; emUso.add(key); srobLog('🎯 Slot '+(i+1)+' ativado: '+c.gat+' skip'+c.skip+' '+(c.alvo?'ímpar':'par')+' ('+srobPct(c.sg+c.g1,c.done)+')','evt'); break; }
+  }
+  srobSave(); srobBtn();
+}
+function srobCheckUpgrade(bank) {
+  const best=srobScanBest(bank,10); if(!best.length) return;
+  for (let i=0;i<SROB_N;i++) {
+    const s=SROB_SLOTS[i]; if(s.estado!=='ativo'||!s.rb) continue;
+    const W=LIVE[bank]; if(!W) continue;
+    const starts=(()=>{ if(s.rb.kind==='Dupla') return scPairMap(W).get(s.rb.pair)||[]; if(s.rb.kind&&s.rb.kind.startsWith('Soma')) return (scSumMap(W,s.rb.n)||new Map()).get(s.rb.mod)||[]; return scDigitStarts(W,s.rb.d); })();
+    const ev=scEval(W,starts,s.rb.alvo,s.rb.skip,2);
+    const rAtual=(ev.sg+ev.g1)/(ev.done||1);
+    const emUso=new Set(SROB_SLOTS.filter((x,j)=>j!==i&&x.estado!=='vazio'&&x.estado!=='deletado').map(x=>x.rb&&x.rb.gat+x.rb.skip+x.rb.alvo));
+    const ml=best.find(c=>!emUso.has(c.gat+c.skip+c.alvo)); if(!ml) continue;
+    const rNovo=(ml.sg+ml.g1)/(ml.done||1);
+    if(rNovo-rAtual>0.15){srobLog('🔄 Slot '+(i+1)+' substituído: '+ml.gat+' ('+srobPct(ml.sg+ml.g1,ml.done)+' vs '+srobPct(ev.sg+ev.g1,ev.done)+')','evt'); SROB_SLOTS[i]={...srobSlotVazio(i),rb:ml,estado:'ativo',tsAtivado:srvNow()};}
+  }
+}
+function srobProcessResult(i, res) {
+  const s=SROB_SLOTS[i]; if(!s||s.estado==='vazio'||s.estado==='deletado') return;
+  if(s.estado==='dormindo'){if(res==='red'){s.redsD++;s.greensConsec=0;s.estado='ativo';srobLog('⏰ Slot '+(i+1)+' acordou (red dormente): '+s.rb.gat,'evt');} return;}
+  if(res==='green'){s.greens++;s.greensConsec++;s.primeiroGreen=true;s.redsBefore=0;srobLog('✅ Slot '+(i+1)+' green #'+s.greensConsec+': '+s.rb.gat,'g');if(s.greensConsec>=2){s.estado='dormindo';s.greensConsec=0;srobLog('😴 Slot '+(i+1)+' adormeceu (2 greens): '+s.rb.gat,'evt');}}
+  else{s.reds++;s.greensConsec=0;if(!s.primeiroGreen){s.redsBefore++;srobLog('❌ Slot '+(i+1)+' red sem green (#'+s.redsBefore+'): '+s.rb.gat,'r');if(s.redsBefore>=2){s.estado='deletado';srobLog('🗑 Slot '+(i+1)+' deletado (2 reds sem green): '+s.rb.gat,'r');srobFillSlots(s.rb.bank);}}
+  else{s.estado='deletado';srobLog('🗑 Slot '+(i+1)+' deletado (red pós-green): '+s.rb.gat,'r');srobFillSlots(s.rb.bank);}}
+  SROB_SLOTS[i]=s;
+}
+function srobWatchNew() {
+  const byBank={};
+  for (const s of SROB_SLOTS){if(!s.rb||s.estado==='vazio'||s.estado==='deletado')continue;const bk=s.rb.bank||cfg.bank;if(!byBank[bk])byBank[bk]=[];byBank[bk].push(s);}
+  for (const [bank,slots] of Object.entries(byBank)){
+    const W=LIVE[bank];if(!W||W.length<2)continue;
+    for (const s of slots){const rb=s.rb;const starts=(()=>{if(rb.kind==='Dupla')return(scPairMap(W)).get(rb.pair)||[];if(rb.kind&&rb.kind.startsWith('Soma'))return((scSumMap(W,rb.n))||new Map()).get(rb.mod)||[];return scDigitStarts(W,rb.d);})();if(!starts.length)continue;const last=starts[starts.length-1];const base=last+1+rb.skip;if(base>=W.length)continue;const key=s.id+'_'+last+'_'+base;if(s._lastKey===key)continue;s._lastKey=key;let res='red';for(let g=0;g<=2&&base+g<W.length;g++){if(+W[base+g].p===rb.alvo){res='green';break;}}const fechou=base+(res==='green'?0:2);if(W.length-fechou>4)continue;SROB_PEND.push({slotIdx:s.id,res,ts:Date.now()});}
+    if(SROB_SLOTS.some(s=>s.estado==='vazio'))srobFillSlots(bank);
+    if(W.length%20===0)srobCheckUpgrade(bank);
+  }
+}
+function srobResolvePending(){
+  if(!SROB_PEND.length)return;const now=Date.now();
+  for(const p of SROB_PEND){if(now-p.ts>30000)continue;srobProcessResult(p.slotIdx,p.res);}
+  SROB_PEND=[];srobSave();srobBtn();if(SROB_OPEN)srobRefreshPopup();
+}
+function srobOpen(){SROB_OPEN=true;const el=document.querySelector('#srobPop');if(!el)return;el.style.display='flex';srobRefreshPopup();}
+function srobPopClose(){SROB_OPEN=false;const el=document.querySelector('#srobPop');if(el)el.style.display='none';}
+function srobRefreshPopup(){
+  const el=document.querySelector('#srobPop');if(!el||!SROB_OPEN)return;
+  const bank=cfg.bank,popOff=cfg.srob_pop_off;
+  let h='<div class="srobpc"><div class="srobpt">🎯 Somente Robô<span style="margin-left:auto;display:flex;gap:8px;align-items:center"><label style="font-size:11px;font-weight:400;display:flex;gap:5px;align-items:center;cursor:pointer"><input type="checkbox" onchange="cfg.srob_pop_off=this.checked;saveCfg();srobRefreshPopup()" '+(popOff?'checked':'')+'>Desativar popup</label><button onclick="srobReset()" style="font-size:11px;padding:2px 8px;border-radius:6px;background:rgba(239,68,68,.2);border:1px solid #ef4444;color:#f87171;cursor:pointer">🗑 Resetar</button><button onclick="srobPopClose()" style="font-size:11px;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,.1);border:1px solid var(--bd);color:var(--mu);cursor:pointer">✕</button></span></div>';
+  h+='<div style="margin-bottom:4px;font-size:11px;color:var(--mu)">Banco: '+bank+' · '+SROB_SLOTS.filter(s=>s.estado==='ativo').length+' ativos · '+SROB_SLOTS.filter(s=>s.estado==='dormindo').length+' dormindo</div>';
+  for(const s of SROB_SLOTS){const est=s.estado;h+='<div class="srobslot '+est+'"><div class="srobnum '+est+'">'+(s.id+1)+'</div><div class="srobinfo">';if(est==='vazio'||!s.rb){h+='<span style="color:var(--mu);font-size:12px">— vazio —</span>';}else{const rb=s.rb;h+='<span class="srobtag '+est+'">'+est.toUpperCase()+'</span><span style="font-size:13px;font-weight:700;margin-left:6px">'+rb.gat+'</span><span style="font-size:11px;color:var(--mu);margin-left:4px">skip'+rb.skip+' '+(rb.alvo?'ímpar':'par')+'</span><div class="srobgr">';if(s.greens>0)h+='<span class="srobg">✅ '+s.greens+'</span>';if(s.reds>0)h+='<span class="srobr">❌ '+s.reds+'</span>';if(s.redsD>0)h+='<span class="srobrd">🌙 '+s.redsD+'</span>';if(s.greensConsec>0)h+='<span style="font-size:11px;color:#a78bfa">streak '+s.greensConsec+'</span>';h+='</div>';}h+='</div></div>';}
+  h+='<div style="display:flex;gap:8px;margin-top:10px"><button onclick="srobFillSlots(cfg.bank);srobRefreshPopup()" style="font-size:12px;padding:4px 12px;border-radius:8px;background:#8b5cf6;color:#fff;border:none;cursor:pointer">⚡ Preencher slots</button><button onclick="srobCheckUpgrade(cfg.bank);srobRefreshPopup()" style="font-size:12px;padding:4px 12px;border-radius:8px;background:rgba(139,92,246,.2);color:#a78bfa;border:1px solid #8b5cf6;cursor:pointer">🔄 Verificar upgrades</button></div>';
+  h+='<div class="srob-log-box"><div style="font-size:12px;font-weight:700;color:var(--mu);margin-bottom:6px">Relatório ('+SROB_LOG.length+')</div>';
+  const lr=[...SROB_LOG].reverse().slice(0,50);if(!lr.length)h+='<div style="font-size:12px;color:var(--mu)">Nenhum evento ainda.</div>';
+  for(const l of lr){const cls=l.tipo==='g'?'srob-log-g':l.tipo==='r'?'srob-log-r':l.tipo==='rd'?'srob-log-rd':'srob-log-evt';h+='<div class="srob-log-line '+cls+'"><span style="color:var(--mu);margin-right:5px">'+l.ts+'</span>'+l.msg+'</div>';}
+  h+='</div></div>';el.innerHTML=h;
+}
+function srobReset(){if(!confirm('Resetar todos os slots do Somente Robô?'))return;SROB_SLOTS=Array.from({length:SROB_N},(_,i)=>srobSlotVazio(i));SROB_LOG=[];SROB_PEND=[];srobSave();srobBtn();srobRefreshPopup();}
 // dado novo chegou: abas leves redesenham na hora; abas pesadas no máximo a cada 30s; robôs só atualizam os cards
 function afterUpdate(novo) {
   const v = VIEWS[S.tab];
   if (v.live) v.live();
   else if (!novo || !HEAVY.has(S.tab) || Date.now() - LAST_HEAVY > 30000) fillRes();
-  if (novo) setTimeout(() => { rbWatchNew(); rbRefreshOpenPopup(); try { cfCheck(); } catch (e) { console.warn('confluência', e); } }, 0);
+  if (novo) setTimeout(() => { rbWatchNew(); rbRefreshOpenPopup(); srobWatchNew(); try { cfCheck(); } catch (e) { console.warn('confluência', e); } }, 0);
 }
 
 // ---------- início ----------
@@ -8729,11 +8853,12 @@ function afterUpdate(novo) {
   renderTab();
   if (cfg.deriv5sOn !== 0) d5Connect();
   srLoadStore();
+  srobLoad(); setTimeout(srobBtn, 1800);
   if (SRB.some(r => r.on)) { cfg.sr_sym = SRB.find(r => r.on).sym; setTimeout(() => srCarregar(true), 4000); }
   if (cfg.autoOn) { buscar(); clearInterval(S.timer); S.timer = setInterval(buscar, cfg.auto * 1000); }
   if (cfg.derivFallback) connectDerivFallback();
   // relógio dos robôs: abre o popup na hora certa e confere green/red mesmo sem dado novo
-  setInterval(() => { rbProcessPending(); rbRefreshOpenPopup(); }, 1000);
+  setInterval(() => { rbProcessPending(); rbRefreshOpenPopup(); srobResolvePending(); srobRefreshPopup(); }, 1000);
 })();
 
 // =================== ☁ NUVEM (quando o HTML está hospedado na Netlify) ===================
