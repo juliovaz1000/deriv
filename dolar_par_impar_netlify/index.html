@@ -409,7 +409,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.28 · 02/10/2026 · interligado relatório separado por qtd de jogos + 30s + trios';
+const VERSAO='v3.29 · 02/10/2026 · interligado cenário histórico no popup + G1/G2 ao vivo + relatório separado';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -4967,6 +4967,65 @@ function ilBarraHtml(E){
     <div class="fzbar"><i style="width:${R.forca}%;background:${N.c}"></i><span class="fzm" style="left:25%"></span><span class="fzm" style="left:43%"></span><span class="fzm" style="left:58%"></span><span class="fzm" style="left:75%"></span></div>
     <div class="fzleg"><span>🔴 fraco</span><span>🟠 abaixo</span><span>⚪ média</span><span>🟢 bom</span><span>💎 forte</span></div>${lista?`<div style="font-size:11px;margin-top:2px">${lista}</div>`:''}</div>`;
 }
+// ---------- cenário similar (histórico de situações parecidas) ----------
+function ilCenarioSim(E){
+  // retorna todos os logs fechados similares a E
+  // Similar = mesmo alvo, fontes ±1, pelo menos 1 tempo em comum
+  const all=Object.values(IL.log).flat().filter(x=>x.res==='green'||x.res==='red');
+  if(!all.length) return null;
+  const nF=E.fontes.length, alvo=E.alvo;
+  const et=new Set(E.fontes.map(f=>f.s));
+  return all.filter(x=>x.alvo===alvo && Math.abs((x.fontes||[]).length-nF)<=1 && (x.fontes||[]).some(f=>et.has(f.s)));
+}
+function ilCenarioHtml(E, galeAtual){
+  // galeAtual: 0=TS ainda, 1=foi para G1, 2=foi para G2
+  const sim=ilCenarioSim(E); if(!sim||!sim.length) return '';
+  const n=sim.length;
+  // totais
+  const gTot=sim.filter(x=>x.res==='green').length, rTot=n-gTot;
+  const pTot=n?Math.round(100*gTot/n):0;
+  // quantos precisaram de G1 ou mais (nivel>=1 ou red com gale>=1)
+  const foiG1=sim.filter(x=>x.nivel>=1||(x.nivel===-1&&(x.gale||0)>=1));
+  const foiG2=sim.filter(x=>x.nivel>=2||(x.nivel===-1&&(x.gale||0)>=2));
+  let html=`<div class="ilcen" style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px 10px;margin-top:6px;font-size:12px">`;
+  html+=`<div style="font-weight:700;margin-bottom:4px">📊 Cenário parecido apareceu <b>${n}</b> vez${n>1?'es':''} — `;
+  html+=`<span class="ok">${gTot} green (${pTot}%)</span> · <span class="ruim">${rTot} red</span></div>`;
+  // barra proporcional
+  html+=`<div style="display:flex;height:6px;border-radius:4px;overflow:hidden;margin-bottom:6px">`;
+  if(gTot) html+=`<div style="flex:${gTot};background:var(--g)"></div>`;
+  if(rTot) html+=`<div style="flex:${rTot};background:var(--v)"></div>`;
+  html+=`</div>`;
+  // detalhe por gale
+  const g0=sim.filter(x=>x.nivel===0).length;
+  const g1=sim.filter(x=>x.nivel===1).length;
+  const g2=sim.filter(x=>x.nivel===2).length;
+  html+=`<div style="display:flex;gap:10px;flex-wrap:wrap">`;
+  html+=`<span>🎯 TS: <b class="ok">${g0}</b></span>`;
+  if(ilGale()>=1){ html+=`<span>⬆ G1: <b class="${g1?'ok':'mu'}">${g1}</b> green · <b class="${foiG1.length-g1?'ruim':'mu'}">${foiG1.length-g1}</b> red${foiG1.length?` (${foiG1.length} foram para G1)`:''}</span>`; }
+  if(ilGale()>=2){ html+=`<span>⬆ G2: <b class="${g2?'ok':'mu'}">${g2}</b> green · <b class="${foiG2.length-g2?'ruim':'mu'}">${foiG2.length-g2}</b> red${foiG2.length?` (${foiG2.length} foram para G2)`:''}</span>`; }
+  html+=`</div>`;
+  // aviso em tempo real quando está indo para G1/G2
+  if(galeAtual>=1){
+    const pG=foiG1.length?Math.round(100*g1/foiG1.length):null;
+    const destaque=pG!=null?(pG>=60?'ok':pG>=40?'mu':'ruim'):'mu';
+    html+=`<div style="margin-top:6px;padding:5px 8px;border-radius:6px;background:rgba(255,180,0,.1);font-weight:600">`;
+    html+=`⚡ Indo para G${galeAtual}: em ${foiG1.length||'?'} entradas similares que chegaram aqui → `;
+    if(foiG1.length){ html+=`<span class="${destaque}">${g1} green (${pG}%)</span> · <span class="ruim">${foiG1.length-g1} red</span>`; }
+    else{ html+=`<span class="mu">sem histórico ainda</span>`; }
+    html+=`</div>`;
+  }
+  if(galeAtual>=2){
+    const pG2=foiG2.length?Math.round(100*g2/foiG2.length):null;
+    const destaque2=pG2!=null?(pG2>=60?'ok':pG2>=40?'mu':'ruim'):'mu';
+    html+=`<div style="margin-top:4px;padding:5px 8px;border-radius:6px;background:rgba(255,100,0,.1);font-weight:600">`;
+    html+=`🔥 Indo para G2: em ${foiG2.length||'?'} similares que chegaram aqui → `;
+    if(foiG2.length){ html+=`<span class="${destaque2}">${g2} green (${pG2}%)</span> · <span class="ruim">${foiG2.length-g2} red</span>`; }
+    else{ html+=`<span class="mu">sem histórico ainda</span>`; }
+    html+=`</div>`;
+  }
+  html+=`</div>`;
+  return html;
+}
 // ---------- popup ----------
 function ilTemposTxt(F){ return [5,10,20,30].map(s=>{ const n=F.filter(f=>f.s===s).length; return n?`<span class="iltp">${s}s ×${n}</span>`:''; }).join(' '); }
 function ilPopup(){
@@ -4982,6 +5041,7 @@ function ilPopup(){
     <div id="ilFase" class="big"></div>
     ${ilGale()?`<div class="rbsched">${[0,1,2].slice(0,ilGale()+1).map(g=>`<div>${g?IL_NT[g]:'🎯 TIRO SECO'}<b>${hmsOf((E.T0+g*E.gstep)/1000)}</b></div>`).join('')}</div>`:''}
     <div id="ilForca">${ilBarraHtml(E)}</div>
+    <div id="ilHist">${ilCenarioHtml(E,0)}</div>
     <div id="ilRes" style="display:none;margin-top:10px;padding:10px;border-radius:9px;font-size:16px;font-weight:800"></div>
     <div class="nota" style="margin-top:8px"><b>Fontes 100%:</b><br>${E.fontes.map(f=>`<span class="iltp">${f.s}s</span> ${tipo[f.tipo]||''} ${f.txt} <span class="mu">(${f.casos} ${f.tipo==='hp'?'h':'casos'})</span>`).join('<br>')}</div>
     ${outras.length?`<div class="nota"><b>Próximas já avisadas:</b> ${outras.map(e=>`${hmsOf(e.T0/1000)} ${tagc(e.alvo)} (${e.fontes.length})`).join(' · ')}</div>`:''}
@@ -4997,10 +5057,19 @@ function ilPopRefresh(){
   const f=document.getElementById('ilFase'), r=document.getElementById('ilRes');
   if(!E){ return; }
   if(!E.fim && E.fontes){ const fz=document.getElementById('ilForca'); if(fz && Date.now()%3000<600) fz.innerHTML=ilBarraHtml(E); }
-  const Tg=(E.T0+(E.g||0)*(E.gstep||5000))/1000, falta=Math.ceil(Tg-srvNow());
-  if(f) f.textContent=E.fim?'':`${IL_NT[E.g]} ${hmsOf(Tg)} · `+(falta>0?`faltam ${falta}s`:'em jogo…');
+  const g_atual=E.g||0;
+  const Tg=(E.T0+g_atual*(E.gstep||5000))/1000, falta=Math.ceil(Tg-srvNow());
+  if(f) f.textContent=E.fim?'':`${IL_NT[g_atual]} ${hmsOf(Tg)} · `+(falta>0?`faltam ${falta}s`:'em jogo…');
+  // atualiza histórico de cenário quando gale muda ou 1x por segundo enquanto em jogo
+  const hist=document.getElementById('ilHist');
+  if(hist && !E.fim && E._lastHistG !== g_atual){
+    E._lastHistG=g_atual;
+    hist.innerHTML=ilCenarioHtml(E, g_atual);
+  }
   if(r && E.fim){ r.style.display='block'; const g=E.res==='green'; r.style.border=`1px solid ${g?'var(--g)':'var(--v)'}`;
-    r.innerHTML=g?`<span class="ok">✅ GREEN ${IL_NT[E.g]} · ${E.tent.map(t=>t.d).join(' / ')}</span>`:E.res==='red'?`<span class="ruim">❌ RED · ${E.tent.map(t=>t.d??'?').join(' / ')}</span>`:'<span class="mu">sem dado</span>';
+    r.innerHTML=g?`<span class="ok">✅ GREEN ${IL_NT[g_atual]} · ${E.tent.map(t=>t.d).join(' / ')}</span>`:E.res==='red'?`<span class="ruim">❌ RED · ${E.tent.map(t=>t.d??'?').join(' / ')}</span>`:'<span class="mu">sem dado</span>';
+    // atualiza o hist com gale final
+    if(hist) hist.innerHTML=ilCenarioHtml(E, g_atual);
     // depois de mostrar o resultado, passa para a próxima avisada
     const prox=IL.abertas.find(e=>!e.fim);
     if(prox && !E._pula){ E._pula=1; setTimeout(()=>{ if(IL.pop===E.id && +(cfg.il_pop??1)) ilPopup(); },4000); }
