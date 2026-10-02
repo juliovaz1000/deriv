@@ -409,7 +409,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.26 · 01/10/2026 · exportar/importar dados + trios de números';
+const VERSAO='v3.27 · 01/10/2026 · interligado 30s + trios de números + exportar/importar';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -425,7 +425,7 @@ const DEF = {
   limit: 5000, pages: 20, pip: 0, proxy: '', auto: 10, janela: 'n:2000', bank: 'Dólar', lastId: 0,
   padL: 3, padG: 1, padMin: 10, padAss: 80, padAlert: 1,
   bt_tipo: 'seq', bt_n: 4, bt_dir: 'contra', bt_pad: 'VVG', bt_cor: 'G', bt_dig: 0,
-  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, es_on: 0, es_estr: 'popup', es_base: 0.35, es_gale: 2, es_modo: 'rec', es_mult: 2.1, es_rec: 1, es_sw: 0, es_sl: 0, es_max: 0, es_aposRed: 0, es_aposWin: 0, dm_appId: '', srd_fonte: 'c1', srd_esp: 2, srd_para: 1, srd_pay: 85, srd_base: 1, srd_ini: 100, srd_gale: 2, srd_rec: 1, srd_conta: 0, p10_on: 0, p10_cruz: 1, p10_n: 5000, p10_hpMin: 3, p10_rbMin: 30, p10_rbPulo: 20, ra_w10: 1, ra_min10: 25, il_on: 0, il_w5: 1, il_w10: 1, il_w20: 1, il_minF: 3, il_nivel: 0, il_gale: 0, il_lead: 3, il_sc: 1, il_rb: 1, il_hp: 1, il_minCasos: 12, il_pulo: 15, il_hpMin: 6, il_n: 5000, il_bloq: 1, il_dif: 0, il_pop: 1, il_horiz: 90, il_alvo: 20, il_so: 1, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
+  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, es_on: 0, es_estr: 'popup', es_base: 0.35, es_gale: 2, es_modo: 'rec', es_mult: 2.1, es_rec: 1, es_sw: 0, es_sl: 0, es_max: 0, es_aposRed: 0, es_aposWin: 0, dm_appId: '', srd_fonte: 'c1', srd_esp: 2, srd_para: 1, srd_pay: 85, srd_base: 1, srd_ini: 100, srd_gale: 2, srd_rec: 1, srd_conta: 0, p10_on: 0, p10_cruz: 1, p10_n: 5000, p10_hpMin: 3, p10_rbMin: 30, p10_rbPulo: 20, ra_w10: 1, ra_min10: 25, il_on: 0, il_w5: 1, il_w10: 1, il_w20: 1, il_w30: 1, il_minF: 3, il_nivel: 0, il_gale: 0, il_lead: 3, il_sc: 1, il_rb: 1, il_hp: 1, il_minCasos: 12, il_pulo: 15, il_hpMin: 6, il_n: 5000, il_bloq: 1, il_dif: 0, il_pop: 1, il_horiz: 90, il_alvo: 20, il_so: 1, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
   sc_min: 20, sc_skip: 12, sc_top: 40, sc_digit: 5, sc_digit_skip: 3,
   sc_sum_min: 2, sc_sum_max: 5, sc_sum_skip: 8, autoOn: 1, derivFallback: 1,
   rb_popup: 1, rb_auto_min: 20, rb_auto_top: 100, rb_auto_only100: 1, rb_auto_family: 'ambos', rb_auto_pulo: 500, rb_manual_create: 1, rb_auto_nivel: 2, histShow: 1000, histFixed: 0, histCols: 20, hpMinSeq: 2, hpMinOc: 5, hpOrd: 'g2',
@@ -4780,7 +4780,7 @@ function fzResumoHtml(){
 //   🔬 Scanner (somas, duplas, números) · 🤖 robôs · 🕐 horas pagantes — de cada tempo.
 // Quando ≥ N fontes 100% apontam a MESMA cor para o MESMO segundo (qualquer segundo, não só os de 20s),
 // abre a entrada com alguns segundos de antecedência no popup próprio. Enquanto ligado, desliga os popups da confluência.
-const IL_TEMPOS=[5,10,20];
+const IL_TEMPOS=[5,10,20,30];
 let IL={bk:{},hp:{},rbc:{},abertas:[],log:[],agenda:[],pop:null,popRes:null,k:'',scanT:0,fz:{key:'',m:null}};
 function ilLoad(){ try{ IL.log=JSON.parse(localStorage.getItem('dpi_il_log_v1')||'[]')||[]; }catch(e){ IL.log=[]; } }
 function ilSave(){ try{ localStorage.setItem('dpi_il_log_v1',JSON.stringify(IL.log.slice(-1500))); }catch(e){} }
@@ -4790,7 +4790,7 @@ function ilNivel(){ return Math.max(0,Math.min(2,+(cfg.il_nivel??0))); }
 function ilGale(){ return Math.max(0,Math.min(2,+(cfg.il_gale??0))); }
 function ilMinF(){ return Math.max(2,+(cfg.il_minF??3)); }
 function ilSo(){ return !!cfg.il_on && +(cfg.il_so??1)===1; }   // interligado ligado = só ele avisa
-function ilAlvoS(){ return +(cfg.il_alvo??20)===5?5:+(cfg.il_alvo??20)===10?10:20; }   // segundos em que o interligado entra
+function ilAlvoS(){ const v=+(cfg.il_alvo??20); return v===5?5:v===10?10:v===30?30:20; }   // segundos em que o interligado entra
 function ilMinCasos(){ return Math.max(5,+(cfg.il_minCasos??12)); }
 function ilW(s){ let W=liveW(d5BankName(s))||[]; const n=Math.max(1000,+cfg.il_n||5000); return W.length>n?W.slice(-n):W; }
 function ilFresco(W,s){ return W.length>=200 && srvNow()*1000-W.at(-1).t < s*1000+15000; }
@@ -4950,7 +4950,7 @@ function ilBarraHtml(E){
     <div class="fzleg"><span>🔴 fraco</span><span>🟠 abaixo</span><span>⚪ média</span><span>🟢 bom</span><span>💎 forte</span></div>${lista?`<div style="font-size:11px;margin-top:2px">${lista}</div>`:''}</div>`;
 }
 // ---------- popup ----------
-function ilTemposTxt(F){ return [5,10,20].map(s=>{ const n=F.filter(f=>f.s===s).length; return n?`<span class="iltp">${s}s ×${n}</span>`:''; }).join(' '); }
+function ilTemposTxt(F){ return [5,10,20,30].map(s=>{ const n=F.filter(f=>f.s===s).length; return n?`<span class="iltp">${s}s ×${n}</span>`:''; }).join(' '); }
 function ilPopup(){
   const p=$('#rbPopDPI'); if(!p) return;
   const E=IL.abertas.find(e=>!e.fim)||IL.abertas.at(-1); if(!E) return;
@@ -5046,11 +5046,11 @@ function ilAgendaHtml(){
 }
 function ilLive(){ const e=$('#ilAgenda'); if(e) e.innerHTML=ilAgendaHtml(); const s=$('#ilStatus'); if(s) s.innerHTML=ilStatusHtml(); }
 VIEWS.il={nome:'🔗 Interligado',html(){
-  return `<div class="panel ilpanel"><h3>🔗 Interligado 5s + 10s + 20s <small>só fontes 100% · entra no jogo de ${ilAlvoS()}s · popup próprio</small></h3>
+  return `<div class="panel ilpanel"><h3>🔗 Interligado 5s + 10s + 20s + 30s <small>só fontes 100% · entra no jogo de ${ilAlvoS()}s · popup próprio</small></h3>
     <div class="ctl">
       ${ilOn()?`<button class="ruimbtn" onclick="ilLigar(false)">⏸ DESINTERLIGAR</button>`:`<button class="okbtn" onclick="ilLigar(true)">🔗 INTERLIGAR</button>`}
       ${IL_TEMPOS.map(s=>`<label><input type="checkbox" ${+(cfg['il_w'+s]??1)?'checked':''} onchange="cfg.il_w${s}=this.checked?1:0;saveCfg();IL.k='';fillRes()"> ${s}s</label>`).join('')}
-      <label>Entrar no jogo de ${sel('il_alvo',[[20,'20s (:00 :20 :40)'],[10,'10s'],[5,'5s (qualquer segundo)']])}</label>
+      <label>Entrar no jogo de ${sel('il_alvo',[[20,'20s (:00 :20 :40)'],[30,'30s (:00 :30)'],[10,'10s'],[5,'5s (qualquer segundo)']])}</label>
       <label>Mínimo de fontes ${sel('il_minF',[[2,'2'],[3,'3'],[4,'4'],[5,'5'],[6,'6']])}</label>
       <label>100% em ${sel('il_nivel',[[0,'TS (sem gale)'],[1,'até G1'],[2,'até G2']])}</label>
       <label>Entrada ${sel('il_gale',[[0,'tiro seco'],[1,'até G1'],[2,'até G2']])}</label>
@@ -5070,8 +5070,8 @@ VIEWS.il={nome:'🔗 Interligado',html(){
       <button onclick="IL.bk={};IL.hp={};IL.k='';status('🔗 recalculando as listas 100%…','ok')">↻ recalcular</button>
       <button onclick="if(confirm('Limpar o relatório do interligado?')){IL.log=[];ilSave();IL.fz.key='';fillRes()}">🧹 limpar relatório</button>
     </div>
-    <div class="nota">Com o <b>🔗 INTERLIGAR</b> ligado: os popups da Confluência 1 e 2 ficam desligados (os relatórios deles continuam)${+(cfg.il_so??1)?', os robôs, robôs de segundos e Under/Over param de abrir popup e bipar (continuam rodando por trás e contando no interligado)':''}, os robôs automáticos de 5s, 10s e 20s ficam ligados renovando a cada ${raMin()} min, e as listas 100% de cada tempo são refeitas a cada 3 min (horas pagantes a cada 10 min).
-      Uma fonte só conta se está <b>100% ${IL_NT[ilNivel()]==='TS'?'no tiro seco':'até '+IL_NT[ilNivel()]}</b> com pelo menos ${ilMinCasos()} casos (robôs: metade disso). Quando ${ilMinF()} ou mais apontam a mesma cor para o <b>mesmo segundo</b> de um jogo de <b>${ilAlvoS()}s</b>${ilAlvoS()===20?' (:00, :20 e :40)':''} — as fontes de 5s e 10s contam como confirmação quando caem nesse segundo — o popup avisa com antecedência.
+    <div class="nota">Com o <b>🔗 INTERLIGAR</b> ligado: os popups da Confluência 1 e 2 ficam desligados (os relatórios deles continuam)${+(cfg.il_so??1)?', os robôs, robôs de segundos e Under/Over param de abrir popup e bipar (continuam rodando por trás e contando no interligado)':''}, os robôs automáticos de 5s, 10s, 20s e 30s ficam ligados renovando a cada ${raMin()} min, e as listas 100% de cada tempo são refeitas a cada 3 min (horas pagantes a cada 10 min).
+      Uma fonte só conta se está <b>100% ${IL_NT[ilNivel()]==='TS'?'no tiro seco':'até '+IL_NT[ilNivel()]}</b> com pelo menos ${ilMinCasos()} casos (robôs: metade disso). Quando ${ilMinF()} ou mais apontam a mesma cor para o <b>mesmo segundo</b> de um jogo de <b>${ilAlvoS()}s</b>${ilAlvoS()===20?' (:00, :20 e :40)':ilAlvoS()===30?' (:00 e :30)':''} — as fontes dos outros tempos contam como confirmação quando caem nesse segundo — o popup avisa com antecedência.
       O mesmo padrão aparecendo no scanner e num robô do mesmo tempo conta uma vez só.</div>
   </div><div id="res"></div>`;
 },res(){
@@ -8342,7 +8342,7 @@ function iaImportarDados(){
         for(const k of chaves){
           try{ localStorage.setItem(k,dados[k]); ok++; }catch(ex){ err++; }
         }
-        alert(`✅ Importação concluída!\n${ok} registros restaurados${err?`\n⚠ ${err} erros`:''}.\nA página será recarregada agora.`);
+        alert(`✅ Importação concluída!\n${ok} registros restaurados${err?`\n⚠ ${err} erros`:''}.\n\nA página será recarregada agora.`);
         setTimeout(()=>location.reload(),500);
       }catch(ex){
         alert('❌ Erro ao ler arquivo: '+ex.message);
