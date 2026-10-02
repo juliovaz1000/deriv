@@ -245,6 +245,14 @@ tr.cfa-best td{background:rgba(34,197,94,.12)}
 #ilBtn{padding:3px 10px;border-radius:10px;font-size:12px;font-weight:800;border-color:#f59e0b;color:#fbbf24}#ilBtn.ilon{background:#f59e0b;color:#111;border-color:#f59e0b;box-shadow:0 0 10px rgba(245,158,11,.6)}
 .ilpanel{border-color:rgba(245,158,11,.55)!important}.ilpop{border:2px solid #f59e0b!important}.iltp{display:inline-block;font-size:10px;font-weight:800;padding:0 5px;border-radius:6px;background:rgba(245,158,11,.18);color:#fbbf24;margin-right:2px}
 .ilgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px;margin:8px 0}.ilgrid h4{margin:4px 0}
+.ild5wrap{background:rgba(255,255,255,.03);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:7px 9px;margin-top:6px;font-size:11px}
+.ild5tit{font-size:10px;color:var(--mu);font-weight:700;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.ild5strip{display:flex;gap:3px;flex-wrap:wrap;align-items:center;margin-bottom:4px}
+.ild5b{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;cursor:default}
+.ild5b.ok{background:var(--g);color:#000}.ild5b.ruim{background:var(--v);color:#fff}.ild5b.mu{background:rgba(255,255,255,.1);color:var(--mu)}
+.ild5lbl{font-size:9px;color:var(--mu);margin-right:1px;align-self:center;white-space:nowrap}
+.ild5sep{width:1px;height:16px;background:var(--bd);margin:0 3px;flex-shrink:0}
+.ild5ver{font-size:11px;padding:4px 7px;border-radius:5px;background:rgba(255,255,255,.04);line-height:1.6}
 .bvbox{border:1px solid rgba(245,197,24,.35);background:rgba(245,197,24,.05);border-radius:10px;padding:10px;margin:10px 0}
 .bvhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}.bvst{margin-left:auto;font-weight:700}
 .bvpop{margin-top:8px;padding:6px 9px;border-radius:8px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.35);font-size:13px}
@@ -409,7 +417,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.29 · 02/10/2026 · interligado cenário histórico no popup + G1/G2 ao vivo + relatório separado';
+const VERSAO='v3.30 · 02/10/2026 · ticker 5s ao vivo no popup + veredito + dig5pct no relatório';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -4934,7 +4942,8 @@ function ilResolve(){
 }
 function ilFecha(E,res){
   E.fim=true; E.fimT=Date.now(); E.res=res;
-  ilLogArr().push({T0:E.T0,alvo:E.alvo,res,nivel:res==='green'?E.g:-1,gale:ilGale(),tent:E.tent,fontes:E.fontes,n0:E.n0,contra:E.contra,forca:E.forca,ant:Math.round((E.T0-E.abriu)/1000),ilN:ilLogN()});
+  const _d5ante=ilDig5Recent(E.T0).ante; const _d5pct=ilDig5Pct(_d5ante,E.alvo);
+  ilLogArr().push({T0:E.T0,alvo:E.alvo,res,nivel:res==='green'?E.g:-1,gale:ilGale(),tent:E.tent,fontes:E.fontes,n0:E.n0,contra:E.contra,forca:E.forca,ant:Math.round((E.T0-E.abriu)/1000),ilN:ilLogN(),dig5pct:_d5pct?_d5pct.pct:null,dig5n:_d5pct?_d5pct.n:0});
   ilSave(); IL.fz.key=''; ilPopRefresh();
   if(S.tab==='il') fillRes();
 }
@@ -5026,6 +5035,76 @@ function ilCenarioHtml(E, galeAtual){
   html+=`</div>`;
   return html;
 }
+// ---------- análise ao vivo dos dígitos 5s no popup ----------
+function ilDig5Recent(T0){
+  // retorna {ante: ticks antes de T0, wait: ticks a partir de T0}
+  const W=LIVE[d5BankName(5)]||[];
+  if(!W.length) return {ante:[],wait:[]};
+  const ante=W.filter(x=>x.t<T0).slice(-14);
+  const wait=W.filter(x=>x.t>=T0).slice(0,30);
+  return {ante,wait};
+}
+function ilDig5Pct(ticks,alvo){
+  if(!ticks.length) return null;
+  const match=ticks.filter(x=>x.p===alvo).length;
+  return {match,n:ticks.length,pct:Math.round(100*match/ticks.length)};
+}
+function ilDig5TiraHtml(ticks,alvo){
+  return ticks.map(x=>{
+    const cls=x.p===alvo?'ok':'ruim';
+    return `<span class="ild5b ${cls}" title="${hmsOf(x.t/1000)} · ${x.d} · ${x.p===0?'PAR':'ÍMPAR'}">${x.d}</span>`;
+  }).join('');
+}
+function ilDig5Html(E){
+  if(!E||!E.T0) return '';
+  const {ante,wait}=ilDig5Recent(E.T0);
+  if(!ante.length&&!wait.length) return '';
+  const alvo=E.alvo;
+  const alvoNome=alvo===0?'PAR':'ÍMPAR', outroNome=alvo===0?'ÍMPAR':'PAR';
+  const all=[...ante,...wait];
+  const sAll=ilDig5Pct(all,alvo), sAnte=ilDig5Pct(ante,alvo), sWait=ilDig5Pct(wait,alvo);
+  const sLast5=ilDig5Pct(all.slice(-5),alvo);
+  let histHtml='';
+  if(sAnte&&sAnte.n>=5){
+    const allLog=Object.values(IL.log).flat().filter(x=>(x.res==='green'||x.res==='red')&&x.dig5pct!=null&&x.alvo===alvo);
+    if(allLog.length>=5){
+      const sim=allLog.filter(x=>Math.abs(x.dig5pct-sAnte.pct)<=18);
+      if(sim.length>=3){
+        const hg=sim.filter(x=>x.res==='green').length, hp=Math.round(100*hg/sim.length);
+        const hn=hp>=60?'ok':hp>=40?'mu':'ruim';
+        histHtml=` · hist parecido: <span class="${hn}">${hg}/${sim.length} green (${hp}%)</span>`;
+      }
+    }
+  }
+  let ver='', verCls='mu';
+  if(sAll){
+    if(sAll.pct>=62){ver='✅ Favorável';verCls='ok';}
+    else if(sAll.pct>=40){ver='⚠ Neutro';verCls='mu';}
+    else{ver='⛔ Contrário';verCls='ruim';}
+    if(sLast5){
+      if(sLast5.pct>=60&&sAll.pct<60) ver+=' ↗';
+      else if(sLast5.pct<40&&sAll.pct>=40) ver+=' ↘';
+    }
+  }
+  let html=`<div class="ild5wrap">`;
+  html+=`<div class="ild5tit">🎲 Dígitos 5s ao vivo · aguardando ${alvoNome}</div>`;
+  html+=`<div class="ild5strip">`;
+  if(ante.length){html+=`<span class="ild5lbl">antes</span>${ilDig5TiraHtml(ante,alvo)}`;}
+  if(wait.length){html+=`<span class="ild5sep"></span><span class="ild5lbl" style="color:var(--am)">espera</span>${ilDig5TiraHtml(wait,alvo)}`;}
+  html+=`</div>`;
+  if(sAll){
+    const bar=`<div style="display:flex;height:4px;border-radius:3px;overflow:hidden;margin-bottom:3px"><div style="flex:${sAll.match};background:var(--g)"></div><div style="flex:${sAll.n-sAll.match};background:var(--v)"></div></div>`;
+    html+=bar;
+    html+=`<div class="ild5ver">`;
+    html+=`<span class="${verCls}"><b>${ver}</b></span> · `;
+    html+=`<span class="ok">${sAll.match} ${alvoNome}</span> · <span class="ruim">${sAll.n-sAll.match} ${outroNome}</span> nos últimos ${sAll.n}`;
+    if(sWait&&sWait.n>0) html+=` · <span style="color:var(--am)">espera: ${sWait.match}/${sWait.n} ${alvoNome}</span>`;
+    html+=histHtml;
+    html+=`</div>`;
+  }
+  html+=`</div>`;
+  return html;
+}
 // ---------- popup ----------
 function ilTemposTxt(F){ return [5,10,20,30].map(s=>{ const n=F.filter(f=>f.s===s).length; return n?`<span class="iltp">${s}s ×${n}</span>`:''; }).join(' '); }
 function ilPopup(){
@@ -5041,6 +5120,7 @@ function ilPopup(){
     <div id="ilFase" class="big"></div>
     ${ilGale()?`<div class="rbsched">${[0,1,2].slice(0,ilGale()+1).map(g=>`<div>${g?IL_NT[g]:'🎯 TIRO SECO'}<b>${hmsOf((E.T0+g*E.gstep)/1000)}</b></div>`).join('')}</div>`:''}
     <div id="ilForca">${ilBarraHtml(E)}</div>
+    <div id="ilDig5">${ilDig5Html(E)}</div>
     <div id="ilHist">${ilCenarioHtml(E,0)}</div>
     <div id="ilRes" style="display:none;margin-top:10px;padding:10px;border-radius:9px;font-size:16px;font-weight:800"></div>
     <div class="nota" style="margin-top:8px"><b>Fontes 100%:</b><br>${E.fontes.map(f=>`<span class="iltp">${f.s}s</span> ${tipo[f.tipo]||''} ${f.txt} <span class="mu">(${f.casos} ${f.tipo==='hp'?'h':'casos'})</span>`).join('<br>')}</div>
@@ -5057,6 +5137,7 @@ function ilPopRefresh(){
   const f=document.getElementById('ilFase'), r=document.getElementById('ilRes');
   if(!E){ return; }
   if(!E.fim && E.fontes){ const fz=document.getElementById('ilForca'); if(fz && Date.now()%3000<600) fz.innerHTML=ilBarraHtml(E); }
+  if(!E.fim){ const dg=document.getElementById('ilDig5'); if(dg) dg.innerHTML=ilDig5Html(E); }
   const g_atual=E.g||0;
   const Tg=(E.T0+g_atual*(E.gstep||5000))/1000, falta=Math.ceil(Tg-srvNow());
   if(f) f.textContent=E.fim?'':`${IL_NT[g_atual]} ${hmsOf(Tg)} · `+(falta>0?`faltam ${falta}s`:'em jogo…');
@@ -5108,12 +5189,14 @@ function ilRelatorioPainel(L,nJogos){
     <div><h4>Pela barra de força</h4>${ilTab('Força',fx.map(([a,b,t])=>[t,L.filter(x=>x.forca!=null&&x.forca>=a&&x.forca<b)]))}</div>
     <div><h4>Por cor</h4>${ilTab('Alvo',[['PAR',L.filter(x=>x.alvo===0)],['ÍMPAR',L.filter(x=>x.alvo===1)]])}</div>
     <div><h4>Por hora do dia</h4>${ilTab('Hora',ilAgrupa(L,x=>p2d(new Date(x.T0).getHours())+'h').sort((a,b)=>a[0]<b[0]?-1:1))}</div>
+    ${(()=>{const LD=L.filter(x=>x.dig5pct!=null&&x.dig5n>=5);if(LD.length<5)return'';const bx=[[0,38,'⛔ Contrário'],[38,62,'⚠ Neutro'],[62,101,'✅ Favorável']];return`<div><h4>🎲 Por % ticks favoráveis (5s)</h4>${ilTab('%Fav',bx.map(([a,b,t])=>[t,LD.filter(x=>x.dig5pct>=a&&x.dig5pct<b)]))}</div>`})()}
   </div>`:''}
-  ${R.length?`<div class="tw" style="max-height:380px"><table><tr><th>Entrada</th><th>Alvo</th><th>Fontes</th><th>Tempos</th><th>Aviso</th><th>Força</th><th>Dígito(s)</th><th>Resultado</th><th style="text-align:left">Quem apontou</th></tr>
-    ${R.map(x=>`<tr><td>${fmtT(x.T0)}</td><td>${tagc(x.alvo)}</td><td><b>${x.fontes.length}</b>${x.contra?` <span class="ruim">(${x.contra} contra)</span>`:''}</td><td>${ilTemposTxt(x.fontes)}</td><td>${x.ant??'—'}s antes</td><td>${x.forca??'—'}</td>
+  ${R.length?`<div class="tw" style="max-height:380px"><table><tr><th>Entrada</th><th>Alvo</th><th>Fontes</th><th>Tempos</th><th>Aviso</th><th>Força</th><th>🎲 Ticks 5s</th><th>Dígito(s)</th><th>Resultado</th><th style="text-align:left">Quem apontou</th></tr>
+    ${R.map(x=>{const d5v=x.dig5pct!=null&&x.dig5n>=5?(x.dig5pct>=62?`<span class="ok">✅ ${x.dig5pct}%</span>`:x.dig5pct>=38?`<span class="mu">⚠ ${x.dig5pct}%</span>`:`<span class="ruim">⛔ ${x.dig5pct}%</span>`):'<span class="mu">—</span>';return`<tr><td>${fmtT(x.T0)}</td><td>${tagc(x.alvo)}</td><td><b>${x.fontes.length}</b>${x.contra?` <span class="ruim">(${x.contra} contra)</span>`:''}</td><td>${ilTemposTxt(x.fontes)}</td><td>${x.ant??'—'}s antes</td><td>${x.forca??'—'}</td>
+      <td>${d5v}</td>
       <td>${(x.tent||[]).map(t=>`<span class="b s2 ${t.d==null?'':t.d%2?'v':'g'}">${t.d??'?'}</span>`).join(' ')}</td>
       <td class="${x.res==='green'?'ok':x.res==='red'?'ruim':'mu'}"><b>${x.res==='green'?'✅ '+IL_NT[x.nivel]:x.res==='red'?'❌ RED':'sem dado'}</b></td>
-      <td style="text-align:left;font-size:11px">${x.fontes.map(f=>`<span class="iltp">${f.s}s</span>${tipo[f.tipo]||''} ${f.txt}`).join(' · ')}</td></tr>`).join('')}</table></div>`:'<div class="nota">Nenhuma entrada fechada ainda.</div>'}`;
+      <td style="text-align:left;font-size:11px">${x.fontes.map(f=>`<span class="iltp">${f.s}s</span>${tipo[f.tipo]||''} ${f.txt}`).join(' · ')}</td></tr>`;}).join('')}</table></div>`:'<div class="nota">Nenhuma entrada fechada ainda.</div>'}`;
 }
 function ilRelatorio(){
   // coleta todas as chaves que têm entradas, ordena numericamente
