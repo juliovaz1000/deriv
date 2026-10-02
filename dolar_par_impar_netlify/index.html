@@ -417,7 +417,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.30 · 02/10/2026 · ticker 5s ao vivo no popup + veredito + dig5pct no relatório';
+const VERSAO='v3.30b · 02/10/2026 · fix cor ticks 5s (PAR verde / ÍMPAR vermelho)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -5046,13 +5046,13 @@ function ilDig5Recent(T0){
 }
 function ilDig5Pct(ticks,alvo){
   if(!ticks.length) return null;
-  const match=ticks.filter(x=>x.p===alvo).length;
+  const match=ticks.filter(x=>+x.p===alvo).length;
   return {match,n:ticks.length,pct:Math.round(100*match/ticks.length)};
 }
 function ilDig5TiraHtml(ticks,alvo){
   return ticks.map(x=>{
-    const cls=x.p===alvo?'ok':'ruim';
-    return `<span class="ild5b ${cls}" title="${hmsOf(x.t/1000)} · ${x.d} · ${x.p===0?'PAR':'ÍMPAR'}">${x.d}</span>`;
+    const cls=+x.p===alvo?'ok':'ruim';
+    return `<span class="ild5b ${cls}" title="${hmsOf(x.t/1000)} · ${x.d} · ${+x.p===0?'PAR':'ÍMPAR'}">${x.d}</span>`;
   }).join('');
 }
 function ilDig5Html(E){
