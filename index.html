@@ -245,6 +245,14 @@ tr.cfa-best td{background:rgba(34,197,94,.12)}
 #ilBtn{padding:3px 10px;border-radius:10px;font-size:12px;font-weight:800;border-color:#f59e0b;color:#fbbf24}#ilBtn.ilon{background:#f59e0b;color:#111;border-color:#f59e0b;box-shadow:0 0 10px rgba(245,158,11,.6)}
 .ilpanel{border-color:rgba(245,158,11,.55)!important}.ilpop{border:2px solid #f59e0b!important}.iltp{display:inline-block;font-size:10px;font-weight:800;padding:0 5px;border-radius:6px;background:rgba(245,158,11,.18);color:#fbbf24;margin-right:2px}
 .ilgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px;margin:8px 0}.ilgrid h4{margin:4px 0}
+.ild5wrap{background:rgba(255,255,255,.03);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:7px 9px;margin-top:6px;font-size:11px}
+.ild5tit{font-size:10px;color:var(--mu);font-weight:700;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.ild5strip{display:flex;gap:3px;flex-wrap:wrap;align-items:center;margin-bottom:4px}
+.ild5b{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;cursor:default}
+.ild5b.ok{background:var(--g);color:#000}.ild5b.ruim{background:var(--v);color:#fff}.ild5b.mu{background:rgba(255,255,255,.1);color:var(--mu)}
+.ild5lbl{font-size:9px;color:var(--mu);margin-right:1px;align-self:center;white-space:nowrap}
+.ild5sep{width:1px;height:16px;background:var(--bd);margin:0 3px;flex-shrink:0}
+.ild5ver{font-size:11px;padding:4px 7px;border-radius:5px;background:rgba(255,255,255,.04);line-height:1.6}
 .bvbox{border:1px solid rgba(245,197,24,.35);background:rgba(245,197,24,.05);border-radius:10px;padding:10px;margin:10px 0}
 .bvhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}.bvst{margin-left:auto;font-weight:700}
 .bvpop{margin-top:8px;padding:6px 9px;border-radius:8px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.35);font-size:13px}
@@ -260,6 +268,30 @@ button.cfon{background:linear-gradient(90deg,#0891b2,#7c3aed);border-color:trans
 .cfativo{margin:6px 0;padding:8px 10px;border:1px solid var(--az);border-radius:9px;background:rgba(59,130,246,.15);font-weight:700;animation:piscaAz 1.2s infinite}
 .histzoom .b{width:calc(24px*var(--z,1));height:calc(24px*var(--z,1));font-size:calc(11px*var(--z,1))}
 .histzoom .ticktime{font-size:calc(9px*var(--z,1))}
+/* ===== SOMENTE ROBÔ ===== */
+#srobBtn{padding:3px 10px;border-radius:10px;font-size:12px;font-weight:800;border:1px solid #8b5cf6;color:#a78bfa;background:transparent;cursor:pointer}
+#srobBtn.son{background:#8b5cf6;color:#fff;border-color:#8b5cf6;box-shadow:0 0 10px rgba(139,92,246,.5)}
+#srobPop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:9999;overflow-y:auto}
+.srobpc{background:var(--p1);border:1px solid #8b5cf6;border-radius:14px;padding:18px 20px;width:min(580px,98vw);max-height:90vh;overflow-y:auto}
+.srobpt{font-size:15px;font-weight:800;color:#a78bfa;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.srobslot{background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.srobslot.dormindo{border-color:#f59e0b;opacity:.75}
+.srobslot.deletado{border-color:var(--v);opacity:.4;text-decoration:line-through}
+.srobslot.ativo{border-color:#8b5cf6}
+.srobslot.vazio{border-style:dashed;opacity:.4}
+.srobnum{width:22px;height:22px;border-radius:50%;background:#8b5cf6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.srobnum.dormindo{background:#f59e0b}.srobnum.deletado{background:var(--v)}
+.srobinfo{flex:1;min-width:0}
+.srobtag{font-size:10px;font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:5px;background:rgba(139,92,246,.2);color:#a78bfa}
+.srobtag.dormindo{background:rgba(245,158,11,.2);color:#f59e0b}
+.srobtag.deletado{background:rgba(239,68,68,.2);color:#ef4444}
+.srobgr{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.srobg{padding:2px 8px;border-radius:6px;font-size:12px;font-weight:800;background:rgba(34,197,94,.2);color:#4ade80}
+.srobr{padding:2px 8px;border-radius:6px;font-size:12px;font-weight:800;background:rgba(239,68,68,.2);color:#f87171}
+.srobrd{padding:2px 8px;border-radius:6px;font-size:12px;font-weight:800;background:rgba(245,158,11,.15);color:#fbbf24}
+.srob-log-box{margin-top:12px;border-top:1px solid var(--bd);padding-top:10px}
+.srob-log-line{font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.srob-log-g{color:#4ade80}.srob-log-r{color:#f87171}.srob-log-rd{color:#fbbf24}.srob-log-evt{color:#a78bfa}
 .histzoom .tickitem{min-width:calc(34px*var(--z,1))}
 .balls.fixed.histzoom{grid-template-columns:repeat(var(--hist-cols,20),minmax(calc(34px*var(--z,1)),1fr))}
 #demoBox{align-items:center;font-size:12px;font-weight:800;padding:4px 10px;border-radius:8px;border:1px solid var(--bd)}
@@ -345,6 +377,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
   <span id="status">pronto</span>
   <span id="repairBox" style="display:none"></span>
   <button id="ilBtn" onclick="ilLigar(!cfg.il_on)" title="junta 5s + 10s + 20s só com fontes 100%">🔗 INTERLIGAR</button>
+  <button id="srobBtn" onclick="srobOpen()" title="5 robôs automáticos com regra de sono/deleção">🎯 SOMENTE ROBÔ</button>
   <span id="demoBox" style="display:none"></span>
   <span id="atuBox" style="display:none" onclick="atuAbrir()" title="clique para ver todas as atualizações"></span>
   <span id="pgBox" style="display:none"></span>
@@ -367,6 +400,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 <nav id="tabs"></nav>
 <main id="view"></main>
 <div id="rbPopDPI" onclick="if(event.target===this)rbPopupFechar()"></div>
+<div id="srobPop" onclick="if(event.target===this)srobPopClose()"></div>
 <div id="nuvemPop" onclick="if(event.target===this)this.style.display='none'"></div>
 <div id="cf2Pop"></div>
 
@@ -409,7 +443,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.24 · 30/09/2026 · com o interligado ligado só ele avisa (robôs calados)';
+const VERSAO='v3.37 · 02/10/2026 · Somente Robô temporário: 1 resultado e sai, horário fixo só da hora atual, sem dormência';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -425,7 +459,7 @@ const DEF = {
   limit: 5000, pages: 20, pip: 0, proxy: '', auto: 10, janela: 'n:2000', bank: 'Dólar', lastId: 0,
   padL: 3, padG: 1, padMin: 10, padAss: 80, padAlert: 1,
   bt_tipo: 'seq', bt_n: 4, bt_dir: 'contra', bt_pad: 'VVG', bt_cor: 'G', bt_dig: 0,
-  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, es_on: 0, es_estr: 'popup', es_base: 0.35, es_gale: 2, es_modo: 'rec', es_mult: 2.1, es_rec: 1, es_sw: 0, es_sl: 0, es_max: 0, es_aposRed: 0, es_aposWin: 0, dm_appId: '', srd_fonte: 'c1', srd_esp: 2, srd_para: 1, srd_pay: 85, srd_base: 1, srd_ini: 100, srd_gale: 2, srd_rec: 1, srd_conta: 0, p10_on: 0, p10_cruz: 1, p10_n: 5000, p10_hpMin: 3, p10_rbMin: 30, p10_rbPulo: 20, ra_w10: 1, ra_min10: 25, il_on: 0, il_w5: 1, il_w10: 1, il_w20: 1, il_minF: 3, il_nivel: 0, il_gale: 0, il_lead: 3, il_sc: 1, il_rb: 1, il_hp: 1, il_minCasos: 12, il_pulo: 15, il_hpMin: 6, il_n: 5000, il_bloq: 1, il_dif: 0, il_pop: 1, il_horiz: 90, il_alvo: 20, il_so: 1, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
+  bt_gales: 1, bt_stake: 1, bt_mult: 2.1, bt_payout: 95, showSec: 0, ddBank: 'Dólar', ddLastId: null, d5FillH: 6, d5CheckDays: 3, sr_sym: 'R_100', sr_horas: 6, sr_E: 20, sr_L: 4, sr_nivel: 1, sr_fam: 'ambos', sr_kmax: 4, dm_on: 0, dm_stake: 0.35, dm_galeModo: 'auto', dm_mult: 2.1, dm_maxStake: 10, dm_stopLoss: 5, dm_stopWin: 5, dm_lead: 1.5, ra_on: 1, ra_w20: 1, ra_w5: 1, ra_int: 5, ra_max: 10, ra_min20: 20, ra_min5: 30, ra_pulo: 20, ra_valid: 1, ra_pop: 0, pg_n: 15, es_on: 0, es_estr: 'popup', es_base: 0.35, es_gale: 2, es_modo: 'rec', es_mult: 2.1, es_rec: 1, es_sw: 0, es_sl: 0, es_max: 0, es_aposRed: 0, es_aposWin: 0, dm_appId: '', srd_fonte: 'c1', srd_esp: 2, srd_para: 1, srd_pay: 85, srd_base: 1, srd_ini: 100, srd_gale: 2, srd_rec: 1, srd_conta: 0, p10_on: 0, p10_cruz: 1, p10_n: 5000, p10_hpMin: 3, p10_rbMin: 30, p10_rbPulo: 20, ra_w10: 1, ra_min10: 25, il_on: 0, il_w5: 1, il_w10: 1, il_w20: 1, il_w30: 1, il_minF: 3, il_nivel: 0, il_gale: 0, il_lead: 3, il_sc: 1, il_rb: 1, il_hp: 1, il_minCasos: 12, il_pulo: 15, il_hpMin: 6, il_n: 5000, il_bloq: 1, il_dif: 0, il_pop: 1, il_horiz: 90, il_alvo: 20, il_so: 1, p5_on: 0, p5_cruz: 1, p5_n: 5000, p5_hpMin: 3, p5_rbMin: 30, p5_rbPulo: 20, cf2_on: 1, cf2_rob: 1, cf_n100: 0, cf_p100: 100, cf_100gale: 1, cf2_max: 7, cf2_v: 1, bv_fonte: 'c1', cf2_espera: 0, cf2_pop: 1, cfa_fonte: 'todas', bv_ini: 100, bv_entrada: 1, bv_gale: 2, bv_modo: 'mult', bv_mult: 2.1, bv_payout: 95, bv_sw: 0, bv_sl: 0, cf_exRob: 1, cf_exHp: 1, cf_exCol: 1, cf_hpMin: 3, cf_colMin: 4, cf_on: 1, cf_min: 3, cf_fontes: 'ambos', cf_bloq: 1, cf_pop: 1, cf_galeCor: 'qualquer', cf_espera: 60, dm_estrito: 1, dm_ajuste: 0, histZoom: 1, uo_sym: '', uo_w: 20, uo_per: 168, uo_lvl: 0, uo_sub: 'visao', uo_mode: 'hora', uo_top: 60, uo_ord: 'score', uo_tipo: 'todos', uo_bar: 'todas', uo_view: 'cards', uo_popup: 1, uo_lead: 30, uo_opMin: 15, uo_fw: 'todos', uo_fm: 'todos', uo_fs: 'todos', uo_refB: 5, uo_tlog: 0, d5Syms: ['R_100'], sr_seqMax: 6, sr_pulo: 3, rb_seqMax: 8, sr_min: 30, sr_top: 80, sr_popup: 1, sr_popSoExc: 1, sr_popTaxa: 85, sr_popCasos: 20, c10Rows: 36, hpPer: 168, hpAlvo: 'all', hpMin: 'all', rb_valid: 1,
   sc_min: 20, sc_skip: 12, sc_top: 40, sc_digit: 5, sc_digit_skip: 3,
   sc_sum_min: 2, sc_sum_max: 5, sc_sum_skip: 8, autoOn: 1, derivFallback: 1,
   rb_popup: 1, rb_auto_min: 20, rb_auto_top: 100, rb_auto_only100: 1, rb_auto_family: 'ambos', rb_auto_pulo: 500, rb_manual_create: 1, rb_auto_nivel: 2, histShow: 1000, histFixed: 0, histCols: 20, hpMinSeq: 2, hpMinOc: 5, hpOrd: 'g2',
@@ -3652,6 +3686,7 @@ function scScanSums(W){
 function scNivel(){ return Math.max(0,Math.min(2,+cfg.rb_auto_nivel||0)); }
 function scStartsOf(W,o,C){
   if(o.kind==='Número'){ C.dig=C.dig||{}; return C.dig[o.d]||(C.dig[o.d]=scDigitStarts(W,o.d)); }
+  if(o.kind==='Trio'){ C.trio=C.trio||scTrioMap(W); return C.trio.get(`${o.a}-${o.b}-${o.c}`)||[]; }
   if(o.kind==='Dupla'){ C.pair=C.pair||scPairMap(W); return C.pair.get(o.pair||`${o.a}-${o.b}`)||[]; }
   C.sum=C.sum||{}; const M=C.sum[o.n]||(C.sum[o.n]=scSumMap(W,o.n)); return M.get(o.mod)||[];
 }
@@ -3679,6 +3714,7 @@ function scLive(W,o,nivel,C,stepMs){
 }
 function scGatTxt(W,o,ti){
   if(o.kind==='Número') return `nº ${W[ti].d}`;
+  if(o.kind==='Trio') return `${W[ti-2]?.d}-${W[ti-1]?.d}-${W[ti].d}`;
   if(o.kind==='Dupla') return `${W[ti-1]?.d}-${W[ti].d}`;
   const g=[]; for(let k=ti-o.n+1;k<=ti;k++) g.push(W[k]?.d);
   return `${g.join('+')}=${g.reduce((a,b)=>a+b,0)}`;
@@ -4452,7 +4488,7 @@ function p5Resumo(E){
 function p5Buscar(){
   const W=p5W(); if(W.length<500){ status('⏱ Banco de 5s ainda com poucos jogos','err'); return; }
   const t0=performance.now(), nivel=scNivel(), min=Math.max(5,+cfg.p5_rbMin||30), maxSkip=Math.max(0,Math.min(60,+cfg.p5_rbPulo||20));
-  let all=[]; for(const fam of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,0));
+  let all=[]; for(const fam of ['somas','duplas','trios','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,0));
   all.sort((a,b)=>b.rate-a.rate||b.done-a.done||a.skip-b.skip);
   P5.auto=all.slice(0,60); P5.autoInfo={n:W.length,ms:Math.round(performance.now()-t0),achados:all.length,when:Date.now()};
   fillRes();
@@ -4463,7 +4499,7 @@ function p5Criar(i){
   let rb=RBOTS.find(r=>r.id===id);
   if(!rb){
     const base={id,skip:x.skip,alvo:x.alvo,maxNivel:nivel,bank,on:true,popup:false,cfPop:true,criadoEm:Date.now(),minOcc:x.done||0,taxaCriacao:x.rate,p5:true};
-    rb=x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
+    rb=x.kind==='Trio'?{...base,tipo:'trio',a:x.a,b:x.b,c:x.c}:x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
     RBOTS.unshift(rb); rbSave();
   } else { rb.on=true; rbSave(); }
   status(`⏱ Robô de 5s criado: ${rbName(rb)}`,'ok'); fillRes();
@@ -4608,7 +4644,7 @@ function p10Resumo(E){
 function p10Buscar(){
   const W=p10W(); if(W.length<500){ status('⏱ Banco de 10s ainda com poucos jogos','err'); return; }
   const t0=performance.now(), nivel=scNivel(), min=Math.max(5,+cfg.p10_rbMin||30), maxSkip=Math.max(0,Math.min(60,+cfg.p10_rbPulo||20));
-  let all=[]; for(const fam of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,0));
+  let all=[]; for(const fam of ['somas','duplas','trios','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,0));
   all.sort((a,b)=>b.rate-a.rate||b.done-a.done||a.skip-b.skip);
   P10.auto=all.slice(0,60); P10.autoInfo={n:W.length,ms:Math.round(performance.now()-t0),achados:all.length,when:Date.now()};
   fillRes();
@@ -4619,7 +4655,7 @@ function p10Criar(i){
   let rb=RBOTS.find(r=>r.id===id);
   if(!rb){
     const base={id,skip:x.skip,alvo:x.alvo,maxNivel:nivel,bank,on:true,popup:false,cfPop:true,criadoEm:Date.now(),minOcc:x.done||0,taxaCriacao:x.rate,p10:true};
-    rb=x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
+    rb=x.kind==='Trio'?{...base,tipo:'trio',a:x.a,b:x.b,c:x.c}:x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
     RBOTS.unshift(rb); rbSave();
   } else { rb.on=true; rbSave(); }
   status(`⏱ Robô de 10s criado: ${rbName(rb)}`,'ok'); fillRes();
@@ -4778,17 +4814,35 @@ function fzResumoHtml(){
 //   🔬 Scanner (somas, duplas, números) · 🤖 robôs · 🕐 horas pagantes — de cada tempo.
 // Quando ≥ N fontes 100% apontam a MESMA cor para o MESMO segundo (qualquer segundo, não só os de 20s),
 // abre a entrada com alguns segundos de antecedência no popup próprio. Enquanto ligado, desliga os popups da confluência.
-const IL_TEMPOS=[5,10,20];
-let IL={bk:{},hp:{},rbc:{},abertas:[],log:[],agenda:[],pop:null,popRes:null,k:'',scanT:0,fz:{key:'',m:null}};
-function ilLoad(){ try{ IL.log=JSON.parse(localStorage.getItem('dpi_il_log_v1')||'[]')||[]; }catch(e){ IL.log=[]; } }
-function ilSave(){ try{ localStorage.setItem('dpi_il_log_v1',JSON.stringify(IL.log.slice(-1500))); }catch(e){} }
+const IL_TEMPOS=[5,10,20,30];
+let IL={bk:{},hp:{},rbc:{},abertas:[],log:{},agenda:[],pop:null,popRes:null,k:'',scanT:0,fz:{key:'',m:null}};
+function ilLogN(){ return +(cfg.il_n||5000); }
+function ilLogArr(n){ n=n||ilLogN(); if(!IL.log[n]) IL.log[n]=[]; return IL.log[n]; }
+function ilLoad(){
+  try{
+    const v2=JSON.parse(localStorage.getItem('dpi_il_log_v2')||'null');
+    if(v2&&typeof v2==='object'&&!Array.isArray(v2)){ IL.log=v2; }
+    else{
+      // migrar v1 (array) para v2 com chave 5000
+      const v1=JSON.parse(localStorage.getItem('dpi_il_log_v1')||'[]')||[];
+      IL.log=v1.length?{5000:v1}:{};
+    }
+  }catch(e){ IL.log={}; }
+}
+function ilSave(){
+  try{
+    const out={};
+    for(const k of Object.keys(IL.log)){ if(IL.log[k]&&IL.log[k].length) out[k]=IL.log[k].slice(-1500); }
+    localStorage.setItem('dpi_il_log_v2',JSON.stringify(out));
+  }catch(e){}
+}
 function ilOn(){ return !!cfg.il_on; }
 function ilTempos(){ return IL_TEMPOS.filter(s=>+(cfg['il_w'+s]??1)); }
 function ilNivel(){ return Math.max(0,Math.min(2,+(cfg.il_nivel??0))); }
 function ilGale(){ return Math.max(0,Math.min(2,+(cfg.il_gale??0))); }
 function ilMinF(){ return Math.max(2,+(cfg.il_minF??3)); }
 function ilSo(){ return !!cfg.il_on && +(cfg.il_so??1)===1; }   // interligado ligado = só ele avisa
-function ilAlvoS(){ return +(cfg.il_alvo??20)===5?5:+(cfg.il_alvo??20)===10?10:20; }   // segundos em que o interligado entra
+function ilAlvoS(){ const v=+(cfg.il_alvo??20); return v===5?5:v===10?10:v===30?30:20; }   // segundos em que o interligado entra
 function ilMinCasos(){ return Math.max(5,+(cfg.il_minCasos??12)); }
 function ilW(s){ let W=liveW(d5BankName(s))||[]; const n=Math.max(1000,+cfg.il_n||5000); return W.length>n?W.slice(-n):W; }
 function ilFresco(W,s){ return W.length>=200 && srvNow()*1000-W.at(-1).t < s*1000+15000; }
@@ -4800,7 +4854,7 @@ function ilLista(s,W){
   if(B.lista && B.key===key && Date.now()-B.t<180000) return B.lista;
   if(B.lista && Date.now()-(IL.calcT||0)<2000) return B.lista;           // um tempo por vez, para não travar a tela
   const t0=performance.now(), nivel=ilNivel(), min=ilMinCasos(), pulo=Math.max(0,Math.min(40,+(cfg.il_pulo??15)));
-  let all=[]; for(const f of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,f,pulo,nivel,min,0));
+  let all=[]; for(const f of ['somas','duplas','trios','numeros']) all=all.concat(scScanFamily(W,f,pulo,nivel,min,0));
   B.lista=all.filter(x=>x.red===0 && x.done>=min).sort((a,b)=>b.done-a.done).slice(0,400);
   B.key=key; B.t=Date.now(); B.n=W.length; B.ms=Math.round(performance.now()-t0); IL.calcT=Date.now();
   return B.lista;
@@ -4843,7 +4897,7 @@ function ilAponta(s){
       if(sig.done||sig.bank!==bank) continue;
       const rb=RBOTS.find(r=>r.id===sig.rbId); if(!rb||!rb.on) continue;
       const st=ilRbOk(rb,W); if(!st.ok) continue;
-      const kind=rb.tipo==='dupla'?'Dupla':rb.tipo==='num'?'Número':rb.tipo==='soma'?'Soma':rb.tipo, id=rb.tipo==='dupla'?`${rb.a}-${rb.b}`:rb.tipo==='num'?rb.d:rb.tipo==='soma'?rb.n+'/'+rb.mod:rb.id;
+      const kind=rb.tipo==='trio'?'Trio':rb.tipo==='dupla'?'Dupla':rb.tipo==='num'?'Número':rb.tipo==='soma'?'Soma':rb.tipo, id=rb.tipo==='trio'?`${rb.a}-${rb.b}-${rb.c}`:rb.tipo==='dupla'?`${rb.a}-${rb.b}`:rb.tipo==='num'?rb.d:rb.tipo==='soma'?rb.n+'/'+rb.mod:rb.id;
       const ch=ilChave(s,kind,id,rb.skip,rb.alvo)+'|'+sig.entryT;
       if(vistos.has(ch)){ const o=out.find(x=>x.T===sig.entryT&&x.tipo==='sc'&&x.alvo===rb.alvo&&x.s===s); if(o){ o.tipo='rb'; o.txt=`🤖 ${rbName(rb)}`; } continue; }  // mesmo padrão do scanner = conta uma vez só
       add({s,tipo:'rb',txt:`🤖 ${rbName(rb)}`,alvo:sig.alvo,T:sig.entryT,casos:st.done},ch);
@@ -4914,7 +4968,9 @@ function ilResolve(){
 }
 function ilFecha(E,res){
   E.fim=true; E.fimT=Date.now(); E.res=res;
-  IL.log.push({T0:E.T0,alvo:E.alvo,res,nivel:res==='green'?E.g:-1,gale:ilGale(),tent:E.tent,fontes:E.fontes,n0:E.n0,contra:E.contra,forca:E.forca,ant:Math.round((E.T0-E.abriu)/1000)});
+  const _d5ante=ilDig5Recent(E.T0).ante; const _d5pct=ilDig5Pct(_d5ante,E.alvo);
+  const _d5seq=ilDig5Seq(_d5ante,6); // últimos 6 ticks antes do sinal como chave
+  ilLogArr().push({T0:E.T0,alvo:E.alvo,res,nivel:res==='green'?E.g:-1,gale:ilGale(),tent:E.tent,fontes:E.fontes,n0:E.n0,contra:E.contra,forca:E.forca,ant:Math.round((E.T0-E.abriu)/1000),ilN:ilLogN(),dig5pct:_d5pct?_d5pct.pct:null,dig5n:_d5pct?_d5pct.n:0,dig5seq:_d5seq});
   ilSave(); IL.fz.key=''; ilPopRefresh();
   if(S.tab==='il') fillRes();
 }
@@ -4924,7 +4980,7 @@ function ilFeat(o){
   const n=o.n; return {n:'n:'+(n<=3?'3':n===4?'4':n<=6?'5–6':'7+'),c:'c:'+(o.c>=2?'2+':o.c),t:'t:'+o.tempos.join('+')+'s',k:'k:'+o.tipos.map(t=>({sc:'scanner',rb:'robô',hp:'horas'}[t]||t)).join('+')};
 }
 function ilModelo(){
-  const L=IL.log.filter(x=>x.res==='green'||x.res==='red'), key=L.length;
+  const L=ilLogArr().filter(x=>x.res==='green'||x.res==='red'), key=L.length;
   if(IL.fz.key===key && IL.fz.m) return IL.fz.m;
   const n=L.length, g=L.filter(x=>x.res==='green').length, base=n?(g+1)/(n+2):0.5, K=8, B={};
   for(const x of L){ const F=ilFeat(ilFeatObj(x)); for(const k in F){ const b=B[F[k]]||(B[F[k]]={n:0,g:0}); b.n++; b.g+=x.res==='green'?1:0; } }
@@ -4947,8 +5003,200 @@ function ilBarraHtml(E){
     <div class="fzbar"><i style="width:${R.forca}%;background:${N.c}"></i><span class="fzm" style="left:25%"></span><span class="fzm" style="left:43%"></span><span class="fzm" style="left:58%"></span><span class="fzm" style="left:75%"></span></div>
     <div class="fzleg"><span>🔴 fraco</span><span>🟠 abaixo</span><span>⚪ média</span><span>🟢 bom</span><span>💎 forte</span></div>${lista?`<div style="font-size:11px;margin-top:2px">${lista}</div>`:''}</div>`;
 }
+// ---------- cenário similar (histórico de situações parecidas) ----------
+function ilCenarioSim(E){
+  // retorna todos os logs fechados similares a E
+  // Similar = mesmo alvo, fontes ±1, pelo menos 1 tempo em comum
+  const all=Object.values(IL.log).flat().filter(x=>x.res==='green'||x.res==='red');
+  if(!all.length) return null;
+  const nF=E.fontes.length, alvo=E.alvo;
+  const et=new Set(E.fontes.map(f=>f.s));
+  return all.filter(x=>x.alvo===alvo && Math.abs((x.fontes||[]).length-nF)<=1 && (x.fontes||[]).some(f=>et.has(f.s)));
+}
+function ilCenarioHtml(E, galeAtual){
+  // galeAtual: 0=TS ainda, 1=foi para G1, 2=foi para G2
+  const sim=ilCenarioSim(E); if(!sim||!sim.length) return '';
+  const n=sim.length;
+  // totais
+  const gTot=sim.filter(x=>x.res==='green').length, rTot=n-gTot;
+  const pTot=n?Math.round(100*gTot/n):0;
+  // quantos precisaram de G1 ou mais (nivel>=1 ou red com gale>=1)
+  const foiG1=sim.filter(x=>x.nivel>=1||(x.nivel===-1&&(x.gale||0)>=1));
+  const foiG2=sim.filter(x=>x.nivel>=2||(x.nivel===-1&&(x.gale||0)>=2));
+  let html=`<div class="ilcen" style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px 10px;margin-top:6px;font-size:12px">`;
+  html+=`<div style="font-weight:700;margin-bottom:4px">📊 Cenário parecido apareceu <b>${n}</b> vez${n>1?'es':''} — `;
+  html+=`<span class="ok">${gTot} green (${pTot}%)</span> · <span class="ruim">${rTot} red</span></div>`;
+  // barra proporcional
+  html+=`<div style="display:flex;height:6px;border-radius:4px;overflow:hidden;margin-bottom:6px">`;
+  if(gTot) html+=`<div style="flex:${gTot};background:var(--g)"></div>`;
+  if(rTot) html+=`<div style="flex:${rTot};background:var(--v)"></div>`;
+  html+=`</div>`;
+  // detalhe por gale
+  const g0=sim.filter(x=>x.nivel===0).length;
+  const g1=sim.filter(x=>x.nivel===1).length;
+  const g2=sim.filter(x=>x.nivel===2).length;
+  html+=`<div style="display:flex;gap:10px;flex-wrap:wrap">`;
+  html+=`<span>🎯 TS: <b class="ok">${g0}</b></span>`;
+  if(ilGale()>=1){ html+=`<span>⬆ G1: <b class="${g1?'ok':'mu'}">${g1}</b> green · <b class="${foiG1.length-g1?'ruim':'mu'}">${foiG1.length-g1}</b> red${foiG1.length?` (${foiG1.length} foram para G1)`:''}</span>`; }
+  if(ilGale()>=2){ html+=`<span>⬆ G2: <b class="${g2?'ok':'mu'}">${g2}</b> green · <b class="${foiG2.length-g2?'ruim':'mu'}">${foiG2.length-g2}</b> red${foiG2.length?` (${foiG2.length} foram para G2)`:''}</span>`; }
+  html+=`</div>`;
+  // aviso em tempo real quando está indo para G1/G2
+  if(galeAtual>=1){
+    const pG=foiG1.length?Math.round(100*g1/foiG1.length):null;
+    const destaque=pG!=null?(pG>=60?'ok':pG>=40?'mu':'ruim'):'mu';
+    html+=`<div style="margin-top:6px;padding:5px 8px;border-radius:6px;background:rgba(255,180,0,.1);font-weight:600">`;
+    html+=`⚡ Indo para G${galeAtual}: em ${foiG1.length||'?'} entradas similares que chegaram aqui → `;
+    if(foiG1.length){ html+=`<span class="${destaque}">${g1} green (${pG}%)</span> · <span class="ruim">${foiG1.length-g1} red</span>`; }
+    else{ html+=`<span class="mu">sem histórico ainda</span>`; }
+    html+=`</div>`;
+  }
+  if(galeAtual>=2){
+    const pG2=foiG2.length?Math.round(100*g2/foiG2.length):null;
+    const destaque2=pG2!=null?(pG2>=60?'ok':pG2>=40?'mu':'ruim'):'mu';
+    html+=`<div style="margin-top:4px;padding:5px 8px;border-radius:6px;background:rgba(255,100,0,.1);font-weight:600">`;
+    html+=`🔥 Indo para G2: em ${foiG2.length||'?'} similares que chegaram aqui → `;
+    if(foiG2.length){ html+=`<span class="${destaque2}">${g2} green (${pG2}%)</span> · <span class="ruim">${foiG2.length-g2} red</span>`; }
+    else{ html+=`<span class="mu">sem histórico ainda</span>`; }
+    html+=`</div>`;
+  }
+  html+=`</div>`;
+  return html;
+}
+// ---------- análise ao vivo dos dígitos 5s no popup ----------
+function ilDig5Recent(T0){
+  // retorna {ante: ticks antes de T0, wait: ticks a partir de T0}
+  const W=LIVE[d5BankName(5)]||[];
+  if(!W.length) return {ante:[],wait:[]};
+  const ante=W.filter(x=>x.t<T0).slice(-14);
+  const wait=W.filter(x=>x.t>=T0).slice(0,30);
+  return {ante,wait};
+}
+function ilDig5Pct(ticks,alvo){
+  if(!ticks.length) return null;
+  const match=ticks.filter(x=>+x.p===alvo).length;
+  return {match,n:ticks.length,pct:Math.round(100*match/ticks.length)};
+}
+function ilDig5Seq(ticks,n){
+  // codifica últimos n ticks como string "0101..." para lookup histórico
+  const last=ticks.slice(-n);
+  if(last.length<n) return null;
+  return last.map(x=>''+((+x.p)?1:0)).join('');
+}
+function ilDig5DetectPat(ps){
+  // ps = array de 0/1 (do mais antigo ao mais novo)
+  const n=ps.length; if(n<3) return null;
+  // 1. Sequência (streak final)
+  let streak=1;
+  for(let i=n-2;i>=0;i--){ if(ps[i]===ps[n-1]) streak++; else break; }
+  if(streak>=3) return {type:'streak',streak,cor:ps[n-1],next:1-ps[n-1]};
+  // 2. Alternado (últimos 4+)
+  if(n>=4){
+    const l4=ps.slice(-4);
+    if(l4.every((v,i)=>i===0||v!==l4[i-1])) return {type:'alt',next:1-ps[n-1]};
+  }
+  // 3. Bloco 2+2 (PPII ou IIPP)
+  if(n>=4){
+    const l4=ps.slice(-4);
+    if(l4[0]===l4[1]&&l4[2]===l4[3]&&l4[0]!==l4[2]) return {type:'block2',next:l4[0]};
+  }
+  // 4. Quebra após sequência (XXX→Y, será que volta?)
+  if(n>=4){
+    const l4=ps.slice(-4);
+    if(l4[0]===l4[1]&&l4[0]===l4[2]&&l4[3]!==l4[0]) return {type:'quebra',next:l4[3]};
+  }
+  return null;
+}
+function ilDig5PadraoHtml(ante,alvo){
+  if(ante.length<3) return '';
+  const ps=ante.map(x=>(+x.p)?1:0);
+  const pat=ilDig5DetectPat(ps);
+  if(!pat) return '';
+  const NC=c=>c===0?'PAR':'ÍMPAR';
+  const alvoNome=NC(alvo), outroNome=NC(1-alvo);
+  const isFav=(pat.next===alvo);
+  const cls=isFav?'ok':'ruim';
+  let desc='';
+  if(pat.type==='streak') desc=`🔥 ${pat.streak}× ${NC(pat.cor)} seguidos → quebra esperada: <b>${NC(pat.next)}</b>`;
+  else if(pat.type==='alt') desc=`🔄 Alternado (P↔I) → próximo seria: <b>${NC(pat.next)}</b>`;
+  else if(pat.type==='block2') desc=`🔁 Bloco 2+2 → próximo bloco: <b>${NC(pat.next)}</b>`;
+  else if(pat.type==='quebra') desc=`↩ Quebrou sequência → possível continuação: <b>${NC(pat.next)}</b>`;
+  // lookup histórico por sequência
+  let histHtml='';
+  const seq3=ilDig5Seq(ante,3);
+  const allLog=Object.values(IL.log).flat().filter(x=>(x.res==='green'||x.res==='red')&&x.dig5seq&&x.alvo===alvo);
+  if(allLog.length>=5&&seq3){
+    const sim=allLog.filter(x=>x.dig5seq.slice(-3)===seq3);
+    if(sim.length>=3){
+      const hg=sim.filter(x=>x.res==='green').length, hp=Math.round(100*hg/sim.length);
+      const hn=hp>=60?'ok':hp>=40?'mu':'ruim';
+      histHtml=` · <span class="${hn}">hist padrão: ${hg}/${sim.length} green (${hp}%)</span>`;
+    }
+  }
+  const bgPat=isFav?'rgba(34,197,94,.08)':'rgba(239,68,68,.08)';
+  return `<div style="font-size:10px;padding:3px 8px;border-radius:4px;background:${bgPat};margin-top:3px;border-left:2px solid ${isFav?'var(--g)':'var(--v)'}">📐 Padrão: <span class="${cls}">${desc}</span> <span class="mu">${isFav?'→ '+alvoNome+' favorável':'→ '+outroNome+' esperado (contra)'}</span>${histHtml}</div>`;
+}
+function ilDig5TiraHtml(ticks,alvo){
+  return ticks.map(x=>{
+    const cls=+x.p===alvo?'ok':'ruim';
+    return `<span class="ild5b ${cls}" title="${hmsOf(x.t/1000)} · ${x.d} · ${+x.p===0?'PAR':'ÍMPAR'}">${x.d}</span>`;
+  }).join('');
+}
+function ilDig5Html(E){
+  if(!E||!E.T0) return '';
+  const {ante,wait}=ilDig5Recent(E.T0);
+  if(!ante.length&&!wait.length) return '';
+  const alvo=E.alvo; // 0=PAR, 1=ÍMPAR
+  const alvoNome=alvo===0?'PAR':'ÍMPAR', outroNome=alvo===0?'ÍMPAR':'PAR';
+  const all=[...ante,...wait];
+  const sAll=ilDig5Pct(all,alvo), sAnte=ilDig5Pct(ante,alvo), sWait=ilDig5Pct(wait,alvo);
+  const sLast5=ilDig5Pct(all.slice(-5),alvo);
+  // histórico: entradas com padrão pré-sinal parecido
+  let histHtml='';
+  if(sAnte&&sAnte.n>=5){
+    const allLog=Object.values(IL.log).flat().filter(x=>(x.res==='green'||x.res==='red')&&x.dig5pct!=null&&x.alvo===alvo);
+    if(allLog.length>=5){
+      const sim=allLog.filter(x=>Math.abs(x.dig5pct-sAnte.pct)<=18);
+      if(sim.length>=3){
+        const hg=sim.filter(x=>x.res==='green').length, hp=Math.round(100*hg/sim.length);
+        const hn=hp>=60?'ok':hp>=40?'mu':'ruim';
+        histHtml=` · hist parecido: <span class="${hn}">${hg}/${sim.length} green (${hp}%)</span>`;
+      }
+    }
+  }
+  // veredito
+  let ver='', verCls='mu';
+  if(sAll){
+    if(sAll.pct>=62){ver='✅ Favorável';verCls='ok';}
+    else if(sAll.pct>=40){ver='⚠ Neutro';verCls='mu';}
+    else{ver='⛔ Contrário';verCls='ruim';}
+    if(sLast5){
+      if(sLast5.pct>=60&&sAll.pct<60) ver+=' ↗';
+      else if(sLast5.pct<40&&sAll.pct>=40) ver+=' ↘';
+    }
+  }
+  let html=`<div class="ild5wrap">`;
+  html+=`<div class="ild5tit">🎲 Dígitos 5s ao vivo · aguardando ${alvoNome}</div>`;
+  html+=`<div class="ild5strip">`;
+  if(ante.length){html+=`<span class="ild5lbl">antes</span>${ilDig5TiraHtml(ante,alvo)}`;}
+  if(wait.length){html+=`<span class="ild5sep"></span><span class="ild5lbl" style="color:var(--am)">espera</span>${ilDig5TiraHtml(wait,alvo)}`;}
+  html+=`</div>`;
+  if(sAll){
+    const bar=`<div style="display:flex;height:4px;border-radius:3px;overflow:hidden;margin-bottom:3px"><div style="flex:${sAll.match};background:var(--g)"></div><div style="flex:${sAll.n-sAll.match};background:var(--v)"></div></div>`;
+    html+=bar;
+    html+=`<div class="ild5ver">`;
+    html+=`<span class="${verCls}"><b>${ver}</b></span> · `;
+    html+=`<span class="ok">${sAll.match} ${alvoNome}</span> · <span class="ruim">${sAll.n-sAll.match} ${outroNome}</span> nos últimos ${sAll.n}`;
+    if(sWait&&sWait.n>0) html+=` · <span style="color:var(--am)">espera: ${sWait.match}/${sWait.n} ${alvoNome}</span>`;
+    html+=histHtml;
+    html+=`</div>`;
+    // análise de padrão de formação
+    html+=ilDig5PadraoHtml(ante,alvo);
+  }
+  html+=`</div>`;
+  return html;
+}
 // ---------- popup ----------
-function ilTemposTxt(F){ return [5,10,20].map(s=>{ const n=F.filter(f=>f.s===s).length; return n?`<span class="iltp">${s}s ×${n}</span>`:''; }).join(' '); }
+function ilTemposTxt(F){ return [5,10,20,30].map(s=>{ const n=F.filter(f=>f.s===s).length; return n?`<span class="iltp">${s}s ×${n}</span>`:''; }).join(' '); }
 function ilPopup(){
   const p=$('#rbPopDPI'); if(!p) return;
   const E=IL.abertas.find(e=>!e.fim)||IL.abertas.at(-1); if(!E) return;
@@ -4962,6 +5210,8 @@ function ilPopup(){
     <div id="ilFase" class="big"></div>
     ${ilGale()?`<div class="rbsched">${[0,1,2].slice(0,ilGale()+1).map(g=>`<div>${g?IL_NT[g]:'🎯 TIRO SECO'}<b>${hmsOf((E.T0+g*E.gstep)/1000)}</b></div>`).join('')}</div>`:''}
     <div id="ilForca">${ilBarraHtml(E)}</div>
+    <div id="ilDig5">${ilDig5Html(E)}</div>
+    <div id="ilHist">${ilCenarioHtml(E,0)}</div>
     <div id="ilRes" style="display:none;margin-top:10px;padding:10px;border-radius:9px;font-size:16px;font-weight:800"></div>
     <div class="nota" style="margin-top:8px"><b>Fontes 100%:</b><br>${E.fontes.map(f=>`<span class="iltp">${f.s}s</span> ${tipo[f.tipo]||''} ${f.txt} <span class="mu">(${f.casos} ${f.tipo==='hp'?'h':'casos'})</span>`).join('<br>')}</div>
     ${outras.length?`<div class="nota"><b>Próximas já avisadas:</b> ${outras.map(e=>`${hmsOf(e.T0/1000)} ${tagc(e.alvo)} (${e.fontes.length})`).join(' · ')}</div>`:''}
@@ -4972,14 +5222,25 @@ function ilPopup(){
 }
 function ilPopRefresh(){
   if(!IL.pop) return;
-  const E=IL.abertas.find(e=>e.id===IL.pop) || IL.log.find(x=>'IL'+x.T0===IL.pop);
+  const _allIlLog=Object.values(IL.log).flat();
+  const E=IL.abertas.find(e=>e.id===IL.pop) || _allIlLog.find(x=>'IL'+x.T0===IL.pop);
   const f=document.getElementById('ilFase'), r=document.getElementById('ilRes');
   if(!E){ return; }
   if(!E.fim && E.fontes){ const fz=document.getElementById('ilForca'); if(fz && Date.now()%3000<600) fz.innerHTML=ilBarraHtml(E); }
-  const Tg=(E.T0+(E.g||0)*(E.gstep||5000))/1000, falta=Math.ceil(Tg-srvNow());
-  if(f) f.textContent=E.fim?'':`${IL_NT[E.g]} ${hmsOf(Tg)} · `+(falta>0?`faltam ${falta}s`:'em jogo…');
+  if(!E.fim){ const dg=document.getElementById('ilDig5'); if(dg) dg.innerHTML=ilDig5Html(E); }
+  const g_atual=E.g||0;
+  const Tg=(E.T0+g_atual*(E.gstep||5000))/1000, falta=Math.ceil(Tg-srvNow());
+  if(f) f.textContent=E.fim?'':`${IL_NT[g_atual]} ${hmsOf(Tg)} · `+(falta>0?`faltam ${falta}s`:'em jogo…');
+  // atualiza histórico de cenário quando gale muda ou 1x por segundo enquanto em jogo
+  const hist=document.getElementById('ilHist');
+  if(hist && !E.fim && E._lastHistG !== g_atual){
+    E._lastHistG=g_atual;
+    hist.innerHTML=ilCenarioHtml(E, g_atual);
+  }
   if(r && E.fim){ r.style.display='block'; const g=E.res==='green'; r.style.border=`1px solid ${g?'var(--g)':'var(--v)'}`;
-    r.innerHTML=g?`<span class="ok">✅ GREEN ${IL_NT[E.g]} · ${E.tent.map(t=>t.d).join(' / ')}</span>`:E.res==='red'?`<span class="ruim">❌ RED · ${E.tent.map(t=>t.d??'?').join(' / ')}</span>`:'<span class="mu">sem dado</span>';
+    r.innerHTML=g?`<span class="ok">✅ GREEN ${IL_NT[g_atual]} · ${E.tent.map(t=>t.d).join(' / ')}</span>`:E.res==='red'?`<span class="ruim">❌ RED · ${E.tent.map(t=>t.d??'?').join(' / ')}</span>`:'<span class="mu">sem dado</span>';
+    // atualiza o hist com gale final
+    if(hist) hist.innerHTML=ilCenarioHtml(E, g_atual);
     // depois de mostrar o resultado, passa para a próxima avisada
     const prox=IL.abertas.find(e=>!e.fim);
     if(prox && !E._pula){ E._pula=1; setTimeout(()=>{ if(IL.pop===E.id && +(cfg.il_pop??1)) ilPopup(); },4000); }
@@ -5003,13 +5264,14 @@ function ilTab(titulo,grupos){
     ${grupos.map(([k,L])=>{ const n=L.length, g=L.filter(x=>x.res==='green').length; return `<tr><td style="text-align:left">${k}</td><td>${n}</td><td class="ok">${g}</td><td>${L.filter(x=>x.nivel===0).length}</td><td class="ruim">${n-g}</td><td><b class="${n>=5?(g/n>=0.5?'ok':'ruim'):''}">${n?(100*g/n).toFixed(1)+'%':'—'}</b></td></tr>`; }).join('')}</table></div>`;
 }
 function ilAgrupa(L,fn){ const M=new Map(); for(const x of L){ const k=fn(x); if(!M.has(k)) M.set(k,[]); M.get(k).push(x); } return [...M.entries()].sort((a,b)=>b[1].length-a[1].length); }
-function ilRelatorio(){
-  const L=IL.log.filter(x=>x.res==='green'||x.res==='red'), n=L.length, g=L.filter(x=>x.res==='green').length, sq=ilSeqs(L);
+function ilRelatorioPainel(L,nJogos){
+  const tipo={sc:'🔬',rb:'🤖',hp:'🕐'};
+  const n=L.length, g=L.filter(x=>x.res==='green').length, sq=ilSeqs(L);
   const lv=[0,1,2].map(k=>L.filter(x=>x.nivel===k).length);
-  const R=IL.log.slice(-80).reverse(), tipo={sc:'🔬',rb:'🤖',hp:'🕐'};
+  const R=L.slice(-80).reverse();
   const fx=[[0,25,'🔴 fraco'],[25,43,'🟠 abaixo'],[43,58,'⚪ média'],[58,75,'🟢 bom'],[75,101,'💎 forte']];
-  return `<div class="cards">${card('Entradas',num(n),'interligado fechadas')}${card('Green',`<span class="ok">${g}</span>`,`TS ${lv[0]}${ilGale()?` · G1 ${lv[1]} · G2 ${lv[2]}`:''}`)}
-    ${card('Red',`<span class="ruim">${n-g}</span>`,`maior sequência de red ${sq.mr}`)}${card('Assertividade',n?(100*g/n).toFixed(1)+'%':'—',`green seguidos agora ${sq.g} · máx ${sq.mg}`)}</div>
+  return `<div class="cards">${card('Entradas',num(n),'fechadas')}${card('Green',`<span class="ok">${g}</span>`,`TS ${lv[0]}${ilGale()?` · G1 ${lv[1]} · G2 ${lv[2]}`:''}`)}
+    ${card('Red',`<span class="ruim">${n-g}</span>`,`maior seq. de red ${sq.mr}`)}${card('Assertividade',n?(100*g/n).toFixed(1)+'%':'—',`green seguidos agora ${sq.g} · máx ${sq.mg}`)}</div>
   ${n?`<div class="ilgrid">
     <div><h4>Por nº de fontes 100%</h4>${ilTab('Fontes',ilAgrupa(L,x=>{ const k=x.fontes.length; return k<=3?'3':k===4?'4':k<=6?'5–6':'7+'; }))}</div>
     <div><h4>Por tempos que apontaram</h4>${ilTab('Tempos',ilAgrupa(L,x=>[...new Set(x.fontes.map(f=>f.s))].sort((a,b)=>a-b).join(' + ')+'s'))}</div>
@@ -5017,12 +5279,37 @@ function ilRelatorio(){
     <div><h4>Pela barra de força</h4>${ilTab('Força',fx.map(([a,b,t])=>[t,L.filter(x=>x.forca!=null&&x.forca>=a&&x.forca<b)]))}</div>
     <div><h4>Por cor</h4>${ilTab('Alvo',[['PAR',L.filter(x=>x.alvo===0)],['ÍMPAR',L.filter(x=>x.alvo===1)]])}</div>
     <div><h4>Por hora do dia</h4>${ilTab('Hora',ilAgrupa(L,x=>p2d(new Date(x.T0).getHours())+'h').sort((a,b)=>a[0]<b[0]?-1:1))}</div>
+    ${(()=>{const LD=L.filter(x=>x.dig5pct!=null&&x.dig5n>=5);if(LD.length<5)return'';const bx=[[0,38,'⛔ Contrário'],[38,62,'⚠ Neutro'],[62,101,'✅ Favorável']];return`<div><h4>🎲 Por % ticks favoráveis (5s)</h4>${ilTab('%Fav',bx.map(([a,b,t])=>[t,LD.filter(x=>x.dig5pct>=a&&x.dig5pct<b)]))}</div>`})()}
   </div>`:''}
-  ${R.length?`<div class="tw" style="max-height:380px"><table><tr><th>Entrada</th><th>Alvo</th><th>Fontes</th><th>Tempos</th><th>Aviso</th><th>Força</th><th>Dígito(s)</th><th>Resultado</th><th style="text-align:left">Quem apontou</th></tr>
-    ${R.map(x=>`<tr><td>${fmtT(x.T0)}</td><td>${tagc(x.alvo)}</td><td><b>${x.fontes.length}</b>${x.contra?` <span class="ruim">(${x.contra} contra)</span>`:''}</td><td>${ilTemposTxt(x.fontes)}</td><td>${x.ant??'—'}s antes</td><td>${x.forca??'—'}</td>
+  ${R.length?`<div class="tw" style="max-height:380px"><table><tr><th>Entrada</th><th>Alvo</th><th>Fontes</th><th>Tempos</th><th>Aviso</th><th>Força</th><th>🎲 Ticks 5s</th><th>Dígito(s)</th><th>Resultado</th><th style="text-align:left">Quem apontou</th></tr>
+    ${R.map(x=>{const d5v=x.dig5pct!=null&&x.dig5n>=5?(x.dig5pct>=62?`<span class="ok">✅ ${x.dig5pct}%</span>`:x.dig5pct>=38?`<span class="mu">⚠ ${x.dig5pct}%</span>`:`<span class="ruim">⛔ ${x.dig5pct}%</span>`):'<span class="mu">—</span>';return`<tr><td>${fmtT(x.T0)}</td><td>${tagc(x.alvo)}</td><td><b>${x.fontes.length}</b>${x.contra?` <span class="ruim">(${x.contra} contra)</span>`:''}</td><td>${ilTemposTxt(x.fontes)}</td><td>${x.ant??'—'}s antes</td><td>${x.forca??'—'}</td>
+      <td>${d5v}</td>
       <td>${(x.tent||[]).map(t=>`<span class="b s2 ${t.d==null?'':t.d%2?'v':'g'}">${t.d??'?'}</span>`).join(' ')}</td>
       <td class="${x.res==='green'?'ok':x.res==='red'?'ruim':'mu'}"><b>${x.res==='green'?'✅ '+IL_NT[x.nivel]:x.res==='red'?'❌ RED':'sem dado'}</b></td>
-      <td style="text-align:left;font-size:11px">${x.fontes.map(f=>`<span class="iltp">${f.s}s</span>${tipo[f.tipo]||''} ${f.txt}`).join(' · ')}</td></tr>`).join('')}</table></div>`:'<div class="nota">Nenhuma entrada do interligado fechada ainda.</div>'}`;
+      <td style="text-align:left;font-size:11px">${x.fontes.map(f=>`<span class="iltp">${f.s}s</span>${tipo[f.tipo]||''} ${f.txt}`).join(' · ')}</td></tr>`;}).join('')}</table></div>`:'<div class="nota">Nenhuma entrada fechada ainda.</div>'}`;
+}
+function ilRelatorio(){
+  // coleta todas as chaves que têm entradas, ordena numericamente
+  const chaves=[1000,2000,3000,5000,10000].filter(k=>IL.log[k]&&IL.log[k].length);
+  const cur=ilLogN();
+  if(!chaves.length) return '<div class="nota">Nenhuma entrada do interligado fechada ainda.</div>';
+  // se só há uma, mostra direto sem painel separado
+  if(chaves.length===1){
+    const k=chaves[0];
+    const L=IL.log[k].filter(x=>x.res==='green'||x.res==='red');
+    const lbl=k>=1000?`${k/1000}k`:`${k}`;
+    return `<details open><summary style="cursor:pointer;font-weight:bold;padding:4px 0">${k===cur?'▶ ':''}📊 Analisando ${lbl} jogos${k===cur?' (atual)':''} — ${L.length} entradas
+      <button style="margin-left:8px;font-size:11px" onclick="event.stopPropagation();if(confirm('Limpar relatório de ${lbl} jogos?')){IL.log[${k}]=[];ilSave();IL.fz.key='';fillRes()}">🧹</button></summary>
+      <div style="padding-top:8px">${ilRelatorioPainel(L,k)}</div></details>`;
+  }
+  return chaves.map(k=>{
+    const L=IL.log[k].filter(x=>x.res==='green'||x.res==='red');
+    const lbl=k>=1000?`${k/1000}k`:`${k}`;
+    const taxa=L.length?(100*L.filter(x=>x.res==='green').length/L.length).toFixed(1)+'%':'—';
+    return `<details${k===cur?' open':''}><summary style="cursor:pointer;font-weight:bold;padding:4px 0">${k===cur?'▶ ':''}📊 Analisando ${lbl} jogos${k===cur?' (atual)':''} — ${L.length} entradas · ${taxa}
+      <button style="margin-left:8px;font-size:11px" onclick="event.stopPropagation();if(confirm('Limpar relatório de ${lbl} jogos?')){IL.log[${k}]=[];ilSave();IL.fz.key='';fillRes()}">🧹</button></summary>
+      <div style="padding-top:8px">${ilRelatorioPainel(L,k)}</div></details>`;
+  }).join('<hr style="margin:8px 0;opacity:.3">');
 }
 // ---------- aba ----------
 function ilStatusHtml(){
@@ -5044,11 +5331,11 @@ function ilAgendaHtml(){
 }
 function ilLive(){ const e=$('#ilAgenda'); if(e) e.innerHTML=ilAgendaHtml(); const s=$('#ilStatus'); if(s) s.innerHTML=ilStatusHtml(); }
 VIEWS.il={nome:'🔗 Interligado',html(){
-  return `<div class="panel ilpanel"><h3>🔗 Interligado 5s + 10s + 20s <small>só fontes 100% · entra no jogo de ${ilAlvoS()}s · popup próprio</small></h3>
+  return `<div class="panel ilpanel"><h3>🔗 Interligado 5s + 10s + 20s + 30s <small>só fontes 100% · entra no jogo de ${ilAlvoS()}s · popup próprio</small></h3>
     <div class="ctl">
       ${ilOn()?`<button class="ruimbtn" onclick="ilLigar(false)">⏸ DESINTERLIGAR</button>`:`<button class="okbtn" onclick="ilLigar(true)">🔗 INTERLIGAR</button>`}
       ${IL_TEMPOS.map(s=>`<label><input type="checkbox" ${+(cfg['il_w'+s]??1)?'checked':''} onchange="cfg.il_w${s}=this.checked?1:0;saveCfg();IL.k='';fillRes()"> ${s}s</label>`).join('')}
-      <label>Entrar no jogo de ${sel('il_alvo',[[20,'20s (:00 :20 :40)'],[10,'10s'],[5,'5s (qualquer segundo)']])}</label>
+      <label>Entrar no jogo de ${sel('il_alvo',[[20,'20s (:00 :20 :40)'],[30,'30s (:00 :30)'],[10,'10s'],[5,'5s (qualquer segundo)']])}</label>
       <label>Mínimo de fontes ${sel('il_minF',[[2,'2'],[3,'3'],[4,'4'],[5,'5'],[6,'6']])}</label>
       <label>100% em ${sel('il_nivel',[[0,'TS (sem gale)'],[1,'até G1'],[2,'até G2']])}</label>
       <label>Entrada ${sel('il_gale',[[0,'tiro seco'],[1,'até G1'],[2,'até G2']])}</label>
@@ -5060,22 +5347,23 @@ VIEWS.il={nome:'🔗 Interligado',html(){
       <label><input type="checkbox" ${+(cfg.il_hp??1)?'checked':''} onchange="cfg.il_hp=this.checked?1:0;saveCfg();IL.k=''"> 🕐 horas pagantes</label>
       <label>Mín. casos ${inp('il_minCasos',45)}</label><label>Pular até ${inp('il_pulo',40)}</label>
       <label>Horas 100% ≥ ${sel('il_hpMin',[[4,'4h'],[6,'6h'],[8,'8h'],[12,'12h']])}</label>
-      <label>Analisar ${sel('il_n',[[3000,'3.000 jogos'],[5000,'5.000'],[10000,'10.000']])}</label>
+      <label>Analisar ${sel('il_n',[[1000,'1.000 jogos'],[2000,'2.000'],[3000,'3.000'],[5000,'5.000'],[10000,'10.000']])}</label>
       <label><input type="checkbox" ${(cfg.il_bloq??1)?'checked':''} onchange="cfg.il_bloq=this.checked?1:0;saveCfg();IL.k=''"> não entrar com fonte contra</label>
       <label><input type="checkbox" ${+(cfg.il_dif??0)?'checked':''} onchange="cfg.il_dif=this.checked?1:0;saveCfg();IL.k=''"> exigir 2 tempos diferentes</label>
       <label><input type="checkbox" ${+(cfg.il_pop??1)?'checked':''} onchange="cfg.il_pop=this.checked?1:0;saveCfg()"> popup</label>
       <label title="desmarque para os robôs, robôs de segundos e Under/Over voltarem a abrir popup próprio"><input type="checkbox" ${+(cfg.il_so??1)?'checked':''} onchange="cfg.il_so=this.checked?1:0;saveCfg()"> só o interligado avisa</label>
       <button onclick="IL.bk={};IL.hp={};IL.k='';status('🔗 recalculando as listas 100%…','ok')">↻ recalcular</button>
-      <button onclick="if(confirm('Limpar o relatório do interligado?')){IL.log=[];ilSave();IL.fz.key='';fillRes()}">🧹 limpar relatório</button>
+      <button onclick="(()=>{const cur=ilLogN(),lbl=cur>=1000?cur/1000+'k':cur,ch=Object.keys(IL.log).filter(k=>IL.log[k]&&IL.log[k].length);if(!ch.length)return;const op=ch.length>1?confirm('Limpar TODOS os relatórios?\nOK = todos · Cancelar = só '+lbl+' jogos (atual)'):true;if(op===null||op===undefined)return;if(op){IL.log={}}else{IL.log[cur]=[]}ilSave();IL.fz.key='';fillRes()})()">🧹 limpar relatório</button>
     </div>
-    <div class="nota">Com o <b>🔗 INTERLIGAR</b> ligado: os popups da Confluência 1 e 2 ficam desligados (os relatórios deles continuam)${+(cfg.il_so??1)?', os robôs, robôs de segundos e Under/Over param de abrir popup e bipar (continuam rodando por trás e contando no interligado)':''}, os robôs automáticos de 5s, 10s e 20s ficam ligados renovando a cada ${raMin()} min, e as listas 100% de cada tempo são refeitas a cada 3 min (horas pagantes a cada 10 min).
-      Uma fonte só conta se está <b>100% ${IL_NT[ilNivel()]==='TS'?'no tiro seco':'até '+IL_NT[ilNivel()]}</b> com pelo menos ${ilMinCasos()} casos (robôs: metade disso). Quando ${ilMinF()} ou mais apontam a mesma cor para o <b>mesmo segundo</b> de um jogo de <b>${ilAlvoS()}s</b>${ilAlvoS()===20?' (:00, :20 e :40)':''} — as fontes de 5s e 10s contam como confirmação quando caem nesse segundo — o popup avisa com antecedência.
+    <div class="nota">Com o <b>🔗 INTERLIGAR</b> ligado: os popups da Confluência 1 e 2 ficam desligados (os relatórios deles continuam)${+(cfg.il_so??1)?', os robôs, robôs de segundos e Under/Over param de abrir popup e bipar (continuam rodando por trás e contando no interligado)':''}, os robôs automáticos de 5s, 10s, 20s e 30s ficam ligados renovando a cada ${raMin()} min, e as listas 100% de cada tempo são refeitas a cada 3 min (horas pagantes a cada 10 min).
+      Uma fonte só conta se está <b>100% ${IL_NT[ilNivel()]==='TS'?'no tiro seco':'até '+IL_NT[ilNivel()]}</b> com pelo menos ${ilMinCasos()} casos (robôs: metade disso). Quando ${ilMinF()} ou mais apontam a mesma cor para o <b>mesmo segundo</b> de um jogo de <b>${ilAlvoS()}s</b>${ilAlvoS()===20?' (:00, :20 e :40)':ilAlvoS()===30?' (:00 e :30)':''} — as fontes dos outros tempos contam como confirmação quando caem nesse segundo — o popup avisa com antecedência.
       O mesmo padrão aparecendo no scanner e num robô do mesmo tempo conta uma vez só.</div>
   </div><div id="res"></div>`;
 },res(){
   return `<div class="panel"><h3>Tempos</h3><div id="ilStatus">${ilStatusHtml()}</div></div>
   <div class="panel"><h3>🗓 O que as fontes 100% apontam nos próximos ${Math.max(30,+(cfg.il_horiz??90))}s ${ilOn()?'':'<small class="ruim">interligado desligado — só visualização</small>'}</h3><div id="ilAgenda">${ilAgendaHtml()}</div></div>
   <div class="panel"><h3>📋 Relatório do interligado</h3>${ilRelatorio()}</div>
+  ${(()=>{ const b=Object.keys(LIVE||{}).find(bk=>LIVE[bk]&&LIVE[bk].length>10); const h=b?srobContrarioHtml(b,true):''; return h?`<div class="panel" style="border-color:#f59e0b"><h3>🔄 Contrário — e se entrasse ao contrário?</h3>${h}</div>`:''; })()}
   ${(()=>{ const M=ilModelo(); if(M.n<15) return ''; const grupos=[['n','Nº de fontes'],['c','Contra'],['t','Tempos'],['k','Tipos']];
     return `<div class="panel"><h3>💪 O que a força do interligado aprendeu <small>${M.n} entradas · média ${(M.base*100).toFixed(1)}%</small></h3><div class="tw"><table>
       ${grupos.map(([k,t])=>`<tr><td style="text-align:left"><b>${t}</b></td><td style="text-align:left">${Object.entries(M.B).filter(([f])=>f.startsWith(k+':')).sort((a,b)=>b[1].n-a[1].n).map(([f,b])=>`<span class="fzchip ${b.n>=5&&b.rate>=M.base+0.03?'ok':b.n>=5&&b.rate<=M.base-0.03?'ruim':''}">${f.split(':')[1]}: <b>${(b.rate*100).toFixed(0)}%</b> <i>(${b.n})</i></span>`).join(' ')}</td></tr>`).join('')}</table></div></div>`; })()}`;
@@ -5113,7 +5401,7 @@ function raAchar(step){
   if(W.length<500) return {bank,W,lista:null,motivo:`só ${W.length} jogos`};
   const nivel=scNivel(), min=Math.max(5,+(step===5?cfg.ra_min5:step===10?cfg.ra_min10:cfg.ra_min20)||(step===5?30:step===10?25:20)), maxSkip=Math.max(0,Math.min(60,+cfg.ra_pulo||20));
   const cut=(cfg.ra_valid??1)?Math.floor(W.length*0.7):0;
-  let all=[]; for(const fam of ['somas','duplas','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,cut));
+  let all=[]; for(const fam of ['somas','duplas','trios','numeros']) all=all.concat(scScanFamily(W,fam,maxSkip,nivel,min,cut));
   let L=all.filter(x=>x.red===0 && x.done>=min && (!cut || (x.test && x.test.done>=2 && x.test.red===0)));
   L.sort((a,b)=>(b.done+(b.test?.done||0))-(a.done+(a.test?.done||0))||b.sg-a.sg||a.skip-b.skip);
   return {bank,W,lista:L.slice(0,Math.max(1,Math.min(40,+cfg.ra_max||10))),achados:L.length};
@@ -5121,7 +5409,7 @@ function raAchar(step){
 function raNovoRobo(x,bank){
   const nivel=scNivel(), id=rbIdOf(x,nivel,bank);
   const base={id,skip:x.skip,alvo:x.alvo,maxNivel:nivel,bank,on:true,popup:!!cfg.ra_pop,cfPop:true,auto:true,criadoEm:Date.now(),minOcc:x.done||0,taxaCriacao:x.rate,casos:x.done+(x.test?.done||0)};
-  return x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
+  return x.kind==='Trio'?{...base,tipo:'trio',a:x.a,b:x.b,c:x.c}:x.kind==='Dupla'?{...base,tipo:'dupla',a:x.a,b:x.b}:x.kind==='Número'?{...base,tipo:'num',d:x.d}:{...base,tipo:'soma',n:x.n,mod:x.mod};
 }
 async function raRodar(manual){
   if(RA.rodando) return; if(!(cfg.ra_on??1) && !manual) return;
@@ -5669,6 +5957,17 @@ function scPairMap(W){
   }
   return M;
 }
+// ---------- trios de números ----------
+function scTrioMap(W){
+  const M=new Map();
+  for(let i=2;i<W.length;i++){
+    if(W[i-2].d==null||W[i-1].d==null||W[i].d==null) continue;
+    const key=`${W[i-2].d}-${W[i-1].d}-${W[i].d}`;
+    if(!M.has(key))M.set(key,[]);
+    M.get(key).push(i); // gatilho termina na 3ª pedra
+  }
+  return M;
+}
 function scScanPairs(W, maxSkipOverride=null){
   const out=[];
   const minOcc=Math.max(3,+cfg.rb_auto_min||+cfg.sc_min||3);
@@ -5714,6 +6013,7 @@ function rbNivel(rb){ return rb.maxNivel==null?2:+rb.maxNivel; }
 function rbNivelNome(rb){ const n=rbNivel(rb); return n===0?'TIRO SECO':(n===1?'até G1':'até G2'); }
 function rbGat(rb){
   if(rb.tipo==='dupla') return `Dupla ${rb.a}-${rb.b}`;
+  if(rb.tipo==='trio') return `Trio ${rb.a}-${rb.b}-${rb.c}`;
   if(rb.tipo==='num') return `Número ${rb.d}`;
   if(rb.tipo==='seq') return `${rb.x}× ${rb.c?'ÍMPAR':'PAR'} seguidos`;
   return `Σ${rb.n} %10 = ${rb.mod}`;
@@ -5721,7 +6021,7 @@ function rbGat(rb){
 function rbName(rb){ return `${rb.auto?'♻ ':''}${rbGat(rb)} · pula ${rb.skip} · ${NOME(rb.alvo)} · ${rbNivelNome(rb)}`; }
 function rbBankTag(rb){ return rb.bank?`<span class="scanbadge">${rb.bank.replace('DERIV R_100 · ','R_100 ')}</span>`:'<span class="scanbadge">banco aberto</span>'; }
 function rbIdOf(x,nivel,bank){
-  const base = (x.kind==='Dupla'||x.tipo==='dupla') ? `D|${x.a}|${x.b}` : (x.kind==='Número'||x.tipo==='num') ? `N|${x.d}` : (x.kind==='Sequência'||x.tipo==='seq') ? `Q|${x.c}|${x.x}` : `S|${x.n}|${x.mod}`;
+  const base = (x.kind==='Trio'||x.tipo==='trio') ? `T|${x.a}|${x.b}|${x.c}` : (x.kind==='Dupla'||x.tipo==='dupla') ? `D|${x.a}|${x.b}` : (x.kind==='Número'||x.tipo==='num') ? `N|${x.d}` : (x.kind==='Sequência'||x.tipo==='seq') ? `Q|${x.c}|${x.x}` : `S|${x.n}|${x.mod}`;
   return `${base}|${x.skip}|${x.alvo}|${nivel}|${bank||''}`;
 }
 function rbCreate(x){
@@ -5730,7 +6030,8 @@ function rbCreate(x){
   let rb=RBOTS.find(r=>r.id===id);
   if(rb){ rb.on=true; rbSave(); return rb; }
   const base={id,skip:x.skip,alvo:x.alvo,maxNivel:nivel,bank,on:true,popup:true,criadoEm:Date.now(),minOcc:x.done||0,taxaCriacao:x.rate};
-  if(x.kind==='Dupla') rb={...base,tipo:'dupla',a:x.a,b:x.b};
+  if(x.kind==='Trio') rb={...base,tipo:'trio',a:x.a,b:x.b,c:x.c};
+  else if(x.kind==='Dupla') rb={...base,tipo:'dupla',a:x.a,b:x.b};
   else if(x.kind==='Número') rb={...base,tipo:'num',d:x.d};
   else if(x.kind==='Sequência') rb={...base,tipo:'seq',c:x.c,x:x.x};
   else rb={...base,tipo:'soma',n:x.n,mod:x.mod};
@@ -5751,12 +6052,14 @@ function rbPopupFechar(){ RB_OPEN_POPUP_ID=null; RB_OPEN_SIG=null; const e=$('#r
 function rbFmtClock(t){ if(!t)return '—'; const d=new Date(t); return `${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
 function rbFmtDateClock(t){ if(!t)return '—'; const d=new Date(t); return `${p2d(d.getDate())}/${p2d(d.getMonth()+1)} ${rbFmtClock(t)}`; }
 function rbStarts(rb,W){
+  if(rb.tipo==='trio') return scTrioMap(W).get(`${rb.a}-${rb.b}-${rb.c}`)||[];
   if(rb.tipo==='dupla') return scPairMap(W).get(`${rb.a}-${rb.b}`)||[];
   if(rb.tipo==='num') return scDigitStarts(W,rb.d);
   if(rb.tipo==='seq') return scSeqMap(W,rb.x).get(`${rb.c}|${rb.x}`)||[];
   return scSumMap(W,rb.n).get(rb.mod)||[];
 }
 function rbGatTexto(rb,W,ti){
+  if(rb.tipo==='trio') return `${W[ti-2]?.d ?? '?'} - ${W[ti-1]?.d ?? '?'} - ${W[ti]?.d ?? '?'}`;
   if(rb.tipo==='dupla') return `${W[ti-1]?.d ?? '?'} - ${W[ti]?.d ?? '?'}`;
   if(rb.tipo==='num') return `${W[ti]?.d ?? '?'}`;
   if(rb.tipo==='seq') return `${rb.x}× ${rb.c?'ÍMPAR':'PAR'}: ${W.slice(Math.max(0,ti-rb.x+1),ti+1).map(x=>x.d).join(' ')}`;
@@ -5791,6 +6094,7 @@ function rbCurrentStats(rb,W){ return scEval(W,rbStarts(rb,W),rb.alvo,rb.skip,rb
 function rbCurrentTrigger(W,rb){
   if(!W.length) return null;
   const y=W.at(-1);
+  if(rb.tipo==='trio'){ const x=W.at(-2),z=W.at(-3); return (z?.d===rb.a && x?.d===rb.b && y?.d===rb.c)?y:null; }
   if(rb.tipo==='dupla'){ const x=W.at(-2); return (x?.d===rb.a && y?.d===rb.b)?y:null; }
   if(rb.tipo==='num') return y?.d===rb.d?y:null;
   if(rb.tipo==='seq'){ let k=0; for(let i=W.length-1;i>=0&&W[i].p===y.p;i--) k++; return (y.p===rb.c && k===rb.x)?y:null; }
@@ -5949,6 +6253,7 @@ function scScanFamily(W,fam,maxSkip,nivel,minOcc,cut){
     for(let n=minN;n<=maxN;n++) for(const [mod,starts] of scSumMap(W,n)) push({kind:`Soma ${n}`,gat:`Σ${n}%10=${mod}`,n,mod},starts);
   }
   if(fam==='duplas') for(const [pair,starts] of scPairMap(W)){ const [a,b]=pair.split('-').map(Number); push({kind:'Dupla',pair,a,b,gat:pair},starts); }
+  if(fam==='trios') for(const [trio,starts] of scTrioMap(W)){ const [a,b,c]=trio.split('-').map(Number); push({kind:'Trio',trio,a,b,c,gat:trio},starts); }
   if(fam==='numeros') for(let d=0;d<=9;d++) push({kind:'Número',d,gat:String(d)},scDigitStarts(W,d));
   if(fam==='seq'){ const mx=Math.max(1,Math.min(15,+cfg.rb_seqMax||8)); for(const [key,starts] of scSeqMap(W,mx)){ const [c,x]=key.split('|').map(Number); push({kind:'Sequência',c,x,gat:`${x}× ${c?'ÍMPAR':'PAR'}`},starts); } }
   return out;
@@ -5958,7 +6263,7 @@ function rbFind100(){
   const t0=performance.now();
   const min=Math.max(3,+cfg.rb_auto_min||20), nivel=+cfg.rb_auto_nivel||0, maxSkip=Math.max(0,Math.min(500,+cfg.rb_auto_pulo||50));
   const fam=cfg.rb_auto_family||'ambos';
-  const fams=fam==='ambos'?['somas','duplas']:fam==='tudo'?['somas','duplas','numeros','seq']:[fam];
+  const fams=fam==='ambos'?['somas','duplas']:fam==='tudo'?['somas','duplas','trios','numeros','seq']:[fam];
   const cut=cfg.rb_valid?Math.floor(W.length*0.7):0;
   let all=[]; for(const f of fams) all=all.concat(scScanFamily(W,f,maxSkip,nivel,min,cut));
   if(cfg.rb_auto_only100) all=all.filter(x=>x.red===0&&x.done>0);
@@ -6025,7 +6330,7 @@ VIEWS.robos={nome:'🤖 Robôs',live:rbLive,html(){
   <div class="panel"><h3>🔎 Criar sozinho <small>varre o banco aberto: ${cfg.bank} · janela atual</small></h3>
     <div class="ctl">
       <label>Família <select onchange="rbAutoSet('rb_auto_family',this.value)">
-        ${[['ambos','somas + duplas'],['somas','só somas'],['duplas','só duplas'],['numeros','só números'],['seq','sequências (X× par/ímpar)'],['tudo','somas + duplas + números + sequências']].map(([v,t])=>`<option value="${v}" ${cfg.rb_auto_family===v?'selected':''}>${t}</option>`).join('')}
+        ${[['ambos','somas + duplas'],['somas','só somas'],['duplas','só duplas'],['trios','só trios'],['numeros','só números'],['seq','sequências (X× par/ímpar)'],['tudo','somas + duplas + trios + números + sequências']].map(([v,t])=>`<option value="${v}" ${cfg.rb_auto_family===v?'selected':''}>${t}</option>`).join('')}
       </select></label>
       <label>Somar de ${inp('sc_sum_min',40)} até ${inp('sc_sum_max',40)} números</label>
       <label>Sequência até ${inp('rb_seqMax',40)} vezes</label>
@@ -6051,7 +6356,7 @@ VIEWS.robos={nome:'🤖 Robôs',live:rbLive,html(){
     const conf=t?(t.done?`<span class="${t.red===0?'ok':(t.rate>=x.rate-0.05?'':'ruim')}">${(t.rate*100).toFixed(0)}% <span class="mu">${t.done}c ${t.red}R</span></span>`:'<span class="mu">sem casos</span>'):'';
     return `<div class="rb100row" style="grid-template-columns:28px 1fr 70px 80px 60px 70px ${cfg.rb_valid?'110px':''}">
       <div><input class="rb-auto-check" type="checkbox" ${RB_CHECKED.has(i)?'checked':''} onchange="rbCheck(${i},this.checked)"></div>
-      <div><b>${x.kind==='Dupla'?`Dupla ${x.a}-${x.b}`:x.kind==='Número'?`Número ${x.d}`:x.kind==='Sequência'?`Depois de ${x.x}× ${x.c?'ÍMPAR':'PAR'} seguidos`:`${x.kind} · final ${x.mod}`}</b> · pula ${x.skip} · ${NOME(x.alvo)}</div>
+      <div><b>${x.kind==='Trio'?`Trio ${x.a}-${x.b}-${x.c}`:x.kind==='Dupla'?`Dupla ${x.a}-${x.b}`:x.kind==='Número'?`Número ${x.d}`:x.kind==='Sequência'?`Depois de ${x.x}× ${x.c?'ÍMPAR':'PAR'} seguidos`:`${x.kind} · final ${x.mod}`}</b> · pula ${x.skip} · ${NOME(x.alvo)}</div>
       <div>${x.done} casos</div><div class="hide-sm">${x.sg}/${x.g1}/${x.g2}</div><div class="hide-sm ruim">${x.red} R</div>
       <div><b>${(x.rate*100).toFixed(1)}%</b></div>${cfg.rb_valid?`<div>${conf}</div>`:''}</div>`;
   }).join('');
@@ -6146,6 +6451,7 @@ function srEntries(){
 function srCond(x,e){
   const dig=e.dig;
   if(x.tipo==='seq') return e.lp===x.c && e.run===x.x;
+  if(x.tipo==='trio') return dig[dig.length-3]===x.a && dig[dig.length-2]===x.b && dig[dig.length-1]===x.c;
   if(x.tipo==='dupla') return dig[dig.length-2]===x.a && dig[dig.length-1]===x.b;
   let s=0; for(let i=dig.length-x.k;i<dig.length;i++) s+=dig[i];
   return s%10===x.mod;
@@ -6164,7 +6470,7 @@ function srEval(A,x,nivel,i0=0,i1=A.length){
   }
   const done=sg+g1+g2+red; return {sg,g1,g2,red,done,rate:done?(sg+g1+g2)/done:0};
 }
-function srNome(x){ if(x.tipo==='seq') return `Depois de ${x.x}× ${x.c?'ÍMPAR':'PAR'} seguidos · ${x.skip?`pula ${x.skip} jogo${x.skip>1?'s':''}`:'sem pular'}`; return x.tipo==='dupla'?`Dupla ${x.a}-${x.b}`:`Σ${x.k} ${x.k>1?'últimos ticks':'último tick'} final ${x.mod}`; }
+function srNome(x){ if(x.tipo==='seq') return `Depois de ${x.x}× ${x.c?'ÍMPAR':'PAR'} seguidos · ${x.skip?`pula ${x.skip} jogo${x.skip>1?'s':''}`:'sem pular'}`; if(x.tipo==='trio') return `Trio ${x.a}-${x.b}-${x.c}`; return x.tipo==='dupla'?`Dupla ${x.a}-${x.b}`:`Σ${x.k} ${x.k>1?'últimos ticks':'último tick'} final ${x.mod}`; }
 function srScan(){
   const A=srEntries(); const nivel=+cfg.sr_nivel||0;
   if(A.length<50){ SR_SCAN={erro:`Poucas entradas (${A.length}). Carregue mais horas de ticks.`}; fillRes(); return; }
@@ -6172,6 +6478,7 @@ function srScan(){
   const combos=[];
   if(fam==='ambos'||fam==='somas'||fam==='tudo') for(let k=1;k<=kmax;k++) for(let m=0;m<10;m++) combos.push({tipo:'soma',k,mod:m});
   if(fam==='ambos'||fam==='duplas'||fam==='tudo') for(let a=0;a<10;a++) for(let b=0;b<10;b++) combos.push({tipo:'dupla',a,b});
+  if(fam==='trios'||fam==='tudo') for(let a=0;a<10;a++) for(let b=0;b<10;b++) for(let c=0;c<10;c++) combos.push({tipo:'trio',a,b,c});
   if(fam==='seq'||fam==='tudo'){ const mx=Math.max(1,Math.min(15,+cfg.sr_seqMax||6)), pk=Math.max(0,Math.min(10,+cfg.sr_pulo||3));
     for(let xx=1;xx<=mx;xx++) for(const c of [0,1]) for(let sk=0;sk<=pk;sk++) combos.push({tipo:'seq',x:xx,c,skip:sk}); }
   for(const c of combos) for(const alvo of [0,1]){
@@ -6332,7 +6639,7 @@ VIEWS.srob={nome:'⏱ Robôs de segundos',live:srLive,html(){
       <label>Jogo de ${sel('sr_E',[[10,'10s'],[20,'20s'],[30,'30s']])}</label>
       <label>Decidir ${sel('sr_L',[[2,'2s antes'],[4,'4s antes'],[6,'6s antes'],[8,'8s antes']])}</label>
       <label>Entrada ${sel('sr_nivel',[[0,'tiro seco'],[1,'até G1'],[2,'até G2']])}</label>
-      <label>Família ${sel('sr_fam',[['ambos','somas + duplas'],['somas','só somas'],['duplas','só duplas'],['seq','sequências (X× par/ímpar)'],['tudo','somas + duplas + sequências']])}</label>
+      <label>Família ${sel('sr_fam',[['ambos','somas + duplas'],['somas','só somas'],['duplas','só duplas'],['trios','só trios'],['seq','sequências (X× par/ímpar)'],['tudo','somas + duplas + trios + sequências']])}</label>
       <label>Sequência até ${inp('sr_seqMax',40)}× · pular até ${inp('sr_pulo',40)} jogos</label>
       <label>Somar até ${sel('sr_kmax',[[1,'1 tick'],[2,'2 ticks'],[3,'3 ticks'],[4,'4 ticks'],[5,'5 ticks']])}</label>
       <label>Mín. casos ${inp('sr_min',50)}</label>
@@ -7577,7 +7884,7 @@ async function trocarBanco(b) {
 function iaAllLogs(){
   const c1=(typeof CF!=='undefined'?CF.log:[]).filter(x=>x.res==='green'||x.res==='red').map(x=>({...x,_src:'CF1'}));
   const c2=(typeof CF2!=='undefined'?CF2.log:[]).filter(x=>x.res==='green'||x.res==='red').map(x=>({...x,_src:'CF2'}));
-  const il=(typeof IL!=='undefined'?IL.log:[]).filter(x=>x.res==='green'||x.res==='red').map(x=>({...x,_src:'IL'}));
+  const il=(typeof IL!=='undefined'?Object.values(IL.log).flat():[]).filter(x=>x.res==='green'||x.res==='red').map(x=>({...x,_src:'IL'}));
   return [...c1,...c2,...il].sort((a,b)=>a.T0-b.T0);
 }
 
@@ -7771,6 +8078,79 @@ function iaMemSalvar(R,prox){
   const arr=iaMemLer();
   arr.push(snap);
   try{ localStorage.setItem(IA_MEM_KEY,JSON.stringify(arr.slice(-IA_MEM_MAX))); }catch(e){}
+}
+
+// ---- RELATÓRIO CONTRÁRIO (baseado no log histórico da Inteligência) ----
+function iaContrarioPainel(L){
+  if(!L||!L.length) return '';
+  // Entradas com excesso de confirmação
+  const excessivas = L.filter(x => iaNivelConf(x) === 'excessiva');
+  if(excessivas.length < 3) return '';
+
+  // Normal: resultados reais das entradas com excesso
+  const normGreen = excessivas.filter(x => x.res === 'green').length;
+  const normRed   = excessivas.filter(x => x.res === 'red').length;
+  const normTot   = excessivas.length;
+  const normTaxa  = (100 * normGreen / normTot).toFixed(0);
+
+  // Contrário: inverter todos os resultados
+  const invGreen = normRed;   // os reds virariam greens
+  const invRed   = normGreen; // os greens virariam reds
+  const invTaxa  = (100 * invGreen / normTot).toFixed(0);
+
+  const normCol = normGreen/normTot >= 0.6 ? 'var(--g)' : normGreen/normTot >= 0.4 ? 'var(--am)' : 'var(--v)';
+  const invCol  = invGreen/normTot >= 0.6 ? 'var(--g)' : invGreen/normTot >= 0.4 ? 'var(--am)' : 'var(--v)';
+
+  // Detalhamento por fonte (agrupando por _src)
+  const fontes = {};
+  for(const x of excessivas){
+    const src = x._src || '?';
+    if(!fontes[src]) fontes[src] = {green:0, red:0};
+    if(x.res==='green') fontes[src].green++; else fontes[src].red++;
+  }
+  const fontesRows = Object.entries(fontes).sort((a,b)=>(b[1].green+b[1].red)-(a[1].green+a[1].red)).map(([src,v])=>{
+    const tot = v.green + v.red;
+    const taxa = (100*v.green/tot).toFixed(0);
+    const taxaCol = v.green/tot >= 0.6 ? 'var(--g)' : v.green/tot >= 0.4 ? 'var(--am)' : 'var(--v)';
+    const invT = (100*v.red/tot).toFixed(0);
+    const invTCol = v.red/tot >= 0.6 ? 'var(--g)' : v.red/tot >= 0.4 ? 'var(--am)' : 'var(--v)';
+    return `<tr>
+      <td style="font-size:12px">${src}</td>
+      <td style="text-align:center">${tot}</td>
+      <td style="text-align:center;color:${taxaCol};font-weight:700">${taxa}%</td>
+      <td style="text-align:center">${v.green}✅ / ${v.red}❌</td>
+      <td style="text-align:center;color:${invTCol};font-weight:700">${invT}%</td>
+      <td style="text-align:center">${v.red}✅ / ${v.green}❌</td>
+    </tr>`;
+  }).join('');
+
+  const conselho = invGreen/normTot > normGreen/normTot + 0.1
+    ? `<div style="border:1px solid var(--g);background:rgba(34,197,94,.08);border-radius:10px;padding:10px 14px;margin-top:10px">✅ <b>O contrário teria sido melhor!</b> Com excesso de confirmação, entrar na direção oposta daria <b>${invGreen} greens (${invTaxa}%)</b> vs ${normGreen} greens (${normTaxa}%) da direção normal. Considere entrar ao contrário quando houver excesso.</div>`
+    : invGreen/normTot < normGreen/normTot - 0.1
+    ? `<div style="border:1px solid var(--v);background:rgba(239,68,68,.05);border-radius:10px;padding:10px 14px;margin-top:10px">❌ <b>O contrário seria pior.</b> A direção normal com excesso de confirmação ainda deu <b>${normGreen} greens (${normTaxa}%)</b> vs ${invGreen} greens ao contrário (${invTaxa}%). Excesso aqui não é armadilha.</div>`
+    : `<div style="border:1px solid var(--am);background:rgba(245,197,24,.07);border-radius:10px;padding:10px 14px;margin-top:10px">⚖️ <b>Resultado similar nos dois sentidos.</b> Normal: ${normGreen} greens (${normTaxa}%) · Contrário: ${invGreen} greens (${invTaxa}%). O excesso de confirmação não é um sinal confiável em nenhuma das direções.</div>`;
+
+  return `<div class="panel" style="border-color:#f59e0b;background:linear-gradient(135deg,rgba(245,158,11,.06),var(--p1))">
+    <h3>🔄 Relatório Contrário — entradas com excesso de confirmação</h3>
+    <p style="font-size:13px;color:var(--mu);margin:0 0 12px">Analisa as <b>${normTot} entradas</b> registradas com <b>excesso de confirmação</b>. "Ao contrário" = entrar na cor oposta ao sinal.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:11px;color:var(--mu);margin-bottom:4px">🎯 Direção normal (sinal original)</div>
+        <div style="font-size:28px;font-weight:900;color:${normCol}">${normTaxa}%</div>
+        <div style="font-size:12px;color:var(--mu)">${normGreen} greens · ${normRed} reds</div>
+      </div>
+      <div style="background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:11px;color:var(--mu);margin-bottom:4px">🔄 Ao contrário (direção oposta)</div>
+        <div style="font-size:28px;font-weight:900;color:${invCol}">${invTaxa}%</div>
+        <div style="font-size:12px;color:var(--mu)">${invGreen} greens · ${invRed} reds</div>
+      </div>
+    </div>
+    ${fontesRows?`<div class="tw" style="margin-bottom:10px"><table>
+      <tr><th>Fonte</th><th>Total</th><th>Taxa normal</th><th>Green/Red normal</th><th>Taxa contrário</th><th>Green/Red contrário</th></tr>
+      ${fontesRows}
+    </table></div>`:''}
+    ${conselho}
+  </div>`;
 }
 
 // ---- painel CFA integrado ----
@@ -8257,6 +8637,8 @@ function iaHtml(){
   ${iaSomaPainel(somaAnalise,somaGrupos)}
   ${horaHtml}
   ${iaCfaPainel()}
+  ${iaContrarioPainel(L)}
+  ${(()=>{ const b=Object.keys(LIVE||{}).find(bk=>LIVE[bk]&&LIVE[bk].length>10); return b?srobContrarioHtml(b,false):''; })()}
   ${iaHistoricoHtml()}
   </div>`;
 }
@@ -8424,12 +8806,443 @@ function renderTab() {
   $('#view').innerHTML = v.html ? v.html() : '<div id="res"></div>';
   fillRes();
 }
+// ===================== 🎯 SOMENTE ROBÔ (SROB) · v2 =====================
+// 10 robôs que só entram em padrões 100% (sem nenhum red) e que também confirmaram 100% na parte mais nova do banco.
+// Famílias: números, duplas, trios, somas (Σ dos últimos N), sequências (X× par/ímpar), padrões de cor (ex.: PIP),
+// horas pagantes (mesmo mm:ss toda hora) e horário fixo (mesmo hh:mm:ss todo dia). Os tipos são misturados nos slots.
+// Regras (robô temporário): deu 1 resultado (green ou red) → apaga e entra outro 100% no lugar. Sem dormência.
+// Horário fixo só da hora atual (próximos 60 min). A cada 10 min revalida: quem deixou de ser 100% sai.
+const SROB_N = 10;
+const SROB_KEY = 'srob_v2';
+let SROB_COOL = {}, SROB_SLOTS = [], SROB_LOG = [], SROB_SIG = [], SROB_OPEN = false, SROB_SCAN = null, SROB_LASTT = {}, SROB_REVAL = 0, SROB_BUSY = false;
+
+function srobSlotVazio(id) { return { id, uid: '', rb: null, estado: 'vazio', greensConsec: 0, primeiroGreen: false, redsBefore: 0, greens: 0, reds: 0, redsD: 0, greensD: 0, tsAtivado: 0 }; }
+function srobBank() {
+  const b = cfg.srob_bank;
+  if (b && bankIntervalSec(b)) return b;
+  return bankIntervalSec(cfg.bank) ? cfg.bank : d5BankName(20, 'R_100');
+}
+function srobNivel() { const n = +(cfg.srob_nivel ?? 1); return n >= 0 && n <= 2 ? n : 1; }
+function srobStepMs(bank) { return (bankIntervalSec(bank) || gameIntervalSec()) * 1000; }
+function srobW(bank) { const W = liveW(bank) || []; const n = Math.max(1000, +cfg.srob_n || 3000); return W.length > n ? W.slice(-n) : W; }
+
+function srobLoad() {
+  try { const d = JSON.parse(localStorage.getItem(SROB_KEY) || 'null'); if (d) { SROB_SLOTS = d.slots || []; SROB_LOG = d.log || []; } } catch (e) {}
+  while (SROB_SLOTS.length < SROB_N) SROB_SLOTS.push(srobSlotVazio(SROB_SLOTS.length));
+  SROB_SLOTS = SROB_SLOTS.slice(0, SROB_N).map((s, i) => ({ ...srobSlotVazio(i), ...s, id: i, estado: s.estado === 'dormindo' ? 'ativo' : (s.estado || 'vazio') }));
+  srobSeed();
+}
+async function srobSeed() {
+  const b = srobBank(); await srobLoadTempo(b);
+  if (b !== cfg.bank && !LIVE[b] && typeof DB !== 'undefined' && DB) { try { LIVE[b] = await idbTail(b, LIVE_CAP); } catch (e) {} }
+}
+function srobSave() { try { localStorage.setItem(SROB_KEY, JSON.stringify({ slots: SROB_SLOTS, log: SROB_LOG.slice(-200) })); } catch (e) {} }
+function srobBtn() {
+  const el = $('#srobBtn'); if (!el) return;
+  const n = SROB_SLOTS.filter(s => s.estado === 'ativo' || s.estado === 'dormindo').length;
+  el.classList.toggle('son', n > 0);
+  const sig = SROB_SIG.find(s => !s.done && !s.dorm);
+  el.textContent = sig ? `🎯 ROBÔ: ${sig.alvo ? 'ÍMPAR' : 'PAR'} ${hmsOf(sig.entryT / 1000)}` : `🎯 SOMENTE ROBÔ${n ? ' (' + n + ')' : ''}`;
+}
+function srobLog(msg, tipo) {
+  SROB_LOG.push({ ts: new Date().toLocaleTimeString('pt-BR'), msg, tipo });
+  if (SROB_LOG.length > 300) SROB_LOG.splice(0, SROB_LOG.length - 200);
+}
+
+function srobContrarioHtml(bank, compact) {
+  const W = LIVE[bank];
+  if (!W || W.length < 15) return compact ? '' : '<div class="nota">Dados insuficientes para análise contrária.</div>';
+
+  // helper para pegar starts de cada tipo
+  function getStarts(c) {
+    if (c.kind === 'Dupla') return scPairMap(W).get(c.pair) || [];
+    if (c.kind && c.kind.startsWith('Soma')) return (scSumMap(W, c.n) || new Map()).get(c.mod) || [];
+    if (c.kind === 'Número') return scDigitStarts(W, c.d);
+    return [];
+  }
+
+  // Coletar candidatos 100% (mesma lógica de srobScanBest)
+  const cands = [];
+  const pairMap = scPairMap(W);
+  for (const [pair, starts] of pairMap) {
+    for (let skip = 0; skip <= 3; skip++) {
+      for (const alvo of [0, 1]) {
+        const s = scEval(W, starts, alvo, skip, 2);
+        if (s.sg + s.g1 === s.done && s.done >= 3) cands.push({ kind:'Dupla', pair, gat:`Dupla ${pair}`, skip, alvo, ...s });
+      }
+    }
+  }
+  for (let n = 2; n <= 4; n++) {
+    const sumM = scSumMap(W, n);
+    for (const [mod, starts] of sumM) {
+      for (let skip = 0; skip <= 3; skip++) {
+        for (const alvo of [0, 1]) {
+          const s = scEval(W, starts, alvo, skip, 2);
+          if (s.sg + s.g1 === s.done && s.done >= 3) cands.push({ kind:`Soma ${n}`, n, mod, gat:`Σ${n}%10=${mod}`, skip, alvo, ...s });
+        }
+      }
+    }
+  }
+  for (let d = 0; d <= 9; d++) {
+    const starts = scDigitStarts(W, d);
+    for (let skip = 0; skip <= 3; skip++) {
+      for (const alvo of [0, 1]) {
+        const s = scEval(W, starts, alvo, skip, 2);
+        if (s.sg + s.g1 === s.done && s.done >= 3) cands.push({ kind:'Número', d, gat:`Nº ${d}`, skip, alvo, ...s });
+      }
+    }
+  }
+  cands.sort((a, b) => b.done - a.done);
+  const top = cands.slice(0, compact ? 8 : 20);
+  if (!top.length) return compact ? '' : '<div class="nota">Nenhum padrão 100% encontrado no histórico atual.</div>';
+
+  // Para cada padrão, calcula o contrário
+  const rows = top.map(c => {
+    const starts = getStarts(c);
+    const inv = scEval(W, starts, 1 - c.alvo, c.skip, 2);
+    const alvoLabel = c.alvo ? 'ÍMPAR' : 'PAR';
+    const invLabel  = c.alvo ? 'PAR'   : 'ÍMPAR';
+    const normRate  = (100*(c.sg+c.g1)/c.done).toFixed(0);
+    const invRate   = inv.done ? (100*(inv.sg+inv.g1)/inv.done).toFixed(0) : '—';
+    const invCol    = inv.done && (inv.sg+inv.g1)/inv.done >= 0.6 ? 'var(--g)' : inv.done && (inv.sg+inv.g1)/inv.done >= 0.4 ? 'var(--am)' : 'var(--v)';
+    const skipLbl   = c.skip ? ` s${c.skip}` : '';
+    return `<tr>
+      <td style="font-size:12px;white-space:nowrap">${c.gat}${skipLbl}</td>
+      <td><span class="tag g" style="font-size:10px">${alvoLabel}</span></td>
+      <td style="text-align:center;color:var(--g);font-weight:700">${normRate}%</td>
+      <td style="text-align:center">${c.sg}/${c.g1}/${c.done-c.sg-c.g1}</td>
+      <td><span class="tag v" style="font-size:10px">${invLabel}</span></td>
+      <td style="text-align:center;color:${invCol};font-weight:700">${invRate}%</td>
+      <td style="text-align:center">${inv.sg}/${inv.g1}/${inv.red}</td>
+    </tr>`;
+  }).join('');
+
+  const tbl = `<div class="tw" style="max-height:${compact?'260px':'400px'}">
+    <table>
+      <tr>
+        <th>Padrão</th>
+        <th>Alvo normal</th><th>Taxa</th><th title="TS/G1/red">TS/G1/red</th>
+        <th>Ao contrário</th><th>Taxa inv.</th><th>TS/G1/red inv.</th>
+      </tr>
+      ${rows}
+    </table>
+  </div>
+  <div class="nota" style="margin-top:6px">Coluna <b>Ao contrário</b>: se o sinal entrar na direção <b>oposta</b>, quantos TS/G1/reds ocorreriam. Taxa verde = o contrário também pagaria; taxa vermelha = seria ruim nos dois lados.</div>`;
+
+  if (compact) return tbl;
+  return `<div class="panel" style="border-color:#f59e0b;background:linear-gradient(135deg,rgba(245,158,11,.06),var(--p1))">
+    <h3>🔄 Relatório Contrário — e se entrasse ao contrário?</h3>
+    <p style="font-size:13px;color:var(--mu);margin:0 0 10px">Padrões com <b>100% de acerto</b> no histórico. A coluna "Ao contrário" mostra o que aconteceria ao entrar na direção oposta do sinal.</p>
+    ${tbl}
+  </div>`;
+}
+
+// ---------- padrões de cor (ex.: PIP = par, ímpar, par nos últimos 3) ----------
+function srobCorMap(W, L) {
+  const M = new Map();
+  for (let i = L - 1; i < W.length; i++) {
+    let k = ''; for (let j = i - L + 1; j <= i; j++) k += W[j].p ? 'I' : 'P';
+    if (!M.has(k)) M.set(k, []); M.get(k).push(i);
+  }
+  return M;
+}
+function srobScanCores(W, maxSkip, nivel, min, cut) {
+  const out = [];
+  for (let L = 3; L <= 5; L++) for (const [key, starts] of srobCorMap(W, L)) {
+    const tr = starts.filter(i => i < cut), te = starts.filter(i => i >= cut);
+    for (let skip = 0; skip <= maxSkip; skip++) for (const alvo of [0, 1]) {
+      const s = scEval(W, tr, alvo, skip, nivel); if (s.done < min) continue;
+      out.push({ kind: 'Cores', L, key, gat: `Cores ${key}`, skip, alvo, ...s, test: scEval(W, te, alvo, skip, nivel) });
+    }
+  }
+  return out;
+}
+// índices onde o gatilho do robô aconteceu
+function srobStarts(W, x, M = {}) {
+  switch (x.kind) {
+    case 'Número': return scDigitStarts(W, x.d);
+    case 'Dupla': return (M.p || (M.p = scPairMap(W))).get(x.pair) || [];
+    case 'Trio': return (M.t || (M.t = scTrioMap(W))).get(x.trio) || [];
+    case 'Sequência': return (M.q || (M.q = scSeqMap(W, 15))).get(`${x.c}|${x.x}`) || [];
+    case 'Cores': { const k = 'c' + x.L; return (M[k] || (M[k] = srobCorMap(W, x.L))).get(x.key) || []; }
+    default: { const k = 's' + x.n; return (M[k] || (M[k] = scSumMap(W, x.n))).get(x.mod) || []; }
+  }
+}
+const SROB_FAMS = [['Hora', '🕐 horas pagantes'], ['Dia', '🕒 horário fixo'], ['Soma', '➕ somas'], ['Dupla', 'duplas'], ['Trio', 'trios'], ['Número', 'números'], ['Sequência', 'sequências'], ['Cores', 'cores']];
+function srobFam(x) { return String(x.kind).startsWith('Soma') ? 'Soma' : x.kind; }
+function srobFamOn(f) { const o = cfg.srob_fams || {}; return o[f] !== 0; }
+function srobTempo(x) { return x.kind === 'Hora' || x.kind === 'Dia'; }
+function srobOffTxt(x) { return x.kind === 'Dia' ? `${p2d(Math.floor(x.off / 3600))}:${p2d(Math.floor(x.off / 60) % 60)}:${p2d(x.off % 60)}` : `:${p2d(Math.floor(x.off / 60))}:${p2d(x.off % 60)}`; }
+// próximo horário (em segundos, hora do servidor) de um robô de horário
+function srobNextT(x, from = srvNow()) {
+  if (x.kind === 'Dia') { const d = new Date(from * 1000); d.setHours(0, 0, 0, 0); let T = Math.floor(d.getTime() / 1000) + x.off; if (T <= from) { d.setDate(d.getDate() + 1); T = Math.floor(d.getTime() / 1000) + x.off; } return T; }
+  let T = Math.floor(from / 3600) * 3600 + x.off; if (T <= from) T += 3600; return T;
+}
+// jogos do banco inteiro (IndexedDB, até 30 dias) para horas pagantes e horário fixo — a memória só guarda ~6.000 jogos
+let SROB_TW = { bank: '', W: [], when: 0 };
+async function srobLoadTempo(bank, forcar) {
+  if (!forcar && SROB_TW.bank === bank && Date.now() - SROB_TW.when < 30 * 60 * 1000) return SROB_TW;
+  try { const W = await idbRange(bank, Date.now() - 30 * 86400e3, Date.now() + 60000); if (W.length) SROB_TW = { bank, W, when: Date.now() }; } catch (e) {}
+  return SROB_TW;
+}
+function srobTempoW(bank) { const L = liveW(bank) || []; return SROB_TW.bank === bank && SROB_TW.W.length >= L.length ? SROB_TW.W : L; }
+// horas pagantes (toda hora) e horário fixo (todo dia) com 100% no nível escolhido
+function srobScanTempo(bank, nivel) {
+  const out = [], W = srobTempoW(bank); if (W.length < 300) return out;
+  const step = (bankIntervalSec(bank) || gameIntervalSec()), G = gridBuild(W, step); if (!G) return out;
+  const minH = Math.max(3, +(cfg.srob_minHora ?? 12)), minD = Math.max(2, +(cfg.srob_minDia ?? 5));
+  if (srobFamOn('Hora')) for (const r of hpScan(G, 'all')) {
+    const o = r.L[nivel]; if (o.n < minH || o.ok !== o.n) continue;
+    out.push({ kind: 'Hora', off: r.off, alvo: r.alvo, skip: 0, done: o.n, sg: o.pos[0], g1: o.pos[1], g2: o.pos[2], red: 0, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: o.n, ts: o.pos[0], bank });
+  }
+  if (srobFamOn('Dia')) for (const r of hfScan(G, 'all')) {
+    const o = [r.ts, r.g1, r.g2][nivel]; if (o.n < minD || o.ok !== o.n) continue;
+    out.push({ kind: 'Dia', off: r.off, alvo: r.alvo, skip: 0, done: o.n, sg: o.levels.ts, g1: o.levels.g1, g2: o.levels.g2, red: 0, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: o.n, ts: o.levels.ts, bank });
+  }
+  return out;
+}
+function srobProxTxt(x) {
+  const T = srobNextT(x), d = new Date(T * 1000), hoje = new Date(srvNow() * 1000);
+  return (d.toDateString() === hoje.toDateString() ? 'hoje ' : 'amanhã ') + hmsOf(T);
+}
+function srobNome(x) {
+  if (!x) return '—';
+  if (x.kind === 'Hora') return `Horas pagantes ${srobOffTxt(x)} toda hora → ${x.alvo ? 'ÍMPAR' : 'PAR'}`;
+  if (x.kind === 'Dia') return `Horário fixo ${srobOffTxt(x)} todo dia → ${x.alvo ? 'ÍMPAR' : 'PAR'}`;
+  const g = x.kind === 'Número' ? `Número ${x.d}` : x.kind === 'Dupla' ? `Dupla ${x.pair}` : x.kind === 'Trio' ? `Trio ${x.trio}`
+    : x.kind === 'Sequência' ? `${x.x}× ${x.c ? 'ÍMPAR' : 'PAR'} seguidos` : x.kind === 'Cores' ? `Cores ${x.key}` : `Σ${x.n} final ${x.mod}`;
+  return `${g} · ${x.skip ? 'pula ' + x.skip : 'sem pular'} → ${x.alvo ? 'ÍMPAR' : 'PAR'}`;
+}
+function srobChave(x) { return [x.kind, x.off, x.d, x.pair, x.trio, x.n, x.mod, x.c, x.x, x.L, x.key, x.skip, x.alvo].join('|'); }
+
+// ---------- varredura: só padrões 100% no histórico E 100% na conferência (30% mais novos) ----------
+function srobScan(bank = srobBank()) {
+  const W = srobW(bank), t0 = performance.now(), nivel = srobNivel();
+  if (W.length < 300) { SROB_SCAN = { bank, n: W.length, lista: [], when: Date.now(), nivel, erro: `só ${W.length} jogos no banco ${bank}` }; return SROB_SCAN; }
+  const min = Math.max(5, +(cfg.srob_min ?? 12)), pulo = Math.max(0, Math.min(15, +(cfg.srob_pulo ?? 5))), cut = Math.floor(W.length * 0.7);
+  let all = [];
+  for (const [f, F] of [['numeros', 'Número'], ['duplas', 'Dupla'], ['trios', 'Trio'], ['somas', 'Soma'], ['seq', 'Sequência']]) if (srobFamOn(F)) all = all.concat(scScanFamily(W, f, pulo, nivel, min, cut));
+  if (srobFamOn('Cores')) all = all.concat(srobScanCores(W, pulo, nivel, min, cut));
+  const minTeste = Math.max(2, +(cfg.srob_minTeste ?? 3));
+  const lista = all.filter(x => x.red === 0 && x.test && x.test.done >= minTeste && x.test.red === 0)
+    .map(x => ({ ...x, tot: x.done + x.test.done, ts: x.sg + x.test.sg, bank }))
+    .sort((a, b) => b.tot - a.tot || b.ts / b.tot - a.ts / a.tot || a.skip - b.skip);
+  const agora = srvNow();
+  const tempo = srobScanTempo(bank, nivel).filter(x => x.kind !== 'Dia' || srobNextT(x, agora) - agora <= 3600)
+    .sort((a, b) => b.tot - a.tot || b.ts - a.ts || srobNextT(a, agora) - srobNextT(b, agora));
+  // mistura: um de cada tipo por vez (o melhor de cada), para somas, horários etc. entrarem juntos
+  const porFam = {}; for (const x of tempo.concat(lista)) (porFam[srobFam(x)] = porFam[srobFam(x)] || []).push(x);
+  const mix = [], ordem = SROB_FAMS.map(f => f[0]).filter(f => porFam[f]);
+  for (let k = 0; mix.length < 120 && ordem.some(f => porFam[f][k]); k++) for (const f of ordem) if (porFam[f][k]) mix.push(porFam[f][k]);
+  const okTempo = new Set(tempo.map(srobChave)), tempoCompleto = SROB_TW.bank === bank && SROB_TW.W.length > 0;
+  SROB_SCAN = { bank, n: W.length, lista: mix, okTempo, tempoCompleto, porFam: Object.fromEntries(ordem.map(f => [f, porFam[f].length])), achados: lista.length + tempo.length, testados: all.length, when: Date.now(), nivel, ms: Math.round(performance.now() - t0) };
+  return SROB_SCAN;
+}
+function srobScanFresco(bank) {
+  if (!SROB_SCAN || SROB_SCAN.bank !== bank || SROB_SCAN.nivel !== srobNivel() || Date.now() - SROB_SCAN.when > 60000) srobScan(bank);
+  return SROB_SCAN;
+}
+// confere se o robô continua 100% no banco inteiro (sem red)
+function srobAindaOk(W, rb, nivel) { return scEval(W, srobStarts(W, rb), rb.alvo, rb.skip, nivel).red === 0; }
+
+function srobFillSlots(bank = srobBank(), forcar) {
+  if (SROB_BUSY) return; SROB_BUSY = true;
+  try {
+    const sc = forcar ? srobScan(bank) : srobScanFresco(bank);
+    const emUso = new Set(SROB_SLOTS.filter(s => s.rb && (s.estado === 'ativo' || s.estado === 'dormindo')).map(s => srobChave(s.rb)));
+    for (let i = 0; i < SROB_N; i++) {
+      const s = SROB_SLOTS[i]; if (s.estado === 'ativo' || s.estado === 'dormindo') continue;
+      const now = srvNow();
+      const c = sc.lista.find(x => !emUso.has(srobChave(x)) && !(SROB_COOL[srobChave(x)] > Date.now())
+        && (!srobTempo(x) || srobNextT(x, now) - now > 8) && (x.kind !== 'Dia' || srobNextT(x, now) - now <= 3600)); if (!c) break;
+      SROB_SLOTS[i] = { ...srobSlotVazio(i), uid: 'S' + Date.now() + i, rb: { ...c, nivel: sc.nivel }, estado: 'ativo', tsAtivado: Date.now() };
+      emUso.add(srobChave(c));
+      srobLog(`🎯 Robô ${i + 1}: ${srobNome(c)} · ${c.tot} casos 100% (${c.ts} no tiro seco)`, 'evt');
+    }
+    srobSave(); srobBtn();
+  } finally { SROB_BUSY = false; }
+}
+// a cada 10 min: tira quem deixou de ser 100% e completa com os melhores da varredura nova
+async function srobRevalidar(bank = srobBank()) {
+  SROB_REVAL = Date.now(); await srobLoadTempo(bank); srobScan(bank);
+  const W = srobW(bank), M = {};
+  for (const s of SROB_SLOTS) {
+    if (!s.rb || (s.estado !== 'ativo' && s.estado !== 'dormindo')) continue;
+    if (SROB_SIG.some(g => g.uid === s.uid && !g.done)) continue;
+    if (s.rb.bank && s.rb.bank !== bank) { s.estado = 'deletado'; srobLog(`🔁 Robô ${s.id + 1} saiu (banco mudou)`, 'evt'); continue; }
+    if (s.estado === 'dormindo') s.estado = 'ativo';
+    if (s.rb.kind === 'Dia' && srobNextT(s.rb) - srvNow() > 3600) { s.estado = 'deletado'; srobLog(`🔁 Robô ${s.id + 1} saiu: horário fixo não é da próxima hora`, 'evt'); continue; }
+    if (srobTempo(s.rb)) { if (SROB_SCAN && SROB_SCAN.tempoCompleto && SROB_SCAN.okTempo && !SROB_SCAN.okTempo.has(srobChave(s.rb))) { s.estado = 'deletado'; srobLog(`🔁 Robô ${s.id + 1} saiu: deixou de ser 100% (${srobNome(s.rb)})`, 'r'); } continue; }
+    if (scEval(W, srobStarts(W, s.rb, M), s.rb.alvo, s.rb.skip, s.rb.nivel ?? srobNivel()).red > 0) { s.estado = 'deletado'; srobLog(`🔁 Robô ${s.id + 1} saiu: deixou de ser 100% (${srobNome(s.rb)})`, 'r'); }
+  }
+  srobFillSlots(bank, true);
+  srobRefreshPopup();
+}
+// ---------- resultado de cada entrada ----------
+function srobProcessResult(i, res) {
+  const s = SROB_SLOTS[i];
+  if (!s || !s.rb || s.estado !== 'ativo') return;
+  if (res === 'green') s.greens++; else s.reds++;
+  SROB_COOL[srobChave(s.rb)] = Date.now() + 30 * 60 * 1000;           // não volta logo em seguida
+  s.estado = 'deletado';
+  srobLog(`${res === 'green' ? '✅' : '❌'} Robô ${i + 1} cumpriu (${res === 'green' ? 'GREEN' : 'RED'}) e saiu — entra outro 100%`, res === 'green' ? 'g' : 'r');
+  setTimeout(() => srobFillSlots(srobBank(), true), 200);
+}
+// ---------- ao vivo: arma a entrada quando o gatilho sai e confere TS/G1/G2 pelo horário ----------
+function srobWatchNew() {
+  const bank = srobBank(), W = liveW(bank) || [];
+  if (W.length < 2) return;
+  const last = W.at(-1); if (SROB_LASTT[bank] === last.t) return;
+  SROB_LASTT[bank] = last.t;
+  const step = srobStepMs(bank);
+  if (srvNow() * 1000 - last.t > 3 * step) return;                 // dado velho (reposição): não arma
+  if (SROB_SLOTS.some(s => s.estado === 'vazio' || s.estado === 'deletado')) srobFillSlots(bank);
+  if (Date.now() - SROB_REVAL > 10 * 60 * 1000) srobRevalidar(bank);
+  const M = {};
+  for (const s of SROB_SLOTS) {
+    if (!s.rb || (s.estado !== 'ativo' && s.estado !== 'dormindo') || srobTempo(s.rb)) continue;
+    const st = srobStarts(W, s.rb, M); if (st.at(-1) !== W.length - 1) continue;
+    const key = s.uid + '|' + last.t; if (SROB_SIG.some(g => g.key === key)) continue;
+    if (SROB_SIG.some(g => g.uid === s.uid && !g.done)) continue;   // uma entrada aberta por robô
+    const sig = { key, uid: s.uid, slot: s.id, nome: srobNome(s.rb), alvo: s.rb.alvo, nivel: s.rb.nivel ?? srobNivel(), step, bank,
+      trigT: last.t, entryT: last.t + ((+s.rb.skip || 0) + 1) * step, dorm: s.estado === 'dormindo', res: [], done: false };
+    SROB_SIG.push(sig);
+    if (!sig.dorm) {
+      srobLog(`⚡ Robô ${s.id + 1}: ENTRAR ${sig.alvo ? 'ÍMPAR' : 'PAR'} às ${hmsOf(sig.entryT / 1000)} (${NIVEL[sig.nivel] === 'TS' ? 'tiro seco' : 'até ' + NIVEL[sig.nivel]})`, 'evt');
+      if (!cfg.srob_pop_off && !ilSo()) { if (!SROB_OPEN) srobOpen(); try { beep(); } catch (e) {} }
+    }
+  }
+  srobSave(); srobBtn();
+}
+// robôs de horário: armam a entrada 60s antes do horário
+function srobArmTempo() {
+  const bank = srobBank(), step = srobStepMs(bank), now = srvNow();
+  let saiu = false;
+  for (const s of SROB_SLOTS) if (s.rb && s.estado === 'ativo' && s.rb.kind === 'Dia' && !SROB_SIG.some(g => g.uid === s.uid && !g.done) && srobNextT(s.rb, now) - now > 3600) { s.estado = 'deletado'; saiu = true; }
+  if (saiu) setTimeout(() => srobFillSlots(bank, true), 100);
+  for (const s of SROB_SLOTS) {
+    if (!s.rb || (s.estado !== 'ativo' && s.estado !== 'dormindo') || !srobTempo(s.rb)) continue;
+    if (SROB_SIG.some(g => g.uid === s.uid && !g.done)) continue;
+    const T = srobNextT(s.rb, now - 1); if (T - now > 60) continue;
+    const key = s.uid + '|' + T * 1000; if (SROB_SIG.some(g => g.key === key)) continue;
+    const sig = { key, uid: s.uid, slot: s.id, nome: srobNome(s.rb), alvo: s.rb.alvo, nivel: s.rb.nivel ?? srobNivel(), step, bank,
+      trigT: Date.now(), entryT: T * 1000, dorm: s.estado === 'dormindo', res: [], done: false };
+    SROB_SIG.push(sig);
+    if (!sig.dorm) {
+      srobLog(`⚡ Robô ${s.id + 1}: ENTRAR ${sig.alvo ? 'ÍMPAR' : 'PAR'} às ${hmsOf(T)} (${srobNome(s.rb)})`, 'evt');
+      if (!cfg.srob_pop_off && !ilSo()) { if (!SROB_OPEN) srobOpen(); try { beep(); } catch (e) {} }
+    }
+    srobSave(); srobBtn();
+  }
+}
+function srobResolvePending() {
+  srobWatchNew(); srobArmTempo();
+  if (!SROB_SIG.length) return;
+  const now = srvNow() * 1000; let mudou = false;
+  for (const g of SROB_SIG) {
+    if (g.done) continue;
+    const W = liveW(g.bank) || [], M = new Map(); for (let i = Math.max(0, W.length - 300); i < W.length; i++) M.set(W[i].t, W[i]);
+    let hit = -1, falta = false; g.res = [];
+    for (let k = 0; k <= g.nivel; k++) { const x = M.get(g.entryT + k * g.step); if (!x) { falta = true; break; } g.res.push(x.d); if (x.p === g.alvo) { hit = k; break; } }
+    let res = null;
+    if (hit >= 0) res = 'green'; else if (!falta) res = 'red'; else if (now > g.entryT + g.nivel * g.step + 120000) res = 'sem dado';
+    if (!res) continue;
+    g.done = true; g.out = res; g.nv = hit; g.fimT = Date.now(); mudou = true;
+    const s = SROB_SLOTS.find(x => x.uid === g.uid);
+    if (res === 'sem dado') { srobLog(`… Robô ${g.slot + 1}: sem dado para conferir ${hmsOf(g.entryT / 1000)}`, 'evt'); continue; }
+    if (!g.dorm) srobLog(`${res === 'green' ? '✅ GREEN ' + NIVEL[hit] : '❌ RED'} · robô ${g.slot + 1} · ${hmsOf(g.entryT / 1000)} · ${g.res.join(' / ')}`, res === 'green' ? 'g' : 'r');
+    if (s) srobProcessResult(s.id, res);
+  }
+  SROB_SIG = SROB_SIG.filter(g => !g.done || Date.now() - g.fimT < 20000);
+  if (mudou) { srobSave(); srobBtn(); }
+}
+// ---------- popup ----------
+function srobOpen() { SROB_OPEN = true; const el = $('#srobPop'); if (!el) return; el.style.display = 'flex'; srobRender(); }
+function srobPopClose() { SROB_OPEN = false; const el = $('#srobPop'); if (el) el.style.display = 'none'; }
+function srobBankOpts() {
+  const L = []; for (const sym of d5Syms()) for (const s of D5_STEPS) L.push(d5BankName(s, sym));
+  if (!L.includes(srobBank())) L.unshift(srobBank());
+  return L.map(b => `<option ${b === srobBank() ? 'selected' : ''}>${b}</option>`).join('');
+}
+function srobSetCfg(k, v) {
+  cfg[k] = k === 'srob_bank' ? v : +v; saveCfg();
+  // mudou o critério: os robôs atuais saem e entra uma varredura nova
+  SROB_SLOTS = SROB_SLOTS.map((s, i) => SROB_SIG.some(g => g.uid === s.uid && !g.done) ? s : srobSlotVazio(i));
+  srobSeed().then(() => { srobFillSlots(srobBank(), true); srobRender(); });
+}
+function srobRender() {
+  const el = $('#srobPop'); if (!el || !SROB_OPEN) return;
+  el.innerHTML = `<div class="srobpc" style="width:min(720px,98vw)">
+    <div class="srobpt">🎯 Somente Robô <span class="mu" style="font-weight:400;font-size:12px">só padrões 100%</span>
+      <span style="margin-left:auto;display:flex;gap:6px">
+        <button onclick="srobReset()" style="font-size:11px;padding:2px 8px;border-color:#ef4444;color:#f87171">🗑 Resetar</button>
+        <button onclick="srobPopClose()" style="font-size:11px;padding:2px 8px">✕</button></span></div>
+    <div class="ctl">
+      <label>Banco <select onchange="srobSetCfg('srob_bank',this.value)">${srobBankOpts()}</select></label>
+      <label>100% em <select onchange="srobSetCfg('srob_nivel',this.value)">${[[0, 'tiro seco'], [1, 'até G1'], [2, 'até G2']].map(([v, t]) => `<option value="${v}" ${srobNivel() === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+      <label>Mín. casos <select onchange="srobSetCfg('srob_min',this.value)">${[8, 10, 12, 15, 20, 30].map(v => `<option ${+(cfg.srob_min ?? 12) === v ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+      <label>Pular até <select onchange="srobSetCfg('srob_pulo',this.value)">${[0, 2, 5, 10, 15].map(v => `<option ${+(cfg.srob_pulo ?? 5) === v ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+      <label>Analisar <select onchange="srobSetCfg('srob_n',this.value)">${[[1000, '1.000 jogos'], [3000, '3.000'], [5000, '5.000']].map(([v, t]) => `<option value="${v}" ${(+cfg.srob_n || 3000) === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+      <label><input type="checkbox" ${cfg.srob_pop_off ? 'checked' : ''} onchange="cfg.srob_pop_off=this.checked?1:0;saveCfg()"> não abrir sozinho na entrada</label>
+    </div>
+    <div class="ctl"><b style="font-size:12px">Tipos:</b> ${SROB_FAMS.map(([f, t]) => `<label><input type="checkbox" ${srobFamOn(f) ? 'checked' : ''} onchange="cfg.srob_fams={...(cfg.srob_fams||{}),'${f}':this.checked?1:0};srobSetCfg('srob_n',cfg.srob_n||3000)"> ${t}</label>`).join('')}</div>
+    <div class="ctl">
+      <label>Horas pagantes: mín. <select onchange="srobSetCfg('srob_minHora',this.value)">${[6, 8, 12, 18, 24].map(v => `<option ${+(cfg.srob_minHora ?? 12) === v ? 'selected' : ''}>${v}</option>`).join('')}</select> horas 100%</label>
+      <label>Horário fixo: mín. <select onchange="srobSetCfg('srob_minDia',this.value)">${[3, 4, 5, 7, 10, 14].map(v => `<option ${+(cfg.srob_minDia ?? 5) === v ? 'selected' : ''}>${v}</option>`).join('')}</select> dias 100%</label>
+      <button class="pri" onclick="srobRevalidar();srobRender()">🔎 Varrer de novo e completar</button></div>
+    <div class="nota" style="margin:0 0 6px">${srobAcasoTxt()}</div>
+    <div class="nota" style="margin:0 0 8px">Até 10 robôs, misturando os tipos: horas pagantes (mesmo minuto:segundo toda hora), horário fixo (mesmo horário todo dia), somas, duplas, trios, números, sequências e padrões de cor. Horários usam o banco inteiro; os outros só entram se <b>nunca deram red</b> (${NIVEL[srobNivel()] === 'TS' ? 'tiro seco' : 'até ' + NIVEL[srobNivel()]}) nos 70% mais antigos <b>e</b> repetiu 100% nos 30% mais novos. Robôs temporários: deu 1 resultado (green ou red), o robô sai e entra outro 100% no lugar. Horário fixo só entra se for da próxima hora. 100% no passado não garante o próximo.</div>
+    <div id="srobLive">${srobLiveHtml()}</div></div>`;
+}
+function srobLiveHtml() {
+  const bank = srobBank(), W = liveW(bank) || [], sc = SROB_SCAN;
+  const sigs = SROB_SIG.filter(g => !g.dorm);
+  let h = `<div class="nota" style="margin:0 0 6px">${bank} · ${num(W.length)} jogos em memória${W.length ? ` · último ${hmsOf(W.at(-1).t / 1000)}` : ''}${sc ? ` · varredura ${hmsOf(sc.when / 1000)}: ${sc.erro ? '<span class="ruim">' + sc.erro + '</span>' : `${num(sc.achados)} padrões 100% (${Object.entries(sc.porFam || {}).map(([f, n]) => f + ' ' + n).join(' · ')}) · ${sc.ms} ms`}` : ''}</div>`;
+  for (const g of sigs.slice().reverse()) {
+    const falta = Math.ceil((g.entryT - srvNow() * 1000) / 1000);
+    h += `<div class="cfativo" style="${g.done ? `animation:none;border-color:${g.out === 'green' ? 'var(--g)' : 'var(--v)'};background:transparent` : ''}">⚡ Robô ${g.slot + 1}: ENTRAR ${tagc(g.alvo)} às <b>${hmsOf(g.entryT / 1000)}</b>
+      ${g.nivel ? `<span class="mu">(${[...Array(g.nivel + 1).keys()].map(k => NIVEL[k] + ' ' + hmsOf((g.entryT + k * g.step) / 1000).slice(3)).join(' → ')})</span>` : ''}
+      · ${g.done ? (g.out === 'green' ? `<span class="ok">✅ GREEN ${NIVEL[g.nv]} · ${g.res.join(' / ')}</span>` : g.out === 'red' ? `<span class="ruim">❌ RED · ${g.res.join(' / ')}</span>` : 'sem dado') : falta > 0 ? `faltam ${falta}s` : `em jogo… ${g.res.join(' / ')}`}
+      <div class="mu" style="font-size:11px;font-weight:400">${g.nome}</div></div>`;
+  }
+  for (const s of SROB_SLOTS) {
+    const est = s.estado, rb = s.rb;
+    h += `<div class="srobslot ${est}"><div class="srobnum ${est}">${s.id + 1}</div><div class="srobinfo">`;
+    if (!rb || est === 'vazio' || est === 'deletado') h += `<span class="mu" style="font-size:12px">${est === 'deletado' ? 'apagado — esperando outro padrão 100%' : '— vazio —'}</span>`;
+    else h += `<span class="srobtag ${est}">${est.toUpperCase()}</span> <b style="font-size:13px;margin-left:4px">${srobNome(rb)}</b>
+      <div class="mu" style="font-size:11px">${srobTempo(rb) ? `${rb.tot} ${rb.kind === 'Dia' ? 'dias' : 'horas'} seguidas sem red · tiro seco ${pct(rb.ts, rb.tot)} · SG/G1/G2 ${rb.sg}/${rb.g1}/${rb.g2} · <b style="color:var(--tx)">próxima ${srobProxTxt(rb)}</b>` : `${rb.tot} casos sem red (${rb.done} antigos + ${rb.test.done} conferência) · tiro seco ${pct(rb.ts, rb.tot)} · SG/G1/G2 ${rb.sg + rb.test.sg}/${rb.g1 + rb.test.g1}/${rb.g2 + rb.test.g2}`}</div>
+      <div class="srobgr">${s.greens ? `<span class="srobg">✅ ${s.greens}</span>` : ''}${s.reds ? `<span class="srobr">❌ ${s.reds}</span>` : ''}${s.greensD || s.redsD ? `<span class="srobrd">🌙 ${s.greensD}✅ ${s.redsD}❌</span>` : ''}${s.greensConsec ? `<span class="mu" style="font-size:11px">${s.greensConsec} seguido</span>` : ''}</div>`;
+    h += `</div></div>`;
+  }
+  const fila = sc && sc.lista ? sc.lista.filter(x => !SROB_SLOTS.some(s => s.rb && (s.estado === 'ativo' || s.estado === 'dormindo') && srobChave(s.rb) === srobChave(x))).slice(0, 10) : [];
+  if (fila.length) h += `<details style="margin-top:8px"><summary class="mu" style="cursor:pointer">Próximos 100% na fila (${fila.length})</summary>
+    <div class="tw" style="max-height:200px"><table><tr><th>Padrão</th><th>Casos</th><th>Tiro seco</th></tr>${fila.map(x => `<tr><td style="text-align:left">${srobNome(x)}</td><td>${x.tot}</td><td>${pct(x.ts, x.tot)}</td></tr>`).join('')}</table></div></details>`;
+  h += `<div class="srob-log-box"><div class="mu" style="font-size:12px;font-weight:700;margin-bottom:6px">Relatório</div>`;
+  const lg = SROB_LOG.slice(-40).reverse();
+  h += lg.length ? lg.map(l => `<div class="srob-log-line srob-log-${l.tipo === 'g' ? 'g' : l.tipo === 'r' ? 'r' : l.tipo === 'rd' ? 'rd' : 'evt'}"><span class="mu" style="margin-right:5px">${l.ts}</span>${l.msg}</div>`).join('') : '<div class="mu" style="font-size:12px">Nenhum evento ainda.</div>';
+  return h + `</div>`;
+}
+// quantos horários dariam 100% só por sorte, com esse mínimo (para saber se o mínimo está baixo demais)
+function srobAcasoTxt() {
+  const step = bankIntervalSec(srobBank()) || 20, p = 1 - Math.pow(0.5, srobNivel() + 1);
+  const eH = Math.round(3600 / step * 2 * Math.pow(p, +(cfg.srob_minHora ?? 12))), eD = Math.round(86400 / step * 2 * Math.pow(p, +(cfg.srob_minDia ?? 5)));
+  const sc = SROB_SCAN && SROB_SCAN.porFam || {};
+  const linha = (nome, ach, esp) => `${nome}: achou <b>${ach || 0}</b> · só por sorte daria ~<b>${esp}</b> ${esp >= Math.max(1, (ach || 0) / 2) ? '<span class="ruim">→ quase tudo pode ser sorte, suba o mínimo ou use tiro seco</span>' : '<span class="ok">→ bem acima do acaso</span>'}`;
+  return `🎲 ${linha('Horas pagantes', sc.Hora, eH)}<br>🎲 ${linha('Horário fixo', sc.Dia, eD)}`;
+}
+function srobRefreshPopup() { if (!SROB_OPEN) return; const e = $('#srobLive'); if (e) e.innerHTML = srobLiveHtml(); else srobRender(); }
+function srobReset() {
+  if (!confirm('Resetar os 10 robôs do Somente Robô?')) return;
+  SROB_SLOTS = Array.from({ length: SROB_N }, (_, i) => srobSlotVazio(i)); SROB_LOG = []; SROB_SIG = [];
+  srobSave(); srobFillSlots(srobBank(), true); srobBtn(); srobRender();
+}
+
 // dado novo chegou: abas leves redesenham na hora; abas pesadas no máximo a cada 30s; robôs só atualizam os cards
 function afterUpdate(novo) {
   const v = VIEWS[S.tab];
   if (v.live) v.live();
   else if (!novo || !HEAVY.has(S.tab) || Date.now() - LAST_HEAVY > 30000) fillRes();
-  if (novo) setTimeout(() => { rbWatchNew(); rbRefreshOpenPopup(); try { cfCheck(); } catch (e) { console.warn('confluência', e); } }, 0);
+  if (novo) setTimeout(() => { rbWatchNew(); rbRefreshOpenPopup(); srobWatchNew(); try { cfCheck(); } catch (e) { console.warn('confluência', e); } }, 0);
 }
 
 // ---------- início ----------
@@ -8467,10 +9280,11 @@ function afterUpdate(novo) {
   if (cfg.deriv5sOn !== 0) d5Connect();
   srLoadStore();
   if (SRB.some(r => r.on)) { cfg.sr_sym = SRB.find(r => r.on).sym; setTimeout(() => srCarregar(true), 4000); }
+  srobLoad(); setTimeout(srobBtn, 1800);
   if (cfg.autoOn) { buscar(); clearInterval(S.timer); S.timer = setInterval(buscar, cfg.auto * 1000); }
   if (cfg.derivFallback) connectDerivFallback();
   // relógio dos robôs: abre o popup na hora certa e confere green/red mesmo sem dado novo
-  setInterval(() => { rbProcessPending(); rbRefreshOpenPopup(); }, 1000);
+  setInterval(() => { rbProcessPending(); rbRefreshOpenPopup(); srobResolvePending(); srobRefreshPopup(); }, 1000);
 })();
 
 // =================== ☁ NUVEM (quando o HTML está hospedado na Netlify) ===================
