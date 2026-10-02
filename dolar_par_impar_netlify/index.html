@@ -443,7 +443,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.33 · 02/10/2026 · Relatório Contrário: padrões 100% vs direção oposta';
+const VERSAO='v3.33b · 02/10/2026 · Contrário: histórico excesso de confirmação vs direção oposta';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8064,6 +8064,38 @@ function iaMemSalvar(R,prox){
 }
 
 // ---- painel CFA integrado ----
+function iaContrarioPainel(L){
+  if(!L||!L.length) return '';
+  var excessivas = L.filter(function(x){ return iaNivelConf(x) === 'excessiva'; });
+  if(excessivas.length < 3) return '';
+  var normGreen = excessivas.filter(function(x){ return x.res === 'green'; }).length;
+  var normRed   = excessivas.filter(function(x){ return x.res === 'red'; }).length;
+  var normTot   = excessivas.length;
+  var normTaxa  = (100 * normGreen / normTot).toFixed(0);
+  var invGreen  = normRed;
+  var invRed    = normGreen;
+  var invTaxa   = (100 * invGreen / normTot).toFixed(0);
+  var normCol = normGreen/normTot >= 0.6 ? 'var(--g)' : normGreen/normTot >= 0.4 ? 'var(--am)' : 'var(--v)';
+  var invCol  = invGreen/normTot >= 0.6 ? 'var(--g)' : invGreen/normTot >= 0.4 ? 'var(--am)' : 'var(--v)';
+  var fontes = {};
+  excessivas.forEach(function(x){
+    var src = x._src || '?';
+    if(!fontes[src]) fontes[src] = {green:0, red:0};
+    if(x.res==='green') fontes[src].green++; else fontes[src].red++;
+  });
+  var fontesRows = Object.entries(fontes).sort(function(a,b){ return (b[1].green+b[1].red)-(a[1].green+a[1].red); }).map(function(e){
+    var src=e[0], v=e[1]; var tot = v.green + v.red;
+    var taxa = (100*v.green/tot).toFixed(0); var taxaCol = v.green/tot >= 0.6 ? 'var(--g)' : v.green/tot >= 0.4 ? 'var(--am)' : 'var(--v)';
+    var invT = (100*v.red/tot).toFixed(0); var invTCol = v.red/tot >= 0.6 ? 'var(--g)' : v.red/tot >= 0.4 ? 'var(--am)' : 'var(--v)';
+    return '<tr><td style="font-size:12px">'+src+'</td><td style="text-align:center">'+tot+'</td><td style="text-align:center;color:'+taxaCol+';font-weight:700">'+taxa+'%</td><td style="text-align:center">'+v.green+' ✅ / '+v.red+' ❌</td><td style="text-align:center;color:'+invTCol+';font-weight:700">'+invT+'%</td><td style="text-align:center">'+v.red+' ✅ / '+v.green+' ❌</td></tr>';
+  }).join('');
+  var conselho = invGreen/normTot > normGreen/normTot + 0.1
+    ? '<div style="border:1px solid var(--g);background:rgba(34,197,94,.08);border-radius:10px;padding:10px 14px;margin-top:10px">✅ <b>O contrário teria sido melhor!</b> Com excesso de confirmação, entrar ao contrário daria <b>'+invGreen+' greens ('+invTaxa+'%)</b> vs '+normGreen+' greens ('+normTaxa+'%) da direção normal.</div>'
+    : invGreen/normTot < normGreen/normTot - 0.1
+    ? '<div style="border:1px solid var(--v);background:rgba(239,68,68,.05);border-radius:10px;padding:10px 14px;margin-top:10px">❌ <b>O contrário seria pior.</b> A direção normal com excesso ainda deu <b>'+normGreen+' greens ('+normTaxa+'%)</b> vs '+invGreen+' greens ao contrário ('+invTaxa+'%).</div>'
+    : '<div style="border:1px solid var(--am);background:rgba(245,197,24,.07);border-radius:10px;padding:10px 14px;margin-top:10px">⚖️ <b>Resultado similar nos dois sentidos.</b> Normal: '+normGreen+' greens ('+normTaxa+'%) · Contrário: '+invGreen+' greens ('+invTaxa+'%). Excesso de confirmação não é sinal confiável em nenhum sentido.</div>';
+  return '<div class="panel" style="border-color:#f59e0b;background:linear-gradient(135deg,rgba(245,158,11,.06),var(--p1))"><h3>🔄 Relatório Contrário — excesso de confirmação no histórico</h3><p style="font-size:13px;color:var(--mu);margin:0 0 12px">Analisa as <b>'+normTot+' entradas</b> registradas com <b>excesso de confirmação</b>. "Contrário" = entrar na cor oposta ao sinal.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px"><div style="background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--mu);margin-bottom:4px">🎯 Direção normal (sinal original)</div><div style="font-size:28px;font-weight:900;color:'+normCol+'">'+normTaxa+'%</div><div style="font-size:12px;color:var(--mu)">'+normGreen+' greens · '+normRed+' reds</div></div><div style="background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--mu);margin-bottom:4px">🔄 Ao contrário (direção oposta)</div><div style="font-size:28px;font-weight:900;color:'+invCol+'">'+invTaxa+'%</div><div style="font-size:12px;color:var(--mu)">'+invGreen+' greens · '+invRed+' reds</div></div></div>'+(fontesRows?'<div class="tw" style="margin-bottom:10px"><table><tr><th>Fonte</th><th>Total</th><th>Taxa normal</th><th>Green/Red normal</th><th>Taxa contrário</th><th>Green/Red contrário</th></tr>'+fontesRows+'</table></div>':'')+conselho+'</div>';
+}
 function iaCfaPainel(){
   if(typeof cfaRows!=='function') return '';
   let rows;
@@ -8547,6 +8579,7 @@ function iaHtml(){
   ${iaSomaPainel(somaAnalise,somaGrupos)}
   ${horaHtml}
   ${iaCfaPainel()}
+  ${iaContrarioPainel(L)}
   ${(()=>{ var b=Object.keys(LIVE||{}).find(function(bk){return LIVE[bk]&&LIVE[bk].length>10;}); return b?srobContrarioHtml(b,false):''; })()}
   ${iaHistoricoHtml()}
   </div>`;
