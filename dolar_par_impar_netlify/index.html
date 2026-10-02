@@ -443,7 +443,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.32 · 02/10/2026 · botão Somente Robô: 5 slots com regras de sono/deleção';
+const VERSAO='v3.32b · 02/10/2026 · Somente Robô: apenas robôs 100% de acerto';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8746,8 +8746,7 @@ function srobScanBest(bank, topN) {
   for (const [pair, starts] of pm) for (let sk=0;sk<=3;sk++) for (const alvo of [0,1]) { const s=scEval(W,starts,alvo,sk,2); if(s.done>=5) cands.push({kind:'Dupla',pair,gat:'Dupla '+pair,skip:sk,alvo,bank,...s}); }
   for (let n=2;n<=4;n++) { const sm=scSumMap(W,n); for (const [mod,starts] of sm) for (let sk=0;sk<=3;sk++) for (const alvo of [0,1]) { const s=scEval(W,starts,alvo,sk,2); if(s.done>=5) cands.push({kind:'Soma '+n,n,mod,gat:'Σ'+n+'%10='+mod,skip:sk,alvo,bank,...s}); } }
   for (let d=0;d<=9;d++) { const starts=scDigitStarts(W,d); for (let sk=0;sk<=3;sk++) for (const alvo of [0,1]) { const s=scEval(W,starts,alvo,sk,2); if(s.done>=5) cands.push({kind:'Número',d,gat:'Nº '+d,skip:sk,alvo,bank,...s}); } }
-  cands.sort((a,b) => { const ra=(a.sg+a.g1)/(a.done||1),rb2=(b.sg+b.g1)/(b.done||1); return rb2-ra||b.done-a.done; });
-  return cands.slice(0, topN);
+  const perfeitos=cands.filter(c=>c.sg+c.g1===c.done&&c.done>=3);perfeitos.sort((a,b)=>b.done-a.done);return perfeitos.slice(0,topN);
 }
 function srobFillSlots(bank) {
   const W = LIVE[bank]; if (!W || W.length < 10) return;
