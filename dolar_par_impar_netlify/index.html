@@ -443,7 +443,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.37 · 02/10/2026 · Somente Robô temporário: 1 resultado e sai, horário fixo só da hora atual, sem dormência';
+const VERSAO='v3.38 · 03/10/2026 · Somente Robô: relatório completo (green/red, reds seguidos, hora a hora, período todo, CSV)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8829,6 +8829,7 @@ function srobW(bank) { const W = liveW(bank) || []; const n = Math.max(1000, +cf
 function srobLoad() {
   try { const d = JSON.parse(localStorage.getItem(SROB_KEY) || 'null'); if (d) { SROB_SLOTS = d.slots || []; SROB_LOG = d.log || []; } } catch (e) {}
   while (SROB_SLOTS.length < SROB_N) SROB_SLOTS.push(srobSlotVazio(SROB_SLOTS.length));
+  srobResLoad();
   SROB_SLOTS = SROB_SLOTS.slice(0, SROB_N).map((s, i) => ({ ...srobSlotVazio(i), ...s, id: i, estado: s.estado === 'dormindo' ? 'ativo' : (s.estado || 'vazio') }));
   srobSeed();
 }
@@ -8836,7 +8837,91 @@ async function srobSeed() {
   const b = srobBank(); await srobLoadTempo(b);
   if (b !== cfg.bank && !LIVE[b] && typeof DB !== 'undefined' && DB) { try { LIVE[b] = await idbTail(b, LIVE_CAP); } catch (e) {} }
 }
-function srobSave() { try { localStorage.setItem(SROB_KEY, JSON.stringify({ slots: SROB_SLOTS, log: SROB_LOG.slice(-200) })); } catch (e) {} }
+// ===== relatório completo de resultados (green/red) — guardado à parte, até 20.000 entradas =====
+let SROB_RES = [], SROB_REL_N = -1;
+function srobResLoad() {
+  try { SROB_RES = JSON.parse(localStorage.getItem('srob_res_v1') || '[]') || []; } catch (e) { SROB_RES = []; }
+  // recupera o que ainda estiver no registro de eventos antigo (só tem a hora, a data é deduzida)
+  if (!localStorage.getItem('srob_res_rec')) {
+    const now = Date.now(); let n = 0;
+    for (const l of SROB_LOG) {
+      const m = String(l.msg).match(/^(✅ GREEN (TS|G1|G2)|❌ RED) · robô (\d+) · (\d\d):(\d\d):(\d\d) · (.*)$/); if (!m) continue;
+      const d = new Date(now); d.setHours(+m[4], +m[5], +m[6], 0); if (d.getTime() > now + 60000) d.setDate(d.getDate() - 1);
+      const T = d.getTime(); if (SROB_RES.some(x => x.T === T && x.slot === +m[3])) continue;
+      SROB_RES.push({ T, slot: +m[3], nome: '(recuperado do registro)', fam: '', alvo: null, res: m[2] ? 'green' : 'red', nv: m[2] ? NIVEL.indexOf(m[2]) : -1, ds: m[7].split(' / ').map(Number), rec: 1 }); n++;
+    }
+    SROB_RES.sort((a, b) => a.T - b.T); try { localStorage.setItem('srob_res_rec', '1'); } catch (e) {}
+    if (n) srobResSave();
+  }
+}
+function srobResSave() { try { localStorage.setItem('srob_res_v1', JSON.stringify(SROB_RES.slice(-20000))); } catch (e) {} }
+function srobResAdd(x) { if (x.res !== 'green' && x.res !== 'red') return; SROB_RES.push(x); if (SROB_RES.length > 20000) SROB_RES.splice(0, SROB_RES.length - 20000); srobResSave(); }
+function srobRelPer() { return cfg.srob_relPer || 'all'; }
+function srobRelLista() {
+  const p = srobRelPer(), now = Date.now(); let ini = 0;
+  if (p === 'hoje') { const d = new Date(); d.setHours(0, 0, 0, 0); ini = d.getTime(); } else if (p !== 'all') ini = now - (+p) * 3600e3;
+  const f = cfg.srob_relFam || 'todos';
+  return SROB_RES.filter(x => x.T >= ini && (f === 'todos' || x.fam === f)).sort((a, b) => a.T - b.T);
+}
+function srobSeqs(L) {
+  const S = []; let c = null;
+  for (const x of L) { if (!c || c.res !== x.res) { c = { res: x.res, n: 0, ini: x.T, fim: x.T }; S.push(c); } c.n++; c.fim = x.T; }
+  return S;
+}
+function srobRelHtml() {
+  const L = srobRelLista(), n = L.length, g = L.filter(x => x.res === 'green').length, r = n - g;
+  const lv = [0, 1, 2].map(k => L.filter(x => x.res === 'green' && x.nv === k).length);
+  const S = srobSeqs(L), sr = S.filter(s => s.res === 'red'), sg = S.filter(s => s.res === 'green');
+  const maxR = sr.reduce((m, s) => Math.max(m, s.n), 0), maxG = sg.reduce((m, s) => Math.max(m, s.n), 0), atual = S.at(-1);
+  const dist = {}; for (const s of sr) dist[s.n] = (dist[s.n] || 0) + 1;
+  const sel = (k, def, ops) => `<select onchange="cfg.${k}=this.value;saveCfg();srobRelRefresh()">${ops.map(([v, t]) => `<option value="${v}" ${(cfg[k] || def) === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
+  const fams = [...new Set(SROB_RES.map(x => x.fam).filter(Boolean))];
+  const dh = t => { const d = new Date(t); return `${p2d(d.getDate())}/${p2d(d.getMonth() + 1)} ${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; };
+  const pc = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
+  // hora a hora (linha do tempo) com a maior sequência de red dentro de cada hora
+  const H = new Map();
+  for (const x of L) { const d = new Date(x.T); d.setMinutes(0, 0, 0); const k = d.getTime(); if (!H.has(k)) H.set(k, []); H.get(k).push(x); }
+  const horas = [...H.entries()].sort((a, b) => b[0] - a[0]).map(([k, A]) => { const gg = A.filter(x => x.res === 'green').length; const mr = srobSeqs(A).filter(s => s.res === 'red').reduce((m, s) => Math.max(m, s.n), 0); return { k, n: A.length, g: gg, r: A.length - gg, mr, ts: A.filter(x => x.res === 'green' && x.nv === 0).length }; });
+  // por hora do dia (somando todos os dias)
+  const HD = [...Array(24)].map(() => ({ n: 0, g: 0 })); for (const x of L) { const hh = new Date(x.T).getHours(); HD[hh].n++; if (x.res === 'green') HD[hh].g++; }
+  const porFam = {}; for (const x of L) { const k = x.fam || '—'; porFam[k] = porFam[k] || { n: 0, g: 0 }; porFam[k].n++; if (x.res === 'green') porFam[k].g++; }
+  return `<div class="panel" style="margin-top:12px;border-color:#8b5cf6"><h3>📊 Relatório completo do Somente Robô</h3>
+    <div class="ctl"><label>Período ${sel('srob_relPer', 'all', [['hoje', 'hoje'], ['6', 'últimas 6h'], ['24', 'últimas 24h'], ['72', '3 dias'], ['168', '7 dias'], ['all', 'período completo']])}</label>
+      <label>Tipo ${sel('srob_relFam', 'todos', [['todos', 'todos'], ...fams.map(f => [f, f])])}</label>
+      <button onclick="srobRelCSV()">⬇ exportar CSV</button>
+      <button onclick="if(confirm('Apagar o relatório de resultados do Somente Robô?')){SROB_RES=[];srobResSave();srobRelRefresh()}">🧹 limpar</button></div>
+    ${n ? `<div class="nota" style="margin:0 0 6px">De ${dh(L[0].T)} até ${dh(L.at(-1).T)}${L.some(x => x.rec) ? ' · inclui entradas recuperadas do registro antigo' : ''}</div>
+    <div class="cards">
+      ${card('Entradas', num(n), `${num(g)} green · ${num(r)} red`)}
+      ${card('Assertividade', pc(g, n), `TS ${lv[0]} · G1 ${lv[1]} · G2 ${lv[2]}`)}
+      ${card('Reds seguidos (máx.)', `<span class="ruim">${maxR}</span>`, maxR ? `${dist[maxR]}× · ${sr.filter(s => s.n === maxR).map(s => dh(s.ini)).slice(-2).join(' · ')}` : 'nenhum red')}
+      ${card('Greens seguidos (máx.)', `<span class="ok">${maxG}</span>`, `${sg.length} sequências de green`)}
+      ${card('Agora', atual ? (atual.res === 'green' ? `<span class="ok">${atual.n} green</span>` : `<span class="ruim">${atual.n} red</span>`) : '—', 'seguidos')}
+    </div>
+    <div class="nota">Reds seguidos — quantas vezes: ${Object.keys(dist).sort((a, b) => a - b).map(k => `<b>${k} red${k > 1 ? 's' : ''}</b>: ${dist[k]}×`).join(' · ') || 'nenhum'}</div>
+    ${sr.filter(s => s.n >= 2).length ? `<div class="nota">Sequências de 2+ reds: ${sr.filter(s => s.n >= 2).slice(-15).reverse().map(s => `${dh(s.ini)}${s.n > 1 ? ' → ' + dh(s.fim).slice(6) : ''} <b class="ruim">${s.n}×</b>`).join(' · ')}</div>` : ''}
+    <div class="grid2" style="margin-top:8px">
+      <div><b style="font-size:12px">⏰ Hora a hora</b><div class="tw" style="max-height:300px"><table><tr><th>Hora</th><th>Entradas</th><th>Green</th><th>TS</th><th>Red</th><th>%</th><th>Reds seguidos</th></tr>
+        ${horas.map(x => `<tr><td>${dh(x.k).slice(0, 8)}h</td><td>${x.n}</td><td class="ok">${x.g}</td><td>${x.ts}</td><td class="ruim">${x.r}</td><td><b>${pc(x.g, x.n)}</b></td><td class="${x.mr >= 2 ? 'ruim' : ''}">${x.mr}</td></tr>`).join('')}</table></div></div>
+      <div><b style="font-size:12px">🕐 Por hora do dia (somando os dias)</b><div class="tw" style="max-height:300px"><table><tr><th>Hora</th><th>Entradas</th><th>Green</th><th>Red</th><th>%</th></tr>
+        ${HD.map((x, hh) => x.n ? `<tr><td>${p2d(hh)}h</td><td>${x.n}</td><td class="ok">${x.g}</td><td class="ruim">${x.n - x.g}</td><td><b>${pc(x.g, x.n)}</b></td></tr>` : '').join('')}</table></div>
+        <b style="font-size:12px;display:block;margin-top:8px">Por tipo de robô</b><div class="tw"><table><tr><th>Tipo</th><th>Entradas</th><th>%</th></tr>
+        ${Object.entries(porFam).sort((a, b) => b[1].n - a[1].n).map(([k, v]) => `<tr><td>${k}</td><td>${v.n}</td><td><b>${pc(v.g, v.n)}</b></td></tr>`).join('')}</table></div></div>
+    </div>
+    <b style="font-size:12px;display:block;margin-top:8px">📋 Todas as entradas (mais nova em cima)</b>
+    <div class="tw" style="max-height:360px"><table><tr><th>Entrada</th><th>Robô</th><th>Tipo</th><th>Alvo</th><th>Dígitos</th><th>Resultado</th></tr>
+      ${L.slice().reverse().slice(0, 1000).map(x => `<tr><td>${dh(x.T)}</td><td style="text-align:left;font-size:11px">${x.slot} · ${x.nome}</td><td>${x.fam || '—'}</td><td>${x.alvo == null ? '—' : tagc(x.alvo)}</td><td>${(x.ds || []).join(' / ')}</td><td class="${x.res === 'green' ? 'ok' : 'ruim'}"><b>${x.res === 'green' ? '✅ ' + NIVEL[x.nv] : '❌ RED'}</b></td></tr>`).join('')}</table></div>
+    ${n > 1000 ? '<div class="nota">Mostrando as 1.000 mais novas — o CSV traz todas.</div>' : ''}`
+    : '<div class="nota">Nenhuma entrada fechada neste período ainda. Cada green/red do Somente Robô entra aqui e fica guardado.</div>'}
+  </div>`;
+}
+function srobRelRefresh() { const e = $('#srobRel'); if (e) e.innerHTML = srobRelHtml(); SROB_REL_N = SROB_RES.length; }
+function srobRelCSV() {
+  const L = srobRelLista(), lin = [['data', 'hora', 'robo', 'padrao', 'tipo', 'alvo', 'digitos', 'resultado', 'nivel']];
+  for (const x of L) { const d = new Date(x.T); lin.push([d.toLocaleDateString('pt-BR'), d.toLocaleTimeString('pt-BR'), x.slot, '"' + String(x.nome).replace(/"/g, "'") + '"', x.fam, x.alvo == null ? '' : x.alvo ? 'IMPAR' : 'PAR', (x.ds || []).join('/'), x.res, x.res === 'green' ? NIVEL[x.nv] : '']); }
+  baixar(`somente_robo_${new Date().toISOString().slice(0, 10)}.csv`, '﻿' + lin.map(l => l.join(';')).join('\n'), 'text/csv');
+}
+function srobSave() { try { localStorage.setItem(SROB_KEY, JSON.stringify({ slots: SROB_SLOTS, log: SROB_LOG.slice(-1000) })); } catch (e) {} }
 function srobBtn() {
   const el = $('#srobBtn'); if (!el) return;
   const n = SROB_SLOTS.filter(s => s.estado === 'ativo' || s.estado === 'dormindo').length;
@@ -8846,7 +8931,7 @@ function srobBtn() {
 }
 function srobLog(msg, tipo) {
   SROB_LOG.push({ ts: new Date().toLocaleTimeString('pt-BR'), msg, tipo });
-  if (SROB_LOG.length > 300) SROB_LOG.splice(0, SROB_LOG.length - 200);
+  if (SROB_LOG.length > 1200) SROB_LOG.splice(0, SROB_LOG.length - 1000);
 }
 
 function srobContrarioHtml(bank, compact) {
@@ -9151,6 +9236,7 @@ function srobResolvePending() {
     const s = SROB_SLOTS.find(x => x.uid === g.uid);
     if (res === 'sem dado') { srobLog(`… Robô ${g.slot + 1}: sem dado para conferir ${hmsOf(g.entryT / 1000)}`, 'evt'); continue; }
     if (!g.dorm) srobLog(`${res === 'green' ? '✅ GREEN ' + NIVEL[hit] : '❌ RED'} · robô ${g.slot + 1} · ${hmsOf(g.entryT / 1000)} · ${g.res.join(' / ')}`, res === 'green' ? 'g' : 'r');
+    if (!g.dorm) srobResAdd({ T: g.entryT, slot: g.slot + 1, nome: g.nome, fam: s && s.rb ? srobFam(s.rb) : '', alvo: g.alvo, res, nv: hit, nivel: g.nivel, ds: g.res.slice(), bank: g.bank });
     if (s) srobProcessResult(s.id, res);
   }
   SROB_SIG = SROB_SIG.filter(g => !g.done || Date.now() - g.fimT < 20000);
@@ -9192,7 +9278,9 @@ function srobRender() {
       <button class="pri" onclick="srobRevalidar();srobRender()">🔎 Varrer de novo e completar</button></div>
     <div class="nota" style="margin:0 0 6px">${srobAcasoTxt()}</div>
     <div class="nota" style="margin:0 0 8px">Até 10 robôs, misturando os tipos: horas pagantes (mesmo minuto:segundo toda hora), horário fixo (mesmo horário todo dia), somas, duplas, trios, números, sequências e padrões de cor. Horários usam o banco inteiro; os outros só entram se <b>nunca deram red</b> (${NIVEL[srobNivel()] === 'TS' ? 'tiro seco' : 'até ' + NIVEL[srobNivel()]}) nos 70% mais antigos <b>e</b> repetiu 100% nos 30% mais novos. Robôs temporários: deu 1 resultado (green ou red), o robô sai e entra outro 100% no lugar. Horário fixo só entra se for da próxima hora. 100% no passado não garante o próximo.</div>
-    <div id="srobLive">${srobLiveHtml()}</div></div>`;
+    <div id="srobLive">${srobLiveHtml()}</div>
+    <div id="srobRel">${srobRelHtml()}</div></div>`;
+  SROB_REL_N = SROB_RES.length;
 }
 function srobLiveHtml() {
   const bank = srobBank(), W = liveW(bank) || [], sc = SROB_SCAN;
@@ -9217,10 +9305,10 @@ function srobLiveHtml() {
   const fila = sc && sc.lista ? sc.lista.filter(x => !SROB_SLOTS.some(s => s.rb && (s.estado === 'ativo' || s.estado === 'dormindo') && srobChave(s.rb) === srobChave(x))).slice(0, 10) : [];
   if (fila.length) h += `<details style="margin-top:8px"><summary class="mu" style="cursor:pointer">Próximos 100% na fila (${fila.length})</summary>
     <div class="tw" style="max-height:200px"><table><tr><th>Padrão</th><th>Casos</th><th>Tiro seco</th></tr>${fila.map(x => `<tr><td style="text-align:left">${srobNome(x)}</td><td>${x.tot}</td><td>${pct(x.ts, x.tot)}</td></tr>`).join('')}</table></div></details>`;
-  h += `<div class="srob-log-box"><div class="mu" style="font-size:12px;font-weight:700;margin-bottom:6px">Relatório</div>`;
-  const lg = SROB_LOG.slice(-40).reverse();
+  h += `<div class="srob-log-box"><div class="mu" style="font-size:12px;font-weight:700;margin-bottom:6px">Eventos (últimos 300)</div><div style="max-height:260px;overflow:auto">`;
+  const lg = SROB_LOG.slice(-300).reverse();
   h += lg.length ? lg.map(l => `<div class="srob-log-line srob-log-${l.tipo === 'g' ? 'g' : l.tipo === 'r' ? 'r' : l.tipo === 'rd' ? 'rd' : 'evt'}"><span class="mu" style="margin-right:5px">${l.ts}</span>${l.msg}</div>`).join('') : '<div class="mu" style="font-size:12px">Nenhum evento ainda.</div>';
-  return h + `</div>`;
+  return h + `</div></div>`;
 }
 // quantos horários dariam 100% só por sorte, com esse mínimo (para saber se o mínimo está baixo demais)
 function srobAcasoTxt() {
@@ -9230,7 +9318,7 @@ function srobAcasoTxt() {
   const linha = (nome, ach, esp) => `${nome}: achou <b>${ach || 0}</b> · só por sorte daria ~<b>${esp}</b> ${esp >= Math.max(1, (ach || 0) / 2) ? '<span class="ruim">→ quase tudo pode ser sorte, suba o mínimo ou use tiro seco</span>' : '<span class="ok">→ bem acima do acaso</span>'}`;
   return `🎲 ${linha('Horas pagantes', sc.Hora, eH)}<br>🎲 ${linha('Horário fixo', sc.Dia, eD)}`;
 }
-function srobRefreshPopup() { if (!SROB_OPEN) return; const e = $('#srobLive'); if (e) e.innerHTML = srobLiveHtml(); else srobRender(); }
+function srobRefreshPopup() { if (!SROB_OPEN) return; const e = $('#srobLive'); if (e) e.innerHTML = srobLiveHtml(); else return srobRender(); if (SROB_REL_N !== SROB_RES.length) srobRelRefresh(); }
 function srobReset() {
   if (!confirm('Resetar os 10 robôs do Somente Robô?')) return;
   SROB_SLOTS = Array.from({ length: SROB_N }, (_, i) => srobSlotVazio(i)); SROB_LOG = []; SROB_SIG = [];
