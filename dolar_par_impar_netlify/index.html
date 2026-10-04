@@ -454,7 +454,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.43 · 04/10/2026 · 🔁 Interligado 2R+G: cruza só padrões vindo de 2 reds + 1 green (scanner, robôs, somente robô, horas pagantes, colunas) com popup e relatório próprios';
+const VERSAO='v3.46 · 04/10/2026 · 🔁 2R+G: relatório e histórico em PDF';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -5420,28 +5420,44 @@ setInterval(()=>{ if(IL.pop) ilPopRefresh(); },500);
 ilLoad();
 setTimeout(ilBtn,1500);
 
-// =================== 🔁 INTERLIGADO 2R+G (só padrões vindo de 2 reds + 1 green atual) ===================
+// =================== 🔁 INTERLIGADO 2R+G (padrões vindo de red: 2R+G, 1R+G, 1R, 2R) ===================
 // Cruza, nos tempos do interligado (5s/10s/20s/30s), SOMENTE fontes que estavam pagando, tomaram 2 reds seguidos e agora deram 1 green:
 //   🔬 scanner (somas, duplas, trios, números) · 🤖 robôs · 🎯 Somente Robô (2 red+green / retomada 2h) · 🕐 horas pagantes (retomada 2h) · 🧱 colunas 10
 // Quando ≥ N fontes apontam a MESMA cor para o MESMO segundo, abre a entrada no popup próprio (ciano). Relatório separado.
 let IL2 = { bk: {}, hp: {}, col: {}, abertas: [], log: [], agenda: [], open: false, k: '', scanT: 0, calcT: 0 };
 const IL2_COR = '#06b6d4';
+// modos: quantos reds no fim e se depois veio 1 green (cauda = resultados mais recentes, 0 = red, 1 = green)
+const IL2_MODOS = { RRG: { k: 2, g: 1, tag: '🔴🔴🟢', txt: '2 reds + 1 green' }, RG: { k: 1, g: 1, tag: '🔴🟢', txt: '1 red + 1 green' }, R: { k: 1, g: 0, tag: '🔴', txt: '1 red atual (sem green)' }, RR: { k: 2, g: 0, tag: '🔴🔴', txt: '2 reds atuais (sem green)' } };
+function il2Modos() { const o = cfg.il2_modos || { RRG: 1 }; return Object.keys(IL2_MODOS).filter(k => o[k]); }
+function il2Cauda(m) { const M = IL2_MODOS[m]; return '0'.repeat(M.k) + (M.g ? '1' : ''); }
+// qual modo ligado bate com (total de reds, últimos resultados)
+function il2ModoDe(red, tail) { for (const m of il2Modos()) { const c = il2Cauda(m); if (red === IL2_MODOS[m].k && tail.slice(-c.length) === c) return m; } return null; }
+// sequência de horas/colunas: pagava ≥ min, depois k reds, depois (se g) 1 green — r = array de 0/1
+function il2SeqModo(r, min) {
+  for (const m of il2Modos()) { const M = IL2_MODOS[m], c = il2Cauda(m), n = r.length; if (n < c.length + min) continue;
+    if (r.slice(-c.length).join('') !== c) continue;
+    let run = 0; for (let i = n - c.length - 1; i >= 0 && r[i] === 1; i--) run++;
+    if (run >= min) return { m, run }; }
+  return null;
+}
 function il2On() { return !!cfg.il2_on; }
 function il2Nivel() { return Math.max(0, Math.min(2, +(cfg.il2_nivel ?? 0))); }
 function il2Gale() { return Math.max(0, Math.min(2, +(cfg.il2_gale ?? 1))); }
 function il2MinF() { return Math.max(1, +(cfg.il2_minF ?? 2)); }
+function il2Slim(x) { return { s: x.s, tipo: x.tipo, txt: x.txt, casos: x.casos, md: x.md }; }
 function il2Load() { try { IL2.log = JSON.parse(localStorage.getItem('dpi_il2_log') || '[]') || []; } catch (e) { IL2.log = []; } }
 function il2Save() { try { localStorage.setItem('dpi_il2_log', JSON.stringify(IL2.log.slice(-5000))); } catch (e) {} }
 const IL2_TIPO = { sc: '🔬 scanner', rb: '🤖 robô', sr: '🎯 somente robô', hp: '🕐 horas pagantes', col: '🧱 colunas 10' };
 // 🔬 padrões do scanner com exatamente 2 reds, que são os 2 penúltimos resultados, e o último é green
 function il2Lista(s, W) {
   const B = IL2.bk[s] || (IL2.bk[s] = {});
-  const key = [il2Nivel(), ilMinCasos(), cfg.il_pulo, cfg.il_n, curSym()].join('|');
+  const key = [il2Nivel(), ilMinCasos(), cfg.il_pulo, cfg.il_n, curSym(), il2Modos().join(',')].join('|');
   if (B.lista && B.key === key && Date.now() - B.t < 180000) return B.lista;
   if (B.lista && Date.now() - IL2.calcT < 2000) return B.lista;
   const nivel = il2Nivel(), min = ilMinCasos(), pulo = Math.max(0, Math.min(40, +(cfg.il_pulo ?? 15))), C = {};
   let all = []; for (const f of ['somas', 'duplas', 'trios', 'numeros']) all = all.concat(scScanFamily(W, f, pulo, nivel, min, 0));
-  B.lista = all.filter(x => x.red === 2 && x.done >= min && srobUltimos(W, scStartsOf(W, x, C), x.alvo, x.skip, nivel, 3).join('') === '001')
+  B.lista = all.filter(x => x.red >= 1 && x.red <= 2 && x.done >= min)
+    .map(x => ({ ...x, md: il2ModoDe(x.red, srobUltimos(W, scStartsOf(W, x, C), x.alvo, x.skip, nivel, 3).join('')) })).filter(x => x.md)
     .sort((a, b) => b.done - a.done).slice(0, 300);
   B.key = key; B.t = Date.now(); IL2.calcT = Date.now();
   return B.lista;
@@ -5449,32 +5465,32 @@ function il2Lista(s, W) {
 // 🕐 horas pagantes em retomada: pagava ≥ N h, 2h sem pagar, agora 1 green
 function il2Hp(s) {
   const H = IL2.hp[s] || (IL2.hp[s] = {});
-  const key = [il2Nivel(), cfg.il2_hpMin, curSym()].join('|');
+  const key = [il2Nivel(), cfg.il2_hpMin, curSym(), il2Modos().join(',')].join('|');
   if (H.rows && H.key === key && Date.now() - H.t < 600000) return H.rows;
   H.key = key; H.t = Date.now(); H.rows = [];
   try {
     const W = liveW(d5BankName(s)) || []; if (W.length < 500) return H.rows;
     const G = gridBuild(W, s); if (!G) return H.rows;
     const lv = il2Nivel(), min = Math.max(2, +(cfg.il2_hpMin ?? 6));
-    H.rows = hpScan(G, 'all').map(r => ({ off: r.off, alvo: r.alvo, run: hpRetomada(r.L[lv], 2, min) })).filter(r => r.run);
+    H.rows = hpScan(G, 'all').map(r => { const q = il2SeqModo(r.L[lv].hist.map(z => z.r), min); return q ? { off: r.off, alvo: r.alvo, run: q.run, md: q.m } : null; }).filter(Boolean);
   } catch (e) { console.warn('2R+G horas', e); }
   return H.rows;
 }
 // 🧱 colunas 10: a coluna repetia a cor X ≥ N vezes, depois 2× a outra cor, e agora voltou X → aponta X no próximo
 function il2Col(s) {
   const H = IL2.col[s] || (IL2.col[s] = {});
-  const W = liveW(d5BankName(s)) || []; const k = (W.at(-1)?.t || 0) + '|' + cfg.il2_colMin;
+  const W = liveW(d5BankName(s)) || []; const k = (W.at(-1)?.t || 0) + '|' + cfg.il2_colMin + '|' + il2Modos().join(',');
   if (H.k === k) return H.rows; H.k = k; H.rows = [];
   const G = W.length >= 500 ? gridBuild(W.slice(-6000), s) : null; if (!G) return H.rows;
   const min = Math.max(2, +(cfg.il2_colMin ?? 3)), gpm = 60 / s;
   for (let c = 0; c < 10; c++) for (let j = 0; j < gpm; j++) {
     let m = G.T0; while (new Date(m * 1000).getMinutes() % 10 !== c) m += 60;
     const A = []; for (; m + j * s <= G.last; m += 600) { const T = m + j * s, v = gAt(G, T); if (v >= 0) A.push({ T, v }); }
-    const n = A.length; if (n < min + 3) continue;
-    const X = A[n - 1].v; if (A[n - 2].v === X || A[n - 3].v === X) continue;
-    let ok = true; for (let i = n - 3; i < n; i++) if (A[i].T - A[i - 1].T !== 600) ok = false; if (!ok) continue;
-    let run = 0; for (let i = n - 4; i >= 0 && A[i].v === X && A[i + 1].T - A[i].T === 600; i--) run++;
-    if (run >= min) H.rows.push({ c, j, alvo: X, run, next: A[n - 1].T + 600 });
+    const n = A.length; if (n < min + 2) continue;
+    // a cor que vinha repetindo (antes dos reds) é a do alvo; "red" = veio a outra cor
+    let ini = n - 1; while (ini > 0 && A[ini].T - A[ini - 1].T === 600) ini--;
+    const B = A.slice(ini); if (B.length < min + 1) continue;
+    for (const X of [0, 1]) { const q = il2SeqModo(B.map(z => z.v === X ? 1 : 0), min); if (q) { H.rows.push({ c, j, alvo: X, run: q.run, md: q.m, next: A[n - 1].T + 600 }); break; } }
   }
   return H.rows;
 }
@@ -5483,22 +5499,23 @@ function il2Aponta(s) {
   const out = [], stepMs = s * 1000, C = {}, vistos = new Set(), agora = Date.now() / 1000, hz = Math.max(30, +(cfg.il_horiz ?? 90));
   const add = (o, ch) => { if (vistos.has(ch)) return; vistos.add(ch); out.push(o); };
   if (+(cfg.il2_sc ?? 1)) for (const o of il2Lista(s, W)) for (const x of scLive(W, o, 0, C, stepMs)) if (x.st === 'armado')
-    add({ s, tipo: 'sc', txt: `${o.kind} ${o.gat} · pula ${o.skip}`, alvo: o.alvo, T: x.entT, casos: o.done }, `${s}|sc|${o.kind}|${o.gat}|${o.skip}|${o.alvo}|${x.entT}`);
+    add({ s, tipo: 'sc', md: o.md, txt: `${o.kind} ${o.gat} · pula ${o.skip}`, alvo: o.alvo, T: x.entT, casos: o.done }, `${s}|sc|${o.kind}|${o.gat}|${o.skip}|${o.alvo}|${x.entT}`);
   if (+(cfg.il2_rb ?? 1)) { const bank = d5BankName(s);
     for (const sig of RB_PENDING) {
       if (sig.done || sig.bank !== bank) continue;
       const rb = RBOTS.find(r => r.id === sig.rbId); if (!rb || !rb.on) continue;
       const st = rbStarts(rb, W), ev = scEval(W, st, rb.alvo, rb.skip, il2Nivel());
-      if (ev.red !== 2 || srobUltimos(W, st, rb.alvo, rb.skip, il2Nivel(), 3).join('') !== '001') continue;
-      add({ s, tipo: 'rb', txt: `🤖 ${rbName(rb)}`, alvo: sig.alvo, T: sig.entryT, casos: ev.done }, `${s}|rb|${rb.id}|${sig.entryT}`);
+      const md = il2ModoDe(ev.red, srobUltimos(W, st, rb.alvo, rb.skip, il2Nivel(), 3).join('')); if (!md) continue;
+      add({ s, tipo: 'rb', md, txt: `🤖 ${rbName(rb)}`, alvo: sig.alvo, T: sig.entryT, casos: ev.done }, `${s}|rb|${rb.id}|${sig.entryT}`);
     } }
   if (+(cfg.il2_sr ?? 1)) for (const g of SROB_SIG) {
     if (g.done || g.dorm || (bankIntervalSec(g.bank) !== s)) continue;
-    const sl = SROB_SLOTS.find(z => z.uid === g.uid); if (!sl || !sl.rb || !['RRG', 'HP2'].includes(sl.rb.rm)) continue;
-    add({ s, tipo: 'sr', txt: `🎯 ${g.nome}`, alvo: g.alvo, T: g.entryT, casos: sl.rb.tot }, `${s}|sr|${g.key}`);
+    const sl = SROB_SLOTS.find(z => z.uid === g.uid); const md = sl && sl.rb ? ({ RRG: 'RRG', HP2: 'RRG', RG: 'RG', R: 'R' })[sl.rb.rm] : null;
+    if (!md || !il2Modos().includes(md)) continue;
+    add({ s, tipo: 'sr', md, txt: `🎯 ${g.nome}`, alvo: g.alvo, T: g.entryT, casos: sl.rb.tot }, `${s}|sr|${g.key}`);
   }
-  if (+(cfg.il2_hp ?? 1)) for (const r of il2Hp(s)) { const T = hpNext(r.off); if (T - agora <= hz) add({ s, tipo: 'hp', txt: `🕐 Horas pagantes :${msOf(r.off)} · pagava ${r.run}h, 2h sem pagar, 1 green`, alvo: r.alvo, T: T * 1000, casos: r.run }, `${s}|hp|${r.off}|${r.alvo}`); }
-  if (+(cfg.il2_col ?? 1)) for (const r of il2Col(s)) if (r.next - agora <= hz && r.next > agora) add({ s, tipo: 'col', txt: `🧱 Coluna ${r.c} · J${r.j + 1}: ${r.run}× ${r.alvo ? 'ÍMPAR' : 'PAR'}, 2× contra, voltou`, alvo: r.alvo, T: r.next * 1000, casos: r.run }, `${s}|col|${r.c}|${r.j}`);
+  if (+(cfg.il2_hp ?? 1)) for (const r of il2Hp(s)) { const T = hpNext(r.off); if (T - agora <= hz) add({ s, tipo: 'hp', md: r.md, txt: `🕐 Horas pagantes :${msOf(r.off)} · pagava ${r.run}h · ${IL2_MODOS[r.md].txt}`, alvo: r.alvo, T: T * 1000, casos: r.run }, `${s}|hp|${r.off}|${r.alvo}`); }
+  if (+(cfg.il2_col ?? 1)) for (const r of il2Col(s)) if (r.next - agora <= hz && r.next > agora) add({ s, tipo: 'col', md: r.md, txt: `🧱 Coluna ${r.c} · J${r.j + 1}: vinha ${r.run}× ${r.alvo ? 'ÍMPAR' : 'PAR'} · ${IL2_MODOS[r.md].txt}`, alvo: r.alvo, T: r.next * 1000, casos: r.run }, `${s}|col|${r.c}|${r.j}`);
   return out;
 }
 function il2Coleta() {
@@ -5516,10 +5533,10 @@ function il2Scan() {
   const agora = srvNow() * 1000, lead = Math.max(1, +(cfg.il_lead ?? 3)) * 1000;
   for (const g of G) {
     const ab = IL2.abertas.find(e => e.T0 === g.T);
-    if (ab) { if (!ab.fim && ab.g === 0 && g.T - agora > 1000 && g.f[ab.alvo].length > ab.fontes.length) ab.fontes = g.f[ab.alvo].map(ilSlim); continue; }
+    if (ab) { if (!ab.fim && ab.g === 0 && g.T - agora > 1000 && g.f[ab.alvo].length > ab.fontes.length) ab.fontes = g.f[ab.alvo].map(il2Slim); continue; }
     for (const alvo of [0, 1]) {
       if (!il2Cond(g, alvo) || g.T - agora < lead) continue;
-      const E = { id: 'IL2' + g.T, T0: g.T, alvo, g: 0, tent: [], fim: false, abriu: Date.now(), fontes: g.f[alvo].map(ilSlim), contra: g.f[1 - alvo].length, gstep: (+(cfg.il2_alvo ?? ilAlvoS())) * 1000 };
+      const E = { id: 'IL2' + g.T, T0: g.T, alvo, g: 0, tent: [], fim: false, abriu: Date.now(), fontes: g.f[alvo].map(il2Slim), contra: g.f[1 - alvo].length, gstep: (+(cfg.il2_alvo ?? ilAlvoS())) * 1000 };
       IL2.abertas.push(E); IL2.abertas.sort((a, b) => a.T0 - b.T0);
       try { beep(); setTimeout(beep, 250); } catch (e) {}
       if (+(cfg.il2_pop ?? 1)) il2Abrir();
@@ -5553,16 +5570,16 @@ function il2EntradaHtml(E) {
   const Tg = (E.T0 + E.g * E.gstep) / 1000, falta = Math.ceil(Tg - srvNow());
   const tp = [...new Set(E.fontes.map(f => f.s))].sort((a, b) => a - b).map(s => `<span class="iltp il2tp">${s}s ×${E.fontes.filter(f => f.s === s).length}</span>`).join(' ');
   return `<div class="il2entrada ${E.fim ? (E.res === 'green' ? 'ok' : 'ruim') : ''}">
-    <div style="font-size:12px">${tp} · ${E.fontes.length} fonte${E.fontes.length > 1 ? 's' : ''} vindo de 2 reds + 1 green · ${E.contra ? `<span class="ruim">${E.contra} contra</span>` : 'nenhuma contra'}</div>
+    <div style="font-size:12px">${tp} · ${E.fontes.length} fonte${E.fontes.length > 1 ? 's' : ''} · ${[...new Set(E.fontes.map(f => f.md).filter(Boolean))].map(m => IL2_MODOS[m].txt).join(' / ')} · ${E.contra ? `<span class="ruim">${E.contra} contra</span>` : 'nenhuma contra'}</div>
     <div class="rbpbig">ENTRAR ${tagc(E.alvo)} às <b>${hmsOf(E.T0 / 1000)}</b></div>
     ${il2Gale() ? `<div class="mu" style="font-size:12px">${[0, 1, 2].slice(0, il2Gale() + 1).map(g => `${IL_NT[g]} ${hmsOf((E.T0 + g * E.gstep) / 1000)}`).join(' → ')}</div>` : ''}
     <div style="font-size:15px;font-weight:800;margin:6px 0">${E.fim ? (E.res === 'green' ? `<span class="ok">✅ GREEN ${IL_NT[E.g]} · ${E.tent.map(t => t.d).join(' / ')}</span>` : E.res === 'red' ? `<span class="ruim">❌ RED · ${E.tent.map(t => t.d).join(' / ')}</span>` : 'sem dado') : `${IL_NT[E.g]} ${hmsOf(Tg)} · ${falta > 0 ? 'faltam ' + falta + 's' : 'em jogo…'}`}</div>
-    <div class="nota" style="margin:0">${E.fontes.map(f => `<span class="iltp il2tp">${f.s}s</span> ${IL2_TIPO[f.tipo] || ''} · ${f.txt} <span class="mu">(${f.casos})</span>`).join('<br>')}</div></div>`;
+    <div class="nota" style="margin:0">${E.fontes.map(f => `<span class="iltp il2tp">${f.s}s</span> ${f.md ? IL2_MODOS[f.md].tag + ' ' : ''}${IL2_TIPO[f.tipo] || ''} · ${f.txt} <span class="mu">(${f.casos})</span>`).join('<br>')}</div></div>`;
 }
 function il2AgendaHtml() {
   const G = IL2.agenda.filter(g => g.f[0].length + g.f[1].length).slice(0, 12);
-  return G.length ? `<div class="tw" style="max-height:170px"><table><tr><th>Jogo</th><th>PAR</th><th>ÍMPAR</th><th>Fontes</th></tr>${G.map(g => `<tr><td>${hmsOf(g.T / 1000)}</td><td class="${g.f[0].length >= il2MinF() ? 'ok' : ''}"><b>${g.f[0].length}</b></td><td class="${g.f[1].length >= il2MinF() ? 'ok' : ''}"><b>${g.f[1].length}</b></td><td style="text-align:left;font-size:11px">${[...g.f[0], ...g.f[1]].map(f => `${f.s}s ${IL2_TIPO[f.tipo].split(' ')[0]} ${f.alvo ? 'Í' : 'P'}`).join(' · ')}</td></tr>`).join('')}</table></div>`
-    : `<div class="nota" style="margin:0">Nenhuma fonte vindo de 2 reds + 1 green apontando nos próximos ${Math.max(30, +(cfg.il_horiz ?? 90))}s.</div>`;
+  return G.length ? `<div class="tw" style="max-height:170px"><table><tr><th>Jogo</th><th>PAR</th><th>ÍMPAR</th><th>Fontes</th></tr>${G.map(g => `<tr><td>${hmsOf(g.T / 1000)}</td><td class="${g.f[0].length >= il2MinF() ? 'ok' : ''}"><b>${g.f[0].length}</b></td><td class="${g.f[1].length >= il2MinF() ? 'ok' : ''}"><b>${g.f[1].length}</b></td><td style="text-align:left;font-size:11px">${[...g.f[0], ...g.f[1]].map(f => `${f.s}s ${IL2_TIPO[f.tipo].split(' ')[0]}${f.md ? IL2_MODOS[f.md].tag : ''} ${f.alvo ? 'Í' : 'P'}`).join(' · ')}</td></tr>`).join('')}</table></div>`
+    : `<div class="nota" style="margin:0">Nenhuma fonte (${il2Modos().map(m => IL2_MODOS[m].txt).join(' / ') || 'nenhum modo marcado'}) apontando nos próximos ${Math.max(30, +(cfg.il_horiz ?? 90))}s. Veja abaixo como foi no passado.</div>`;
 }
 function il2RelHtml() {
   const per = cfg.il2_relPer || 'all', now = Date.now(); let ini = 0;
@@ -5576,17 +5593,139 @@ function il2RelHtml() {
   const tab = (tit, grupos) => `<div class="tw"><table><tr><th style="text-align:left">${tit}</th><th>Entr.</th><th>Green</th><th>Red</th><th>%</th></tr>${grupos.map(([k, A]) => { const gg = A.filter(x => x.res === 'green').length; return `<tr><td style="text-align:left">${k}</td><td>${A.length}</td><td class="ok">${gg}</td><td class="ruim">${A.length - gg}</td><td><b>${pc(gg, A.length)}</b></td></tr>`; }).join('')}</table></div>`;
   const H = ilAgrupa(L, x => { const d = new Date(x.T0); d.setMinutes(0, 0, 0); return d.getTime(); }).sort((a, b) => b[0] - a[0]);
   return `<div class="ctl"><label>Período <select onchange="cfg.il2_relPer=this.value;saveCfg();il2Render(true)">${[['hoje', 'hoje'], ['6', 'últimas 6h'], ['24', '24h'], ['72', '3 dias'], ['168', '7 dias'], ['all', 'período completo']].map(([v, t]) => `<option value="${v}" ${per === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
-    <button onclick="il2CSV()">⬇ CSV</button><button onclick="if(confirm('Apagar o relatório do 2R+G?')){IL2.log=[];il2Save();il2Render(true)}">🧹 limpar</button></div>
+    <button onclick="il2PDF('rel')">⬇ PDF</button><button onclick="if(confirm('Apagar o relatório do 2R+G?')){IL2.log=[];il2Save();il2Render(true)}">🧹 limpar</button></div>
   ${n ? `<div class="cards">${card('Entradas', num(n), dh(L[0].T0) + ' →')}${card('Assertividade', pc(g, n), `${g} green · ${n - g} red`)}${card('Nível', `TS ${lv[0]}`, `G1 ${lv[1]} · G2 ${lv[2]}`)}
     ${card('Reds seguidos (máx.)', `<span class="ruim">${maxR}</span>`, Object.keys(dist).map(k => `${k}× : ${dist[k]}`).join(' · ') || 'nenhum')}${card('Greens seguidos (máx.)', `<span class="ok">${maxG}</span>`, S.length ? `agora ${S.at(-1).n} ${S.at(-1).res}` : '')}</div>
     <div class="ilgrid">
       <div><h4>⏰ Hora a hora</h4><div class="tw" style="max-height:240px"><table><tr><th>Hora</th><th>Entr.</th><th>Green</th><th>Red</th><th>%</th><th>Reds seg.</th></tr>${H.map(([k, A]) => { const gg = A.filter(x => x.res === 'green').length, mr = srobSeqs(A.map(x => ({ res: x.res, T: x.T0 }))).filter(s => s.res === 'red').reduce((m, s) => Math.max(m, s.n), 0); return `<tr><td>${dh(+k).slice(0, 8)}h</td><td>${A.length}</td><td class="ok">${gg}</td><td class="ruim">${A.length - gg}</td><td><b>${pc(gg, A.length)}</b></td><td class="${mr >= 2 ? 'ruim' : ''}">${mr}</td></tr>`; }).join('')}</table></div></div>
       <div><h4>Por nº de fontes</h4>${tab('Fontes', ilAgrupa(L, x => { const k = x.fontes.length; return k >= 5 ? '5+' : String(k); }))}
         <h4>Por tipo de fonte</h4>${tab('Tipo', (() => { const M = new Map(); for (const x of L) for (const t of new Set(x.fontes.map(f => f.tipo))) { if (!M.has(t)) M.set(t, []); M.get(t).push(x); } return [...M.entries()].map(([t, A]) => [IL2_TIPO[t] || t, A]); })())}
+        <h4>Por modo</h4>${tab('Modo', (() => { const M = new Map(); for (const x of L) for (const m of new Set(x.fontes.map(f => f.md || 'RRG'))) { if (!M.has(m)) M.set(m, []); M.get(m).push(x); } return [...M.entries()].map(([m, A]) => [IL2_MODOS[m] ? IL2_MODOS[m].tag + ' ' + IL2_MODOS[m].txt : m, A]); })())}
         <h4>Por tempos</h4>${tab('Tempos', ilAgrupa(L, x => [...new Set(x.fontes.map(f => f.s))].sort((a, b) => a - b).join(' + ') + 's'))}</div>
     </div>
-    <h4>📋 Entradas (mais nova em cima)</h4><div class="tw" style="max-height:260px"><table><tr><th>Jogo</th><th>Alvo</th><th>Fontes</th><th>Dígitos</th><th>Resultado</th></tr>${L.slice().reverse().slice(0, 500).map(x => `<tr><td>${dh(x.T0)}</td><td>${tagc(x.alvo)}</td><td style="text-align:left;font-size:11px">${x.fontes.map(f => `${f.s}s ${IL2_TIPO[f.tipo].split(' ')[0]} ${f.txt}`).join('<br>')}</td><td>${x.tent.map(t => t.d).join(' / ')}</td><td class="${x.res === 'green' ? 'ok' : 'ruim'}"><b>${x.res === 'green' ? '✅ ' + IL_NT[x.nivel] : '❌ RED'}</b></td></tr>`).join('')}</table></div>`
+    <h4>📋 Entradas (mais nova em cima)</h4><div class="tw" style="max-height:260px"><table><tr><th>Jogo</th><th>Alvo</th><th>Fontes</th><th>Dígitos</th><th>Resultado</th></tr>${L.slice().reverse().slice(0, 500).map(x => `<tr><td>${dh(x.T0)}</td><td>${tagc(x.alvo)}</td><td style="text-align:left;font-size:11px">${x.fontes.map(f => `${f.s}s ${IL2_TIPO[f.tipo].split(' ')[0]}${f.md ? IL2_MODOS[f.md].tag : ''} ${f.txt}`).join('<br>')}</td><td>${x.tent.map(t => t.d).join(' / ')}</td><td class="${x.res === 'green' ? 'ok' : 'ruim'}"><b>${x.res === 'green' ? '✅ ' + IL_NT[x.nivel] : '❌ RED'}</b></td></tr>`).join('')}</table></div>`
     : '<div class="nota">Nenhuma entrada do 2R+G fechada neste período ainda.</div>'}`;
+}
+// 📜 histórico: em cada padrão do scanner (banco do jogo alvo), toda vez que o passado dele batia com o modo, o que deu a entrada seguinte
+let IL2_HIST = { k: '', R: null };
+function il2HistCalc() {
+  const s = +(cfg.il2_alvo ?? ilAlvoS()), W = ilW(s), key = [s, W.length, Math.floor(Date.now() / 600000), il2Nivel(), il2Gale(), ilMinCasos(), cfg.il_pulo].join('|');
+  if (IL2_HIST.k === key) return IL2_HIST.R;
+  const R = { s, n: W.length, M: {} }; for (const m in IL2_MODOS) R.M[m] = { n: 0, g: 0, lv: [0, 0, 0], ult: [], seqR: 0, maxR: 0 };
+  if (W.length < 500) { IL2_HIST = { k: key, R }; return R; }
+  const nivel = il2Nivel(), gale = il2Gale(), min = ilMinCasos(), pulo = Math.max(0, Math.min(40, +(cfg.il_pulo ?? 15))), C = {}, ev = [];
+  let all = []; for (const f of ['somas', 'duplas', 'trios', 'numeros']) all = all.concat(scScanFamily(W, f, pulo, nivel, min, 0));
+  for (const x of all) {
+    const st = scStartsOf(W, x, C), res = [];
+    for (const ti of st) { const base = ti + 1 + x.skip; if (base + 2 >= W.length) break;
+      let a = -1, b = -1; for (let g = 0; g <= 2; g++) if (W[base + g].p === x.alvo) { if (g <= nivel && a < 0) a = g; if (g <= gale && b < 0) b = g; break; }
+      const ds = []; for (let g = 0; g <= gale; g++) { ds.push(W[base + g].d); if (W[base + g].p === x.alvo) break; }
+      res.push({ r: a >= 0 ? 1 : 0, out: b, T: W[base].t, ti, ds }); }
+    let reds = 0;
+    for (let j = 0; j < res.length; j++) {
+      if (j >= min) for (const m in IL2_MODOS) { const M = IL2_MODOS[m], c = il2Cauda(m), L = c.length; if (reds !== M.k || j < L) continue;
+        let ok = true; for (let q = 0; q < L; q++) if (res[j - L + q].r !== +c[q]) { ok = false; break; }
+        if (ok) ev.push({ m, T: res[j].T, out: res[j].out, ds: res[j].ds, alvo: x.alvo, pad: `${x.kind} ${x.gat} · pula ${x.skip}`, fam: String(x.kind).startsWith('Soma') ? 'Soma' : x.kind,
+          gat: scGatTxt(W, x, res[j].ti), trigT: W[res[j].ti].t, antes: j, ant: res.slice(Math.max(0, j - 8), j).map(z => z.r ? 'G' : 'R').join(''), antT: res.slice(j - L, j).map(z => z.T) }); }
+      if (!res[j].r) { reds++; if (reds > 2) break; }
+    }
+  }
+  ev.sort((a, b) => a.T - b.T);
+  for (const e of ev) { const o = R.M[e.m]; o.n++; if (e.out >= 0) { o.g++; o.lv[e.out]++; o.seqR = 0; } else { o.seqR++; o.maxR = Math.max(o.maxR, o.seqR); } o.ult.push(e); if (o.ult.length > 12) o.ult.shift(); }
+  R.ev = ev;
+  IL2_HIST = { k: key, R }; return R;
+}
+function il2HistHtml() {
+  let R; try { R = il2HistCalc(); } catch (e) { return '<div class="nota">Não deu para calcular o histórico agora.</div>'; }
+  if (!R || R.n < 500) return '<div class="nota">Poucos jogos no banco para olhar o passado.</div>';
+  const pc = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
+  return `<div class="tw"><table><tr><th style="text-align:left">Modo</th><th>Vezes</th><th>Green</th><th>TS/G1/G2</th><th>Red</th><th>%</th><th>Reds seg. (máx.)</th><th style="text-align:left">Últimas (mais recente à direita)</th></tr>
+    ${Object.entries(IL2_MODOS).map(([m, M]) => { const o = R.M[m]; return `<tr style="${il2Modos().includes(m) ? '' : 'opacity:.55'}"><td style="text-align:left">${M.tag} ${M.txt}</td><td>${o.n}</td><td class="ok">${o.g}</td><td>${o.lv.slice(0, il2Gale() + 1).join('/')}</td><td class="ruim">${o.n - o.g}</td><td><b class="${o.n >= 10 ? (o.g / o.n >= 0.5 ? 'ok' : 'ruim') : ''}">${pc(o.g, o.n)}</b></td><td>${o.maxR}</td>
+      <td style="text-align:left">${o.ult.map(e => `<span class="hppill ${e.out >= 0 ? 'g' : 'v'}" title="${hmsOf(e.T / 1000)}">${hmsOf(e.T / 1000).slice(0, 5)} ${e.out >= 0 ? '✅' + IL_NT[e.out] : '❌'}</span>`).join('') || '<span class="mu">nunca</span>'}</td></tr>`; }).join('')}</table></div>
+  ${il2HistListaHtml(R)}
+  <div class="nota" style="margin:4px 0 0">Banco de ${R.s}s · ${num(R.n)} jogos · padrões do scanner (somas, duplas, trios, números) com ≥ ${ilMinCasos()} casos, 100% em ${IL_NT[il2Nivel()]} antes da falha · entrada conferida ${il2Gale() ? 'até ' + IL_NT[il2Gale()] : 'no tiro seco'}. É cada padrão sozinho (sem cruzar fontes) — serve para saber se o modo costuma pagar.</div>`;
+}
+function il2DHS(t) { const d = new Date(t); return `${p2d(d.getDate())}/${p2d(d.getMonth() + 1)}/${d.getFullYear()} ${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
+function il2HistFiltro(R) { const fm = cfg.il2_hFm || 'todos', fr = cfg.il2_hFr || 'todos', ff = cfg.il2_hFf || 'todos';
+  return (R.ev || []).filter(e => (fm === 'todos' || e.m === fm) && (fr === 'todos' || (fr === 'g' ? e.out >= 0 : e.out < 0)) && (ff === 'todos' || e.fam === ff)); }
+function il2HistListaHtml(R) {
+  const L = il2HistFiltro(R).slice().reverse(), g = L.filter(e => e.out >= 0).length;
+  const sel = (k, ops) => `<select onchange="cfg.${k}=this.value;saveCfg();$('#il2Hist').innerHTML=il2HistHtml()">${ops.map(([v, t]) => `<option value="${v}" ${(cfg[k] || 'todos') === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
+  return `<details ${cfg.il2_hAberto ? 'open' : ''} ontoggle="cfg.il2_hAberto=this.open?1:0;saveCfg()" style="margin-top:8px"><summary style="cursor:pointer;color:#67e8f9;font-weight:700">📋 Histórico completo — ${num((R.ev || []).length)} ocorrências (clique para abrir)</summary>
+    <div class="ctl" style="margin-top:6px"><label>Modo ${sel('il2_hFm', [['todos', 'todos'], ...Object.entries(IL2_MODOS).map(([m, M]) => [m, M.tag + ' ' + M.txt])])}</label>
+      <label>Resultado ${sel('il2_hFr', [['todos', 'todos'], ['g', 'só green'], ['r', 'só red']])}</label>
+      <label>Tipo ${sel('il2_hFf', [['todos', 'todos'], ['Soma', 'somas'], ['Dupla', 'duplas'], ['Trio', 'trios'], ['Número', 'números']])}</label>
+      <button onclick="il2PDF('hist')">⬇ baixar histórico completo (PDF)</button>
+      <span class="mu" style="font-size:12px">${num(L.length)} no filtro · ${g} green · ${L.length - g} red · ${L.length ? (100 * g / L.length).toFixed(1) + '%' : '—'}</span></div>
+    <div class="tw" style="max-height:380px"><table><tr><th>Entrada (data hora:seg)</th><th>Modo</th><th style="text-align:left">Padrão</th><th>Gatilho</th><th>Gatilho saiu</th><th>Alvo</th><th>Antes (últimas 8)</th><th>Dígitos</th><th>Resultado</th></tr>
+    ${L.slice(0, 2000).map(e => `<tr><td><b>${il2DHS(e.T)}</b></td><td>${IL2_MODOS[e.m].tag}</td><td style="text-align:left;font-size:11px">${e.pad}</td><td>${e.gat}</td><td class="mu">${il2DHS(e.trigT).slice(11)}</td><td>${tagc(e.alvo)}</td>
+      <td style="letter-spacing:1px;font-family:monospace">${[...e.ant].map(c => `<span class="${c === 'G' ? 'ok' : 'ruim'}">${c === 'G' ? '✅' : '❌'}</span>`).join('')}</td>
+      <td>${e.ds.map((d, i) => `<span class="b ${d % 2 ? 'v' : 'g'}" title="${IL_NT[i]} ${il2DHS(e.T + i * R.s * 1000).slice(11)}">${d}</span>`).join(' ')}</td>
+      <td class="${e.out >= 0 ? 'ok' : 'ruim'}"><b>${e.out >= 0 ? '✅ ' + IL_NT[e.out] : '❌ RED'}</b></td></tr>`).join('')}</table></div>
+    ${L.length > 2000 ? '<div class="nota">Mostrando as 2.000 mais novas na tela — o CSV traz todas.</div>' : ''}</details>`;
+}
+function il2HistCSV() {
+  const R = IL2_HIST.R || il2HistCalc(), L = il2HistFiltro(R), s = R.s;
+  const lin = [['data', 'hora_entrada', 'segundo', 'modo', 'tipo', 'padrao', 'gatilho', 'hora_gatilho', 'alvo', 'entradas_antes_do_padrao', 'ultimas_8_antes', 'horarios_do_modo_(reds_e_green)', 'TS_hora', 'TS_digito', 'G1_hora', 'G1_digito', 'G2_hora', 'G2_digito', 'resultado', 'nivel', 'banco']];
+  for (const e of L) { const dh = il2DHS(e.T), ts = [0, 1, 2].map(i => e.ds[i] != null ? [il2DHS(e.T + i * s * 1000).slice(11), e.ds[i]] : ['', '']).flat();
+    lin.push([dh.slice(0, 10), dh.slice(11), new Date(e.T).getSeconds(), IL2_MODOS[e.m].txt, e.fam, '"' + e.pad + '"', e.gat, il2DHS(e.trigT).slice(11), e.alvo ? 'IMPAR' : 'PAR', e.antes, e.ant, (e.antT || []).map(t => il2DHS(t).slice(11)).join(' '), ...ts, e.out >= 0 ? 'green' : 'red', e.out >= 0 ? IL_NT[e.out] : '', `DERIV ${s}s`]); }
+  baixar(`historico_2r_g_${s}s_${new Date().toISOString().slice(0, 10)}.csv`, '﻿' + lin.map(l => l.join(';')).join('\n'), 'text/csv');
+}
+// ⬇ PDF: abre uma página de impressão (fundo branco) e chama "Salvar como PDF"
+function il2PDF(qual) {
+  const pc = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—', cor = r => r ? '<b style="color:#b91c1c">ÍMPAR</b>' : '<b style="color:#15803d">PAR</b>';
+  const tb = (cab, linhas) => `<table><tr>${cab.map(c => `<th>${c}</th>`).join('')}</tr>${linhas.map(l => `<tr>${l.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</table>`;
+  const res = (ok, nv) => ok ? `<span class="g">✅ GREEN ${IL_NT[nv]}</span>` : '<span class="r">❌ RED</span>';
+  let corpo = '', titulo = '';
+  if (qual === 'hist') {
+    const R = IL2_HIST.R || il2HistCalc(), L = il2HistFiltro(R), s = R.s;
+    titulo = `Histórico 2R+G — ${s}s`;
+    const acaso = [50, 75, 87.5][il2Gale()];
+    corpo = `<h2>Resumo por modo</h2><div class="sub">Banco DERIV ${s}s · ${num(R.n)} jogos · padrões do scanner com ≥ ${ilMinCasos()} casos, 100% em ${IL_NT[il2Nivel()]} antes da falha · entrada ${il2Gale() ? 'até ' + IL_NT[il2Gale()] : 'tiro seco'} (o acaso daria ${acaso}%)</div>
+      ${tb(['Modo', 'Vezes', 'Green', 'TS/G1/G2', 'Red', '%', 'Reds seguidos (máx.)'], Object.entries(IL2_MODOS).map(([m, M]) => { const o = R.M[m]; return [M.txt, o.n, o.g, o.lv.slice(0, il2Gale() + 1).join('/'), o.n - o.g, `<b>${pc(o.g, o.n)}</b>`, o.maxR]; }))}
+      <h2>Todas as ocorrências (${num(L.length)}) — mais nova primeiro</h2>
+      <div class="sub">Filtro: modo ${cfg.il2_hFm || 'todos'} · resultado ${cfg.il2_hFr || 'todos'} · tipo ${cfg.il2_hFf || 'todos'} · ${L.filter(e => e.out >= 0).length} green · ${L.filter(e => e.out < 0).length} red</div>
+      ${tb(['Entrada', 'Modo', 'Padrão', 'Gatilho', 'Gatilho saiu', 'Alvo', 'Últimas 8 antes', 'TS', 'G1', 'G2', 'Resultado'], L.slice().reverse().map(e => [il2DHS(e.T), IL2_MODOS[e.m].txt, e.pad, e.gat, il2DHS(e.trigT).slice(11), cor(e.alvo), [...e.ant].map(c => c === 'G' ? '✅' : '❌').join(''),
+        ...[0, 1, 2].map(i => e.ds[i] != null ? `${il2DHS(e.T + i * s * 1000).slice(11)} · <b>${e.ds[i]}</b>` : ''), res(e.out >= 0, e.out)]))}`;
+  } else {
+    const per = cfg.il2_relPer || 'all'; let ini = 0;
+    if (per === 'hoje') { const d = new Date(); d.setHours(0, 0, 0, 0); ini = d.getTime(); } else if (per !== 'all') ini = Date.now() - (+per) * 3600e3;
+    const L = IL2.log.filter(x => x.T0 >= ini), n = L.length, g = L.filter(x => x.res === 'green').length;
+    const S = srobSeqs(L.map(x => ({ res: x.res, T: x.T0 }))), maxR = S.filter(q => q.res === 'red').reduce((m, q) => Math.max(m, q.n), 0);
+    titulo = 'Relatório Interligado 2R+G';
+    const grupo = (fn) => { const M = new Map(); for (const x of L) for (const k of fn(x)) { if (!M.has(k)) M.set(k, []); M.get(k).push(x); } return [...M.entries()].map(([k, A]) => { const gg = A.filter(x => x.res === 'green').length; return [k, A.length, gg, A.length - gg, `<b>${pc(gg, A.length)}</b>`]; }); };
+    const H = ilAgrupa(L, x => { const d = new Date(x.T0); d.setMinutes(0, 0, 0); return d.getTime(); }).sort((a, b) => b[0] - a[0]);
+    corpo = `<h2>Resumo</h2><div class="sub">Período: ${per === 'all' ? 'completo' : per === 'hoje' ? 'hoje' : 'últimas ' + per + 'h'}${n ? ` · de ${il2DHS(L[0].T0)} até ${il2DHS(L.at(-1).T0)}` : ''}</div>
+      ${tb(['Entradas', 'Green', 'Red', 'Assertividade', 'TS / G1 / G2', 'Maior seq. de red'], [[n, g, n - g, `<b>${pc(g, n)}</b>`, [0, 1, 2].map(k => L.filter(x => x.nivel === k).length).join(' / '), maxR]])}
+      <h2>Por modo</h2>${tb(['Modo', 'Entradas', 'Green', 'Red', '%'], grupo(x => new Set(x.fontes.map(f => IL2_MODOS[f.md || 'RRG'].txt))))}
+      <h2>Por tipo de fonte</h2>${tb(['Tipo', 'Entradas', 'Green', 'Red', '%'], grupo(x => new Set(x.fontes.map(f => (IL2_TIPO[f.tipo] || f.tipo).replace(/^\S+ /, '')))))}
+      <h2>Por nº de fontes</h2>${tb(['Fontes', 'Entradas', 'Green', 'Red', '%'], grupo(x => [String(x.fontes.length)]))}
+      <h2>Hora a hora</h2>${tb(['Hora', 'Entradas', 'Green', 'Red', '%'], H.map(([k, A]) => { const gg = A.filter(x => x.res === 'green').length; return [il2DHS(+k).slice(0, 13) + 'h', A.length, gg, A.length - gg, `<b>${pc(gg, A.length)}</b>`]; }))}
+      <h2>Todas as entradas — mais nova primeiro</h2>
+      ${tb(['Jogo', 'Alvo', 'Fontes', 'Tentativas (hora · dígito)', 'Resultado'], L.slice().reverse().map(x => [il2DHS(x.T0), cor(x.alvo), x.fontes.map(f => `${f.s}s · ${f.md ? IL2_MODOS[f.md].txt + ' · ' : ''}${(IL2_TIPO[f.tipo] || '').replace(/^\S+ /, '')} · ${f.txt}`).join('<br>'),
+        x.tent.map(t => `${IL_NT[t.g]} ${il2DHS(t.T).slice(11)} · <b>${t.d}</b>`).join('<br>'), res(x.res === 'green', x.nivel)]))}`;
+  }
+  const w = window.open('', '_blank', 'width=1000,height=760');
+  if (!w || w.closed) { alert('⚠ Pop-up bloqueado!\n\nLibere pop-ups para este site no navegador e tente de novo.'); return; }
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${titulo} ${new Date().toISOString().slice(0, 10)}</title><style>
+    body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;padding:10px;font-size:11px}
+    h1{font-size:18px;margin:0 0 2px;color:#0e7490;border-bottom:3px solid #06b6d4;padding-bottom:4px}
+    h2{font-size:13px;margin:14px 0 4px;color:#0e7490}
+    .sub{color:#555;font-size:10.5px;margin-bottom:5px}
+    table{border-collapse:collapse;width:100%;margin-bottom:6px;page-break-inside:auto}
+    tr{page-break-inside:avoid}
+    th{background:#cffafe;color:#164e63;font-size:10px;text-align:left;padding:3px 5px;border:1px solid #a5f3fc}
+    td{padding:3px 5px;border:1px solid #e5e7eb;font-size:10px;vertical-align:top}
+    tr:nth-child(even) td{background:#f8fafc}
+    .g{color:#15803d;font-weight:700}.r{color:#b91c1c;font-weight:700}
+    @page{size:A4 landscape;margin:10mm}
+  </style></head><body>
+    <h1>🔁 ${titulo} — Dólar Par/Ímpar</h1>
+    <div class="sub">Gerado em ${new Date().toLocaleString('pt-BR')} · ${VERSAO}</div>
+    ${corpo}
+    <script>setTimeout(()=>{window.print();},700);<\/script>
+  </body></html>`);
+  w.document.close();
 }
 function il2CSV() {
   const lin = [['data', 'hora', 'alvo', 'fontes', 'tipos', 'tempos', 'digitos', 'resultado', 'nivel']];
@@ -5597,7 +5736,7 @@ function il2Render(full) {
   il2Btn();
   const p = $('#il2Pop'); if (!p || !IL2.open) return;
   const ab = IL2.abertas.slice().sort((a, b) => (a.fim - b.fim) || a.T0 - b.T0);
-  if (!full && $('#il2Live')) { $('#il2Live').innerHTML = ab.map(il2EntradaHtml).join('') || ''; $('#il2Ag').innerHTML = il2AgendaHtml(); if (IL2.relN !== IL2.log.length) { IL2.relN = IL2.log.length; $('#il2Rel').innerHTML = il2RelHtml(); } return; }
+  if (!full && $('#il2Live')) { $('#il2Live').innerHTML = ab.map(il2EntradaHtml).join('') || ''; $('#il2Ag').innerHTML = il2AgendaHtml(); if (IL2.relN !== IL2.log.length) { IL2.relN = IL2.log.length; $('#il2Rel').innerHTML = il2RelHtml(); } const hk = IL2_HIST.k; il2HistCalc(); if (hk !== IL2_HIST.k && $('#il2Hist')) $('#il2Hist').innerHTML = il2HistHtml(); return; }
   const chk = (k, t) => `<label><input type="checkbox" ${+(cfg[k] ?? 1) ? 'checked' : ''} onchange="il2Set('${k}',this.checked?1:0)"> ${t}</label>`;
   const op = (k, def, L) => `<select onchange="il2Set('${k}',+this.value)">${L.map(([v, t]) => `<option value="${v}" ${+(cfg[k] ?? def) === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
   IL2.relN = IL2.log.length;
@@ -5605,6 +5744,7 @@ function il2Render(full) {
     <div class="il2pt">🔁 INTERLIGADO 2R+G <span style="font-weight:400;font-size:12px">só padrões vindo de 2 reds + 1 green atual</span>
       <span style="margin-left:auto;display:flex;gap:6px">${il2On() ? `<button class="ruimbtn" onclick="il2Set('il2_on',0)">⏸ desligar</button>` : `<button class="okbtn" onclick="il2Set('il2_on',1)">▶ ligar</button>`}<button onclick="il2Fechar()">✕</button></span></div>
     <div id="il2Live">${ab.map(il2EntradaHtml).join('')}</div>
+    <div class="ctl" style="border:1px solid rgba(6,182,212,.5);border-radius:10px;padding:6px 8px"><b style="font-size:12px;color:#67e8f9">Modos:</b> ${Object.entries(IL2_MODOS).map(([k, M]) => `<label><input type="checkbox" ${il2Modos().includes(k) ? 'checked' : ''} onchange="cfg.il2_modos={...(cfg.il2_modos||{RRG:1}),'${k}':this.checked?1:0};il2Set('il2_modos',cfg.il2_modos)"> ${M.tag} ${M.txt}</label>`).join('')}</div>
     <div class="ctl">${chk('il2_sc', '🔬 scanner')}${chk('il2_rb', '🤖 robôs')}${chk('il2_sr', '🎯 somente robô')}${chk('il2_hp', '🕐 horas pagantes')}${chk('il2_col', '🧱 colunas 10')}</div>
     <div class="ctl"><label>Padrão 100% em ${op('il2_nivel', 0, [[0, 'tiro seco'], [1, 'até G1'], [2, 'até G2']])}</label>
       <label>Entrada ${op('il2_gale', 1, [[0, 'tiro seco'], [1, 'até G1'], [2, 'até G2']])}</label>
@@ -5614,8 +5754,9 @@ function il2Render(full) {
     <div class="ctl"><label>Horas pagantes: pagava ≥ ${op('il2_hpMin', 6, [[3, '3h'], [4, '4h'], [6, '6h'], [8, '8h'], [10, '10h'], [12, '12h']])}</label>
       <label>Colunas: vinha ≥ ${op('il2_colMin', 3, [[2, '2×'], [3, '3×'], [4, '4×'], [5, '5×'], [6, '6×']])}</label>
       <span class="mu" style="font-size:11px">tempos: ${ilTempos().join('s, ')}s (os mesmos do 🔗 Interligar)</span></div>
-    <div class="nota" style="margin:0 0 6px">Cada fonte só conta se estava pagando (sem nenhum outro red), tomou <b>2 reds seguidos</b> e no resultado mais recente deu <b>1 green</b>. Robôs, scanner: 2 reds no histórico e foram os 2 penúltimos · horas pagantes: pagava ≥ N h, 2h sem pagar, 1 green · colunas: a coluna repetia a cor ≥ N×, veio 2× a outra e voltou. Funciona sozinho — não precisa do 🔗 Interligar ligado.</div>
+    <div class="nota" style="margin:0 0 6px">Cada fonte só conta se estava pagando (sem nenhum outro red) e o fim dela bate com um dos modos marcados: 2 reds + 1 green, 1 red + 1 green, 1 red atual ou 2 reds atuais. Robôs e scanner: os únicos reds do histórico são os do fim · horas pagantes: pagava ≥ N h e depois o modo · colunas: a coluna repetia a cor ≥ N× e depois o modo (red = veio a outra cor). Funciona sozinho — não precisa do 🔗 Interligar ligado.</div>
     <h4 style="margin:8px 0 4px">⏭ O que está apontando agora</h4><div id="il2Ag">${il2AgendaHtml()}</div>
+    <h4 style="margin:12px 0 4px">📜 Como foi no passado <small class="mu" style="font-weight:400">o que aconteceu na entrada seguinte, toda vez que um padrão ficou nesse estado</small></h4><div id="il2Hist">${il2HistHtml()}</div>
     <h4 style="margin:12px 0 4px">📊 Relatório do 2R+G</h4><div id="il2Rel">${il2RelHtml()}</div>
   </div>`;
 }
