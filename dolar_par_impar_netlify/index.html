@@ -443,7 +443,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.38 · 03/10/2026 · Somente Robô: relatório completo (green/red, reds seguidos, hora a hora, período todo, CSV)';
+const VERSAO='v3.41 · 03/10/2026 · Somente Robô: vindo de red com modos red+green e 2 reds+green';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -9098,7 +9098,7 @@ function srobNome(x) {
     : x.kind === 'Sequência' ? `${x.x}× ${x.c ? 'ÍMPAR' : 'PAR'} seguidos` : x.kind === 'Cores' ? `Cores ${x.key}` : `Σ${x.n} final ${x.mod}`;
   return `${g} · ${x.skip ? 'pula ' + x.skip : 'sem pular'} → ${x.alvo ? 'ÍMPAR' : 'PAR'}`;
 }
-function srobChave(x) { return [x.kind, x.off, x.d, x.pair, x.trio, x.n, x.mod, x.c, x.x, x.L, x.key, x.skip, x.alvo].join('|'); }
+function srobChave(x) { return [x.rm || '', x.kind, x.off, x.d, x.pair, x.trio, x.n, x.mod, x.c, x.x, x.L, x.key, x.skip, x.alvo].join('|'); }
 
 // ---------- varredura: só padrões 100% no histórico E 100% na conferência (30% mais novos) ----------
 function srobScan(bank = srobBank()) {
@@ -9120,8 +9120,58 @@ function srobScan(bank = srobBank()) {
   const mix = [], ordem = SROB_FAMS.map(f => f[0]).filter(f => porFam[f]);
   for (let k = 0; mix.length < 120 && ordem.some(f => porFam[f][k]); k++) for (const f of ordem) if (porFam[f][k]) mix.push(porFam[f][k]);
   const okTempo = new Set(tempo.map(srobChave)), tempoCompleto = SROB_TW.bank === bank && SROB_TW.W.length > 0;
-  SROB_SCAN = { bank, n: W.length, lista: mix, okTempo, tempoCompleto, porFam: Object.fromEntries(ordem.map(f => [f, porFam[f].length])), achados: lista.length + tempo.length, testados: all.length, when: Date.now(), nivel, ms: Math.round(performance.now() - t0) };
+  const listaRed = cfg.srob_red ? srobScanRed(bank, nivel) : [];
+  SROB_SCAN = { bank, n: W.length, lista: mix, listaRed, okTempo, tempoCompleto, porFam: Object.fromEntries(ordem.map(f => [f, porFam[f].length])), achados: lista.length + tempo.length, testados: all.length, when: Date.now(), nivel, ms: Math.round(performance.now() - t0) };
   return SROB_SCAN;
+}
+// resultado da última entrada já fechada de um padrão de gatilho: 1 green · 0 red · -1 nenhuma
+function srobUltRes(W, starts, alvo, skip, nivel) {
+  for (let k = starts.length - 1; k >= 0; k--) {
+    const base = starts[k] + 1 + skip; if (base + nivel >= W.length) { let ok = false; for (let g = 0; g <= nivel && base + g < W.length; g++) if (W[base + g].p === alvo) { ok = true; break; } if (!ok) continue; return 1; }
+    for (let g = 0; g <= nivel; g++) if (W[base + g].p === alvo) return 1;
+    return 0;
+  }
+  return -1;
+}
+function srobUltimos(W, starts, alvo, skip, nivel, k) {
+  const out = [];
+  for (let i = starts.length - 1; i >= 0 && out.length < k; i--) {
+    const base = starts[i] + 1 + skip; let hit = false, fecha = true;
+    for (let g = 0; g <= nivel; g++) { if (base + g >= W.length) { fecha = false; break; } if (W[base + g].p === alvo) { hit = true; break; } }
+    if (!hit && !fecha) continue;                      // ainda em jogo
+    out.unshift(hit ? 1 : 0);
+  }
+  return out;
+}
+// modos do vindo de red: R = último foi red · RG = 1 red e depois 1 green (atual) · RRG = 2 reds seguidos e depois 1 green
+const SROB_RMODOS = { R: { reds: 1, cauda: [0], tag: '🔴 VINDO DE RED', txt: '1 red (o último)' }, RG: { reds: 1, cauda: [0, 1], tag: '🔴🟢 RED + GREEN', txt: '1 red e depois 1 green (atual)' }, RRG: { reds: 2, cauda: [0, 0, 1], tag: '🔴🔴🟢 2 RED + GREEN', txt: '2 reds seguidos e depois 1 green (atual)' } };
+function srobRModosOn() { const o = cfg.srob_redM || { R: 1 }; return Object.keys(SROB_RMODOS).filter(k => o[k]); }
+function srobCaudaOk(red, tail, m) { const M = SROB_RMODOS[m]; return red === M.reds && tail.length === M.cauda.length && tail.every((v, i) => v === M.cauda[i]); }
+// 🔴 vindo de red: era 100%, e os únicos reds são os do fim (conforme o modo escolhido)
+function srobScanRed(bank, nivel) {
+  const W = srobW(bank), out = [], modos = srobRModosOn(); if (W.length < 300 || !modos.length) return out;
+  const min = Math.max(5, +(cfg.srob_min ?? 12)), pulo = Math.max(0, Math.min(15, +(cfg.srob_pulo ?? 5))), M = {};
+  for (const [f, F] of [['numeros', 'Número'], ['duplas', 'Dupla'], ['trios', 'Trio'], ['somas', 'Soma'], ['seq', 'Sequência']]) {
+    if (!srobFamOn(F)) continue;
+    for (const x of scScanFamily(W, f, pulo, nivel, min, 0)) {
+      if (x.red < 1 || x.red > 2) continue;
+      const tail = srobUltimos(W, srobStarts(W, x, M), x.alvo, x.skip, nivel, 3);
+      for (const m of modos) if (srobCaudaOk(x.red, tail.slice(-SROB_RMODOS[m].cauda.length), m)) { out.push({ ...x, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: x.done, ts: x.sg, bank, modo: 'red', rm: m }); break; }
+    }
+  }
+  const TW = srobTempoW(bank), step = bankIntervalSec(bank) || gameIntervalSec(), G = TW.length >= 300 ? gridBuild(TW, step) : null;
+  if (G) {
+    const minH = Math.max(3, +(cfg.srob_minHora ?? 12)), minD = Math.max(2, +(cfg.srob_minDia ?? 5)), agora = srvNow();
+    if (srobFamOn('Hora')) for (const r of hpScan(G, 'all')) { const o = r.L[nivel], red = o.n - o.ok; if (o.n < minH || red < 1 || red > 2) continue;
+      const tail = o.hist.map(z => z.r), m = modos.find(m => srobCaudaOk(red, tail.slice(-SROB_RMODOS[m].cauda.length), m)); if (m) out.push({ rm: m, kind: 'Hora', off: r.off, alvo: r.alvo, skip: 0, done: o.n, sg: o.pos[0], g1: o.pos[1], g2: o.pos[2], red, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: o.n, ts: o.pos[0], bank, modo: 'red' }); }
+    if (false) for (const r of hfScan(G, 'all')) { const o = [r.ts, r.g1, r.g2][nivel]; const ult = o.hist && o.hist.at(-1); // regra: vindo de red nunca é horário fixo
+      if (o.n >= minD && o.n - o.ok === 1 && ult && ult.r === 0) { const x = { kind: 'Dia', off: r.off, alvo: r.alvo, skip: 0, done: o.n, sg: o.levels.ts, g1: o.levels.g1, g2: o.levels.g2, red: 1, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: o.n, ts: o.levels.ts, bank, modo: 'red' }; if (srobNextT(x, agora) - agora <= 3600) out.push(x); } }
+  }
+  out.sort((a, b) => b.tot - a.tot || b.ts - a.ts);
+  const porFam = {}; for (const x of out) (porFam[srobFam(x)] = porFam[srobFam(x)] || []).push(x);
+  const ordem = SROB_FAMS.map(f => f[0]).filter(f => porFam[f]), mix = [];
+  for (let k = 0; mix.length < 60 && ordem.some(f => porFam[f][k]); k++) for (const f of ordem) if (porFam[f][k]) mix.push(porFam[f][k]);
+  return mix;
 }
 function srobScanFresco(bank) {
   if (!SROB_SCAN || SROB_SCAN.bank !== bank || SROB_SCAN.nivel !== srobNivel() || Date.now() - SROB_SCAN.when > 60000) srobScan(bank);
@@ -9137,12 +9187,14 @@ function srobFillSlots(bank = srobBank(), forcar) {
     const emUso = new Set(SROB_SLOTS.filter(s => s.rb && (s.estado === 'ativo' || s.estado === 'dormindo')).map(s => srobChave(s.rb)));
     for (let i = 0; i < SROB_N; i++) {
       const s = SROB_SLOTS[i]; if (s.estado === 'ativo' || s.estado === 'dormindo') continue;
-      const now = srvNow();
-      const c = sc.lista.find(x => !emUso.has(srobChave(x)) && !(SROB_COOL[srobChave(x)] > Date.now())
+      const now = srvNow(), cota = cfg.srob_red ? Math.max(1, +(cfg.srob_redN ?? 3)) : 0;
+      const nRed = SROB_SLOTS.filter(z => z.rb && z.estado === 'ativo' && z.rb.modo === 'red').length;
+      const fonte = nRed < cota && (sc.listaRed || []).length ? sc.listaRed.concat(sc.lista) : sc.lista;
+      const c = fonte.find(x => !emUso.has(srobChave(x)) && !(SROB_COOL[srobChave(x)] > Date.now())
         && (!srobTempo(x) || srobNextT(x, now) - now > 8) && (x.kind !== 'Dia' || srobNextT(x, now) - now <= 3600)); if (!c) break;
       SROB_SLOTS[i] = { ...srobSlotVazio(i), uid: 'S' + Date.now() + i, rb: { ...c, nivel: sc.nivel }, estado: 'ativo', tsAtivado: Date.now() };
       emUso.add(srobChave(c));
-      srobLog(`🎯 Robô ${i + 1}: ${srobNome(c)} · ${c.tot} casos 100% (${c.ts} no tiro seco)`, 'evt');
+      srobLog(c.modo === 'red' ? `🔴 Robô ${i + 1} (${SROB_RMODOS[c.rm || 'R'].tag}): ${srobNome(c)} · ${c.tot} casos, ${SROB_RMODOS[c.rm || 'R'].txt}` : `🎯 Robô ${i + 1}: ${srobNome(c)} · ${c.tot} casos 100% (${c.ts} no tiro seco)`, 'evt');
     }
     srobSave(); srobBtn();
   } finally { SROB_BUSY = false; }
@@ -9156,6 +9208,8 @@ async function srobRevalidar(bank = srobBank()) {
     if (SROB_SIG.some(g => g.uid === s.uid && !g.done)) continue;
     if (s.rb.bank && s.rb.bank !== bank) { s.estado = 'deletado'; srobLog(`🔁 Robô ${s.id + 1} saiu (banco mudou)`, 'evt'); continue; }
     if (s.estado === 'dormindo') s.estado = 'ativo';
+    if (s.rb.modo === 'red' && s.rb.kind === 'Dia' && !SROB_SIG.some(g => g.uid === s.uid && !g.done)) { s.estado = 'deletado'; srobLog(`🔁 Robô ${s.id + 1} saiu: vindo de red não pode ser horário fixo`, 'evt'); continue; }
+    if (s.rb.modo === 'red') { if (s.rb.kind === 'Dia' && srobNextT(s.rb) - srvNow() > 3600 && !SROB_SIG.some(g => g.uid === s.uid && !g.done)) { /* aguarda o horário mesmo assim */ } continue; }
     if (s.rb.kind === 'Dia' && srobNextT(s.rb) - srvNow() > 3600) { s.estado = 'deletado'; srobLog(`🔁 Robô ${s.id + 1} saiu: horário fixo não é da próxima hora`, 'evt'); continue; }
     if (srobTempo(s.rb)) { if (SROB_SCAN && SROB_SCAN.tempoCompleto && SROB_SCAN.okTempo && !SROB_SCAN.okTempo.has(srobChave(s.rb))) { s.estado = 'deletado'; srobLog(`🔁 Robô ${s.id + 1} saiu: deixou de ser 100% (${srobNome(s.rb)})`, 'r'); } continue; }
     if (scEval(W, srobStarts(W, s.rb, M), s.rb.alvo, s.rb.skip, s.rb.nivel ?? srobNivel()).red > 0) { s.estado = 'deletado'; srobLog(`🔁 Robô ${s.id + 1} saiu: deixou de ser 100% (${srobNome(s.rb)})`, 'r'); }
@@ -9168,6 +9222,7 @@ function srobProcessResult(i, res) {
   const s = SROB_SLOTS[i];
   if (!s || !s.rb || s.estado !== 'ativo') return;
   if (res === 'green') s.greens++; else s.reds++;
+  if (s.rb.modo === 'red' && res === 'red') { srobLog(`🔴 Robô ${i + 1} (vindo de red) deu RED — continua até dar o green`, 'r'); srobSave(); return; }
   SROB_COOL[srobChave(s.rb)] = Date.now() + 30 * 60 * 1000;           // não volta logo em seguida
   s.estado = 'deletado';
   srobLog(`${res === 'green' ? '✅' : '❌'} Robô ${i + 1} cumpriu (${res === 'green' ? 'GREEN' : 'RED'}) e saiu — entra outro 100%`, res === 'green' ? 'g' : 'r');
@@ -9203,7 +9258,7 @@ function srobWatchNew() {
 function srobArmTempo() {
   const bank = srobBank(), step = srobStepMs(bank), now = srvNow();
   let saiu = false;
-  for (const s of SROB_SLOTS) if (s.rb && s.estado === 'ativo' && s.rb.kind === 'Dia' && !SROB_SIG.some(g => g.uid === s.uid && !g.done) && srobNextT(s.rb, now) - now > 3600) { s.estado = 'deletado'; saiu = true; }
+  for (const s of SROB_SLOTS) if (s.rb && s.estado === 'ativo' && s.rb.kind === 'Dia' && s.rb.modo !== 'red' && !SROB_SIG.some(g => g.uid === s.uid && !g.done) && srobNextT(s.rb, now) - now > 3600) { s.estado = 'deletado'; saiu = true; }
   if (saiu) setTimeout(() => srobFillSlots(bank, true), 100);
   for (const s of SROB_SLOTS) {
     if (!s.rb || (s.estado !== 'ativo' && s.estado !== 'dormindo') || !srobTempo(s.rb)) continue;
@@ -9236,7 +9291,7 @@ function srobResolvePending() {
     const s = SROB_SLOTS.find(x => x.uid === g.uid);
     if (res === 'sem dado') { srobLog(`… Robô ${g.slot + 1}: sem dado para conferir ${hmsOf(g.entryT / 1000)}`, 'evt'); continue; }
     if (!g.dorm) srobLog(`${res === 'green' ? '✅ GREEN ' + NIVEL[hit] : '❌ RED'} · robô ${g.slot + 1} · ${hmsOf(g.entryT / 1000)} · ${g.res.join(' / ')}`, res === 'green' ? 'g' : 'r');
-    if (!g.dorm) srobResAdd({ T: g.entryT, slot: g.slot + 1, nome: g.nome, fam: s && s.rb ? srobFam(s.rb) : '', alvo: g.alvo, res, nv: hit, nivel: g.nivel, ds: g.res.slice(), bank: g.bank });
+    if (!g.dorm) srobResAdd({ T: g.entryT, slot: g.slot + 1, nome: g.nome, fam: s && s.rb ? srobFam(s.rb) + (s.rb.modo === 'red' ? ' · ' + ({ R: 'vindo de red', RG: 'red+green', RRG: '2 red+green' })[s.rb.rm || 'R'] : '') : '', alvo: g.alvo, res, nv: hit, nivel: g.nivel, ds: g.res.slice(), bank: g.bank });
     if (s) srobProcessResult(s.id, res);
   }
   SROB_SIG = SROB_SIG.filter(g => !g.done || Date.now() - g.fimT < 20000);
@@ -9274,10 +9329,13 @@ function srobRender() {
     <div class="ctl"><b style="font-size:12px">Tipos:</b> ${SROB_FAMS.map(([f, t]) => `<label><input type="checkbox" ${srobFamOn(f) ? 'checked' : ''} onchange="cfg.srob_fams={...(cfg.srob_fams||{}),'${f}':this.checked?1:0};srobSetCfg('srob_n',cfg.srob_n||3000)"> ${t}</label>`).join('')}</div>
     <div class="ctl">
       <label>Horas pagantes: mín. <select onchange="srobSetCfg('srob_minHora',this.value)">${[6, 8, 12, 18, 24].map(v => `<option ${+(cfg.srob_minHora ?? 12) === v ? 'selected' : ''}>${v}</option>`).join('')}</select> horas 100%</label>
+      <label style="border:1px solid #ef4444;border-radius:8px;padding:3px 8px"><input type="checkbox" ${cfg.srob_red ? 'checked' : ''} onchange="cfg.srob_red=this.checked?1:0;srobSetCfg('srob_n',cfg.srob_n||3000)"> 🔴 robôs vindo de red</label>
+      ${cfg.srob_red ? Object.entries(SROB_RMODOS).map(([k, M]) => `<label><input type="checkbox" ${srobRModosOn().includes(k) ? 'checked' : ''} onchange="cfg.srob_redM={...(cfg.srob_redM||{R:1}),'${k}':this.checked?1:0};srobSetCfg('srob_n',cfg.srob_n||3000)"> ${M.tag.toLowerCase()}</label>`).join('') : ''}
+      ${cfg.srob_red ? `<label>lugares <select onchange="srobSetCfg('srob_redN',this.value)">${[1, 2, 3, 4, 5, 7, 10].map(v => `<option ${+(cfg.srob_redN ?? 3) === v ? 'selected' : ''}>${v}</option>`).join('')}</select></label>` : ''}
       <label>Horário fixo: mín. <select onchange="srobSetCfg('srob_minDia',this.value)">${[3, 4, 5, 7, 10, 14].map(v => `<option ${+(cfg.srob_minDia ?? 5) === v ? 'selected' : ''}>${v}</option>`).join('')}</select> dias 100%</label>
       <button class="pri" onclick="srobRevalidar();srobRender()">🔎 Varrer de novo e completar</button></div>
     <div class="nota" style="margin:0 0 6px">${srobAcasoTxt()}</div>
-    <div class="nota" style="margin:0 0 8px">Até 10 robôs, misturando os tipos: horas pagantes (mesmo minuto:segundo toda hora), horário fixo (mesmo horário todo dia), somas, duplas, trios, números, sequências e padrões de cor. Horários usam o banco inteiro; os outros só entram se <b>nunca deram red</b> (${NIVEL[srobNivel()] === 'TS' ? 'tiro seco' : 'até ' + NIVEL[srobNivel()]}) nos 70% mais antigos <b>e</b> repetiu 100% nos 30% mais novos. Robôs temporários: deu 1 resultado (green ou red), o robô sai e entra outro 100% no lugar. Horário fixo só entra se for da próxima hora. 100% no passado não garante o próximo.</div>
+    <div class="nota" style="margin:0 0 8px">Até 10 robôs, misturando os tipos: horas pagantes (mesmo minuto:segundo toda hora), horário fixo (mesmo horário todo dia), somas, duplas, trios, números, sequências e padrões de cor. Horários usam o banco inteiro; os outros só entram se <b>nunca deram red</b> (${NIVEL[srobNivel()] === 'TS' ? 'tiro seco' : 'até ' + NIVEL[srobNivel()]}) nos 70% mais antigos <b>e</b> repetiu 100% nos 30% mais novos. Robôs temporários: deu 1 resultado (green ou red), o robô sai e entra outro 100% no lugar. 🔴 Vindo de red: padrão que era 100% e tomou red no fim — só o último red, ou 1 red + 1 green atual, ou 2 reds seguidos + 1 green atual (nunca horário fixo) — entra, sai no green, e se der red continua até o green. Horário fixo só entra se for da próxima hora. 100% no passado não garante o próximo.</div>
     <div id="srobLive">${srobLiveHtml()}</div>
     <div id="srobRel">${srobRelHtml()}</div></div>`;
   SROB_REL_N = SROB_RES.length;
@@ -9297,8 +9355,8 @@ function srobLiveHtml() {
     const est = s.estado, rb = s.rb;
     h += `<div class="srobslot ${est}"><div class="srobnum ${est}">${s.id + 1}</div><div class="srobinfo">`;
     if (!rb || est === 'vazio' || est === 'deletado') h += `<span class="mu" style="font-size:12px">${est === 'deletado' ? 'apagado — esperando outro padrão 100%' : '— vazio —'}</span>`;
-    else h += `<span class="srobtag ${est}">${est.toUpperCase()}</span> <b style="font-size:13px;margin-left:4px">${srobNome(rb)}</b>
-      <div class="mu" style="font-size:11px">${srobTempo(rb) ? `${rb.tot} ${rb.kind === 'Dia' ? 'dias' : 'horas'} seguidas sem red · tiro seco ${pct(rb.ts, rb.tot)} · SG/G1/G2 ${rb.sg}/${rb.g1}/${rb.g2} · <b style="color:var(--tx)">próxima ${srobProxTxt(rb)}</b>` : `${rb.tot} casos sem red (${rb.done} antigos + ${rb.test.done} conferência) · tiro seco ${pct(rb.ts, rb.tot)} · SG/G1/G2 ${rb.sg + rb.test.sg}/${rb.g1 + rb.test.g1}/${rb.g2 + rb.test.g2}`}</div>
+    else h += `<span class="srobtag ${est}">${est.toUpperCase()}</span>${rb.modo === 'red' ? ` <span class="srobtag deletado">${SROB_RMODOS[rb.rm || 'R'].tag}</span>` : ''} <b style="font-size:13px;margin-left:4px">${srobNome(rb)}</b>
+      <div class="mu" style="font-size:11px">${srobTempo(rb) ? `${rb.tot} ${rb.kind === 'Dia' ? 'dias' : 'horas'} seguidas sem red · tiro seco ${pct(rb.ts, rb.tot)} · SG/G1/G2 ${rb.sg}/${rb.g1}/${rb.g2} · <b style="color:var(--tx)">próxima ${srobProxTxt(rb)}</b>` : rb.modo === 'red' ? `${rb.tot} casos · 100% até ${SROB_RMODOS[rb.rm || 'R'].txt} · tiro seco ${pct(rb.ts, rb.tot)} · continua até dar green${s.reds ? ` · já deu ${s.reds} red aqui` : ''}${srobTempo(rb) ? ` · próxima ${srobProxTxt(rb)}` : ''}` : `${rb.tot} casos sem red (${rb.done} antigos + ${rb.test.done} conferência) · tiro seco ${pct(rb.ts, rb.tot)} · SG/G1/G2 ${rb.sg + rb.test.sg}/${rb.g1 + rb.test.g1}/${rb.g2 + rb.test.g2}`}</div>
       <div class="srobgr">${s.greens ? `<span class="srobg">✅ ${s.greens}</span>` : ''}${s.reds ? `<span class="srobr">❌ ${s.reds}</span>` : ''}${s.greensD || s.redsD ? `<span class="srobrd">🌙 ${s.greensD}✅ ${s.redsD}❌</span>` : ''}${s.greensConsec ? `<span class="mu" style="font-size:11px">${s.greensConsec} seguido</span>` : ''}</div>`;
     h += `</div></div>`;
   }
