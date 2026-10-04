@@ -454,7 +454,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.46 · 04/10/2026 · 🔁 2R+G: relatório e histórico em PDF';
+const VERSAO='v3.50 · 04/10/2026 · 🔁 2R+G: cada entrada guarda e mostra a configuração com que abriu';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -5441,9 +5441,14 @@ function il2SeqModo(r, min) {
   return null;
 }
 function il2On() { return !!cfg.il2_on; }
+// tempos das fontes do 2R+G (independente do 🔗 Interligar) — ex.: só 20s
+function il2Tempos() { return IL_TEMPOS.filter(s => +(cfg['il2_t' + s] ?? cfg['il_w' + s] ?? 1)); }
 function il2Nivel() { return Math.max(0, Math.min(2, +(cfg.il2_nivel ?? 0))); }
 function il2Gale() { return Math.max(0, Math.min(2, +(cfg.il2_gale ?? 1))); }
 function il2MinF() { return Math.max(1, +(cfg.il2_minF ?? 2)); }
+// foto da configuração do popup na hora em que a entrada abriu (fica salva na entrada e no relatório)
+function il2CfgFoto() { return { nivel: il2Nivel(), gale: il2Gale(), minF: il2MinF(), alvo: +(cfg.il2_alvo ?? ilAlvoS()), tempos: il2Tempos(), modos: il2Modos(), bloq: +(cfg.il2_bloq ?? 1), fontes: ['sc', 'rb', 'sr', 'hp', 'col'].filter(k => +(cfg['il2_' + k] ?? 1)) }; }
+function il2CfgTxt(c) { if (!c) return ''; return `padrão 100% ${IL_NT[c.nivel]} · entrada ${c.gale ? 'até ' + IL_NT[c.gale] : 'tiro seco'} · mín. ${c.minF} fonte${c.minF > 1 ? 's' : ''} · jogo ${c.alvo}s · tempos ${c.tempos.join('/')}s · ${c.modos.map(m => IL2_MODOS[m].tag).join(' ')}${c.bloq ? ' · bloqueia contra' : ''}`; }
 function il2Slim(x) { return { s: x.s, tipo: x.tipo, txt: x.txt, casos: x.casos, md: x.md }; }
 function il2Load() { try { IL2.log = JSON.parse(localStorage.getItem('dpi_il2_log') || '[]') || []; } catch (e) { IL2.log = []; } }
 function il2Save() { try { localStorage.setItem('dpi_il2_log', JSON.stringify(IL2.log.slice(-5000))); } catch (e) {} }
@@ -5520,7 +5525,7 @@ function il2Aponta(s) {
 }
 function il2Coleta() {
   const agora = srvNow() * 1000, hz = agora + Math.max(30, +(cfg.il_horiz ?? 90)) * 1000, M = new Map(), passo = (+(cfg.il2_alvo ?? ilAlvoS())) * 1000;
-  for (const s of ilTempos()) {
+  for (const s of il2Tempos()) {
     let L = []; try { L = il2Aponta(s); } catch (e) { console.warn('2R+G ' + s + 's', e); }
     for (const x of L) { if (x.T <= agora || x.T > hz || x.T % passo) continue; const g = M.get(x.T) || { T: x.T, f: { 0: [], 1: [] } }; g.f[x.alvo].push(x); M.set(x.T, g); }
   }
@@ -5536,7 +5541,7 @@ function il2Scan() {
     if (ab) { if (!ab.fim && ab.g === 0 && g.T - agora > 1000 && g.f[ab.alvo].length > ab.fontes.length) ab.fontes = g.f[ab.alvo].map(il2Slim); continue; }
     for (const alvo of [0, 1]) {
       if (!il2Cond(g, alvo) || g.T - agora < lead) continue;
-      const E = { id: 'IL2' + g.T, T0: g.T, alvo, g: 0, tent: [], fim: false, abriu: Date.now(), fontes: g.f[alvo].map(il2Slim), contra: g.f[1 - alvo].length, gstep: (+(cfg.il2_alvo ?? ilAlvoS())) * 1000 };
+      const E = { id: 'IL2' + g.T, T0: g.T, alvo, g: 0, tent: [], fim: false, abriu: Date.now(), cf: il2CfgFoto(), fontes: g.f[alvo].map(il2Slim), contra: g.f[1 - alvo].length, gstep: (+(cfg.il2_alvo ?? ilAlvoS())) * 1000 };
       IL2.abertas.push(E); IL2.abertas.sort((a, b) => a.T0 - b.T0);
       try { beep(); setTimeout(beep, 250); } catch (e) {}
       if (+(cfg.il2_pop ?? 1)) il2Abrir();
@@ -5552,13 +5557,13 @@ function il2Resolve() {
     const x = ilDig(Tg);
     if (!x) { if (agora > Tg + 25000) il2Fecha(E, 'sem dado'); continue; }
     E.tent.push({ g: E.g, T: Tg, d: x.d, p: x.p });
-    if (x.p === E.alvo) il2Fecha(E, 'green'); else if (E.g >= il2Gale()) il2Fecha(E, 'red'); else E.g++;
+    if (x.p === E.alvo) il2Fecha(E, 'green'); else if (E.g >= (E.cf ? E.cf.gale : il2Gale())) il2Fecha(E, 'red'); else E.g++;
   }
   IL2.abertas = IL2.abertas.filter(e => !e.fim || Date.now() - e.fimT < 10000);
 }
 function il2Fecha(E, res) {
   E.fim = true; E.fimT = Date.now(); E.res = res;
-  if (res === 'green' || res === 'red') { IL2.log.push({ T0: E.T0, alvo: E.alvo, res, nivel: res === 'green' ? E.g : -1, gale: il2Gale(), tent: E.tent, fontes: E.fontes, contra: E.contra }); il2Save(); }
+  if (res === 'green' || res === 'red') { IL2.log.push({ T0: E.T0, alvo: E.alvo, res, nivel: res === 'green' ? E.g : -1, gale: E.cf ? E.cf.gale : il2Gale(), cf: E.cf, tent: E.tent, fontes: E.fontes, contra: E.contra }); il2Save(); }
   il2Render();
 }
 // ---------- tela (popup ciano) ----------
@@ -5572,7 +5577,8 @@ function il2EntradaHtml(E) {
   return `<div class="il2entrada ${E.fim ? (E.res === 'green' ? 'ok' : 'ruim') : ''}">
     <div style="font-size:12px">${tp} · ${E.fontes.length} fonte${E.fontes.length > 1 ? 's' : ''} · ${[...new Set(E.fontes.map(f => f.md).filter(Boolean))].map(m => IL2_MODOS[m].txt).join(' / ')} · ${E.contra ? `<span class="ruim">${E.contra} contra</span>` : 'nenhuma contra'}</div>
     <div class="rbpbig">ENTRAR ${tagc(E.alvo)} às <b>${hmsOf(E.T0 / 1000)}</b></div>
-    ${il2Gale() ? `<div class="mu" style="font-size:12px">${[0, 1, 2].slice(0, il2Gale() + 1).map(g => `${IL_NT[g]} ${hmsOf((E.T0 + g * E.gstep) / 1000)}`).join(' → ')}</div>` : ''}
+    ${(E.cf ? E.cf.gale : il2Gale()) ? `<div class="mu" style="font-size:12px">${[0, 1, 2].slice(0, (E.cf ? E.cf.gale : il2Gale()) + 1).map(g => `${IL_NT[g]} ${hmsOf((E.T0 + g * E.gstep) / 1000)}`).join(' → ')}</div>` : ''}
+    ${E.cf ? `<div style="font-size:11px;color:#67e8f9;margin-top:2px">⚙ ${il2CfgTxt(E.cf)}</div>` : ''}
     <div style="font-size:15px;font-weight:800;margin:6px 0">${E.fim ? (E.res === 'green' ? `<span class="ok">✅ GREEN ${IL_NT[E.g]} · ${E.tent.map(t => t.d).join(' / ')}</span>` : E.res === 'red' ? `<span class="ruim">❌ RED · ${E.tent.map(t => t.d).join(' / ')}</span>` : 'sem dado') : `${IL_NT[E.g]} ${hmsOf(Tg)} · ${falta > 0 ? 'faltam ' + falta + 's' : 'em jogo…'}`}</div>
     <div class="nota" style="margin:0">${E.fontes.map(f => `<span class="iltp il2tp">${f.s}s</span> ${f.md ? IL2_MODOS[f.md].tag + ' ' : ''}${IL2_TIPO[f.tipo] || ''} · ${f.txt} <span class="mu">(${f.casos})</span>`).join('<br>')}</div></div>`;
 }
@@ -5603,7 +5609,8 @@ function il2RelHtml() {
         <h4>Por modo</h4>${tab('Modo', (() => { const M = new Map(); for (const x of L) for (const m of new Set(x.fontes.map(f => f.md || 'RRG'))) { if (!M.has(m)) M.set(m, []); M.get(m).push(x); } return [...M.entries()].map(([m, A]) => [IL2_MODOS[m] ? IL2_MODOS[m].tag + ' ' + IL2_MODOS[m].txt : m, A]); })())}
         <h4>Por tempos</h4>${tab('Tempos', ilAgrupa(L, x => [...new Set(x.fontes.map(f => f.s))].sort((a, b) => a - b).join(' + ') + 's'))}</div>
     </div>
-    <h4>📋 Entradas (mais nova em cima)</h4><div class="tw" style="max-height:260px"><table><tr><th>Jogo</th><th>Alvo</th><th>Fontes</th><th>Dígitos</th><th>Resultado</th></tr>${L.slice().reverse().slice(0, 500).map(x => `<tr><td>${dh(x.T0)}</td><td>${tagc(x.alvo)}</td><td style="text-align:left;font-size:11px">${x.fontes.map(f => `${f.s}s ${IL2_TIPO[f.tipo].split(' ')[0]}${f.md ? IL2_MODOS[f.md].tag : ''} ${f.txt}`).join('<br>')}</td><td>${x.tent.map(t => t.d).join(' / ')}</td><td class="${x.res === 'green' ? 'ok' : 'ruim'}"><b>${x.res === 'green' ? '✅ ' + IL_NT[x.nivel] : '❌ RED'}</b></td></tr>`).join('')}</table></div>`
+    <h4>⚙ Por configuração usada</h4>${tab('Configuração', ilAgrupa(L, x => x.cf ? il2CfgTxt(x.cf) : '(antes desta versão)'))}
+    <h4>📋 Entradas (mais nova em cima)</h4><div class="tw" style="max-height:260px"><table><tr><th>Jogo</th><th>Alvo</th><th>Config.</th><th>Fontes</th><th>Dígitos</th><th>Resultado</th></tr>${L.slice().reverse().slice(0, 500).map(x => `<tr><td>${dh(x.T0)}</td><td>${tagc(x.alvo)}</td><td style="font-size:10px;text-align:left">${x.cf ? il2CfgTxt(x.cf) : '—'}</td><td style="text-align:left;font-size:11px">${x.fontes.map(f => `${f.s}s ${IL2_TIPO[f.tipo].split(' ')[0]}${f.md ? IL2_MODOS[f.md].tag : ''} ${f.txt}`).join('<br>')}</td><td>${x.tent.map(t => t.d).join(' / ')}</td><td class="${x.res === 'green' ? 'ok' : 'ruim'}"><b>${x.res === 'green' ? '✅ ' + IL_NT[x.nivel] : '❌ RED'}</b></td></tr>`).join('')}</table></div>`
     : '<div class="nota">Nenhuma entrada do 2R+G fechada neste período ainda.</div>'}`;
 }
 // 📜 histórico: em cada padrão do scanner (banco do jogo alvo), toda vez que o passado dele batia com o modo, o que deu a entrada seguinte
@@ -5642,14 +5649,71 @@ function il2HistHtml() {
   return `<div class="tw"><table><tr><th style="text-align:left">Modo</th><th>Vezes</th><th>Green</th><th>TS/G1/G2</th><th>Red</th><th>%</th><th>Reds seg. (máx.)</th><th style="text-align:left">Últimas (mais recente à direita)</th></tr>
     ${Object.entries(IL2_MODOS).map(([m, M]) => { const o = R.M[m]; return `<tr style="${il2Modos().includes(m) ? '' : 'opacity:.55'}"><td style="text-align:left">${M.tag} ${M.txt}</td><td>${o.n}</td><td class="ok">${o.g}</td><td>${o.lv.slice(0, il2Gale() + 1).join('/')}</td><td class="ruim">${o.n - o.g}</td><td><b class="${o.n >= 10 ? (o.g / o.n >= 0.5 ? 'ok' : 'ruim') : ''}">${pc(o.g, o.n)}</b></td><td>${o.maxR}</td>
       <td style="text-align:left">${o.ult.map(e => `<span class="hppill ${e.out >= 0 ? 'g' : 'v'}" title="${hmsOf(e.T / 1000)}">${hmsOf(e.T / 1000).slice(0, 5)} ${e.out >= 0 ? '✅' + IL_NT[e.out] : '❌'}</span>`).join('') || '<span class="mu">nunca</span>'}</td></tr>`; }).join('')}</table></div>
+  <div style="margin:8px 0"><button onclick="il2PDF('hist')" style="border:2px solid #06b6d4;background:#0e7490;color:#fff;font-weight:800;padding:7px 14px;border-radius:9px">⬇ Baixar histórico do passado (PDF) — ${num(il2HistFiltro(R).length)} ocorrências</button></div>
+  ${il2SimHtml(R)}
   ${il2HistListaHtml(R)}
   <div class="nota" style="margin:4px 0 0">Banco de ${R.s}s · ${num(R.n)} jogos · padrões do scanner (somas, duplas, trios, números) com ≥ ${ilMinCasos()} casos, 100% em ${IL_NT[il2Nivel()]} antes da falha · entrada conferida ${il2Gale() ? 'até ' + IL_NT[il2Gale()] : 'no tiro seco'}. É cada padrão sozinho (sem cruzar fontes) — serve para saber se o modo costuma pagar.</div>`;
 }
 function il2DHS(t) { const d = new Date(t); return `${p2d(d.getDate())}/${p2d(d.getMonth() + 1)}/${d.getFullYear()} ${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
 function il2HistFiltro(R) { const fm = cfg.il2_hFm || 'todos', fr = cfg.il2_hFr || 'todos', ff = cfg.il2_hFf || 'todos';
   return (R.ev || []).filter(e => (fm === 'todos' || e.m === fm) && (fr === 'todos' || (fr === 'g' ? e.out >= 0 : e.out < 0)) && (ff === 'todos' || e.fam === ff)); }
+// 💰 simulação de banca no histórico: gale (×fator dentro da entrada), mão fixa só TS, e mão fixa subindo ×fator depois de red
+function il2SimCfg() { return { e: Math.max(0.01, +(cfg.il2_sEnt ?? 0.35)), f: Math.max(1, +(cfg.il2_sFat ?? 2.2)), p: Math.max(0.01, +(cfg.il2_sPay ?? 95) / 100), prog: Math.max(1, +(cfg.il2_sProg ?? 3)), gale: il2Gale() }; }
+function il2SimLinhas(L) {   // L em ordem de tempo; devolve o valor de cada estratégia por entrada
+  const c = il2SimCfg(); let a = 0, b = 0, d = 0, k = 0;
+  return L.map(e => {
+    // A) gale dentro da entrada: TS, G1 (×f), G2 (×f²)
+    let va; if (e.out >= 0) { let gasto = 0; for (let i = 0; i < e.out; i++) gasto += c.e * c.f ** i; va = c.e * c.f ** e.out * c.p - gasto; } else { va = 0; for (let i = 0; i <= c.gale; i++) va -= c.e * c.f ** i; }
+    // B) mão fixa sem gale: só o tiro seco
+    const vb = e.out === 0 ? c.e * c.p : -c.e;
+    // C) mão fixa sem gale, mas depois de red a próxima entrada sobe ×f (até N vezes, depois volta)
+    const st = c.e * c.f ** k, vd = e.out === 0 ? st * c.p : -st; k = e.out === 0 ? 0 : (k + 1 >= c.prog ? 0 : k + 1);
+    a += va; b += vb; d += vd;
+    return { va, vb, vd, sa: a, sb: b, sd: d, st };
+  });
+}
+function il2SimResumo(L) {
+  const S = il2SimLinhas(L), c = il2SimCfg();
+  const est = (k, sk) => { let pico = 0, dd = 0, seq = 0, mseq = 0; for (const x of S) { pico = Math.max(pico, x[sk]); dd = Math.max(dd, pico - x[sk]); if (x[k] < 0) { seq++; mseq = Math.max(mseq, seq); } else seq = 0; }
+    const pos = S.filter(x => x[k] > 0), neg = S.filter(x => x[k] < 0);
+    return { tot: S.length ? S.at(-1)[sk] : 0, pos: pos.length, neg: neg.length, ganho: pos.reduce((s, x) => s + x[k], 0), perda: neg.reduce((s, x) => s + x[k], 0), dd, mseq, por: S.length ? (S.at(-1)[sk]) / S.length : 0 }; };
+  let gastoMax = 0; for (let i = 0; i <= c.gale; i++) gastoMax += c.e * c.f ** i;
+  return { S, A: est('va', 'sa'), B: est('vb', 'sb'), C: est('vd', 'sd'), gastoMax, stMax: Math.max(c.e, ...S.map(x => x.st)), c };
+}
+const brl = v => (v < 0 ? '−' : v > 0 ? '+' : '') + 'R$ ' + Math.abs(v).toFixed(2).replace('.', ',');
+function il2SimHtml(R) {
+  const L = il2HistFiltro(R), Z = il2SimResumo(L), c = Z.c, inp = (k, def, st, w) => `<input type="number" step="${st}" value="${cfg[k] ?? def}" style="width:${w}px" onchange="cfg.${k}=+this.value;saveCfg();$('#il2Hist').innerHTML=il2HistHtml()">`;
+  const cls = v => v > 0 ? 'ok' : v < 0 ? 'ruim' : '';
+  const lin = (nome, x, extra) => `<tr><td style="text-align:left"><b>${nome}</b><div class="mu" style="font-size:11px">${extra}</div></td><td>${x.pos}</td><td>${x.neg}</td><td class="ok">${brl(x.ganho)}</td><td class="ruim">${brl(x.perda)}</td><td class="${cls(x.tot)}"><b>${brl(x.tot)}</b></td><td>${brl(x.por)}</td><td class="ruim">${brl(-x.dd)}</td><td>${x.mseq}</td></tr>`;
+  const tsN = L.filter(e => e.out === 0).length, pTS = L.length ? tsN / L.length : 0, beFixa = 1 / (1 + c.p);
+  const vTS = c.e * c.p, vG1 = c.e * c.f * c.p - c.e, vRed = -Z.gastoMax;
+  // pior sequência de reds já vista × quanto custa
+  return `<div style="border:1px solid rgba(6,182,212,.5);border-radius:10px;padding:8px 10px;margin:8px 0">
+    <b style="color:#67e8f9">💰 Simulação de banca no histórico</b> <span class="mu" style="font-size:11px">(${num(L.length)} entradas do filtro, na ordem em que aconteceram)</span>
+    <div class="ctl" style="margin-top:6px"><label>Entrada R$ ${inp('il2_sEnt', 0.35, 0.05, 70)}</label><label>Fator do gale × ${inp('il2_sFat', 2.2, 0.1, 60)}</label>
+      <label>Payout (lucro %) ${inp('il2_sPay', 95, 1, 55)}</label><label>Subir depois de red até ${inp('il2_sProg', 3, 1, 45)} vezes</label>
+      <span class="mu" style="font-size:11px">gale ${c.gale ? 'até ' + IL_NT[c.gale] : 'desligado'} (o mesmo da "Entrada" lá em cima)</span></div>
+    <div class="nota" style="margin:0 0 6px">Valores por entrada: <b>gale</b> → TS ${brl(vTS)}${c.gale >= 1 ? ` · G1 ${brl(vG1)}` : ''}${c.gale >= 2 ? ` · G2 ${brl(c.e * c.f ** 2 * c.p - c.e - c.e * c.f)}` : ''} · red ${brl(vRed)} &nbsp;|&nbsp; <b>mão fixa</b> → green ${brl(vTS)} · red ${brl(-c.e)}</div>
+    <div class="tw"><table><tr><th style="text-align:left">Estratégia</th><th>Positivas</th><th>Negativas</th><th>Ganhou</th><th>Perdeu</th><th>Resultado</th><th>Média/entrada</th><th>Pior queda</th><th>Negativas seguidas</th></tr>
+      ${lin(`Com gale ×${c.f} ${c.gale ? '(até ' + IL_NT[c.gale] + ')' : ''}`, Z.A, `arrisca até ${brl(Z.gastoMax).slice(1)} por entrada`)}
+      ${lin('Mão fixa sem gale (só tiro seco)', Z.B, `${(100 * pTS).toFixed(1)}% de acerto no TS · precisa de ${(100 * beFixa).toFixed(1)}% para empatar`)}
+      ${lin(`Mão fixa, sobe ×${c.f} depois de red`, Z.C, `até ${c.prog} vez(es), maior entrada ${brl(Z.stMax).slice(1)}`)}
+    </table></div>
+    <div class="nota" style="margin:6px 0 0"><b>Leitura:</b> ${il2SimDicas(Z, L, pTS, beFixa)}</div></div>`;
+}
+function il2SimDicas(Z, L, pTS, be) {
+  if (L.length < 30) return 'poucas entradas ainda — com menos de ~30 qualquer resultado pode ser sorte.';
+  const d = [], c = Z.c, best = [['com gale', Z.A], ['mão fixa', Z.B], ['mão fixa subindo após red', Z.C]].sort((a, b) => b[1].tot - a[1].tot)[0];
+  d.push(`no passado o melhor foi <b>${best[0]}</b> (${brl(best[1].tot)} em ${L.length} entradas).`);
+  if (pTS > be) d.push(`o TS acertou ${(100 * pTS).toFixed(1)}%, acima dos ${(100 * be).toFixed(1)}% que a mão fixa precisa — sem gale você arrisca só ${brl(c.e).slice(1)} por vez.`);
+  else d.push(`o TS acertou ${(100 * pTS).toFixed(1)}%, abaixo dos ${(100 * be).toFixed(1)}% que a mão fixa precisa — sem gale daria prejuízo.`);
+  if (c.gale) d.push(`no gale um red custa ${brl(Z.gastoMax).slice(1)} = ${(Z.gastoMax / (c.e * c.p)).toFixed(1)} greens de TS para recuperar.`);
+  d.push(`tenha banca de pelo menos ${brl(Math.max(Z.A.dd, Z.B.dd, Z.C.dd) * 2).slice(1)} (2× a pior queda já vista).`);
+  d.push('isso é o passado do mesmo banco usado para escolher os padrões — o futuro tende a ser pior que a simulação.');
+  return d.join(' ');
+}
 function il2HistListaHtml(R) {
-  const L = il2HistFiltro(R).slice().reverse(), g = L.filter(e => e.out >= 0).length;
+  const SIM = il2SimLinhas(il2HistFiltro(R)), L = il2HistFiltro(R).slice().reverse(), g = L.filter(e => e.out >= 0).length;
   const sel = (k, ops) => `<select onchange="cfg.${k}=this.value;saveCfg();$('#il2Hist').innerHTML=il2HistHtml()">${ops.map(([v, t]) => `<option value="${v}" ${(cfg[k] || 'todos') === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
   return `<details ${cfg.il2_hAberto ? 'open' : ''} ontoggle="cfg.il2_hAberto=this.open?1:0;saveCfg()" style="margin-top:8px"><summary style="cursor:pointer;color:#67e8f9;font-weight:700">📋 Histórico completo — ${num((R.ev || []).length)} ocorrências (clique para abrir)</summary>
     <div class="ctl" style="margin-top:6px"><label>Modo ${sel('il2_hFm', [['todos', 'todos'], ...Object.entries(IL2_MODOS).map(([m, M]) => [m, M.tag + ' ' + M.txt])])}</label>
@@ -5657,11 +5721,12 @@ function il2HistListaHtml(R) {
       <label>Tipo ${sel('il2_hFf', [['todos', 'todos'], ['Soma', 'somas'], ['Dupla', 'duplas'], ['Trio', 'trios'], ['Número', 'números']])}</label>
       <button onclick="il2PDF('hist')">⬇ baixar histórico completo (PDF)</button>
       <span class="mu" style="font-size:12px">${num(L.length)} no filtro · ${g} green · ${L.length - g} red · ${L.length ? (100 * g / L.length).toFixed(1) + '%' : '—'}</span></div>
-    <div class="tw" style="max-height:380px"><table><tr><th>Entrada (data hora:seg)</th><th>Modo</th><th style="text-align:left">Padrão</th><th>Gatilho</th><th>Gatilho saiu</th><th>Alvo</th><th>Antes (últimas 8)</th><th>Dígitos</th><th>Resultado</th></tr>
-    ${L.slice(0, 2000).map(e => `<tr><td><b>${il2DHS(e.T)}</b></td><td>${IL2_MODOS[e.m].tag}</td><td style="text-align:left;font-size:11px">${e.pad}</td><td>${e.gat}</td><td class="mu">${il2DHS(e.trigT).slice(11)}</td><td>${tagc(e.alvo)}</td>
+    <div class="tw" style="max-height:380px"><table><tr><th>Entrada (data hora:seg)</th><th>Modo</th><th style="text-align:left">Padrão</th><th>Gatilho</th><th>Gatilho saiu</th><th>Alvo</th><th>Antes (últimas 8)</th><th>Dígitos</th><th>Resultado</th><th>Gale</th><th>Saldo gale</th><th>Mão fixa</th><th>Saldo fixa</th></tr>
+    ${L.slice(0, 2000).map((e, i) => { const z = SIM[SIM.length - 1 - i]; return `<tr><td><b>${il2DHS(e.T)}</b></td><td>${IL2_MODOS[e.m].tag}</td><td style="text-align:left;font-size:11px">${e.pad}</td><td>${e.gat}</td><td class="mu">${il2DHS(e.trigT).slice(11)}</td><td>${tagc(e.alvo)}</td>
       <td style="letter-spacing:1px;font-family:monospace">${[...e.ant].map(c => `<span class="${c === 'G' ? 'ok' : 'ruim'}">${c === 'G' ? '✅' : '❌'}</span>`).join('')}</td>
       <td>${e.ds.map((d, i) => `<span class="b ${d % 2 ? 'v' : 'g'}" title="${IL_NT[i]} ${il2DHS(e.T + i * R.s * 1000).slice(11)}">${d}</span>`).join(' ')}</td>
-      <td class="${e.out >= 0 ? 'ok' : 'ruim'}"><b>${e.out >= 0 ? '✅ ' + IL_NT[e.out] : '❌ RED'}</b></td></tr>`).join('')}</table></div>
+      <td class="${e.out >= 0 ? 'ok' : 'ruim'}"><b>${e.out >= 0 ? '✅ ' + IL_NT[e.out] : '❌ RED'}</b></td>
+      <td class="${z.va >= 0 ? 'ok' : 'ruim'}">${brl(z.va)}</td><td class="${z.sa >= 0 ? 'ok' : 'ruim'}">${brl(z.sa)}</td><td class="${z.vb >= 0 ? 'ok' : 'ruim'}">${brl(z.vb)}</td><td class="${z.sb >= 0 ? 'ok' : 'ruim'}">${brl(z.sb)}</td></tr>`; }).join('')}</table></div>
     ${L.length > 2000 ? '<div class="nota">Mostrando as 2.000 mais novas na tela — o CSV traz todas.</div>' : ''}</details>`;
 }
 function il2HistCSV() {
@@ -5683,10 +5748,13 @@ function il2PDF(qual) {
     const acaso = [50, 75, 87.5][il2Gale()];
     corpo = `<h2>Resumo por modo</h2><div class="sub">Banco DERIV ${s}s · ${num(R.n)} jogos · padrões do scanner com ≥ ${ilMinCasos()} casos, 100% em ${IL_NT[il2Nivel()]} antes da falha · entrada ${il2Gale() ? 'até ' + IL_NT[il2Gale()] : 'tiro seco'} (o acaso daria ${acaso}%)</div>
       ${tb(['Modo', 'Vezes', 'Green', 'TS/G1/G2', 'Red', '%', 'Reds seguidos (máx.)'], Object.entries(IL2_MODOS).map(([m, M]) => { const o = R.M[m]; return [M.txt, o.n, o.g, o.lv.slice(0, il2Gale() + 1).join('/'), o.n - o.g, `<b>${pc(o.g, o.n)}</b>`, o.maxR]; }))}
+      <h2>Simulação de banca</h2>${(() => { const Z = il2SimResumo(L), c = Z.c; const ln = (n, x) => [n, x.pos, x.neg, brl(x.ganho), brl(x.perda), `<b>${brl(x.tot)}</b>`, brl(-x.dd), x.mseq];
+        return `<div class="sub">Entrada R$ ${c.e.toFixed(2)} · gale ×${c.f} ${c.gale ? 'até ' + IL_NT[c.gale] : 'desligado'} · payout ${Math.round(c.p * 100)}% · subir após red até ${c.prog}×</div>` + tb(['Estratégia', 'Positivas', 'Negativas', 'Ganhou', 'Perdeu', 'Resultado', 'Pior queda', 'Negativas seguidas'], [ln('Com gale', Z.A), ln('Mão fixa sem gale', Z.B), ln('Mão fixa, sobe após red', Z.C)])
+          + `<div class="sub">${il2SimDicas(Z, L, L.length ? L.filter(e => e.out === 0).length / L.length : 0, 1 / (1 + c.p)).replace(/<[^>]+>/g, '')}</div>`; })()}
       <h2>Todas as ocorrências (${num(L.length)}) — mais nova primeiro</h2>
       <div class="sub">Filtro: modo ${cfg.il2_hFm || 'todos'} · resultado ${cfg.il2_hFr || 'todos'} · tipo ${cfg.il2_hFf || 'todos'} · ${L.filter(e => e.out >= 0).length} green · ${L.filter(e => e.out < 0).length} red</div>
-      ${tb(['Entrada', 'Modo', 'Padrão', 'Gatilho', 'Gatilho saiu', 'Alvo', 'Últimas 8 antes', 'TS', 'G1', 'G2', 'Resultado'], L.slice().reverse().map(e => [il2DHS(e.T), IL2_MODOS[e.m].txt, e.pad, e.gat, il2DHS(e.trigT).slice(11), cor(e.alvo), [...e.ant].map(c => c === 'G' ? '✅' : '❌').join(''),
-        ...[0, 1, 2].map(i => e.ds[i] != null ? `${il2DHS(e.T + i * s * 1000).slice(11)} · <b>${e.ds[i]}</b>` : ''), res(e.out >= 0, e.out)]))}`;
+      ${(() => { const SIM = il2SimLinhas(L); return tb(['Entrada', 'Modo', 'Padrão', 'Gatilho', 'Gatilho saiu', 'Alvo', 'Últimas 8 antes', 'TS', 'G1', 'G2', 'Resultado', 'Gale', 'Saldo gale', 'Mão fixa', 'Saldo fixa'], L.map((e, i) => [il2DHS(e.T), IL2_MODOS[e.m].txt, e.pad, e.gat, il2DHS(e.trigT).slice(11), cor(e.alvo), [...e.ant].map(c => c === 'G' ? '✅' : '❌').join(''),
+        ...[0, 1, 2].map(i => e.ds[i] != null ? `${il2DHS(e.T + i * s * 1000).slice(11)} · <b>${e.ds[i]}</b>` : ''), res(e.out >= 0, e.out), brl(SIM[i].va), brl(SIM[i].sa), brl(SIM[i].vb), brl(SIM[i].sb)]).reverse()); })()}`;
   } else {
     const per = cfg.il2_relPer || 'all'; let ini = 0;
     if (per === 'hoje') { const d = new Date(); d.setHours(0, 0, 0, 0); ini = d.getTime(); } else if (per !== 'all') ini = Date.now() - (+per) * 3600e3;
@@ -5700,9 +5768,10 @@ function il2PDF(qual) {
       <h2>Por modo</h2>${tb(['Modo', 'Entradas', 'Green', 'Red', '%'], grupo(x => new Set(x.fontes.map(f => IL2_MODOS[f.md || 'RRG'].txt))))}
       <h2>Por tipo de fonte</h2>${tb(['Tipo', 'Entradas', 'Green', 'Red', '%'], grupo(x => new Set(x.fontes.map(f => (IL2_TIPO[f.tipo] || f.tipo).replace(/^\S+ /, '')))))}
       <h2>Por nº de fontes</h2>${tb(['Fontes', 'Entradas', 'Green', 'Red', '%'], grupo(x => [String(x.fontes.length)]))}
+      <h2>Por configuração usada</h2>${tb(['Configuração', 'Entradas', 'Green', 'Red', '%'], grupo(x => [x.cf ? il2CfgTxt(x.cf) : '(antes desta versão)']))}
       <h2>Hora a hora</h2>${tb(['Hora', 'Entradas', 'Green', 'Red', '%'], H.map(([k, A]) => { const gg = A.filter(x => x.res === 'green').length; return [il2DHS(+k).slice(0, 13) + 'h', A.length, gg, A.length - gg, `<b>${pc(gg, A.length)}</b>`]; }))}
       <h2>Todas as entradas — mais nova primeiro</h2>
-      ${tb(['Jogo', 'Alvo', 'Fontes', 'Tentativas (hora · dígito)', 'Resultado'], L.slice().reverse().map(x => [il2DHS(x.T0), cor(x.alvo), x.fontes.map(f => `${f.s}s · ${f.md ? IL2_MODOS[f.md].txt + ' · ' : ''}${(IL2_TIPO[f.tipo] || '').replace(/^\S+ /, '')} · ${f.txt}`).join('<br>'),
+      ${tb(['Jogo', 'Alvo', 'Configuração', 'Fontes', 'Tentativas (hora · dígito)', 'Resultado'], L.slice().reverse().map(x => [il2DHS(x.T0), cor(x.alvo), x.cf ? il2CfgTxt(x.cf) : '—', x.fontes.map(f => `${f.s}s · ${f.md ? IL2_MODOS[f.md].txt + ' · ' : ''}${(IL2_TIPO[f.tipo] || '').replace(/^\S+ /, '')} · ${f.txt}`).join('<br>'),
         x.tent.map(t => `${IL_NT[t.g]} ${il2DHS(t.T).slice(11)} · <b>${t.d}</b>`).join('<br>'), res(x.res === 'green', x.nivel)]))}`;
   }
   const w = window.open('', '_blank', 'width=1000,height=760');
@@ -5751,9 +5820,14 @@ function il2Render(full) {
       <label>Mín. fontes ${op('il2_minF', 2, [[1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5']])}</label>
       <label>Jogo de ${op('il2_alvo', ilAlvoS(), [[5, '5s'], [10, '10s'], [20, '20s'], [30, '30s']])}</label>
       ${chk('il2_bloq', 'bloquear se houver contra')}${chk('il2_pop', 'abrir popup na entrada')}</div>
+    <div class="nota" style="margin:0 0 6px;color:#67e8f9">💾 Configuração salva neste navegador — vale para as próximas entradas; cada entrada guarda a configuração com que abriu (aparece no popup e no relatório).</div>
     <div class="ctl"><label>Horas pagantes: pagava ≥ ${op('il2_hpMin', 6, [[3, '3h'], [4, '4h'], [6, '6h'], [8, '8h'], [10, '10h'], [12, '12h']])}</label>
       <label>Colunas: vinha ≥ ${op('il2_colMin', 3, [[2, '2×'], [3, '3×'], [4, '4×'], [5, '5×'], [6, '6×']])}</label>
-      <span class="mu" style="font-size:11px">tempos: ${ilTempos().join('s, ')}s (os mesmos do 🔗 Interligar)</span></div>
+</div>
+    <div class="ctl" style="border:1px solid rgba(6,182,212,.5);border-radius:10px;padding:6px 8px"><b style="font-size:12px;color:#67e8f9">Tempos:</b>
+      ${IL_TEMPOS.map(s => `<label><input type="checkbox" ${il2Tempos().includes(s) ? 'checked' : ''} onchange="il2Set('il2_t${s}',this.checked?1:0)"> ${s}s</label>`).join('')}
+      <button onclick="${IL_TEMPOS.map(s => `cfg.il2_t${s}=${s === 20 ? 1 : 0};`).join('')}cfg.il2_alvo=20;il2Set('il2_t20',1)">só 20s</button>
+      <span class="mu" style="font-size:11px">${il2Tempos().length ? 'fontes só de ' + il2Tempos().join('s, ') + 's' : '<span class="ruim">marque pelo menos um tempo</span>'}</span></div>
     <div class="nota" style="margin:0 0 6px">Cada fonte só conta se estava pagando (sem nenhum outro red) e o fim dela bate com um dos modos marcados: 2 reds + 1 green, 1 red + 1 green, 1 red atual ou 2 reds atuais. Robôs e scanner: os únicos reds do histórico são os do fim · horas pagantes: pagava ≥ N h e depois o modo · colunas: a coluna repetia a cor ≥ N× e depois o modo (red = veio a outra cor). Funciona sozinho — não precisa do 🔗 Interligar ligado.</div>
     <h4 style="margin:8px 0 4px">⏭ O que está apontando agora</h4><div id="il2Ag">${il2AgendaHtml()}</div>
     <h4 style="margin:12px 0 4px">📜 Como foi no passado <small class="mu" style="font-weight:400">o que aconteceu na entrada seguinte, toda vez que um padrão ficou nesse estado</small></h4><div id="il2Hist">${il2HistHtml()}</div>
@@ -5764,7 +5838,7 @@ setInterval(() => {
   if (!il2On() && !IL2.open) return;
   try {
     if (il2On()) il2Resolve();
-    const k = ilTempos().map(s => { const W = liveW(d5BankName(s)); return W && W.length ? W.at(-1).t : 0; }).join('|');
+    const k = il2Tempos().map(s => { const W = liveW(d5BankName(s)); return W && W.length ? W.at(-1).t : 0; }).join('|');
     if (k !== IL2.k || Date.now() - IL2.scanT > 20000) { IL2.k = k; il2Scan(); }
     il2Render(false);
   } catch (e) { console.warn('2R+G', e); }
