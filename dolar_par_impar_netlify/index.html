@@ -455,7 +455,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.56 · 04/10/2026 · 💼 Conta Demo: token novo da Deriv (pat_ + App ID, API nova com OTP)';
+const VERSAO='v3.57 · 04/10/2026 · 💼 Conta Demo: sinal de vida a cada 20s + reconexão automática (não cai mais)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -6454,10 +6454,10 @@ async function dmAbrirNovo(j,como){
   dmDesconectar(true);
   try{ await dmAbrir(j.url); }catch(e){ dmSet('Falhou ao abrir a conexão DEMO: '+e.message); return; }
   DM.novo=true; DM.ok=true; DM.virt=true; DM.loginid='DEMO '+j.account_id; DM.cur=j.currency||'USD'; DM.bal=+j.balance;
-  DM.sess={pl:0,n:0,g:0,r:0,ini:Date.now()}; DM.parado='';
+  if(!DM.rcN) DM.sess={pl:0,n:0,g:0,r:0,ini:Date.now()}; DM.parado=''; DM.querOn=true; const rc=DM.rcN; DM.rcN=0;
   try{ const b=await dmSend({balance:1,subscribe:1},8000); if(b.balance) DM.bal=+b.balance.balance; }catch(e){}
   await dmSyncRelogio();
-  dmSet(`✅ Conectado ${como} na conta <b>${DM.loginid}</b> · saldo ${isFinite(DM.bal)?DM.bal.toFixed(2):'—'} ${DM.cur}${DM.offOk?` · relógio do PC ${DM.off>=0?'atrasado':'adiantado'} ${Math.abs(DM.off).toFixed(2)}s (já corrigido)`:''}`);
+  dmSet(`✅ ${rc?'Reconectado':'Conectado'} ${como} na conta <b>${DM.loginid}</b>${DM.ultQueda&&rc?` (caiu: ${DM.ultQueda})`:''} · saldo ${isFinite(DM.bal)?DM.bal.toFixed(2):'—'} ${DM.cur}${DM.offOk?` · relógio do PC ${DM.off>=0?'atrasado':'adiantado'} ${Math.abs(DM.off).toFixed(2)}s (já corrigido)`:''}`);
   if(S.tab==='demo') renderTab();
 }
 esLoad();
@@ -8116,7 +8116,7 @@ async function dmConectar(){
     DM.ok=true; DM.loginid=au.loginid||''; DM.cur=au.currency||'USD'; DM.bal=+au.balance;
     DM.virt=(+au.is_virtual===1) || /^VR/i.test(DM.loginid);
     if(!DM.virt){ dmSet(`⛔ O token é da conta <b>REAL</b> ${DM.loginid}. Este HTML só opera em conta DEMO (login começando com VRTC). Nenhuma ordem será enviada.`); dmHeader(); if(S.tab==='demo') renderTab(); return; }
-    DM.sess={pl:0,n:0,g:0,r:0,ini:Date.now()}; DM.parado='';
+    if(!DM.rcN) DM.sess={pl:0,n:0,g:0,r:0,ini:Date.now()}; DM.parado=''; DM.querOn=true; DM.rcN=0;
     try{ await dmSend({balance:1,subscribe:1}); }catch(e){}
     await dmSyncRelogio();
     dmSet(`✅ Conectado na conta DEMO <b>${DM.loginid}</b> · saldo ${DM.bal.toFixed(2)} ${DM.cur} · relógio do PC ${DM.off>=0?'atrasado':'adiantado'} ${Math.abs(DM.off).toFixed(2)}s em relação à Deriv (já corrigido)`);
@@ -8129,7 +8129,9 @@ function dmAbrir(url){
     const to=setTimeout(()=>{ try{ws.close();}catch(e){} rej(new Error('tempo esgotado')); },10000);
     ws.onopen=()=>{ clearTimeout(to); DM.ws=ws; res(); };
     ws.onerror=()=>{ clearTimeout(to); rej(new Error('falha de conexão')); };
-    ws.onclose=()=>{ if(DM.ws===ws){ DM.ws=null; DM.ok=false; dmSet('desconectado da Deriv'); if(S.tab==='demo') fillRes(); } };
+    ws.onclose=ev=>{ if(DM.ws===ws){ DM.ws=null; DM.ok=false; const mot=`código ${ev&&ev.code||'?'}${ev&&ev.reason?' · '+ev.reason:''}`; DM.ultQueda=mot;
+      if(DM.querOn){ dmSet(`⚠ A Deriv fechou a conexão (${mot}) — reconectando…`); dmReconectar(); } else dmSet(`desconectado da Deriv (${mot})`);
+      if(S.tab==='demo') fillRes(); } };
     ws.onmessage=ev=>{
       let j; try{ j=JSON.parse(ev.data); }catch(e){ return; }
       if(j.msg_type==='balance' && j.balance){ DM.bal=+j.balance.balance; dmHeader(); }
@@ -8139,12 +8141,21 @@ function dmAbrir(url){
     };
   });
 }
-function dmDesconectar(silencioso){ try{ DM.ws?.close(); }catch(e){} DM.ws=null; DM.ok=false; DM.virt=false; if(!silencioso){ dmSet('desconectado'); if(S.tab==='demo') fillRes(); } dmHeader(); }
-function dmEsquecer(){ try{ localStorage.removeItem('dpi_demo_tok'); localStorage.removeItem('dpi_demo_tok_oa2'); }catch(e){} DM._tok=''; dmDesconectar(); dmSet('Token apagado deste navegador.'); }
+function dmDesconectar(silencioso){ if(!silencioso){ DM.querOn=false; clearTimeout(DM.rcT); } try{ DM.ws?.close(); }catch(e){} DM.ws=null; DM.ok=false; DM.virt=false; if(!silencioso){ dmSet('desconectado'); if(S.tab==='demo') fillRes(); } dmHeader(); }
+// 🔁 reconexão automática: a conexão nova (OTP) é de uso único — cada reconexão pede um endereço novo à Deriv
+function dmReconectar(){
+  clearTimeout(DM.rcT); if(!DM.querOn) return;
+  DM.rcN=(DM.rcN||0)+1; const esp=[1,2,5,10,20,30][Math.min(DM.rcN-1,5)];
+  dmSet(`⚠ Conexão com a Deriv caiu${DM.ultQueda?' ('+DM.ultQueda+')':''} — reconectando em ${esp}s (tentativa ${DM.rcN})…`);
+  DM.rcT=setTimeout(async()=>{ if(!DM.querOn||DM.ok) return; try{ await dmConectar(); }catch(e){} if(!DM.ok&&DM.querOn) dmReconectar(); },esp*1000);
+}
+// 💓 sinal de vida a cada 20s (a Deriv fecha conexões paradas)
+setInterval(()=>{ if(DM.ok&&DM.ws&&DM.ws.readyState===1) dmSend({ping:1},10000).catch(()=>{}); },20000);
+function dmEsquecer(){ DM.querOn=false; clearTimeout(DM.rcT); try{ localStorage.removeItem('dpi_demo_tok'); localStorage.removeItem('dpi_demo_tok_oa2'); }catch(e){} DM._tok=''; dmDesconectar(); dmSet('Token apagado deste navegador.'); }
 // ---------- ordens ----------
 function dmStake0(){ return Math.max(0.35,Math.round((+cfg.dm_stake||0.35)*100)/100); }
 function dmPodeOperar(o){
-  if(!DM.ok||!DM.virt) return 'conta demo não conectada';
+  if((!DM.ok||!DM.virt) && !DM.querOn) return 'conta demo não conectada';   // querOn = já conectou numa DEMO e está reconectando
   if(o&&o.es) return esPode();                                   // ordens da estratégia usam os stops dela
   if(!cfg.dm_on) return 'operação automática desligada';
   const sl=+cfg.dm_stopLoss||0, sw=+cfg.dm_stopWin||0;
@@ -8230,6 +8241,7 @@ setInterval(()=>{
       if((cfg.dm_estrito??1) && now+dmLat()>J.fimJan-0.15){ o.estado='perdido'; dmAddLog({...o,res:'não enviada',obs:`sem tempo para acertar o tick ${hmsOf(J.alvo)} (${o.g?'G'+o.g:'TS'}) — modo estrito`,stake:0,profit:0,nivel:o.g,planT:Tg,alvo:J.alvo}); continue; }
       if(!(cfg.dm_estrito??1) && now>Tg+1){ o.estado='perdido'; dmAddLog({...o,res:'não enviada',obs:`perdeu o horário (${hmsOf(Tg)})`,stake:0,profit:0,nivel:o.g}); continue; }
       const m=dmPodeOperar(o); if(m){ o.estado='parado'; dmAddLog({...o,res:'não enviada',obs:m,stake:0,profit:0,nivel:o.g}); continue; }
+      if(!DM.ok||!DM.ws||DM.ws.readyState!==1){ o.estado='perdido'; dmAddLog({...o,res:'não enviada',obs:`conexão com a Deriv caída na hora da entrada (reconectando${DM.ultQueda?' · '+DM.ultQueda:''})`,stake:0,profit:0,nivel:o.g}); continue; }
       dmComprar(o);
     }
   }
