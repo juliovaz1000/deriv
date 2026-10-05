@@ -455,7 +455,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.55 · 04/10/2026 · 🔁 2R+G: confirmações (interligado, somente robô, horas pagantes) no popup + operar na conta DEMO';
+const VERSAO='v3.56 · 04/10/2026 · 💼 Conta Demo: token novo da Deriv (pat_ + App ID, API nova com OTP)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -6447,6 +6447,9 @@ async function dmConectarNovo(oa){
       catch(e2){ dmSet('⛔ O acesso expirou — clique de novo em 🔐 ENTRAR COM A DERIV. ('+e2.message+')'); return; }
     } else { dmSet('⛔ '+e.message+(e.status===401?' — clique de novo em 🔐 ENTRAR COM A DERIV.':'')); return; }
   }
+  return dmAbrirNovo(j,'pelo login da Deriv');
+}
+async function dmAbrirNovo(j,como){
   if(!/\/ws\/demo/.test(j.url)){ dmSet('⛔ Endereço recebido não é de conta DEMO — bloqueado.'); return; }
   dmDesconectar(true);
   try{ await dmAbrir(j.url); }catch(e){ dmSet('Falhou ao abrir a conexão DEMO: '+e.message); return; }
@@ -6454,7 +6457,7 @@ async function dmConectarNovo(oa){
   DM.sess={pl:0,n:0,g:0,r:0,ini:Date.now()}; DM.parado='';
   try{ const b=await dmSend({balance:1,subscribe:1},8000); if(b.balance) DM.bal=+b.balance.balance; }catch(e){}
   await dmSyncRelogio();
-  dmSet(`✅ Conectado pelo login da Deriv na conta <b>${DM.loginid}</b> · saldo ${isFinite(DM.bal)?DM.bal.toFixed(2):'—'} ${DM.cur}${DM.offOk?` · relógio do PC ${DM.off>=0?'atrasado':'adiantado'} ${Math.abs(DM.off).toFixed(2)}s (já corrigido)`:''}`);
+  dmSet(`✅ Conectado ${como} na conta <b>${DM.loginid}</b> · saldo ${isFinite(DM.bal)?DM.bal.toFixed(2):'—'} ${DM.cur}${DM.offOk?` · relógio do PC ${DM.off>=0?'atrasado':'adiantado'} ${Math.abs(DM.off).toFixed(2)}s (já corrigido)`:''}`);
   if(S.tab==='demo') renderTab();
 }
 esLoad();
@@ -8062,18 +8065,51 @@ function dmSend(o,timeout=20000){
     DM.ws.send(JSON.stringify(o));
   });
 }
+// token novo da Deriv (começa com pat_): pede a lista de contas e um endereço já autorizado (OTP) da conta DEMO
+async function dmRest(met,path,tok,aid){
+  const r=await fetch('https://api.derivws.com'+path,{method:met,headers:{'Authorization':'Bearer '+tok,'Deriv-App-ID':aid,'Content-Type':'application/json'}});
+  let j={}; try{ j=await r.json(); }catch(e){}
+  if(!r.ok){ const m=(j.errors&&j.errors[0]&&(j.errors[0].message||j.errors[0].code))||(j.error&&(j.error.message||j.error.code))||j.message||('erro '+r.status); const e=new Error(m); e.status=r.status; throw e; }
+  return j;
+}
+async function dmConectarPAT(tok){
+  const aid=dmAppId();
+  if(!aid){ dmSet('⛔ Token novo (pat_…) precisa do <b>App ID</b>: crie um aplicativo em <b>developers.deriv.com</b>, copie o App ID e cole no campo <b>App ID</b> aqui embaixo. Depois clique em 🔌 CONECTAR de novo.'); if(S.tab==='demo') renderTab(); return; }
+  dmSet('🔑 Token novo: pedindo à Deriv a conta DEMO…');
+  let j=null;
+  try{
+    const a=await dmRest('GET','/trading/v1/options/accounts',tok,aid);
+    const L=Array.isArray(a.data)?a.data:Array.isArray(a.accounts)?a.accounts:Array.isArray(a)?a:(a.data&&Array.isArray(a.data.accounts)?a.data.accounts:[]);
+    const ehDemo=x=>/demo|virtual/i.test(String(x.account_type??x.type??''))||x.is_virtual===1||x.is_virtual===true||/^VR/i.test(String(x.account_id??x.loginid??''));
+    const d=L.find(ehDemo);
+    if(!d){ dmSet(`⛔ O token não mostrou nenhuma conta DEMO (${L.length} conta(s) encontradas). Crie o token com a conta demo liberada.`); return; }
+    const id=d.account_id??d.id??d.loginid;
+    const o=await dmRest('POST',`/trading/v1/options/accounts/${encodeURIComponent(id)}/otp`,tok,aid);
+    const url=(o.data&&o.data.url)||o.url;
+    j={url,account_id:id,currency:d.currency||'USD',balance:d.balance};
+  }catch(e){
+    if(e instanceof TypeError){                              // o navegador bloqueou a chamada direta: tenta pela função do site (só na Netlify)
+      try{ const k=await dmApi({acao:'otp',client_id:aid,token:tok}); j=k; }
+      catch(e2){ dmSet('⛔ O navegador não deixou falar direto com a Deriv e a função do site não respondeu ('+e2.message+'). Abra pelo site da Netlify ou use um token antigo.'); return; }
+    } else { dmSet('⛔ Deriv recusou o token novo: '+e.message+(e.status===401||e.status===403?' — confira se o token tem o escopo <b>trade</b> e se o App ID é do mesmo usuário.':'')); return; }
+  }
+  if(!j||!j.url){ dmSet('⛔ A Deriv não devolveu o endereço da conta DEMO.'); return; }
+  try{ localStorage.setItem('dpi_demo_tok_pat_ok','1'); }catch(e){}
+  return dmAbrirNovo(j,'pelo token novo');
+}
 async function dmConectar(){
   const tokIn=$('#dmTok')?.value?.trim(); if(tokIn) DM._tok=tokIn;
   DM.novo=false; const oa=dmOa2(); if(!tokIn && oa && oa.at) return dmConectarNovo(oa);
   const tok=dmToken(); if(!tok){ dmSet('Cole o token da conta DEMO.'); return; }
   if($('#dmLembrar')?.checked){ try{ localStorage.setItem('dpi_demo_tok',tok); }catch(e){} }
+  if(/^pat_/i.test(tok)) return dmConectarPAT(tok);
   dmDesconectar(true);
   const aid=dmAppNovo()?'':dmAppId(); const urls=(cfg.dm_url?[cfg.dm_url]:[]).concat(aid?[`wss://ws.derivws.com/websockets/v3?app_id=${aid}`,`wss://ws.binaryws.com/websockets/v3?app_id=${aid}`]:DM_URLS_DEF);
   for(const url of urls){
     dmSet(`Conectando em ${url.replace(/\?.*/,'')}…`);
     try{ await dmAbrir(url); break; }catch(e){ dmSet('Falhou: '+e.message); }
   }
-  if(!DM.ws) return;
+  if(!DM.ws){ dmSet('⛔ Não consegui conectar no endereço antigo da Deriv. Se o seu token começa com <b>pat_</b> (token novo), cole o <b>App ID</b> e clique de novo em 🔌 CONECTAR — ele usa o endereço novo.'); return; }
   try{
     const a=await dmSend({authorize:tok});
     const au=a.authorize||{};
@@ -8269,6 +8305,7 @@ VIEWS.demo={nome:'💼 Conta Demo',live:dmLive,html(){
       <label><input type="checkbox" id="dmLembrar" ${localStorage.getItem('dpi_demo_tok')?'checked':''}> lembrar neste navegador</label>
       <button class="pri" onclick="dmConectar()">🔌 CONECTAR</button><button onclick="dmDesconectar()">desconectar</button><button class="dan" onclick="dmEsquecer()">apagar token</button>
     </div>
+    <div class="nota" style="margin:0 0 6px">🔑 <b>Token novo da Deriv (começa com <code>pat_</code>)</b>: cole o token acima <b>e</b> o <b>App ID</b> do seu aplicativo do developers.deriv.com no campo logo abaixo, depois clique em 🔌 CONECTAR. Token antigo (sem <code>pat_</code>) não precisa de App ID.</div>
     <div class="ctl"><button class="pri" onclick="dmOAuth()">🔐 ENTRAR COM A DERIV (sem token)</button><label>App ID ${inp('dm_appId',190,'placeholder="cole o App ID"')}</label>${dmOa2()?`<button onclick="dmConectar()">🔌 reconectar pelo login</button>`:''}</div>
     <details class="nota"><summary><b>Como liberar o "Entrar com a Deriv"</b> (uma vez só)</summary>
       1) Entre em <b>developers.deriv.com</b> com sua conta e crie um aplicativo (Create app) com <b>OAuth</b> e escopo <b>trade</b>.<br>
