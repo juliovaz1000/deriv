@@ -279,6 +279,7 @@ button.cfon{background:linear-gradient(90deg,#0891b2,#7c3aed);border-color:trans
 .il2entrada.ok{border-color:var(--g);animation:none}.il2entrada.ruim{border-color:var(--v);animation:none}
 @keyframes il2pulse{0%,100%{box-shadow:0 0 0 rgba(6,182,212,0)}50%{box-shadow:0 0 18px rgba(6,182,212,.55)}}
 .il2tp{background:rgba(6,182,212,.2)!important;color:#22d3ee!important}
+.il2conf{margin:6px 0;padding:6px 8px;border-radius:8px;border:1px dashed rgba(6,182,212,.5);font-size:12px}.il2conf.ok{border:1px solid var(--g);background:rgba(34,197,94,.08)}.il2conf.contra{border:1px solid var(--v);background:rgba(239,68,68,.08)}
 #il2Btn{border-color:#06b6d4;color:#22d3ee}#il2Btn.il2on{background:#0e7490;color:#fff;border-color:#22d3ee}
 #srobPop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:9999;overflow-y:auto}
 .srobpc{background:var(--p1);border:1px solid #8b5cf6;border-radius:14px;padding:18px 20px;width:min(580px,98vw);max-height:90vh;overflow-y:auto}
@@ -454,7 +455,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.50 · 04/10/2026 · 🔁 2R+G: cada entrada guarda e mostra a configuração com que abriu';
+const VERSAO='v3.55 · 04/10/2026 · 🔁 2R+G: confirmações (interligado, somente robô, horas pagantes) no popup + operar na conta DEMO';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -1033,12 +1034,79 @@ function hpPills(o, off, step) {
 }
 // 🔁 retomada: pagou ≥ minRun horas seguidas, depois ficou k horas sem pagar e agora deu 1 green
 // devolve quantas horas seguidas pagava antes da falha (0 = não é retomada)
+// 🏆 máximas pagando: para cada horário (mm:ss + alvo), a maior sequência de horas pagando e quando ela aconteceu
+function hpMaxScan(G, alvoFilter, L) {
+  const step = G.step, gpm = 60 / step, out = [];
+  for (let m = 0; m < 60; m++) for (let j = 0; j < gpm; j++) {
+    const off = m * 60 + j * step;
+    for (const alvo of [0, 1]) {
+      if (alvoFilter !== 'all' && +alvoFilter !== alvo) continue;
+      let n = 0, ok = 0, run = 0, ini = 0, max = 0, mIni = 0, mFim = 0, ult = 0, q = 0;
+      for (let hh = G.T0; hh + off <= G.last; hh += 3600) {
+        const T = hh + off; if (T < G.first) continue;
+        const r = gResult(gLadder(G, T, alvo, 2), L); if (r < 0) continue;
+        n++; ult = T;
+        if (r) { ok++; if (!run) ini = T; run++; if (run > max) { max = run; mIni = ini; mFim = T; } } else { run = 0; q++; }
+      }
+      if (n) out.push({ off, m, j, alvo, n, ok, max, mIni, mFim, cur: run, curIni: run ? ini : 0, ult, reds: q });
+    }
+  }
+  return out;
+}
+// filtro "Retomada / Em red agora" da aba (usado também nas confirmações do 2R+G)
+function hpRetFiltra(rows, Lk, minOc) {
+  const retK = String(cfg.hpRet || '0'), retMin = Math.max(1, +(cfg.hpRetMin ?? 6) || 6);
+  if (retK === '0') return [];
+  return rows.map(r => { const o = r.L[Lk]; if (o.n < minOc) return null;
+      const emRed = retK[0] === 'r', ks = retK === '23' ? [2, 3] : retK === 'r123' ? [1, 2, 3] : [+retK.replace('r', '')];
+      for (const k of ks) { const run = emRed ? hpEmRed(o, k, retMin) : hpRetomada(o, k, retMin); if (run) return { ...r, run, k, emRed, next: hpNext(r.off) }; } return null; })
+    .filter(Boolean).sort((a, b) => a.next - b.next);
+}
+// 🔴 em red agora: pagava ≥ minRun horas seguidas e as últimas k horas não pagaram (sem green ainda)
+function hpEmRed(o, k, minRun) {
+  const r = o.hist.map(x => x.r), n = r.length;
+  if (n < k + 1) return 0;
+  for (let i = n - k; i < n; i++) if (r[i] !== 0) return 0;
+  let run = 0; for (let i = n - 1 - k; i >= 0 && r[i] === 1; i--) run++;
+  return run >= minRun ? run : 0;
+}
 function hpRetomada(o, k, minRun) {
   const r = o.hist.map(x => x.r), n = r.length;
   if (n < k + 2 || r[n - 1] !== 1) return 0;
   for (let i = n - 1 - k; i < n - 1; i++) if (r[i] !== 0) return 0;
   let run = 0; for (let i = n - 2 - k; i >= 0 && r[i] === 1; i--) run++;
   return run >= minRun ? run : 0;
+}
+function hpMaxHtml(G, Lk, step, minOc) {
+  if (!+(cfg.hpMaxOn ?? 1)) return `<div class="panel"><h3>🏆 Máximas pagando <small><button onclick="cfg.hpMaxOn=1;saveCfg();fillRes()">mostrar</button></small></h3></div>`;
+  let M = hpMaxScan(G, cfg.hpAlvo ?? 'all', Lk).filter(r => r.n >= minOc);
+  if (cfg.hpMin !== 'all' && cfg.hpMin !== undefined && cfg.hpMin !== '') M = M.filter(r => r.m === +cfg.hpMin);
+  const minMax = Math.max(1, +(cfg.hpMaxMin ?? 6) || 6);
+  const top = M.filter(r => r.max >= minMax).sort((a, b) => b.max - a.max || b.ok / b.n - a.ok / a.n).slice(0, +(cfg.hpMaxTop ?? 60));
+  const dh = T => { const d = new Date(T * 1000); return `${p2d(d.getDate())}/${p2d(d.getMonth() + 1)} ${hmsOf(T)}`; };
+  // por minuto: a maior máxima de cada minuto e onde foi
+  const porMin = [...Array(60).keys()].map(m => { const A = M.filter(r => r.m === m); if (!A.length) return null; const b = A.reduce((x, y) => y.max > x.max ? y : x);
+    return { m, b, media: A.reduce((s, r) => s + r.max, 0) / A.length, n6: A.filter(r => r.max >= minMax).length }; }).filter(Boolean);
+  // por hora do dia: quantas máximas (≥ mín.) estavam pagando em cada hora do relógio
+  const porHora = [...Array(24)].map(() => 0); for (const r of top) for (let T = r.mIni; T <= r.mFim; T += 3600) porHora[new Date(T * 1000).getHours()]++;
+  const pmax = Math.max(1, ...porHora);
+  return `<div class="panel" style="border-color:#eab308"><h3>🏆 Máximas pagando <small>maior sequência de horas pagando (${NIVEL[Lk]}) de cada horário · com a hora e o minuto exatos de início e fim</small></h3>
+    <div class="ctl"><label>Máxima de pelo menos <input type="number" min="1" value="${minMax}" style="width:55px" onchange="cfg.hpMaxMin=+this.value;saveCfg();fillRes()"> h</label>
+      <label>Mostrar <select onchange="cfg.hpMaxTop=+this.value;saveCfg();fillRes()">${[30, 60, 120, 300].map(v => `<option ${+(cfg.hpMaxTop ?? 60) === v ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+      <button onclick="cfg.hpMaxOn=0;saveCfg();fillRes()">esconder</button>
+      <span class="mu" style="font-size:12px">${top.length} horários com máxima ≥ ${minMax}h · usa o período, alvo, minuto e mín. ocorrências lá de cima</span></div>
+    ${top.length ? `<div class="tw" style="max-height:420px"><table><tr><th>Horário</th><th>Alvo</th><th>Máxima</th><th>Começou</th><th>Terminou</th><th>Situação agora</th><th>Taxa</th><th>Próxima</th></tr>
+      ${top.map(r => { const vivo = r.cur > 0 && r.mFim === r.ult && r.cur === r.max;
+        return `<tr class="${vivo ? 'hpstrong' : ''}"><td><b>:${msOf(r.off)}</b></td><td>${tagc(r.alvo)}</td><td class="ok"><b>${r.max}h</b></td><td>${dh(r.mIni)}</td><td>${dh(r.mFim)}</td>
+        <td>${vivo ? '<span class="ok"><b>🔥 na máxima agora</b></span>' : r.cur ? `<span class="ok">pagando ${r.cur}h</span>` : '<span class="ruim">em red</span>'}</td>
+        <td>${(100 * r.ok / r.n).toFixed(1)}% <span class="mu">${r.ok}/${r.n}</span></td><td>${hmsOf(hpNext(r.off))}</td></tr>`; }).join('')}</table></div>`
+      : `<div class="nota">Nenhum horário com máxima ≥ ${minMax}h nesse filtro.</div>`}
+    <div class="grid2" style="margin-top:10px">
+      <div><b style="font-size:12px">⏱ Por minuto (maior máxima de cada minuto)</b><div class="tw" style="max-height:300px"><table><tr><th>Minuto</th><th>Maior máxima</th><th>Horário / alvo</th><th>Quando</th><th>Média</th><th>≥ ${minMax}h</th></tr>
+        ${porMin.sort((a, b) => b.b.max - a.b.max).map(x => `<tr><td><b>:${p2d(x.m)}</b></td><td class="ok"><b>${x.b.max}h</b></td><td>:${msOf(x.b.off)} ${tagc(x.b.alvo)}</td><td class="mu">${dh(x.b.mIni).slice(6, 11)} → ${dh(x.b.mFim).slice(6, 11)}</td><td>${x.media.toFixed(1)}h</td><td>${x.n6}</td></tr>`).join('')}</table></div></div>
+      <div><b style="font-size:12px">🕐 Horas do dia em que essas máximas estavam pagando</b><div class="tw" style="max-height:300px"><table><tr><th>Hora</th><th>Máximas pagando</th><th></th></tr>
+        ${porHora.map((n, hh) => `<tr><td>${p2d(hh)}h</td><td><b>${n}</b></td><td style="width:60%"><div style="height:8px;border-radius:4px;background:#eab308;width:${(100 * n / pmax).toFixed(0)}%"></div></td></tr>`).join('')}</table></div></div>
+    </div></div>`;
 }
 VIEWS.hpag = { nome: '🕐 Horas Pagantes', html() {
   return `<div class="panel"><h3>🕐 Horas pagantes — minuto + segundo exato</h3>
@@ -1049,7 +1117,7 @@ VIEWS.hpag = { nome: '🕐 Horas Pagantes', html() {
       <label>A partir de ${inp('hpMinSeq', 45)} h seguidas</label>
       <label>Mín. ocorrências ${inp('hpMinOc', 45)}</label>
       <label>Minuto ${sel('hpMin', [['all', 'todos'], ...[...Array(60).keys()].map(m => [m, ':' + p2d(m)])])}</label>
-      <label style="border:1px solid #f59e0b;border-radius:8px;padding:3px 8px">🔁 Retomada ${sel('hpRet', [['0', 'desligada'], ['2', '2h sem pagar + 1 green'], ['3', '3h sem pagar + 1 green'], ['23', '2h ou 3h + 1 green']])}</label>
+      <label style="border:1px solid #f59e0b;border-radius:8px;padding:3px 8px">🔁 Retomada ${sel('hpRet', [['0', 'desligada'], ['2', '2h sem pagar + 1 green'], ['3', '3h sem pagar + 1 green'], ['r1', '🔴 em red agora: 1h sem pagar'], ['r2', '🔴 em red agora: 2h sem pagar'], ['r3', '🔴 em red agora: 3h sem pagar'], ['r123', '🔴 em red agora: 1h a 3h sem pagar'], ['23', '2h ou 3h + 1 green']])}</label>
       <label>pagava antes ≥ ${inp('hpRetMin', 45)} h</label>
     </div>
     <div class="nota">Banco <b>${cfg.bank}</b> · ${intervalSummary()}. Cada sinal é um horário exato dentro da hora (ex.: <b>:30:10</b>) e é conferido hora após hora.
@@ -1069,16 +1137,14 @@ VIEWS.hpag = { nome: '🕐 Horas Pagantes', html() {
     .sort((a, b) => b.L[Lk].cur - a.L[Lk].cur || b.L[Lk].rate - a.L[Lk].rate || b.L[Lk].n - a.L[Lk].n);
   // 🔁 retomada (independe do filtro "a partir de")
   const retK = String(cfg.hpRet || '0'), retMin = Math.max(1, +(cfg.hpRetMin ?? 6) || 6);
-  const ret = retK === '0' ? [] : rows.map(r => { const o = r.L[Lk]; if (o.n < minOc) return null;
-      for (const k of retK === '23' ? [2, 3] : [+retK]) { const run = hpRetomada(o, k, retMin); if (run) return { ...r, run, k, next: hpNext(r.off) }; } return null; })
-    .filter(Boolean).sort((a, b) => a.next - b.next);
-  const retHtml = retK === '0' ? '' : `<div class="panel" style="border-color:#f59e0b"><h3>🔁 Retomada <small>pagou ≥ ${retMin}h seguidas · ficou ${retK === '23' ? '2 ou 3' : retK}h sem pagar · agora 1 green (${NIVEL[Lk]}) · ${ret.length} horários</small></h3>
+  const ret = hpRetFiltra(rows, Lk, minOc);
+  const retHtml = retK === '0' ? '' : `<div class="panel" style="border-color:#f59e0b"><h3>${retK[0] === 'r' ? '🔴 Em red agora' : '🔁 Retomada'} <small>pagou ≥ ${retMin}h seguidas · ${retK[0] === 'r' ? `está há ${retK === 'r123' ? '1 a 3' : retK.slice(1)}h sem pagar, ainda sem green` : `ficou ${retK === '23' ? '2 ou 3' : retK}h sem pagar · agora 1 green`} (${NIVEL[Lk]}) · ${ret.length} horários</small></h3>
     ${ret.length ? `<div class="tw"><table><tr><th>Próxima entrada</th><th>Alvo</th><th>Escada</th><th>Pagava antes</th><th>Sem pagar</th><th>Agora</th><th>Taxa</th><th>Hora por hora (recente à esquerda)</th></tr>
     ${ret.map(r => { const o = r.L[Lk]; return `<tr class="${r.next - Date.now() / 1000 <= 600 ? 'hpstrong' : ''}"><td><b>${hmsOf(r.next)}</b> <span class="mu">:${msOf(r.off)}</span></td><td>${tagc(r.alvo)}</td>
       <td class="mu">${[0, 1, 2].slice(0, Lk + 1).map(g => NIVEL[g] + ' ' + hmsOf(r.next + g * step).slice(3)).join(' → ')}</td>
-      <td class="ok"><b>${r.run}h</b></td><td class="ruim"><b>${r.k}h</b></td><td class="ok">✅ 1</td><td>${(o.rate * 100).toFixed(1)}% <span class="mu">${o.ok}/${o.n}</span></td>
-      <td><div class="hppills">${hpPills({ hist: o.hist.slice(-(r.run + r.k + 1)) }, r.off, step)}</div></td></tr>`; }).join('')}</table></div>`
-      : '<div class="nota">Nenhum horário em retomada agora com esse filtro.</div>'}</div>`;
+      <td class="ok"><b>${r.run}h</b></td><td class="ruim"><b>${r.k}h</b></td><td class="${r.emRed ? 'ruim' : 'ok'}">${r.emRed ? '❌ red' : '✅ 1'}</td><td>${(o.rate * 100).toFixed(1)}% <span class="mu">${o.ok}/${o.n}</span></td>
+      <td><div class="hppills">${hpPills({ hist: o.hist.slice(-(r.run + r.k + (r.emRed ? 0 : 1))) }, r.off, step)}</div></td></tr>`; }).join('')}</table></div>`
+      : `<div class="nota">Nenhum horário ${retK[0] === 'r' ? 'em red agora' : 'em retomada agora'} com esse filtro.</div>`}</div>`;
   const prox = fil.map(r => ({ ...r, next: hpNext(r.off) })).filter(r => r.next - Date.now() / 1000 <= 3600).sort((a, b) => a.next - b.next).slice(0, 40);
   const horas = Math.round((G.last - G.first) / 3600);
   const lvCells = r => [0, 1, 2].map(l => { const o = r.L[l]; return `<td class="${l === Lk ? 'hpsel' : ''}"><b>${o.cur}h</b> · ${o.n ? (o.rate * 100).toFixed(0) + '%' : '—'} · máx ${o.max}h</td>`; }).join('');
@@ -1087,7 +1153,7 @@ VIEWS.hpag = { nome: '🕐 Horas Pagantes', html() {
     ${card('Passando no filtro', num(fil.length), `≥ ${minSeq}h seguidas · ≥ ${minOc} ocorr.`)}
     ${card('Horas no período', num(horas), `${fmtT(G.first * 1000)} →`)}
     ${card('Ordenando por', NIVEL[Lk], 'sequência atual de horas')}
-  </div>${retHtml}
+  </div>${retHtml}${hpMaxHtml(G, Lk, step, minOc)}
   <div class="panel"><h3>⏭ Próximos sinais <small>próximos 60 minutos, em ordem de horário</small></h3>
     ${prox.length ? `<div class="tw"><table><tr><th>Entrada</th><th>Alvo</th><th>Escada</th><th>${NIVEL[Lk]} seguidas</th><th>Taxa</th><th>Onde pagou</th></tr>
     ${prox.map(r => { const o = r.L[Lk]; return `<tr class="${o.cur >= 4 ? 'hpstrong' : ''}"><td><b>${hmsOf(r.next)}</b></td><td>${tagc(r.alvo)}</td>
@@ -5543,11 +5609,21 @@ function il2Scan() {
       if (!il2Cond(g, alvo) || g.T - agora < lead) continue;
       const E = { id: 'IL2' + g.T, T0: g.T, alvo, g: 0, tent: [], fim: false, abriu: Date.now(), cf: il2CfgFoto(), fontes: g.f[alvo].map(il2Slim), contra: g.f[1 - alvo].length, gstep: (+(cfg.il2_alvo ?? ilAlvoS())) * 1000 };
       IL2.abertas.push(E); IL2.abertas.sort((a, b) => a.T0 - b.T0);
+      try { E.conf = il2Confs(E); } catch (e) {}
+      il2Demo(E);
       try { beep(); setTimeout(beep, 250); } catch (e) {}
       if (+(cfg.il2_pop ?? 1)) il2Abrir();
       break;
     }
   }
+}
+// 💼 conta DEMO: 0 desligado · 1 todas as entradas · 2 só com confirmação a favor (e nenhuma contra)
+function il2Demo(E) {
+  const m = +(cfg.il2_demo ?? 0); if (!m || E.demo || typeof dmRegistrar !== 'function') return;
+  if (m === 2) { const C = E.conf || { a: [], c: [] }; if (!C.a.length || C.c.length) return; }
+  if (E.T0 / 1000 - srvNow() < 1.5) return;                                  // tarde demais para comprar no segundo certo
+  E.demo = 1;
+  dmRegistrar({ key: 'il2|' + E.id, src: '2R+G', nome: `🔁 2R+G ${E.fontes.length}f${E.conf && E.conf.a.length ? ' +' + E.conf.a.length + '✔' : ''}`, sym: curSym(), T: E.T0 / 1000, step: E.gstep / 1000, maxN: E.cf ? E.cf.gale : il2Gale(), ct: E.alvo ? 'DIGITODD' : 'DIGITEVEN' });
 }
 function il2Resolve() {
   const agora = srvNow() * 1000;
@@ -5563,7 +5639,7 @@ function il2Resolve() {
 }
 function il2Fecha(E, res) {
   E.fim = true; E.fimT = Date.now(); E.res = res;
-  if (res === 'green' || res === 'red') { IL2.log.push({ T0: E.T0, alvo: E.alvo, res, nivel: res === 'green' ? E.g : -1, gale: E.cf ? E.cf.gale : il2Gale(), cf: E.cf, tent: E.tent, fontes: E.fontes, contra: E.contra }); il2Save(); }
+  if (res === 'green' || res === 'red') { IL2.log.push({ T0: E.T0, alvo: E.alvo, res, nivel: res === 'green' ? E.g : -1, gale: E.cf ? E.cf.gale : il2Gale(), cf: E.cf, conf: E.conf ? { a: E.conf.a.map(x => x.k), c: E.conf.c.map(x => x.k) } : null, tent: E.tent, fontes: E.fontes, contra: E.contra }); il2Save(); }
   il2Render();
 }
 // ---------- tela (popup ciano) ----------
@@ -5571,6 +5647,45 @@ function il2Abrir() { IL2.open = true; const p = $('#il2Pop'); if (!p) return; p
 function il2Fechar() { IL2.open = false; const p = $('#il2Pop'); if (p) p.style.display = 'none'; }
 function il2Btn() { const b = $('#il2Btn'); if (!b) return; const E = IL2.abertas.find(e => !e.fim); b.className = il2On() ? 'il2on' : ''; b.textContent = E ? `🔁 2R+G: ${E.alvo ? 'ÍMPAR' : 'PAR'} ${hmsOf(E.T0 / 1000)}` : il2On() ? '🔁 2R+G ●' : '🔁 2R+G'; }
 function il2Set(k, v) { cfg[k] = v; saveCfg(); IL2.bk = {}; IL2.hp = {}; IL2.col = {}; IL2.k = ''; il2Render(true); }
+// ✔ confirmações de outras ferramentas para o mesmo jogo: 🔗 Interligado · 🎯 Somente Robô · 🕐 Horas pagantes (filtro da aba)
+let IL2_HPC = {};
+function il2HpConf(s) {
+  const bank = d5BankName(s), C = IL2_HPC[bank] || (IL2_HPC[bank] = {}), key = [cfg.hpRet, cfg.hpRetMin, cfg.hpOrd, cfg.hpMinSeq, cfg.hpMinOc, cfg.hpPer].join('|');
+  if (C.rows && C.key === key && Date.now() - C.t < 60000) return C;
+  C.key = key; C.t = Date.now(); C.rows = []; C.modo = '';
+  try {
+    const W = liveW(bank) || []; if (W.length < 500) return C;
+    const per = +cfg.hpPer || 0, G = gridBuild(W, s, per ? W.at(-1).t - per * 3600e3 : 0); if (!G) return C;
+    const Lk = cfg.hpOrd === 'ts' ? 0 : cfg.hpOrd === 'g1' ? 1 : 2, minOc = Math.max(1, +cfg.hpMinOc || 1), rows = hpScan(G, 'all'), retK = String(cfg.hpRet || '0');
+    if (retK !== '0') { C.rows = hpRetFiltra(rows, Lk, minOc).map(r => ({ off: r.off, alvo: r.alvo, txt: `${r.emRed ? '🔴 em red ' + r.k + 'h' : '🔁 retomada ' + r.k + 'h'} · pagava ${r.run}h` })); C.modo = retK[0] === 'r' ? 'em red agora' : 'retomada'; }
+    else { const min = Math.max(1, +cfg.hpMinSeq || 1); C.rows = rows.filter(r => r.L[Lk].n >= minOc && r.L[Lk].cur >= min).map(r => ({ off: r.off, alvo: r.alvo, txt: `${r.L[Lk].cur}h seguidas pagando` })); C.modo = `≥ ${min}h seguidas`; }
+    C.lv = Lk;
+  } catch (e) { console.warn('2R+G conf horas', e); }
+  return C;
+}
+function il2Confs(E) {
+  const out = { a: [], c: [] }, T = E.T0, s = Math.round(E.gstep / 1000);
+  const put = (alvo, x) => (alvo === E.alvo ? out.a : out.c).push(x);
+  // 🔗 interligado: fontes 100% apontando este jogo (e entrada aberta do interligado)
+  try {
+    if (Date.now() - (IL.scanT || 0) > 15000) { IL.agenda = ilColeta(); IL.scanT = Date.now(); }
+    const g = (IL.agenda || []).find(x => x.T === T);
+    if (g) for (const al of [0, 1]) if (g.f[al].length) put(al, { k: 'il', txt: `🔗 Interligado: ${g.f[al].length} fonte${g.f[al].length > 1 ? 's' : ''} 100% (${[...new Set(g.f[al].map(f => f.s))].join('/')}s)` });
+    const ia = (IL.abertas || []).find(x => x.T0 === T && !x.fim); if (ia) put(ia.alvo, { k: 'il', txt: '🔗 Interligado abriu entrada neste jogo' });
+  } catch (e) {}
+  // 🎯 somente robô
+  for (const g of SROB_SIG) { if (g.done || g.dorm) continue; for (let k = 0; k <= g.nivel; k++) if (g.entryT + k * g.step === T) { put(g.alvo, { k: 'sr', txt: `🎯 Somente Robô ${g.slot + 1}: ${g.nome}${k ? ' (' + IL_NT[k] + ')' : ''}` }); break; } }
+  // 🕐 horas pagantes (com o filtro da aba: retomada / em red agora / ≥ N h)
+  try { const C = il2HpConf(s), off = (((T / 1000) % 3600) + 3600) % 3600; for (const r of C.rows) for (let k = 0; k <= (C.lv || 0); k++) if (r.off + k * s === off) { put(r.alvo, { k: 'hp', txt: `🕐 Horas pagantes :${msOf(r.off)} (${C.modo}) · ${r.txt}${k ? ' · ' + IL_NT[k] : ''}` }); break; } } catch (e) {}
+  return out;
+}
+function il2ConfHtml(E) {
+  const C = E.fim && E.conf ? E.conf : il2Confs(E);
+  if (!E.fim) E.conf = C;
+  if (!C.a.length && !C.c.length) return '<div class="il2conf mu">✔ Confirmações: nenhuma das outras ferramentas (🔗 interligado, 🎯 somente robô, 🕐 horas pagantes) aponta este jogo.</div>';
+  return `<div class="il2conf ${C.a.length && !C.c.length ? 'ok' : C.c.length ? 'contra' : ''}"><b>✔ Confirmações: ${C.a.length} a favor${C.c.length ? ` · <span class="ruim">${C.c.length} contra</span>` : ''}</b>
+    ${C.a.map(x => `<div>✅ ${x.txt} → ${tagc(E.alvo)}</div>`).join('')}${C.c.map(x => `<div class="ruim">⚠ ${x.txt} → ${tagc(1 - E.alvo)}</div>`).join('')}</div>`;
+}
 function il2EntradaHtml(E) {
   const Tg = (E.T0 + E.g * E.gstep) / 1000, falta = Math.ceil(Tg - srvNow());
   const tp = [...new Set(E.fontes.map(f => f.s))].sort((a, b) => a - b).map(s => `<span class="iltp il2tp">${s}s ×${E.fontes.filter(f => f.s === s).length}</span>`).join(' ');
@@ -5580,6 +5695,7 @@ function il2EntradaHtml(E) {
     ${(E.cf ? E.cf.gale : il2Gale()) ? `<div class="mu" style="font-size:12px">${[0, 1, 2].slice(0, (E.cf ? E.cf.gale : il2Gale()) + 1).map(g => `${IL_NT[g]} ${hmsOf((E.T0 + g * E.gstep) / 1000)}`).join(' → ')}</div>` : ''}
     ${E.cf ? `<div style="font-size:11px;color:#67e8f9;margin-top:2px">⚙ ${il2CfgTxt(E.cf)}</div>` : ''}
     <div style="font-size:15px;font-weight:800;margin:6px 0">${E.fim ? (E.res === 'green' ? `<span class="ok">✅ GREEN ${IL_NT[E.g]} · ${E.tent.map(t => t.d).join(' / ')}</span>` : E.res === 'red' ? `<span class="ruim">❌ RED · ${E.tent.map(t => t.d).join(' / ')}</span>` : 'sem dado') : `${IL_NT[E.g]} ${hmsOf(Tg)} · ${falta > 0 ? 'faltam ' + falta + 's' : 'em jogo…'}`}</div>
+    ${il2ConfHtml(E)}
     <div class="nota" style="margin:0">${E.fontes.map(f => `<span class="iltp il2tp">${f.s}s</span> ${f.md ? IL2_MODOS[f.md].tag + ' ' : ''}${IL2_TIPO[f.tipo] || ''} · ${f.txt} <span class="mu">(${f.casos})</span>`).join('<br>')}</div></div>`;
 }
 function il2AgendaHtml() {
@@ -5609,6 +5725,7 @@ function il2RelHtml() {
         <h4>Por modo</h4>${tab('Modo', (() => { const M = new Map(); for (const x of L) for (const m of new Set(x.fontes.map(f => f.md || 'RRG'))) { if (!M.has(m)) M.set(m, []); M.get(m).push(x); } return [...M.entries()].map(([m, A]) => [IL2_MODOS[m] ? IL2_MODOS[m].tag + ' ' + IL2_MODOS[m].txt : m, A]); })())}
         <h4>Por tempos</h4>${tab('Tempos', ilAgrupa(L, x => [...new Set(x.fontes.map(f => f.s))].sort((a, b) => a - b).join(' + ') + 's'))}</div>
     </div>
+    <h4>✔ Por confirmação</h4>${tab('Confirmação', ilAgrupa(L, x => !x.conf ? '(antes desta versão)' : x.conf.c.length ? 'com confirmação contra' : x.conf.a.length ? `com ${x.conf.a.length} a favor (${[...new Set(x.conf.a)].map(k => ({ il: '🔗', sr: '🎯', hp: '🕐' })[k]).join('')})` : 'sem confirmação'))}
     <h4>⚙ Por configuração usada</h4>${tab('Configuração', ilAgrupa(L, x => x.cf ? il2CfgTxt(x.cf) : '(antes desta versão)'))}
     <h4>📋 Entradas (mais nova em cima)</h4><div class="tw" style="max-height:260px"><table><tr><th>Jogo</th><th>Alvo</th><th>Config.</th><th>Fontes</th><th>Dígitos</th><th>Resultado</th></tr>${L.slice().reverse().slice(0, 500).map(x => `<tr><td>${dh(x.T0)}</td><td>${tagc(x.alvo)}</td><td style="font-size:10px;text-align:left">${x.cf ? il2CfgTxt(x.cf) : '—'}</td><td style="text-align:left;font-size:11px">${x.fontes.map(f => `${f.s}s ${IL2_TIPO[f.tipo].split(' ')[0]}${f.md ? IL2_MODOS[f.md].tag : ''} ${f.txt}`).join('<br>')}</td><td>${x.tent.map(t => t.d).join(' / ')}</td><td class="${x.res === 'green' ? 'ok' : 'ruim'}"><b>${x.res === 'green' ? '✅ ' + IL_NT[x.nivel] : '❌ RED'}</b></td></tr>`).join('')}</table></div>`
     : '<div class="nota">Nenhuma entrada do 2R+G fechada neste período ainda.</div>'}`;
@@ -5650,7 +5767,6 @@ function il2HistHtml() {
     ${Object.entries(IL2_MODOS).map(([m, M]) => { const o = R.M[m]; return `<tr style="${il2Modos().includes(m) ? '' : 'opacity:.55'}"><td style="text-align:left">${M.tag} ${M.txt}</td><td>${o.n}</td><td class="ok">${o.g}</td><td>${o.lv.slice(0, il2Gale() + 1).join('/')}</td><td class="ruim">${o.n - o.g}</td><td><b class="${o.n >= 10 ? (o.g / o.n >= 0.5 ? 'ok' : 'ruim') : ''}">${pc(o.g, o.n)}</b></td><td>${o.maxR}</td>
       <td style="text-align:left">${o.ult.map(e => `<span class="hppill ${e.out >= 0 ? 'g' : 'v'}" title="${hmsOf(e.T / 1000)}">${hmsOf(e.T / 1000).slice(0, 5)} ${e.out >= 0 ? '✅' + IL_NT[e.out] : '❌'}</span>`).join('') || '<span class="mu">nunca</span>'}</td></tr>`; }).join('')}</table></div>
   <div style="margin:8px 0"><button onclick="il2PDF('hist')" style="border:2px solid #06b6d4;background:#0e7490;color:#fff;font-weight:800;padding:7px 14px;border-radius:9px">⬇ Baixar histórico do passado (PDF) — ${num(il2HistFiltro(R).length)} ocorrências</button></div>
-  ${il2SimHtml(R)}
   ${il2HistListaHtml(R)}
   <div class="nota" style="margin:4px 0 0">Banco de ${R.s}s · ${num(R.n)} jogos · padrões do scanner (somas, duplas, trios, números) com ≥ ${ilMinCasos()} casos, 100% em ${IL_NT[il2Nivel()]} antes da falha · entrada conferida ${il2Gale() ? 'até ' + IL_NT[il2Gale()] : 'no tiro seco'}. É cada padrão sozinho (sem cruzar fontes) — serve para saber se o modo costuma pagar.</div>`;
 }
@@ -5699,7 +5815,30 @@ function il2SimHtml(R) {
       ${lin('Mão fixa sem gale (só tiro seco)', Z.B, `${(100 * pTS).toFixed(1)}% de acerto no TS · precisa de ${(100 * beFixa).toFixed(1)}% para empatar`)}
       ${lin(`Mão fixa, sobe ×${c.f} depois de red`, Z.C, `até ${c.prog} vez(es), maior entrada ${brl(Z.stMax).slice(1)}`)}
     </table></div>
-    <div class="nota" style="margin:6px 0 0"><b>Leitura:</b> ${il2SimDicas(Z, L, pTS, beFixa)}</div></div>`;
+    <div class="nota" style="margin:6px 0 0"><b>Leitura:</b> ${il2SimDicas(Z, L, pTS, beFixa)}</div>
+    ${il2FatorHtml(L)}</div>`;
+}
+// 🔎 testa fatores de gale (1,0 a 4,0) em cada nível até o gale configurado e mostra onde daria lucro
+function il2FatorHtml(L) {
+  const c = il2SimCfg(), G = c.gale, cnt = [0, 1, 2].map(k => L.filter(e => e.out === k).length), red = L.filter(e => e.out < 0).length;
+  if (L.length < 30) return '';
+  const ev = (f, gl) => { let v = 0; for (let k = 0; k <= gl; k++) { let gasto = 0; for (let i = 0; i < k; i++) gasto += c.e * f ** i; v += cnt[k] * (c.e * f ** k * c.p - gasto); }
+    const r = red + cnt.slice(gl + 1).reduce((a, b) => a + b, 0); let custo = 0; for (let i = 0; i <= gl; i++) custo += c.e * f ** i; return v - r * custo; };
+  // acerto de cada etapa: TS; G1 dado que o TS perdeu; G2 dado que o G1 perdeu
+  const chegou = [L.length, L.length - cnt[0], L.length - cnt[0] - cnt[1]], be = 1 / (1 + c.p);
+  const etapa = [0, 1, 2].slice(0, G + 1).map(k => ({ k, n: chegou[k], g: cnt[k], pct: chegou[k] ? cnt[k] / chegou[k] : 0 }));
+  const fs = []; for (let f = 1; f <= 4.0001; f += 0.1) fs.push(+f.toFixed(1));
+  const linhas = [0, 1, 2].slice(1, G + 1).map(gl => { const v = fs.map(f => ev(f, gl)), i = v.indexOf(Math.max(...v)); let custo = 0; for (let j = 0; j <= gl; j++) custo += c.e * fs[i] ** j; return { gl, v, best: fs[i], bv: v[i], custo }; });
+  const mostrar = [1.0, 1.5, 2.0, 2.2, 2.5, 3.0, 3.5, 4.0];
+  return `<details style="margin-top:8px" ${cfg.il2_fAberto ? 'open' : ''} ontoggle="cfg.il2_fAberto=this.open?1:0;saveCfg()"><summary style="cursor:pointer;color:#67e8f9;font-weight:700">🔎 Qual fator de gale daria lucro? (testa de 1,0 a 4,0)</summary>
+    <div class="nota" style="margin:6px 0">Acerto de cada etapa: ${etapa.map(x => `<b>${IL_NT[x.k]}</b> ${(100 * x.pct).toFixed(1)}% <span class="mu">(${x.g}/${x.n})</span> <span class="${x.pct > be ? 'ok' : 'ruim'}">${x.pct > be ? '▲' : '▼'}</span>`).join(' · ')} — cada etapa precisa passar de <b>${(100 * be).toFixed(1)}%</b> para valer a pena apostar mais nela. O fator só ajuda se a etapa do gale acerta acima disso; se acerta abaixo, quanto maior o fator, maior o prejuízo.</div>
+    ${linhas.length ? `<div class="tw"><table><tr><th>Gale até</th>${mostrar.map(f => `<th>×${f.toFixed(1).replace('.', ',')}</th>`).join('')}<th>Melhor</th><th></th></tr>
+      ${linhas.map(x => `<tr><td><b>${IL_NT[x.gl]}</b></td>${mostrar.map(f => { const v = x.v[fs.indexOf(f)]; return `<td class="${v > 0 ? 'ok' : 'ruim'}">${brl(v)}</td>`; }).join('')}
+        <td class="${x.bv > 0 ? 'ok' : 'ruim'}"><b>×${x.best.toFixed(1).replace('.', ',')} → ${brl(x.bv)}</b><div class="mu" style="font-size:10px">red custa ${brl(x.custo).slice(1)}</div></td>
+        <td>${x.bv > 0 ? `<button onclick="cfg.il2_sFat=${x.best};cfg.il2_gale=${x.gl};saveCfg();il2Render(true)">usar</button>` : ''}</td></tr>`).join('')}
+      <tr><td><b>sem gale</b></td><td colspan="${mostrar.length}" class="${ev(1, 0) > 0 ? 'ok' : 'ruim'}">${brl(ev(1, 0))} (o fator não muda nada no tiro seco)</td><td></td><td></td></tr></table></div>`
+      : '<div class="nota">A "Entrada" está em tiro seco — mude para até G1 ou até G2 lá em cima para testar fatores.</div>'}
+    <div class="nota" style="margin:4px 0 0">⚠ O fator "melhor" é escolhido olhando o mesmo passado — no futuro costuma render menos. Fator alto também faz cada red custar muito mais: confira a coluna "Pior queda" antes de usar.</div></details>`;
 }
 function il2SimDicas(Z, L, pTS, be) {
   if (L.length < 30) return 'poucas entradas ainda — com menos de ~30 qualquer resultado pode ser sorte.';
@@ -5713,7 +5852,7 @@ function il2SimDicas(Z, L, pTS, be) {
   return d.join(' ');
 }
 function il2HistListaHtml(R) {
-  const SIM = il2SimLinhas(il2HistFiltro(R)), L = il2HistFiltro(R).slice().reverse(), g = L.filter(e => e.out >= 0).length;
+  const L = il2HistFiltro(R).slice().reverse(), g = L.filter(e => e.out >= 0).length;
   const sel = (k, ops) => `<select onchange="cfg.${k}=this.value;saveCfg();$('#il2Hist').innerHTML=il2HistHtml()">${ops.map(([v, t]) => `<option value="${v}" ${(cfg[k] || 'todos') === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
   return `<details ${cfg.il2_hAberto ? 'open' : ''} ontoggle="cfg.il2_hAberto=this.open?1:0;saveCfg()" style="margin-top:8px"><summary style="cursor:pointer;color:#67e8f9;font-weight:700">📋 Histórico completo — ${num((R.ev || []).length)} ocorrências (clique para abrir)</summary>
     <div class="ctl" style="margin-top:6px"><label>Modo ${sel('il2_hFm', [['todos', 'todos'], ...Object.entries(IL2_MODOS).map(([m, M]) => [m, M.tag + ' ' + M.txt])])}</label>
@@ -5721,12 +5860,11 @@ function il2HistListaHtml(R) {
       <label>Tipo ${sel('il2_hFf', [['todos', 'todos'], ['Soma', 'somas'], ['Dupla', 'duplas'], ['Trio', 'trios'], ['Número', 'números']])}</label>
       <button onclick="il2PDF('hist')">⬇ baixar histórico completo (PDF)</button>
       <span class="mu" style="font-size:12px">${num(L.length)} no filtro · ${g} green · ${L.length - g} red · ${L.length ? (100 * g / L.length).toFixed(1) + '%' : '—'}</span></div>
-    <div class="tw" style="max-height:380px"><table><tr><th>Entrada (data hora:seg)</th><th>Modo</th><th style="text-align:left">Padrão</th><th>Gatilho</th><th>Gatilho saiu</th><th>Alvo</th><th>Antes (últimas 8)</th><th>Dígitos</th><th>Resultado</th><th>Gale</th><th>Saldo gale</th><th>Mão fixa</th><th>Saldo fixa</th></tr>
-    ${L.slice(0, 2000).map((e, i) => { const z = SIM[SIM.length - 1 - i]; return `<tr><td><b>${il2DHS(e.T)}</b></td><td>${IL2_MODOS[e.m].tag}</td><td style="text-align:left;font-size:11px">${e.pad}</td><td>${e.gat}</td><td class="mu">${il2DHS(e.trigT).slice(11)}</td><td>${tagc(e.alvo)}</td>
+    <div class="tw" style="max-height:380px"><table><tr><th>Entrada (data hora:seg)</th><th>Modo</th><th style="text-align:left">Padrão</th><th>Gatilho</th><th>Gatilho saiu</th><th>Alvo</th><th>Antes (últimas 8)</th><th>Dígitos</th><th>Resultado</th></tr>
+    ${L.slice(0, 2000).map((e, i) => { return `<tr><td><b>${il2DHS(e.T)}</b></td><td>${IL2_MODOS[e.m].tag}</td><td style="text-align:left;font-size:11px">${e.pad}</td><td>${e.gat}</td><td class="mu">${il2DHS(e.trigT).slice(11)}</td><td>${tagc(e.alvo)}</td>
       <td style="letter-spacing:1px;font-family:monospace">${[...e.ant].map(c => `<span class="${c === 'G' ? 'ok' : 'ruim'}">${c === 'G' ? '✅' : '❌'}</span>`).join('')}</td>
       <td>${e.ds.map((d, i) => `<span class="b ${d % 2 ? 'v' : 'g'}" title="${IL_NT[i]} ${il2DHS(e.T + i * R.s * 1000).slice(11)}">${d}</span>`).join(' ')}</td>
-      <td class="${e.out >= 0 ? 'ok' : 'ruim'}"><b>${e.out >= 0 ? '✅ ' + IL_NT[e.out] : '❌ RED'}</b></td>
-      <td class="${z.va >= 0 ? 'ok' : 'ruim'}">${brl(z.va)}</td><td class="${z.sa >= 0 ? 'ok' : 'ruim'}">${brl(z.sa)}</td><td class="${z.vb >= 0 ? 'ok' : 'ruim'}">${brl(z.vb)}</td><td class="${z.sb >= 0 ? 'ok' : 'ruim'}">${brl(z.sb)}</td></tr>`; }).join('')}</table></div>
+      <td class="${e.out >= 0 ? 'ok' : 'ruim'}"><b>${e.out >= 0 ? '✅ ' + IL_NT[e.out] : '❌ RED'}</b></td></tr>`; }).join('')}</table></div>
     ${L.length > 2000 ? '<div class="nota">Mostrando as 2.000 mais novas na tela — o CSV traz todas.</div>' : ''}</details>`;
 }
 function il2HistCSV() {
@@ -5748,13 +5886,10 @@ function il2PDF(qual) {
     const acaso = [50, 75, 87.5][il2Gale()];
     corpo = `<h2>Resumo por modo</h2><div class="sub">Banco DERIV ${s}s · ${num(R.n)} jogos · padrões do scanner com ≥ ${ilMinCasos()} casos, 100% em ${IL_NT[il2Nivel()]} antes da falha · entrada ${il2Gale() ? 'até ' + IL_NT[il2Gale()] : 'tiro seco'} (o acaso daria ${acaso}%)</div>
       ${tb(['Modo', 'Vezes', 'Green', 'TS/G1/G2', 'Red', '%', 'Reds seguidos (máx.)'], Object.entries(IL2_MODOS).map(([m, M]) => { const o = R.M[m]; return [M.txt, o.n, o.g, o.lv.slice(0, il2Gale() + 1).join('/'), o.n - o.g, `<b>${pc(o.g, o.n)}</b>`, o.maxR]; }))}
-      <h2>Simulação de banca</h2>${(() => { const Z = il2SimResumo(L), c = Z.c; const ln = (n, x) => [n, x.pos, x.neg, brl(x.ganho), brl(x.perda), `<b>${brl(x.tot)}</b>`, brl(-x.dd), x.mseq];
-        return `<div class="sub">Entrada R$ ${c.e.toFixed(2)} · gale ×${c.f} ${c.gale ? 'até ' + IL_NT[c.gale] : 'desligado'} · payout ${Math.round(c.p * 100)}% · subir após red até ${c.prog}×</div>` + tb(['Estratégia', 'Positivas', 'Negativas', 'Ganhou', 'Perdeu', 'Resultado', 'Pior queda', 'Negativas seguidas'], [ln('Com gale', Z.A), ln('Mão fixa sem gale', Z.B), ln('Mão fixa, sobe após red', Z.C)])
-          + `<div class="sub">${il2SimDicas(Z, L, L.length ? L.filter(e => e.out === 0).length / L.length : 0, 1 / (1 + c.p)).replace(/<[^>]+>/g, '')}</div>`; })()}
       <h2>Todas as ocorrências (${num(L.length)}) — mais nova primeiro</h2>
       <div class="sub">Filtro: modo ${cfg.il2_hFm || 'todos'} · resultado ${cfg.il2_hFr || 'todos'} · tipo ${cfg.il2_hFf || 'todos'} · ${L.filter(e => e.out >= 0).length} green · ${L.filter(e => e.out < 0).length} red</div>
-      ${(() => { const SIM = il2SimLinhas(L); return tb(['Entrada', 'Modo', 'Padrão', 'Gatilho', 'Gatilho saiu', 'Alvo', 'Últimas 8 antes', 'TS', 'G1', 'G2', 'Resultado', 'Gale', 'Saldo gale', 'Mão fixa', 'Saldo fixa'], L.map((e, i) => [il2DHS(e.T), IL2_MODOS[e.m].txt, e.pad, e.gat, il2DHS(e.trigT).slice(11), cor(e.alvo), [...e.ant].map(c => c === 'G' ? '✅' : '❌').join(''),
-        ...[0, 1, 2].map(i => e.ds[i] != null ? `${il2DHS(e.T + i * s * 1000).slice(11)} · <b>${e.ds[i]}</b>` : ''), res(e.out >= 0, e.out), brl(SIM[i].va), brl(SIM[i].sa), brl(SIM[i].vb), brl(SIM[i].sb)]).reverse()); })()}`;
+      ${(() => { return tb(['Entrada', 'Modo', 'Padrão', 'Gatilho', 'Gatilho saiu', 'Alvo', 'Últimas 8 antes', 'TS', 'G1', 'G2', 'Resultado'], L.map((e, i) => [il2DHS(e.T), IL2_MODOS[e.m].txt, e.pad, e.gat, il2DHS(e.trigT).slice(11), cor(e.alvo), [...e.ant].map(c => c === 'G' ? '✅' : '❌').join(''),
+        ...[0, 1, 2].map(i => e.ds[i] != null ? `${il2DHS(e.T + i * s * 1000).slice(11)} · <b>${e.ds[i]}</b>` : ''), res(e.out >= 0, e.out)]).reverse()); })()}`;
   } else {
     const per = cfg.il2_relPer || 'all'; let ini = 0;
     if (per === 'hoje') { const d = new Date(); d.setHours(0, 0, 0, 0); ini = d.getTime(); } else if (per !== 'all') ini = Date.now() - (+per) * 3600e3;
@@ -5768,6 +5903,7 @@ function il2PDF(qual) {
       <h2>Por modo</h2>${tb(['Modo', 'Entradas', 'Green', 'Red', '%'], grupo(x => new Set(x.fontes.map(f => IL2_MODOS[f.md || 'RRG'].txt))))}
       <h2>Por tipo de fonte</h2>${tb(['Tipo', 'Entradas', 'Green', 'Red', '%'], grupo(x => new Set(x.fontes.map(f => (IL2_TIPO[f.tipo] || f.tipo).replace(/^\S+ /, '')))))}
       <h2>Por nº de fontes</h2>${tb(['Fontes', 'Entradas', 'Green', 'Red', '%'], grupo(x => [String(x.fontes.length)]))}
+      <h2>Por confirmação</h2>${tb(['Confirmação', 'Entradas', 'Green', 'Red', '%'], grupo(x => [!x.conf ? '(antes desta versão)' : x.conf.c.length ? 'com confirmação contra' : x.conf.a.length ? 'com ' + x.conf.a.length + ' a favor (' + [...new Set(x.conf.a)].map(k => ({ il: 'interligado', sr: 'somente robô', hp: 'horas pagantes' })[k]).join(' + ') + ')' : 'sem confirmação']))}
       <h2>Por configuração usada</h2>${tb(['Configuração', 'Entradas', 'Green', 'Red', '%'], grupo(x => [x.cf ? il2CfgTxt(x.cf) : '(antes desta versão)']))}
       <h2>Hora a hora</h2>${tb(['Hora', 'Entradas', 'Green', 'Red', '%'], H.map(([k, A]) => { const gg = A.filter(x => x.res === 'green').length; return [il2DHS(+k).slice(0, 13) + 'h', A.length, gg, A.length - gg, `<b>${pc(gg, A.length)}</b>`]; }))}
       <h2>Todas as entradas — mais nova primeiro</h2>
@@ -5820,6 +5956,9 @@ function il2Render(full) {
       <label>Mín. fontes ${op('il2_minF', 2, [[1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5']])}</label>
       <label>Jogo de ${op('il2_alvo', ilAlvoS(), [[5, '5s'], [10, '10s'], [20, '20s'], [30, '30s']])}</label>
       ${chk('il2_bloq', 'bloquear se houver contra')}${chk('il2_pop', 'abrir popup na entrada')}</div>
+    <div class="ctl" style="border:1px solid #8b5cf6;border-radius:10px;padding:6px 8px"><b style="font-size:12px;color:#c4b5fd">💼 Conta DEMO:</b>
+      <select onchange="il2Set('il2_demo',+this.value)">${[[0, 'desligado'], [1, 'operar todas as entradas'], [2, 'operar só com confirmação a favor']].map(([v, t]) => `<option value="${v}" ${+(cfg.il2_demo ?? 0) === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      <span class="mu" style="font-size:11px">${typeof DM !== 'undefined' && DM.ok && DM.virt ? `<span class="ok">conectada (${DM.loginid})</span>` : '<span class="ruim">conta demo não conectada — conecte na aba 💼 Conta Demo</span>'} · entrada, gale e stops vêm da aba 💼 Conta Demo · o gale segue o "Entrada até" daqui</span></div>
     <div class="nota" style="margin:0 0 6px;color:#67e8f9">💾 Configuração salva neste navegador — vale para as próximas entradas; cada entrada guarda a configuração com que abriu (aparece no popup e no relatório).</div>
     <div class="ctl"><label>Horas pagantes: pagava ≥ ${op('il2_hpMin', 6, [[3, '3h'], [4, '4h'], [6, '6h'], [8, '8h'], [10, '10h'], [12, '12h']])}</label>
       <label>Colunas: vinha ≥ ${op('il2_colMin', 3, [[2, '2×'], [3, '3×'], [4, '4×'], [5, '5×'], [6, '6×']])}</label>
@@ -5837,7 +5976,7 @@ function il2Render(full) {
 setInterval(() => {
   if (!il2On() && !IL2.open) return;
   try {
-    if (il2On()) il2Resolve();
+    if (il2On()) { il2Resolve(); for (const E of IL2.abertas) if (!E.fim && E.g === 0 && E.T0 / 1000 - srvNow() > 1) { try { E.conf = il2Confs(E); } catch (e) {} il2Demo(E); } }
     const k = il2Tempos().map(s => { const W = liveW(d5BankName(s)); return W && W.length ? W.at(-1).t : 0; }).join('|');
     if (k !== IL2.k || Date.now() - IL2.scanT > 20000) { IL2.k = k; il2Scan(); }
     il2Render(false);
@@ -6246,7 +6385,7 @@ function esPanelHtml(){
 // ---------- 🔐 entrar com a Deriv sem copiar token (OAuth) ----------
 function dmAppId(){ return String(cfg.dm_appId||'').trim().replace(/[^A-Za-z0-9_-]/g,''); }
 function dmAppNovo(){ return /[A-Za-z]/.test(dmAppId()); }          // App ID com letras = portal novo (developers.deriv.com)
-function dmRedir(){ return location.origin+'/'; }
+function dmRedir(){ return location.origin+location.pathname.replace(/[^/]*$/,''); }   // volta para a pasta do site (funciona na raiz da Netlify e em subpasta do GitHub Pages)
 function dmB64u(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
 async function dmOAuth(){
   const id=dmAppId();
@@ -8117,8 +8256,9 @@ function dmOrdHtml(){
 }
 function dmRobosHtml(){
   const L=[...UOB.map(r=>['uo',r,uoRobNome(r),uoNome(r)]),...RBOTS.map(r=>['rb',r,rbName(r),r.alvo?'ÍMPAR':'PAR']),...SRB.map(r=>['sr',r,srNome(r),r.alvo?'ÍMPAR':'PAR'])];
-  if(!L.length) return '<div class="nota">Nenhum robô criado ainda.</div>';
-  return `<div class="tw" style="max-height:320px"><table><tr><th>Tipo</th><th>Robô</th><th>Contrato</th><th>Gale</th><th>Status</th><th>Na DEMO</th></tr>
+  const il2Row=`<tr><td>🔁 2R+G</td><td style="text-align:left">Interligado 2R+G (${il2Modos().map(m=>IL2_MODOS[m].tag).join(' ')} · tempos ${il2Tempos().join('/')}s)</td><td>PAR/ÍMPAR</td><td>${NIVEL[il2Gale()]}</td><td>${il2On()?'🟢':'⚫'}</td><td><select onchange="cfg.il2_demo=+this.value;saveCfg();dmLive()">${[[0,'desligado'],[1,'todas'],[2,'só com confirmação']].map(([v,t])=>`<option value="${v}" ${+(cfg.il2_demo??0)===v?'selected':''}>${t}</option>`).join('')}</select></td></tr>`;
+  if(!L.length) return `<div class="tw"><table><tr><th>Tipo</th><th>Robô</th><th>Contrato</th><th>Gale</th><th>Status</th><th>Na DEMO</th></tr>${il2Row}</table></div>`;
+  return `<div class="tw" style="max-height:320px"><table><tr><th>Tipo</th><th>Robô</th><th>Contrato</th><th>Gale</th><th>Status</th><th>Na DEMO</th></tr>${il2Row}
   ${L.map(([t,r,n,c])=>`<tr><td>${t==='uo'?'📊 Under/Over':t==='rb'?'🤖 Robôs':'⏱ Segundos'}</td><td style="text-align:left">${n}</td><td>${c}</td><td>${t==='uo'?NIVEL[r.lvl]:t==='rb'?NIVEL[rbNivel(r)]:NIVEL[r.nivel]}</td><td>${r.on?'🟢':'⚫'}</td><td>${dmBtn(t,r)}</td></tr>`).join('')}</table></div>`;
 }
 VIEWS.demo={nome:'💼 Conta Demo',live:dmLive,html(){
@@ -9628,7 +9768,7 @@ function srobScanRed(bank, nivel) {
       const mh = modos.find(m => SROB_RMODOS[m].hp && hpRetomada(o, SROB_RMODOS[m].hp, retMin));
       if (mh) { const run = hpRetomada(o, SROB_RMODOS[mh].hp, retMin); out.push({ rm: mh, kind: 'Hora', off: r.off, alvo: r.alvo, skip: 0, done: run, sg: o.pos[0], g1: o.pos[1], g2: o.pos[2], red, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: run, ts: o.pos[0], bank, modo: 'red' }); continue; }
       if (!srobFamOn('Hora') || o.n < minH || red < 1 || red > 2) continue;
-      const tail = o.hist.map(z => z.r), m = modos.find(m => srobCaudaOk(red, tail.slice(-SROB_RMODOS[m].cauda.length), m)); if (m) out.push({ rm: m, kind: 'Hora', off: r.off, alvo: r.alvo, skip: 0, done: o.n, sg: o.pos[0], g1: o.pos[1], g2: o.pos[2], red, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: o.n, ts: o.pos[0], bank, modo: 'red' }); }
+      const tail = o.hist.map(z => z.r), m = modos.find(m => !SROB_RMODOS[m].hp && srobCaudaOk(red, tail.slice(-SROB_RMODOS[m].cauda.length), m)); if (m) out.push({ rm: m, kind: 'Hora', off: r.off, alvo: r.alvo, skip: 0, done: o.n, sg: o.pos[0], g1: o.pos[1], g2: o.pos[2], red, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: o.n, ts: o.pos[0], bank, modo: 'red' }); }
     if (false) for (const r of hfScan(G, 'all')) { const o = [r.ts, r.g1, r.g2][nivel]; const ult = o.hist && o.hist.at(-1); // regra: vindo de red nunca é horário fixo
       if (o.n >= minD && o.n - o.ok === 1 && ult && ult.r === 0) { const x = { kind: 'Dia', off: r.off, alvo: r.alvo, skip: 0, done: o.n, sg: o.levels.ts, g1: o.levels.g1, g2: o.levels.g2, red: 1, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: o.n, ts: o.levels.ts, bank, modo: 'red' }; if (srobNextT(x, agora) - agora <= 3600) out.push(x); } }
   }
