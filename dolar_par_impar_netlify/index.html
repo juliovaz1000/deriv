@@ -312,7 +312,10 @@ button.dmon{background:linear-gradient(90deg,#7c3aed,#2563eb);border-color:trans
 .dmpanel{border-color:#7c3aed;background:linear-gradient(135deg,rgba(124,58,237,.10),var(--p1))}
 .wbtn{padding:2px 7px;font-size:11px;margin-right:3px}.wbtn.on{background:var(--az);border-color:var(--az);color:#fff}
 .uotag{display:inline-block;padding:2px 8px;border-radius:6px;font-weight:800;font-size:12px;color:#fff;white-space:nowrap}
-.uotag.uoU{background:linear-gradient(90deg,#0ea5e9,#2563eb)}.uotag.uoO{background:linear-gradient(90deg,#f59e0b,#db2777)}.uotag.uoM{background:linear-gradient(90deg,#a855f7,#6366f1)}.rbcard.uorob.uoM{border-left:4px solid #a855f7}
+.uotag.uoU{background:linear-gradient(90deg,#0ea5e9,#2563eb)}.uotag.uoO{background:linear-gradient(90deg,#f59e0b,#db2777)}.uonum{display:inline-flex;width:26px;height:26px;border-radius:7px;align-items:center;justify-content:center;font-weight:900;color:#fff}.uonum.par{background:#7c3aed}.uonum.imp{background:#3a3648}
+.uonumgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px}@media(max-width:800px){.uonumgrid{grid-template-columns:1fr}}
+.uobarra{display:grid;grid-template-columns:80px 1fr 44px;gap:6px;align-items:center;font-size:12px;margin:3px 0}.uobarra i{display:block;height:12px;border-radius:4px;background:linear-gradient(90deg,#f59e0b,#ef4444);min-width:2px}.uobarra b{text-align:right}
+.uotag.uoM{background:linear-gradient(90deg,#a855f7,#6366f1)}.rbcard.uorob.uoM{border-left:4px solid #a855f7}
 .uohead{background:linear-gradient(135deg,#131a26,#1a1530)}
 .uowins{display:inline-flex;gap:4px}.uowins button{padding:4px 10px}.uowins button.on{background:linear-gradient(90deg,#3b82f6,#8b5cf6);border-color:transparent;color:#fff}
 .uosubs{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 12px}.uosubs button{background:var(--p1);border:1px solid var(--bd);color:var(--mu)}.uosubs button.on{background:linear-gradient(90deg,#1e3a8a,#5b21b6);color:#fff;border-color:transparent}
@@ -507,7 +510,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.68 · 06/10/2026 · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
+const VERSAO='v3.70 · 06/10/2026 · 📊 Under/Over: 🔢 Máximas por número + 💰 pagamento de cada mercado · virtual mostra só o campo usado · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -7385,7 +7388,7 @@ function uoNome(m){ return (m.mk==='U'?'UNDER ':m.mk==='O'?'OVER ':'DÍGITO ')+m
 function uoTag(m){ return `<span class="uotag ${m.mk==='U'?'uoU':m.mk==='O'?'uoO':'uoM'}">${uoNome(m)}</span>`; }
 const UO_PER=[[1,'1 hora'],[3,'3 horas'],[6,'6 horas'],[12,'12 horas'],[24,'24 horas'],[72,'3 dias'],[168,'7 dias'],[360,'15 dias'],[720,'30 dias'],[0,'todo o banco']];
 const UO_SUBS=[['visao','Visão geral'],['padroes','🎯 Padrões 100%'],['opor','🔥 Oportunidades'],['horas','⏰ Horários pagantes'],['porhora','🕐 Por hora'],['minutos','Minutos pagantes'],['segundos','Segundos pagantes'],
-  ['barreira','Análise por barreira'],['comparar','Comparar janelas'],['maximas','Máximas e sequências'],['criar','🤖 Criar robôs'],['robos','Robôs criados'],['backtest','🧪 Backtest'],['sinais','Histórico de sinais']];
+  ['barreira','Análise por barreira'],['comparar','Comparar janelas'],['maximas','Máximas e sequências'],['numeros','🔢 Máximas por número'],['criar','🤖 Criar robôs'],['robos','Robôs criados'],['backtest','🧪 Backtest'],['sinais','Histórico de sinais']];
 let UO_DATA={}, UO_SCAN={}, UO_BUSY=false, UOB=[], UO_LOG=[], UO_TLOG=[], UO_PREV=null, UO_PREV_CHECK=new Set(), UO_BT=null, UO_STATS={}, UO_SIG=[], UO_POP=null, UO_EDIT=null;
 function uoSym(){ const s=cfg.uo_sym||curSym(); return SYMS_ALL.some(x=>x[0]===s)?s:'R_100'; }
 function uoW(){ const w=+cfg.uo_w||20; return D5_STEPS.includes(w)?w:20; }
@@ -7957,6 +7960,86 @@ function uoSubMaximas(){
     <div class="tw"><table><tr><th>Mercado</th><th>Agora</th><th>Maior sequência green</th><th>Maior sequência red (máx. sem pagar)</th><th>Taxa</th><th>Acaso</th><th>Último red</th></tr>
     ${c.out.filter((_,i)=>mks.includes(i)).map(x=>`<tr><td>${uoTag(x.m)}</td><td>${x.cur?`<span class="ok">${x.cur}× green</span>`:`<span class="ruim">${x.curR}× red</span>`}</td><td>${x.mG}</td><td class="ruim">${x.mR}</td><td>${pct(x.ok,x.n)}</td><td>${(uoBase(x.m)*100).toFixed(0)}%</td><td>${x.lastRed?fmtT(x.lastRed):'—'}</td></tr>`).join('')}</table></div></div>`;
 }
+// =====================================================================================
+// 🔢 MÁXIMAS POR NÚMERO + 💰 PAGAMENTO DE CADA MERCADO (Under/Over)
+// Para cada dígito 0–9 no período: quantas vezes saiu, maior ausência (jogos seguidos sem sair),
+// ausência atual, maior repetição seguida (ex.: quantos 0 seguidos), média entre aparições.
+// Mostra também o pagamento de UNDER 1–9 / OVER 0–8 (real, consultado na Deriv, ou estimado)
+// e o acerto mínimo para empatar, comparado com o acerto real do período.
+// =====================================================================================
+let UO_PAY={}, UO_PAY_BUSY=false;
+const UO_PAY_K=0.975;    // retorno médio da Deriv ≈ 97,5% do justo (igual ao PAR/ÍMPAR de 95%) — só para a estimativa
+function uoPayEst(m){ const p=uoBase(m,0); return UO_PAY_K/p-1; }           // lucro por $1 estimado
+function uoPay(m){ const k=uoNome(m)+'|'+uoSym(); return UO_PAY[k]!=null?{v:UO_PAY[k],real:1}:{v:uoPayEst(m),real:0}; }
+async function uoPayConsultar(){
+  if(UO_PAY_BUSY) return;
+  if(!DM.ok||!DM.ws){ alert('Para ver o pagamento real, conecte a conta DEMO na aba 💼 Conta Demo (só consulta, não aposta nada).'); return; }
+  UO_PAY_BUSY=true; uoMsg('⏳ Consultando o pagamento de cada mercado na Deriv…'); let n=0;
+  for(const m of UO_MK){
+    const params={proposal:1,amount:1,basis:'stake',contract_type:m.mk==='U'?'DIGITUNDER':'DIGITOVER',currency:DM.cur||'USD',duration:1,duration_unit:'t',barrier:String(m.b)};
+    params[DM.novo?'underlying_symbol':'symbol']=uoSym();
+    try{ const r=await dmSend(params,10000); const pay=+(r.proposal?.payout); if(pay>0){ UO_PAY[uoNome(m)+'|'+uoSym()]=pay-1; n++; } }catch(e){ console.warn('proposta',uoNome(m),e.message); }
+  }
+  UO_PAY_BUSY=false; uoMsg(n?`✅ Pagamento real de ${n} mercados carregado (${symNome(uoSym())}).`:'⚠ A Deriv não devolveu os pagamentos — usando a estimativa.'); if(S.tab==='uo') fillRes();
+}
+function uoNumCalc(R){
+  const D=R.filter(x=>x.d!=null), N=D.length, out=[...Array(10).keys()].map(d=>({d,n:0,maxAus:0,curAus:0,maxRep:0,curRep:0,last:0,gaps:[],reps:[],somaGap:0,nGap:0}));
+  const aus=Array(10).fill(0), rep=Array(10).fill(0);
+  for(let i=0;i<N;i++){
+    const d=D[i].d;
+    for(let k=0;k<10;k++){
+      const o=out[k];
+      if(k===d){ if(i>0&&aus[k]>=0){ if(o.n>0){ o.gaps.push(aus[k]); o.somaGap+=aus[k]; o.nGap++; } } aus[k]=0; rep[k]++; if(rep[k]>o.maxRep) o.maxRep=rep[k]; o.n++; o.last=D[i].t; }
+      else { if(rep[k]>0){ o.reps.push(rep[k]); rep[k]=0; } aus[k]++; if(aus[k]>o.maxAus) o.maxAus=aus[k]; }
+    }
+  }
+  for(let k=0;k<10;k++){ out[k].curAus=aus[k]; out[k].curRep=rep[k]; if(rep[k]>0) out[k].reps.push(rep[k]); }
+  // mercados: acerto real e maior red seguido
+  const mk=UO_MK.map(m=>{ let ok=0,rr=0,maxRR=0,cur=0; for(const x of D){ if(uoWin(m,x.d)){ ok++; rr=0; } else { rr++; if(rr>maxRR) maxRR=rr; } } for(let i=D.length-1;i>=0&&!uoWin(m,D[i].d);i--) cur++; return {m,ok,n:N,maxRR,cur}; });
+  return {N,out,mk,ini:D[0]?.t,fim:D.at(-1)?.t};
+}
+function uoNumIrPadroes(mkStr){
+  cfg.uo_pmk=mkStr; cfg.uo_pf={...(cfg.uo_pf||{}),num:1,dupla:1,trio:1,soma:1,chama:0}; cfg.uo_sub='padroes';
+  const w=uoW(); cfg.uo_pw={[w]:1}; saveCfg(); UOP.res=null; renderTab();
+  setTimeout(()=>{ if(typeof uopVarrer==='function') uopVarrer(); },60);
+}
+function uoSubNumeros(){
+  const key=`num|${uoBank()}|${cfg.uo_per}`, c=UO_AGG.num;
+  if(!c||c.key!==key){ UO_AGG.num={key,loading:true}; uoGetData().then(D=>{ UO_AGG.num={key,bank:D.bank,...uoNumCalc(D.rows)}; if(S.tab==='uo') fillRes(); }); return '<div class="nota">⏳ Calculando…</div>'; }
+  if(c.loading) return '<div class="nota">⏳ Calculando…</div>';
+  if(c.N<50) return `<div class="panel"><div class="nota">Só ${c.N} jogos no banco ${c.bank} neste período. Aumente o período ou baixe histórico em 📥 Histórico R_100.</div></div>`;
+  const dSel=+(cfg.uo_numD??0), o=c.out[dSel];
+  // 💰 pagamento
+  const payRows=c.mk.map(x=>{ const P=uoPay(x.m), be=1/(1+P.v), real=x.ok/x.n, dif=real-be, ev=real*P.v-(1-real);
+    return `<tr><td>${uoTag(x.m)}</td><td>${(uoBase(x.m)*100).toFixed(0)}%</td><td><b>${(P.v*100).toFixed(1)}%</b> ${P.real?'<span class="ok" title="pagamento real da Deriv">●</span>':'<span class="mu" title="estimado">≈</span>'}</td><td>${(be*100).toFixed(1)}%</td><td class="${dif>=0?'ok':'ruim'}">${(real*100).toFixed(1)}%</td><td class="${ev>=0?'ok':'ruim'}">${ev>=0?'+':''}${(ev*100).toFixed(1)}¢</td><td class="ruim">${x.maxRR}</td><td>${x.cur?`<span class="ruim">${x.cur} red</span>`:'<span class="ok">green</span>'}</td>
+      <td><button onclick="uoNumIrPadroes('${x.m.mk}${x.m.b}')">🎯 padrões</button></td></tr>`; }).join('');
+  // 🔢 números
+  const numRows=c.out.map(x=>{ const med=x.nGap?x.somaGap/x.nGap:0, alerta=x.maxAus&&x.curAus>=0.8*x.maxAus;
+    return `<tr class="${dSel===x.d?'scativo':''}" style="cursor:pointer" onclick="cfg.uo_numD=${x.d};saveCfg();fillRes()"><td><span class="uonum ${x.d%2?'imp':'par'}">${x.d}</span></td><td>${x.n}</td><td>${pct(x.n,c.N)}</td><td>${med.toFixed(1)}</td>
+      <td class="ruim"><b>${x.maxAus}</b></td><td class="${alerta?'ruim':''}">${x.curAus}${alerta?' ⚠':''}</td><td><b>${x.maxRep}</b></td><td>${x.curRep||'—'}</td><td>${x.last?fmtT(x.last):'—'}</td></tr>`; }).join('');
+  // detalhe do número escolhido
+  const faixas=[[0,4],[5,9],[10,19],[20,29],[30,39],[40,59],[60,99],[100,1e9]];
+  const gh=faixas.map(([a,b])=>({t:b>1e8?`${a}+`:`${a}–${b}`,n:o.gaps.filter(g=>g>=a&&g<=b).length}));
+  const ghMax=Math.max(1,...gh.map(x=>x.n));
+  const rh={}; for(const r of o.reps) rh[r]=(rh[r]||0)+1;
+  const acima=[10,20,30,40,50].map(x=>`<span>≥${x}: <b>${o.gaps.filter(g=>g>=x).length}</b>×</span>`).join(' · ');
+  const overK=o.d===0?'OVER 0':o.d===9?'UNDER 9':null;
+  return `<div class="panel"><h3>💰 Pagamento de cada mercado <small>${symNome(uoSym())} · ${c.bank} · ${num(c.N)} jogos · ${uoPerLbl(cfg.uo_per)}</small></h3>
+    <div class="ctl"><button class="pri" onclick="uoPayConsultar()" ${UO_PAY_BUSY?'disabled':''}>🔄 consultar pagamento real na Deriv</button><span class="nota">● = real da Deriv · ≈ = estimado. Consultar não aposta nada.</span></div>
+    <div class="tw"><table><tr><th>Mercado</th><th>Chance de ganhar</th><th>Paga (lucro)</th><th>Acerto p/ empatar</th><th>Acerto no período</th><th>Resultado médio por $1</th><th>Maior red seguido</th><th>Agora</th><th></th></tr>${payRows}</table></div>
+    <div class="nota"><b>Como ler:</b> OVER 0 ganha em 9 de cada 10 jogos, mas paga pouco (~${(uoPay({mk:'O',b:0}).v*100).toFixed(0)}%). Para empatar precisa acertar <b>${(100/(1+uoPay({mk:'O',b:0}).v)).toFixed(1)}%</b> — mais que os 90% do acaso. Cada red (sair 0) apaga ~${Math.round(1/uoPay({mk:'O',b:0}).v)} greens. Gale no OVER 0 é perigoso: para recuperar $1 no G1 é preciso apostar ~$${(1/uoPay({mk:'O',b:0}).v).toFixed(0)}. "Resultado médio" positivo só aparece quando o período acertou acima do necessário — pode ser sorte do período.</div></div>
+  <div class="panel"><h3>🔢 Máximas de cada número <small>clique num número para ver o detalhe</small></h3>
+    <div class="tw"><table><tr><th>Nº</th><th>Saiu</th><th>%</th><th>Média entre aparições</th><th>Maior ausência (jogos sem sair)</th><th>Ausência agora</th><th>Maior repetição seguida</th><th>Repetindo agora</th><th>Última vez</th></tr>${numRows}</table></div>
+    <div class="nota">Esperado no acaso: cada número sai 10%, com média de 9 jogos entre aparições. ⚠ = ausência atual já passou de 80% da maior do período. Atraso não aumenta a chance do próximo jogo (cada tick é independente) — use como informação, não como garantia.</div></div>
+  <div class="panel"><h3>Detalhe do número <span class="uonum ${o.d%2?'imp':'par'}">${o.d}</span> ${overK?`<small>sair ${o.d} = RED do ${overK}</small>`:''}</h3>
+    <div class="cards">${card('Saiu',`${o.n}×`,pct(o.n,c.N))}${card('Maior ausência',`${o.maxAus} jogos`,`agora ${o.curAus}`)}${card('Maior repetição',`${o.maxRep}× seguidas`,`${o.reps.filter(r=>r>=2).length} vezes em dupla ou mais`)}${card('Média entre aparições',(o.nGap?o.somaGap/o.nGap:0).toFixed(1)+' jogos','acaso: 9')}</div>
+    <div class="uonumgrid"><div><b>Ausências (jogos sem sair entre uma aparição e outra)</b>${gh.map(x=>`<div class="uobarra"><span>${x.t}</span><i style="width:${(x.n/ghMax*100).toFixed(0)}%"></i><b>${x.n}</b></div>`).join('')}<div class="nota">Quantas vezes ficou ausente: ${acima}</div></div>
+      <div><b>Repetições seguidas (${o.d} saindo várias vezes em sequência)</b>${Object.keys(rh).sort((a,b)=>a-b).map(r=>`<div class="uobarra"><span>${r}× seguido${r>1?'s':''}</span><i style="width:${(rh[r]/Math.max(...Object.values(rh))*100).toFixed(0)}%"></i><b>${rh[r]}</b></div>`).join('')||'<div class="nota">não saiu</div>'}
+        <div class="nota">No acaso: dupla (${o.d}${o.d}) ~1 a cada 100 jogos · trio ~1 a cada 1.000.</div></div></div>
+    <div class="ctl" style="margin-top:8px">${o.d<=8?`<button onclick="uoNumIrPadroes('O${o.d}')">🎯 procurar duplas/padrões → OVER ${o.d}</button>`:''}${o.d>=1?`<button onclick="uoNumIrPadroes('U${o.d}')">🎯 procurar duplas/padrões → UNDER ${o.d}</button>`:''}<span class="nota">abre 🎯 Padrões 100% já filtrado nesse mercado e varre número chamando, duplas, trios e somas</span></div></div>
+  ${UO_AVISO}`;
+}
+
 function uoSubCriar(){
   const e=UO_EDIT?UOB.find(x=>x.id===UO_EDIT):null;
   const f=e?{nome:e.nome,on:e.on,tipo:e.mk,bar:e.b,w:e.w,perH:e.perH??24,taxa:(cfg.uo_form||{}).taxa??90,minN:(cfg.uo_form||{}).minN??10,hh:e.h??'any',mm:e.m??'any',ss:e.s??'any',rep:e.rep,lvl:e.lvl}:(cfg.uo_form||{tipo:'auto',bar:'auto',w:'auto',perH:24,taxa:90,minN:10,hh:'any',mm:'any',ss:'any',rep:'hora',lvl:0,on:true});
@@ -8151,7 +8234,7 @@ async function uopScanWin(w,sym,perH,lvl){
   const info={w,bank:D0.bank,n:N,raw:0,esp:0,testados:0,fam:{}};
   if(N<200) return {list:[],info:{...info,erro:`só ${N} jogos no banco ${D0.bank} neste período`}};
   const D=new Int8Array(N); for(let i=0;i<N;i++) D[i]=rows[i].d;
-  const MK=UO_MK.concat(uopF('chama')?UO_MKM:[]), NM=MK.length;
+  const pmk=cfg.uo_pmk||'', MK=UO_MK.concat(uopF('chama')?UO_MKM:[]).filter(m=>!pmk||m.mk+m.b===pmk), NM=MK.length;
   const WIN=new Uint8Array(NM*10); MK.forEach((m,mi)=>{ for(let d=0;d<10;d++) WIN[mi*10+d]=uoWin(m,d)?1:0; });
   const LG=MK.map(m=>Math.log10(uoBase(m,lvl)));
   const S=Math.max(0,Math.min(20,+(cfg.uo_pskip??10)))+1, val=+(cfg.uo_pval??1), cut=val?Math.floor(N*0.7):N;
@@ -8207,6 +8290,7 @@ async function uopScanWin(w,sym,perH,lvl){
     for(let o=0;o<R.nOff;o++){
       let best=null;
       for(let mi=0;mi<UO_NM;mi++){
+        if(cfg.uo_pmk&&UO_MK[mi].mk+UO_MK[mi].b!==cfg.uo_pmk) continue;
         const k=o*UO_NM+mi, n=R.n[k]; if(n<mn) continue;
         info.testados++;
         const lg=n*Math.log10(uoBase(UO_MK[mi],lvl));
@@ -8295,6 +8379,7 @@ function uoSubPadroes(){
     <div class="ctl"><b style="font-size:12px">Janelas:</b> ${wins}
       <label>Período ${sel('uo_pp',[[3,'3 horas'],[6,'6 horas'],[12,'12 horas'],[24,'24 horas'],[72,'3 dias'],[168,'7 dias'],[360,'15 dias'],[720,'30 dias']])}</label></div>
     <div class="ctl"><b style="font-size:12px">Procurar:</b> ${fams}</div>
+    <div class="ctl"><label>Mercado ${sel('uo_pmk',[['','todos (UNDER 1–9 / OVER 0–8)'],...UO_MK.map(m=>[m.mk+m.b,uoNome(m)])])}</label>${cfg.uo_pmk?(()=>{ const m={mk:cfg.uo_pmk[0],b:+cfg.uo_pmk.slice(1)}, lvl=+cfg.uo_lvl||0, p0=uoBase(m,lvl), nmin=Math.ceil(Math.log(Math.max(1e-9,+(cfg.uo_psorte??1)/100))/Math.log(p0)); return `<span class="nota">só ${uoNome(m)} · acerta ${(p0*100).toFixed(0)}% sozinho, então um padrão só passa no filtro de sorte com <b>${nmin}+ casos</b> seguidos sem red${nmin>40?' (difícil de achar — é normal vir vazio)':''}</span>`; })():''}</div>
     <div class="ctl">
       <label>Pular até ${sel('uo_pskip',[[0,'0 (próximo jogo)'],[3,'3 casas'],[5,'5 casas'],[10,'10 casas'],[15,'15 casas'],[20,'20 casas']])}</label>
       <label>Mín. casos ${inp('uo_pmin',45)}</label>
@@ -8333,7 +8418,7 @@ VIEWS.uo={nome:'📊 Under / Over',live:uoLive,html(){
   const sub=cfg.uo_sub||'visao';
   const top=sub!=='opor'&&uoScanOk('hora')?uoOporMini():'';
   const body={visao:uoSubVisao,opor:uoSubOpor,horas:()=>uoSubHoras(cfg.uo_mode==='dia'?'dia':'hora'),porhora:uoSubPorHora,minutos:()=>uoSubAgg('min'),segundos:()=>uoSubAgg('seg'),
-    padroes:uoSubPadroes,barreira:uoSubBarreira,comparar:uoSubComparar,maximas:uoSubMaximas,criar:uoSubCriar,robos:uoSubRobos,backtest:uoSubBacktest,sinais:uoSubSinais}[sub]||uoSubVisao;
+    padroes:uoSubPadroes,numeros:uoSubNumeros,barreira:uoSubBarreira,comparar:uoSubComparar,maximas:uoSubMaximas,criar:uoSubCriar,robos:uoSubRobos,backtest:uoSubBacktest,sinais:uoSubSinais}[sub]||uoSubVisao;
   return top+body();
 }};
 // painel curto de oportunidades no topo de todas as sub-telas
@@ -10159,7 +10244,7 @@ function mbVBoxHtml(w){
     <label class="ms-chk" style="margin-top:4px"><input type="checkbox" ${+V.vOn?'checked':''} onchange="mbSetCfg(${w},'vOn',this.checked?1:0)"> ativar (espera sem apostar até a regra bater)</label>
     ${+V.vOn?`<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
       <label class="ms-chk">Entrar ${sel('vModo',[['loss','após X LOSS virtual'],['win','após Y WIN virtual'],['ou','após X LOSS ou Y WIN'],['seq','após Y WIN e depois X LOSS'],['seq2','após X LOSS e depois Y WIN']])}</label>
-      <div class="ms-row2"><label class="ms-chk">X loss ${num('vX',1)}</label><label class="ms-chk">Y win ${num('vY',1)}</label></div>
+      <div class="ms-row2">${V.vModo!=='win'?`<label class="ms-chk">X loss ${num('vX',1)}</label>`:''}${V.vModo!=='loss'?`<label class="ms-chk">Y win ${num('vY',1)}</label>`:''}</div>
       <label class="ms-chk">Voltar a esperar ${sel('vVolta',[['green','depois de GREEN real'],['red','depois de RED real'],['qualquer','depois de qualquer resultado'],['n','depois de N entradas']])}${V.vVolta==='n'?' N '+num('vN',1):''}</label>
       <div class="ms-nota">${mbVRegraTxt(w)}</div></div>`:''}</div>`;
 }
