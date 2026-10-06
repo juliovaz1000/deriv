@@ -433,7 +433,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
   <span id="repairBox" style="display:none"></span>
   <button id="ilBtn" onclick="ilLigar(!cfg.il_on)" title="junta 5s + 10s + 20s só com fontes 100%">🔗 INTERLIGAR</button>
   <button id="il2Btn" onclick="il2Abrir()" title="interligado só com padrões vindo de 2 reds + 1 green atual">🔁 2R+G</button>
-  <button id="mesaBtn" onclick="mesaAbrir()" title="tela de operar na Deriv com 10s, 20s e 30s separados">🎮 MESA</button>
+  <button id="mesaBtn" onclick="mesaNovaAba()" title="tela de operar na Deriv com 10s, 20s e 30s separados">🎮 MESA</button>
   <button id="srobBtn" onclick="srobOpen()" title="5 robôs automáticos com regra de sono/deleção">🎯 SOMENTE ROBÔ</button>
   <span id="demoBox" style="display:none"></span>
   <span id="atuBox" style="display:none" onclick="atuAbrir()" title="clique para ver todas as atualizações"></span>
@@ -502,7 +502,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.63 · 05/10/2026 · 🎮 Mesa Play: aba 🤖 Robôs (entra sozinho nos robôs 100%), 5s, relógio e fita com o mais novo em cima';
+const VERSAO='v3.64 · 05/10/2026 · 🎮 Mesa Play abre em aba nova · robô de horário fixo 100% da hora atual (mín. 5 dias)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8498,6 +8498,7 @@ function dmPodeOperar(o){
 }
 // registra uma entrada vinda de qualquer robô (par/ímpar, segundos ou Under/Over)
 function dmRegistrar(o){
+  if(typeof MESA_TAB!=='undefined'&&MESA_TAB&&!['mesa','mbot'].includes(o.src)) return;   // na aba da Mesa só a Mesa opera (evita entrada dobrada)
   if(!o.sym){ dmAddLog({...o,res:'não enviada',obs:'banco sem mercado Deriv (use um banco DERIV …)',stake:0,profit:0}); return; }
   const motivo=dmPodeOperar(o);
   if(motivo){ dmAddLog({...o,res:'não enviada',obs:motivo,stake:0,profit:0}); return; }
@@ -9786,6 +9787,10 @@ function mesaGale(){ return Math.max(0,Math.min(6,+(cfg.mesa_gale??1))); }
 function mesaProxT(w){ return Math.ceil((dmNow()+2.6)/w)*w; }           // próximo jogo que ainda dá tempo de entrar
 function mesaSet(k,v){ cfg[k]=v; saveCfg(); mesaRender(true); }
 function mesaAbrir(){ MESA.open=true; const p=$('#mesaPop'); if(!p) return; p.style.display='flex'; mesaRender(true); clearInterval(MESA.timer); MESA.timer=setInterval(()=>mesaRender(false),250); }
+// a Mesa abre numa aba própria do navegador (#mesa); essa aba só opera o que é da Mesa
+const MESA_TAB=/#mesa\b/.test(location.hash);
+function mesaNovaAba(){ const u=location.href.split('#')[0]+'#mesa'; const t=window.open(u,'mesa_play'); if(!t) mesaAbrir(); else t.focus(); }
+function mesaSair(){ if(MESA_TAB){ const op=window.opener; try{ if(op&&!op.closed){ op.focus(); window.close(); return; } }catch(e){} location.href=location.href.split('#')[0]; } else mesaFechar(); }
 function mesaFechar(){ MESA.open=false; clearInterval(MESA.timer); const p=$('#mesaPop'); if(p) p.style.display='none'; }
 function mesaEntrar(alvo){
   const w=mesaW(), sym=mesaSym();
@@ -9850,14 +9855,14 @@ function mesaEsqManual(qv){ return `
 `; }
 function mesaRender(full){
   const p=$('#mesaPop'); if(!p||!MESA.open) return;
-  if(full||!$('#msCentro')){
+  if(full||!$('#msCentro')||(cfg.mesa_modo==='robo')!==!!$('#msFila')){
     const qv=[0.35,1,2,5,10,25,50,100];
     p.innerHTML=`<div class="ms">
       <div class="ms-top"><div style="font-size:22px">💵</div><div class="ms-logo">MESA PLAY <small>Deriv · DEMO</small></div>
         <select class="ms-sel" onchange="mesaSet('mesa_sym',this.value)">${d5Syms().map(s=>`<option value="${s}" ${mesaSym()===s?'selected':''}>${symNome(s)}</option>`).join('')}</select>
         <div class="ms-modos"><button class="${cfg.mesa_modo!=='robo'?'on':''}" onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button class="${cfg.mesa_modo==='robo'?'on':''}" onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS${MESA_TEMPOS.some(w=>mbSt(w).on)?' ●':''}</button></div>
         <div class="ms-relogio" id="msClock"></div>
-        <div class="ms-saldo" id="msSaldo"></div><button class="ms-x" onclick="mesaFechar()">✕ sair</button></div>
+        <div class="ms-saldo" id="msSaldo"></div><button class="ms-x" onclick="mesaSair()">${MESA_TAB?'↩ voltar ao início':'✕ sair'}</button></div>
       <div class="ms-tabs" id="msTabs">${mesaTabsHtml()}</div>
       <div class="ms-corpo">
         <div class="ms-esq">${cfg.mesa_modo==='robo'?mbEsqHtml(mesaW()):mesaEsqManual(qv)}</div>
@@ -9887,7 +9892,7 @@ document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.
 // se dois robôs pedem o mesmo jogo, entra só no primeiro da lista; se pedem PAR e ÍMPAR no mesmo jogo, aborta.
 // A decisão é tomada ~3s antes do jogo, quando todos os sinais daquele jogo já apareceram.
 // =====================================================================================
-const MB_DEF={val:0.35,fat:2.2,gale:-1,sw:0,sl:0,so100:1,soAuto:0};
+const MB_DEF={val:0.35,fat:2.2,gale:-1,sw:0,sl:0,so100:1,soAuto:0,fonte:'padroes',hfMin:5,hfDias:7};
 let MB={};   // estado por tempo: {on,ini,taken:Set,log:[],stats:Map}
 function mbSt(w){ return MB[w]||(MB[w]={on:false,ini:0,taken:new Set(),feitos:new Set(),log:[],stats:new Map(),parou:''}); }
 function mbCfg(w){ return {...MB_DEF,...((cfg.mbot||{})[w]||{})}; }
@@ -9916,32 +9921,56 @@ function mbIniciar(w){
   mbLog(w,`▶ Robô ${w}s iniciado · ${mbRobos(w).length} robô(s)${mbCfg(w).so100?' 100%':''} no banco ${mbBank(w)}`,'evt'); mesaRender(true);
 }
 function mbParar(w,motivo){ const s=mbSt(w); if(!s.on) return; s.on=false; s.parou=motivo||'parado por você'; mbLog(w,`⏹ Robô ${w}s parou: ${s.parou}`,'r'); try{ beep(); }catch(e){} if(MESA.open) mesaRender(true); }
+// horário fixo 100% da hora atual (e da próxima, para cobrir os próximos 60 min) no banco do tempo
+let MBHF={};
+function mbHfNivel(w){ const C=mbCfg(w); return C.gale<0?2:Math.max(0,Math.min(2,+C.gale)); }
+async function mbHfLoad(w,forca){
+  const C=mbCfg(w), bank=mbBank(w), lvl=mbHfNivel(w), hr=new Date().getHours(), mn=Math.max(2,+C.hfMin||5), dias=Math.max(mn+1,+C.hfDias||7);
+  const key=[bank,lvl,hr,mn,dias].join('|'), c=MBHF[w];
+  if(c&&c.busy) return; if(!forca&&c&&c.key===key&&Date.now()-c.when<10*60e3) return;
+  MBHF[w]={...(c||{}),busy:true};
+  try{
+    const rows=await idbRange(bank,Date.now()-dias*86400e3-3600e3,Date.now()+60000), G=gridBuild(rows,w), out=[];
+    if(G) for(const h of [hr,(hr+1)%24]) for(const r of hfScan(G,String(h))){ const m=[r.ts,r.g1,r.g2][lvl]; if(m.n>=mn&&m.ok===m.n) out.push({off:r.off,alvo:r.alvo,n:m.n,slot:r.slotKey}); }
+    out.sort((a,b)=>b.n-a.n||a.off-b.off);
+    MBHF[w]={key,when:Date.now(),rows:out,dias:G?hfDayStarts(G).length:0,busy:false};
+  }catch(e){ console.warn('horário fixo mesa',e); MBHF[w]={key,when:Date.now(),rows:[],dias:0,busy:false}; }
+}
+function mbHfSinais(w){
+  const now=Date.now()/1000, H=MBHF[w]; if(!H||!H.rows) return [];
+  return H.rows.map((r,i)=>({r,i,T:hfNext(r.off)})).filter(x=>x.T-now<=3600)
+    .map(x=>({key:`hf|${w}|${x.T}|${x.r.alvo}`,entryT:x.T*1000,alvo:x.r.alvo,ord:100000+x.i,ok:true,gale:mbHfNivel(w),nome:`🕒 Horário fixo ${x.r.slot} · ${x.r.n} dias 100%`,curto:`HF ${x.r.slot}`}));
+}
 function mbTick(){
   const now=dmNow();
   for(const w of MESA_TEMPOS){
     const s=mbSt(w); if(!s.on) continue;
-    const C=mbCfg(w), ss=mbSess(w);
+    const C=mbCfg(w), ss=mbSess(w), fonte=C.fonte||'padroes';
     if(C.sw>0&&ss.pl>=C.sw){ mbParar(w,`🏁 stop win (+${ss.pl.toFixed(2)})`); continue; }
     if(C.sl>0&&ss.pl<=-C.sl){ mbParar(w,`🛑 stop loss (${ss.pl.toFixed(2)})`); continue; }
     if(!DM.ok&&!DM.querOn){ mbParar(w,'conta demo desconectada'); continue; }
-    const bank=mbBank(w), elig=new Map(mbRobos(w).map((x,i)=>[x.rb.id,{...x,ord:RBOTS.indexOf(x.rb)}]));
-    // sinais vivos do banco deste tempo, por jogo de entrada
-    const sigs=RB_PENDING.filter(g=>!g.done&&g.bank===bank&&!s.taken.has(g.key)&&g.entryT/1000-now>1.6);
+    const bank=mbBank(w); let sigs=[];
+    if(fonte!=='hfix'){
+      const elig=new Map(mbRobos(w).map(x=>[x.rb.id,RBOTS.indexOf(x.rb)]));
+      for(const g of RB_PENDING){ if(g.done||g.bank!==bank) continue; const rb=RBOTS.find(x=>x.id===g.rbId); if(!rb) continue;
+        sigs.push({key:g.key,entryT:g.entryT,alvo:g.alvo,ord:elig.get(g.rbId)??1e9,ok:elig.has(g.rbId),gale:rbNivel(rb),nome:rbName(rb),curto:rbGat(rb)}); }
+    }
+    if(fonte!=='padroes'){ mbHfLoad(w); sigs=sigs.concat(mbHfSinais(w)); }
+    sigs=sigs.filter(g=>!s.taken.has(g.key)&&g.entryT/1000-now>1.6);
     if(!sigs.length) continue;
     const T=Math.min(...sigs.map(g=>g.entryT));
-    if(T/1000-now>3.4) continue;                       // ainda não é hora de decidir este jogo
+    if(T/1000-now>3.4) continue;                       // decide ~3s antes, com todos os sinais do jogo já conhecidos
     const doJogo=sigs.filter(g=>g.entryT===T);
     doJogo.forEach(g=>s.taken.add(g.key));
-    const ok=doJogo.filter(g=>elig.has(g.rbId)).sort((a,b)=>elig.get(a.rbId).ord-elig.get(b.rbId).ord);
+    const ok=doJogo.filter(g=>g.ok).sort((a,b)=>a.ord-b.ord);
     if(!ok.length) continue;
     const hh=hmsOf(T/1000);
     if(mbAberta(w)){ mbLog(w,`⏭ ${hh}: ${ok.length} sinal(is) ignorado(s) — já tem entrada aberta`,'evt'); continue; }
-    const cores=new Set(ok.map(g=>g.alvo));
-    if(cores.size>1){ mbLog(w,`⛔ ${hh}: ABORTADO — PAR e ÍMPAR no mesmo jogo (${ok.map(g=>{ const r=RBOTS.find(x=>x.id===g.rbId); return (g.alvo?'Í':'P')+' '+rbGat(r); }).join(' · ')})`,'r'); continue; }
-    const g=ok[0], rb=RBOTS.find(x=>x.id===g.rbId), gale=C.gale<0?rbNivel(rb):C.gale;
-    dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${rbName(rb)}`,sym:mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.max(0.35,+C.val||0.35),fator:Math.max(1,+C.fat||2.2),mcor:g.alvo});
+    if(new Set(ok.map(g=>g.alvo)).size>1){ mbLog(w,`⛔ ${hh}: ABORTADO — PAR e ÍMPAR no mesmo jogo (${ok.map(g=>(g.alvo?'Í ':'P ')+g.curto).join(' · ')})`,'r'); continue; }
+    const g=ok[0], gale=C.gale<0?g.gale:C.gale;
+    dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.max(0.35,+C.val||0.35),fator:Math.max(1,+C.fat||2.2),mcor:g.alvo});
     s.feitos.add(g.key);
-    mbLog(w,`🎯 ${hh}: ENTRADA ${g.alvo?'ÍMPAR':'PAR'} · ${rbName(rb)}${ok.length>1?` (outros ${ok.length-1} da mesma cor ficaram de fora)`:''}`,'g');
+    mbLog(w,`🎯 ${hh}: ENTRADA ${g.alvo?'ÍMPAR':'PAR'} · ${g.nome}${ok.length>1?` (outros ${ok.length-1} da mesma cor ficaram de fora)`:''}`,'g');
     try{ beep(); }catch(e){}
   }
 }
@@ -9954,8 +9983,10 @@ function mbEsqHtml(w){
       <div class="ms-box"><span class="ms-lb">GALES</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'gale',+this.value)">${[[-1,'seguir o robô'],[0,'sem gale'],[1,'G1'],[2,'G2'],[3,'G3'],[4,'G4'],[5,'G5'],[6,'G6']].map(([v,t])=>`<option value="${v}" ${+C.gale===v?'selected':''}>${t}</option>`).join('')}</select></div></div>
     <div class="ms-row2"><div class="ms-box"><span class="ms-lb">STOP WIN $</span><div class="ms-val" style="font-size:18px">${inpt('sw',C.sw,1)}</div></div>
       <div class="ms-box"><span class="ms-lb">STOP LOSS $</span><div class="ms-val" style="font-size:18px">${inpt('sl',C.sl,1)}</div></div></div>
-    <label class="ms-chk"><input type="checkbox" ${C.so100?'checked':''} onchange="mbSetCfg(${w},'so100',this.checked?1:0)"> só robôs 100% (nenhum red no banco)</label>
-    <label class="ms-chk"><input type="checkbox" ${C.soAuto?'checked':''} onchange="mbSetCfg(${w},'soAuto',this.checked?1:0)"> só robôs automáticos ♻</label>
+    <div class="ms-box"><span class="ms-lb">FONTE DOS SINAIS</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'fonte',this.value)">${[['padroes','🤖 robôs de padrão (aba '+w+'s)'],['hfix','🕒 horário fixo 100% da hora atual'],['ambos','os dois juntos']].map(([v,t])=>`<option value="${v}" ${C.fonte===v?'selected':''}>${t}</option>`).join('')}</select>
+      ${C.fonte!=='padroes'?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">mín. dias 100% <input type="number" min="2" value="${C.hfMin}" style="width:52px" onchange="mbSetCfg(${w},'hfMin',+this.value)"></label><label class="ms-chk">olhar ${'<'}input type="number" min="5" value="${C.hfDias}" style="width:52px" onchange="mbSetCfg(${w},'hfDias',+this.value)"> dias</label></div>`:''}</div>
+    ${C.fonte==='hfix'?'':`<label class="ms-chk"><input type="checkbox" ${C.so100?'checked':''} onchange="mbSetCfg(${w},'so100',this.checked?1:0)"> só robôs 100% (nenhum red no banco)</label>
+    <label class="ms-chk"><input type="checkbox" ${C.soAuto?'checked':''} onchange="mbSetCfg(${w},'soAuto',this.checked?1:0)"> só robôs automáticos ♻</label>`}
     <div class="ms-nota">0 no stop = sem stop. Gale ${C.gale<0?'igual ao do robô (até G2)':C.gale?'até G'+C.gale:'desligado'} · ×${(+C.fat).toFixed(1)}</div>
     <span class="ms-lb">SESSÃO DO ROBÔ ${w}s</span><div class="ms-sess" id="msSess"></div>
     ${s.on?`<button class="ms-go stop" onclick="mbParar(${w})">⏹ PARAR ROBÔ ${w}s</button>`:`<button class="ms-go" onclick="mbIniciar(${w})">▶ INICIAR ROBÔ ${w}s</button>`}
@@ -9969,6 +10000,15 @@ function mbCentroHtml(w){
   return `<div class="ms-faixa ${ult&&Date.now()-ult.t<8000?(ult.tipo==='r'?'r':ult.tipo==='g'?'g':''):''}">${ult&&Date.now()-ult.t<8000?ult.txt:`🔎 Robô ${w}s ligado · aguardando sinal de ${mbRobos(w).length} robô(s)`}</div>`;
 }
 function mbFilaHtml(w){
+  const C=mbCfg(w); let hf='';
+  if(C.fonte!=='padroes'){ mbHfLoad(w); const H=MBHF[w], L=mbHfSinais(w).sort((a,b)=>a.entryT-b.entryT);
+    hf=`<div class="ms-hl" style="grid-template-columns:1fr;color:#c4b5fd;font-weight:700">🕒 Horário fixo ${w}s · 100% até ${NIVEL[mbHfNivel(w)]} · mín. ${C.hfMin} dias${H&&H.dias!=null?` · banco com ${H.dias} dia(s)`:''}${H&&H.busy?' · calculando…':''} · ${L.length} horário(s) nos próximos 60 min</div>`+
+      (L.length?L.slice(0,40).map(x=>`<div class="ms-hl" style="grid-template-columns:90px 70px 1fr 110px"><span><b>${hmsOf(x.entryT/1000)}</b></span><span class="${x.alvo?'ruimc':'okc'}"><b>${x.alvo?'ÍMPAR':'PAR'}</b></span><span>${x.nome.replace('🕒 Horário fixo ','')}</span><span>${mbSt(w).taken.has(x.key)?'<span class="mu">passou</span>':`faltam ${uoTempo(x.entryT/1000-dmNow())}`}</span></div>`).join('')
+        :`<div class="mu" style="padding:8px">${H&&H.dias!=null&&H.dias<C.hfMin?`O banco de ${w}s só tem ${H.dias} dia(s) — baixe mais dias em 📥 Histórico R_100.`:'Nenhum horário fixo 100% nesta hora.'}</div>`); }
+  if(C.fonte==='hfix') return hf;
+  return hf+mbFilaPadroes(w);
+}
+function mbFilaPadroes(w){
   const L=mbRobos(w), now=dmNow();
   const todos=RBOTS.filter(rb=>rb.bank===mbBank(w)).length;
   if(!L.length) return `<div class="mu" style="padding:8px">Nenhum robô ${mbCfg(w).so100?'100% ':''}no banco ${mbBank(w)} (${todos} robô(s) no total). Os robôs ♻ automáticos da aba ⏱ ${w} segundos aparecem aqui sozinhos.</div>`;
@@ -10628,6 +10668,15 @@ function afterUpdate(novo) {
   srLoadStore();
   if (SRB.some(r => r.on)) { cfg.sr_sym = SRB.find(r => r.on).sym; setTimeout(() => srCarregar(true), 4000); }
   srobLoad(); setTimeout(srobBtn, 1800);
+  if (MESA_TAB) {
+    document.title = '🎮 Mesa Play';
+    for (const f of ['rbPopup','srPopup','uoPopup','cfPopup','ilPopup','il2Abrir','srobOpen']) if (typeof window[f] === 'function') window[f] = () => {};
+    window.cf2PopMostra = () => {};
+    mesaAbrir();
+    if (dmToken() || dmOa2()) setTimeout(() => { if (!DM.ok) dmConectar(); }, 2500);
+  }
+  // as configurações da Mesa e da conta demo andam juntas entre a aba principal e a aba da Mesa
+  window.addEventListener('storage', e => { if (e.key !== 'dpi_cfg' || !e.newValue) return; try { const n = JSON.parse(e.newValue); for (const k in n) if (/^(mesa_|mbot|dm_)/.test(k)) cfg[k] = n[k]; } catch (_) {} });
   if (cfg.autoOn) { buscar(); clearInterval(S.timer); S.timer = setInterval(buscar, cfg.auto * 1000); }
   if (cfg.derivFallback) connectDerivFallback();
   // relógio dos robôs: abre o popup na hora certa e confere green/red mesmo sem dado novo
