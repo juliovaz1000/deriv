@@ -396,6 +396,11 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .ms-hist{max-height:260px;overflow:auto;background:var(--mg);border-radius:11px}.ms-hl{display:grid;grid-template-columns:80px 1fr 60px 80px 90px;gap:6px;padding:7px 10px;border-bottom:1px solid var(--mb);font-size:13px}
 .okc{color:#4ade80}.ruimc{color:#f87171}
 #mesaBtn{border-color:#a855f7;color:#d8b4fe;font-weight:800}
+.mb-pres{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.mb-chip{display:inline-flex;border:1px solid var(--mb);border-radius:9px;overflow:hidden;background:#26222f}.mb-chip button{background:transparent;border:0;color:#ece9f6;padding:6px 9px;cursor:pointer;font-weight:700;font-size:12px}.mb-chip button small{color:#a49dbb;font-weight:600}.mb-chip .x{color:#f87171;border-left:1px solid var(--mb);padding:6px 7px}.mb-chip.on{border-color:#22c55e;box-shadow:0 0 0 1px #22c55e}
+.mb-mini{background:var(--mg);border:1px solid var(--mb);color:#cfc9e2;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:0}.mb-mini.on{background:var(--mr);color:#fff;border-color:var(--mr)}.mb-mini.pdf{background:#1f2937;color:#fde68a}
+.mb-expo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.mb-expo>div{background:var(--mg);border:1px solid var(--mb);border-radius:11px;padding:10px;text-align:center}.mb-expo span{display:block;font-size:10px;color:#8b84a3;letter-spacing:.6px;font-weight:700}.mb-expo b{display:block;font-size:20px;color:#fbbf24;margin:3px 0}.mb-expo i{font-style:normal;font-size:11px;color:#8b84a3}
+.mb-vst{margin-top:8px;border-radius:11px;padding:8px 12px;text-align:center;border:1px dashed #a855f7;background:rgba(168,85,247,.08)}.mb-vst.operando{border:1px solid #22c55e;background:rgba(34,197,94,.1)}
+.mb-vb{display:inline-flex;width:22px;height:22px;border-radius:6px;align-items:center;justify-content:center;font-weight:900;font-size:11px;margin:0 2px;color:#fff}.mb-vb.w{background:#16a34a}.mb-vb.l{background:#dc2626}
 .ms-modos{display:flex;gap:4px;background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:3px}.ms-modos button{background:transparent;border:0;color:#a49dbb;border-radius:8px;padding:7px 12px;font-weight:800;cursor:pointer}.ms-modos button.on{background:linear-gradient(90deg,var(--mr2),var(--mr));color:#fff}
 .ms-relogio{display:flex;align-items:center;gap:6px;background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:6px 12px;font-size:18px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.5px}
 .ms-chk{display:flex;align-items:center;gap:6px;font-size:12px;color:#cfc9e2}
@@ -502,7 +507,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.67 · 06/10/2026 · 🎮 Mesa: valor do gale "só recuperar" (empata, expõe menos a banca) e recuperação com ou sem lucro';
+const VERSAO='v3.68 · 06/10/2026 · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -9880,7 +9885,7 @@ function mesaRender(full){
   $('#msSaldo').innerHTML=DM.ok&&DM.virt?`<span>SALDO DEMO</span><b>$ ${DM.bal!=null?DM.bal.toFixed(2):'—'}</b>`:`<button class="ms-con" onclick="mesaFechar();S.tab='demo';renderTab()">CONECTAR DEMO</button>`;
   const ck=$('#msClock'); if(ck){ const d=new Date(); ck.innerHTML=`<span>🕒</span>${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
   const rob=cfg.mesa_modo==='robo';
-  const k2=k+'|'+(rob?mbSt(w).log.length+'|'+RB_PENDING.length+'|'+mbSt(w).on:'');
+  const k2=k+'|'+(rob?mbSt(w).log.length+'|'+RB_PENDING.length+'|'+mbSt(w).on+'|'+(mbSt(w).vEstado||'')+'|'+(cfg.mb_histTudo||0):'');
   if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); }
   if(k2===MESA.lastFull) return; MESA.lastFull=k2;
   $('#msTabs').innerHTML=mesaTabsHtml();
@@ -9950,6 +9955,7 @@ function mbSess(w){
 function mbIniciar(w){
   if(!DM.ok||!DM.virt){ if(confirm('A conta DEMO não está conectada. Abrir a aba 💼 Conta Demo?')){ mesaFechar(); S.tab='demo'; renderTab(); } return; }
   const s=mbSt(w); s.on=true; s.ini=Date.now(); s.parou=''; s.taken=new Set(); s.feitos=new Set();
+  mbVEstado(w); s.vEstado='esperando'; s.vSeq=[]; s.vPend=[]; s.vReal=0; s.vLastLen=DM.log.filter(x=>x.src==='mbot'&&x.mw===w).length;
   mbLog(w,`▶ Robô ${w}s iniciado · ${mbRobos(w).length} robô(s)${mbCfg(w).so100?' 100%':''} no banco ${mbBank(w)}`,'evt'); mesaRender(true);
 }
 function mbParar(w,motivo){ const s=mbSt(w); if(!s.on) return; s.on=false; s.parou=motivo||'parado por você'; mbLog(w,`⏹ Robô ${w}s parou: ${s.parou}`,'r'); try{ beep(); }catch(e){} if(MESA.open) mesaRender(true); }
@@ -9981,6 +9987,7 @@ function mbTick(){
     if(C.sw>0&&ss.pl>=C.sw){ mbParar(w,`🏁 stop win (+${ss.pl.toFixed(2)})`); continue; }
     if(C.sl>0&&ss.pl<=-C.sl){ mbParar(w,`🛑 stop loss (${ss.pl.toFixed(2)})`); continue; }
     if(!DM.ok&&!DM.querOn){ mbParar(w,'conta demo desconectada'); continue; }
+    try{ mbVTick(w); }catch(e){ console.warn('virtual',e); }
     const bank=mbBank(w); let sigs=[];
     if(fonte!=='hfix'){
       const elig=new Map(mbRobos(w).map(x=>[x.rb.id,RBOTS.indexOf(x.rb)]));
@@ -9997,9 +10004,10 @@ function mbTick(){
     const ok=doJogo.filter(g=>g.ok).sort((a,b)=>a.ord-b.ord);
     if(!ok.length) continue;
     const hh=hmsOf(T/1000);
-    if(mbAberta(w)){ mbLog(w,`⏭ ${hh}: ${ok.length} sinal(is) ignorado(s) — já tem entrada aberta`,'evt'); continue; }
+    if(mbAberta(w)||(+mbV(w).vOn&&mbVEstado(w).vPend.length)){ mbLog(w,`⏭ ${hh}: ${ok.length} sinal(is) ignorado(s) — já tem entrada ${mbAberta(w)?'aberta':'virtual em andamento'}`,'evt'); continue; }
     if(new Set(ok.map(g=>g.alvo)).size>1){ mbLog(w,`⛔ ${hh}: ABORTADO — PAR e ÍMPAR no mesmo jogo (${ok.map(g=>(g.alvo?'Í ':'P ')+g.curto).join(' · ')})`,'r'); continue; }
     const g=ok[0], gale=C.gale<0?g.gale:C.gale, base=Math.max(0.35,+C.val||0.35), fat=Math.max(1,+C.fat||2.2);
+    if(+mbV(w).vOn&&mbVEstado(w).vEstado==='esperando'){ mbVAnotar(w,g,T,C.galeModo==='sinal'?0:gale); continue; }
     const R=mbRec(w), rec=R.on?{recAlvo:R.alvo,recMax:+C.recMax||0,ratio:R.r}:{}, rtxt=R.on?` · 🔁 recuperando $ ${R.falta.toFixed(2)} (${R.k} green${R.k>1?'s':''}) → aposta $ ${Math.min(R.stake,+C.recMax||Infinity).toFixed(2)}`:'';
     if(C.galeModo==='sinal'){ const k=mbGaleK(w), G=C.gale<0?2:+C.gale;
       dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:0,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:mbStakeSinal(w),fator:fat,mcor:g.alvo,gk:k,gmax:G,...rec}); }
@@ -10011,10 +10019,190 @@ function mbTick(){
   }
 }
 setInterval(()=>{ try{ mbTick(); }catch(e){ console.warn('robô mesa',e); } },300);
+// =====================================================================================
+// 👻 LOSS / WIN VIRTUAL + ⭐ CONFIGURAÇÕES SALVAS + 📉 MAIOR VALOR EXPOSTO + 📄 PDF — robô da Mesa
+// Virtual: enquanto "esperando", o robô NÃO aposta — só anota o resultado que o sinal teria dado.
+// Quando a regra bate (ex.: 2 loss virtuais seguidos) ele passa a "operando" e entra de verdade;
+// depois volta a esperar conforme a regra de volta (após green real, após red real, etc.).
+// Todo sinal (virtual e real) vai para um histórico salvo por tempo, usado na tabela "como teria sido".
+// =====================================================================================
+const MBV_DEF={vOn:0,vModo:'loss',vX:2,vY:2,vVolta:'green',vN:1};
+function mbV(w){ return {...MBV_DEF,...mbCfg(w)}; }
+function mbHistLoad(w){ try{ return JSON.parse(localStorage.getItem('mb_seq_'+w)||'[]')||[]; }catch(e){ return []; } }
+function mbHistSave(w,H){ try{ localStorage.setItem('mb_seq_'+w,JSON.stringify(H.slice(-3000))); }catch(e){} }
+function mbHistAdd(w,o){ const s=mbSt(w); if(!s.hist) s.hist=mbHistLoad(w); if(s.hist.some(x=>x.k===o.k)) return; s.hist.push(o); mbHistSave(w,s.hist); }
+function mbHist(w){ const s=mbSt(w); if(!s.hist) s.hist=mbHistLoad(w);
+  if(!s.histSeed){ s.histSeed=1; const ks=new Set(s.hist.map(h=>h.k)); let n=0;      // entradas reais antigas do histórico da demo também contam
+    for(const x of DM.log){ if(x.src!=='mbot'||x.mw!==w||(x.res!=='green'&&x.res!=='red')) continue; const fim=x.res==='green'||(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0)); if(!(x.gk!=null||fim)) continue;
+      const k='r|'+x.t+'|'+x.nome; if(ks.has(k)) continue; s.hist.push({k,T:x.planT||x.T,alvo:x.mcor,res:x.res==='green'?'W':'L',tipo:'r',nome:(x.nome||'').replace(/^🤖 \d+s · /,'')}); n++; }
+    if(n){ s.hist.sort((a,b)=>a.T-b.T); mbHistSave(w,s.hist); } }
+  return s.hist; }
+function mbVEstado(w){ const s=mbSt(w); if(!s.vEstado){ s.vEstado='esperando'; s.vSeq=[]; s.vPend=[]; s.vReal=0; s.vLastLen=0; } return s; }
+function mbVRegraTxt(w){
+  const V=mbV(w), L=`${V.vX} loss`, W=`${V.vY} win`;
+  const ent={loss:`depois de ${L} virtual seguidos`,win:`depois de ${W} virtual seguidos`,ou:`depois de ${L} OU ${W} virtual seguidos`,seq:`depois de ${W} e em seguida ${L} virtual`,seq2:`depois de ${L} e em seguida ${W} virtual`}[V.vModo];
+  const vol={green:'volta a esperar depois de um GREEN real',red:'volta a esperar depois de um RED real',qualquer:'volta a esperar depois de qualquer resultado real',n:`volta a esperar depois de ${V.vN} entrada(s) real(is)`}[V.vVolta];
+  return `Entra ${ent} · ${vol}`;
+}
+// a sequência (W/L) do fim bate com a regra?
+function mbVBate(seq,V){
+  const tail=(c)=>{ let n=0; for(let i=seq.length-1;i>=0&&seq[i]===c;i--) n++; return n; };
+  const fim=(a)=>a.length<=seq.length&&a.every((c,i)=>seq[seq.length-a.length+i]===c);
+  const X=Math.max(1,+V.vX||1), Y=Math.max(1,+V.vY||1);
+  if(V.vModo==='loss') return tail('L')>=X;
+  if(V.vModo==='win') return tail('W')>=Y;
+  if(V.vModo==='ou') return tail('L')>=X||tail('W')>=Y;
+  if(V.vModo==='seq') return fim([...Array(Y).fill('W'),...Array(X).fill('L')]);
+  if(V.vModo==='seq2') return fim([...Array(X).fill('L'),...Array(Y).fill('W')]);
+  return false;
+}
+// chamado pelo mbTick em vez de apostar quando está esperando
+function mbVAnotar(w,g,T,gale){
+  const s=mbVEstado(w);
+  s.vPend.push({T:T/1000,alvo:g.alvo,gale:gale,nome:g.nome,k:'v|'+g.key});
+  mbLog(w,`👻 ${hmsOf(T/1000)}: sinal VIRTUAL ${g.alvo?'ÍMPAR':'PAR'} · ${g.nome} (sem apostar)`,'evt');
+}
+// resolve os sinais virtuais com o resultado do jogo e confere as regras
+function mbVTick(w){
+  const s=mbVEstado(w), V=mbV(w), W=LIVE[mbBank(w)]||[], now=dmNow();
+  if(s.vPend.length){
+    const byT=new Map(W.slice(-400).map(x=>[Math.round(x.t/1000),x]));
+    s.vPend=s.vPend.filter(p=>{
+      let res=null;
+      for(let g=0;g<=p.gale;g++){
+        const r=byT.get(p.T+g*w);
+        if(!r){ if(now>p.T+g*w+3*w+5){ res='?'; } break; }
+        if(r.p===p.alvo){ res='W'; break; }
+        if(g===p.gale) res='L';
+      }
+      if(res===null) return true;
+      if(res==='?'){ mbLog(w,`👻 ${hmsOf(p.T)}: virtual sem resultado (faltou o jogo no banco)`,'evt'); return false; }
+      s.vSeq.push(res); if(s.vSeq.length>50) s.vSeq.shift();
+      mbHistAdd(w,{k:p.k,T:p.T,alvo:p.alvo,res,tipo:'v',nome:p.nome});
+      mbLog(w,`👻 ${hmsOf(p.T)}: ${res==='W'?'WIN':'LOSS'} virtual ${p.alvo?'ÍMPAR':'PAR'} · sequência ${s.vSeq.slice(-8).join('')}`,res==='W'?'g':'r');
+      if(V.vOn&&s.vEstado==='esperando'&&mbVBate(s.vSeq,V)){ s.vEstado='operando'; s.vReal=0; mbLog(w,`🚦 Regra virtual bateu (${s.vSeq.slice(-8).join('')}) — próximo sinal entra DE VERDADE`,'g'); try{ beep(); }catch(e){} }
+      return false;
+    });
+  }
+  // resultados reais novos → histórico + regra de volta
+  const L=DM.log.filter(x=>x.src==='mbot'&&x.mw===w);
+  if(s.vLastLen>L.length) s.vLastLen=0;
+  for(const x of L.slice(s.vLastLen)){
+    if(x.res!=='green'&&x.res!=='red') continue;
+    const fim=x.res==='green'||(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0));
+    if(x.gk!=null||fim) mbHistAdd(w,{k:'r|'+x.t+'|'+x.nome,T:x.planT||x.T,alvo:x.mcor,res:x.res==='green'?'W':'L',tipo:'r',nome:(x.nome||'').replace(/^🤖 \d+s · /,'')});
+    if(!fim||!V.vOn||s.vEstado!=='operando') continue;
+    s.vReal++;
+    const volta=V.vVolta==='green'?x.res==='green':V.vVolta==='red'?x.res==='red':V.vVolta==='qualquer'?true:s.vReal>=Math.max(1,+V.vN||1);
+    if(volta){ s.vEstado='esperando'; s.vSeq=[]; mbLog(w,`⏸ Voltou a esperar (${x.res==='green'?'GREEN':'RED'} real) — ${mbVRegraTxt(w).split(' · ')[0].toLowerCase()}`,'evt'); }
+  }
+  s.vLastLen=L.length;
+}
+// tabela "como teria sido": aplica cada regra no histórico de sinais (virtuais + reais) deste tempo
+function mbVSimular(H,V){
+  let est=V?'esperando':'operando', seq=[], n=0, ok=0, real=0;
+  for(const h of H){
+    if(est==='operando'){ n++; if(h.res==='W') ok++; real++;
+      if(V){ const volta=V.vVolta==='green'?h.res==='W':V.vVolta==='red'?h.res==='L':V.vVolta==='qualquer'?true:real>=Math.max(1,+V.vN||1); if(volta){ est='esperando'; seq=[]; } }
+      continue; }
+    seq.push(h.res); if(mbVBate(seq,V)){ est='operando'; real=0; }
+  }
+  return {n,ok,p:n?ok/n:0};
+}
+function mbVTabela(w){
+  const H=mbHist(w).slice().sort((a,b)=>a.T-b.T), V=mbV(w);
+  if(H.length<5) return `<div class="mu" style="padding:8px">Ainda tem ${H.length} sinal(is) guardado(s) neste tempo. Deixe o robô rodando (com ou sem virtual) que cada sinal vai sendo anotado e a tabela aparece.</div>`;
+  const base=mbVSimular(H,null), linhas=[['sem virtual (entra em tudo)',base,1]];
+  for(const m of ['loss','win']) for(let x=1;x<=5;x++){ const VV={...V,vModo:m,vX:x,vY:x}; linhas.push([`${m==='loss'?'após '+x+' LOSS':'após '+x+' WIN'} virtual`,mbVSimular(H,VV),0,m===V.vModo&&x===(m==='loss'?+V.vX:+V.vY)]); }
+  if(['ou','seq','seq2'].includes(V.vModo)) linhas.push([mbVRegraTxt(w).split(' · ')[0].replace('Entra ',''),mbVSimular(H,V),0,1]);
+  const r=mbRatio(w);
+  return `<div class="ms-nota" style="margin:2px 0 4px">Amostra: <b>${H.length}</b> sinais (${H.filter(h=>h.tipo==='v').length} virtuais + ${H.filter(h=>h.tipo==='r').length} reais) desde ${new Date(H[0].T*1000).toLocaleString('pt-BR')} · ${mbVRegraTxt(w).split(' · ')[1]} · saldo em entradas de $1, tiro seco</div>
+    <div class="ms-hl" style="grid-template-columns:1fr 70px 70px 80px;font-weight:700;color:#a49dbb"><span>Regra</span><span>Entradas</span><span>Acerto</span><span>Saldo $1</span></div>
+    ${linhas.map(([nome,R,b,sel])=>{ const sal=R.ok*r-(R.n-R.ok); return `<div class="ms-hl" style="grid-template-columns:1fr 70px 70px 80px;${sel?'background:rgba(168,85,247,.18)':''}"><span>${sel?'▶ ':''}${nome}</span><span>${R.n}</span><span class="${R.n&&R.p>=0.52?'okc':R.n&&R.p<0.5?'ruimc':''}">${R.n?(R.p*100).toFixed(1)+'%':'—'}</span><span class="${sal>=0?'okc':'ruimc'}">${R.n?(sal>=0?'+':'')+sal.toFixed(2):'—'}</span></div>`; }).join('')}
+    <div class="ms-nota" style="margin-top:4px">Poucos sinais = conclusão fraca: com menos de ~100 entradas a diferença entre as regras pode ser só sorte.</div>`;
+}
+// 📉 maior valor exposto: o quanto o saldo ficou abaixo do topo somado à aposta que estava em jogo naquele momento
+function mbExpo(w,L){
+  L=L||mbSess(w).L; let pl=0,pico=0,ex=0,exT=0,queda=0,maxA=0;
+  for(const x of L){ const st=+x.stake||0; if(!st&&!x.profit) continue; const e=(pico-pl)+st; if(e>ex){ ex=e; exT=x.planT||x.T; } if(st>maxA) maxA=st; pl+=(+x.profit||0); if(pl>pico) pico=pl; if(pico-pl>queda) queda=pico-pl; }
+  const o=mbAberta(w); if(o){ const st=o.tent?.at(-1)?.stake||0, e=(pico-pl)+st; if(e>ex){ ex=e; exT=o.T+o.g*o.step; } }
+  return {ex,exT,queda,maxA};
+}
+// ⭐ configurações salvas
+function mbPresets(){ return Array.isArray(cfg.mbPresets)?cfg.mbPresets:[]; }
+function mbPresetSalvar(w){
+  const el=$('#mbPresetNome'), nome=(el?.value||'').trim();
+  if(!nome){ alert('Dê um nome para a configuração (ex.: "Tiro seco horário fixo").'); el?.focus(); return; }
+  const L=mbPresets().filter(p=>!(p.nome===nome&&p.w===w));
+  L.unshift({id:'P'+Date.now(),nome,w,c:{...mbCfg(w)},sym:mesaSym(),criado:Date.now()});
+  cfg.mbPresets=L.slice(0,30); saveCfg(); mbLog(w,`⭐ Configuração "${nome}" salva`,'evt'); mesaRender(true);
+}
+function mbPresetUsar(id){
+  const p=mbPresets().find(x=>x.id===id); if(!p) return;
+  cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[p.w]={...p.c}; cfg.mesa_w=p.w; cfg.mesa_modo='robo'; if(p.sym) cfg.mesa_sym=p.sym; saveCfg();
+  const s=mbSt(p.w); if(s.on) mbParar(p.w,'trocou para a configuração "'+p.nome+'"');
+  mbIniciar(p.w); mbLog(p.w,`⭐ Usando a configuração "${p.nome}"`,'g'); mesaRender(true);
+}
+function mbPresetApagar(id){ const p=mbPresets().find(x=>x.id===id); if(!p||!confirm(`Apagar a configuração "${p.nome}"?`)) return; cfg.mbPresets=mbPresets().filter(x=>x.id!==id); saveCfg(); mesaRender(true); }
+function mbPresetsHtml(w){
+  const L=mbPresets();
+  return `<div class="ms-box" style="border-color:#a855f7"><span class="ms-lb">⭐ CONFIGURAÇÕES SALVAS</span>
+    ${L.length?`<div class="mb-pres">${L.map(p=>`<span class="mb-chip ${p.w===w&&mbSt(p.w).on?'on':''}"><button onclick="mbPresetUsar('${p.id}')" title="carregar e iniciar">▶ ${esc(p.nome)} <small>${p.w}s</small></button><button class="x" onclick="mbPresetApagar('${p.id}')" title="apagar">✕</button></span>`).join('')}</div>`:'<div class="ms-nota" style="margin:4px 0">Nenhuma ainda. Ajuste tudo abaixo e salve com um nome.</div>'}
+    <div style="display:flex;gap:6px;margin-top:6px"><input id="mbPresetNome" class="ms-sel" style="flex:1;min-width:0" placeholder="nome (ex.: Tiro seco HF)"><button class="ms-x" style="padding:6px 10px" onclick="mbPresetSalvar(${w})">💾 salvar</button></div></div>`;
+}
+function esc(t){ return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+// caixa do virtual (painel esquerdo)
+function mbVBoxHtml(w){
+  const V=mbV(w), sel=(k,opts)=>`<select class="ms-sel" onchange="mbSetCfg(${w},'${k}',this.value)">${opts.map(([v,t])=>`<option value="${v}" ${String(V[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
+  const num=(k,min)=>`<input type="number" min="${min}" value="${V[k]}" style="width:52px" onchange="mbSetCfg(${w},'${k}',+this.value)">`;
+  return `<div class="ms-box"><span class="ms-lb">👻 LOSS / WIN VIRTUAL</span>
+    <label class="ms-chk" style="margin-top:4px"><input type="checkbox" ${+V.vOn?'checked':''} onchange="mbSetCfg(${w},'vOn',this.checked?1:0)"> ativar (espera sem apostar até a regra bater)</label>
+    ${+V.vOn?`<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+      <label class="ms-chk">Entrar ${sel('vModo',[['loss','após X LOSS virtual'],['win','após Y WIN virtual'],['ou','após X LOSS ou Y WIN'],['seq','após Y WIN e depois X LOSS'],['seq2','após X LOSS e depois Y WIN']])}</label>
+      <div class="ms-row2"><label class="ms-chk">X loss ${num('vX',1)}</label><label class="ms-chk">Y win ${num('vY',1)}</label></div>
+      <label class="ms-chk">Voltar a esperar ${sel('vVolta',[['green','depois de GREEN real'],['red','depois de RED real'],['qualquer','depois de qualquer resultado'],['n','depois de N entradas']])}${V.vVolta==='n'?' N '+num('vN',1):''}</label>
+      <div class="ms-nota">${mbVRegraTxt(w)}</div></div>`:''}</div>`;
+}
+// status do virtual (centro)
+function mbVStatusHtml(w){
+  const V=mbV(w); if(!+V.vOn) return '';
+  const s=mbVEstado(w), seq=s.vSeq.slice(-12);
+  const bolas=seq.map(c=>`<span class="mb-vb ${c==='W'?'w':'l'}">${c==='W'?'W':'L'}</span>`).join('')||'<span class="mu">nenhum resultado virtual ainda</span>';
+  const pend=s.vPend.length?` · ⏳ virtual ${hmsOf(s.vPend[0].T)}`:'';
+  return `<div class="mb-vst ${s.vEstado}"><b>${s.vEstado==='operando'?'🟢 OPERANDO DE VERDADE':'👻 ESPERANDO (virtual)'}</b>${pend}<div style="margin-top:4px">${bolas}</div><div class="ms-nota">${mbVRegraTxt(w)}</div></div>`;
+}
+// 📄 relatório completo para salvar em PDF
+function mbPdf(w){
+  const tudo=cfg.mb_histTudo, L=tudo?DM.log.filter(x=>x.src==='mbot'&&x.mw===w):mbSess(w).L, s=mbSt(w), C=mbCfg(w), V=mbV(w);
+  const ac=L.filter(x=>x.res==='green').length, er=L.filter(x=>x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0))).length, pl=L.reduce((a,x)=>a+(+x.profit||0),0), E=mbExpo(w,L);
+  const H=mbHist(w).slice().sort((a,b)=>a.T-b.T), Hv=H.filter(h=>h.tipo==='v');
+  const tab=document.createElement('div'); tab.innerHTML=mbVTabela(w);
+  const fonte={padroes:'robôs de padrão',hfix:'horário fixo 100%',ambos:'padrões + horário fixo'}[C.fonte||'padroes'];
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Robô ${w}s — ${new Date().toLocaleDateString('pt-BR')}</title><style>
+    body{font-family:Arial,sans-serif;color:#111;margin:0;padding:18px;font-size:12px}h1{font-size:20px;margin:0 0 2px}h2{font-size:14px;margin:18px 0 6px;border-bottom:2px solid #7c3aed;padding-bottom:3px}
+    .sub{color:#666;margin-bottom:10px}.cards{display:flex;gap:8px;flex-wrap:wrap}.c{border:1px solid #ddd;border-radius:8px;padding:8px 12px;min-width:110px}.c b{display:block;font-size:17px}.c span{color:#666;font-size:10px;text-transform:uppercase}
+    table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #e5e5e5;padding:4px 6px;text-align:left}th{background:#f3f0ff}.g{color:#15803d;font-weight:700}.r{color:#b91c1c;font-weight:700}.mu{color:#777}
+    .ms-hl{display:grid;grid-template-columns:1fr 70px 70px 80px;border-bottom:1px solid #eee;padding:3px 0}.okc{color:#15803d}.ruimc{color:#b91c1c}.ms-nota{color:#666;font-size:11px}@page{margin:12mm}</style></head><body>
+    <h1>🎮 Mesa Play — Robô ${w}s</h1><div class="sub">${tudo?'Histórico completo':'Sessão atual'} · ${symNome(mesaSym())} · gerado em ${new Date().toLocaleString('pt-BR')}</div>
+    <div class="cards"><div class="c"><span>Acertos</span><b class="g">${ac}</b></div><div class="c"><span>Erros</span><b class="r">${er}</b></div><div class="c"><span>Resultado</span><b class="${pl>=0?'g':'r'}">${pl>=0?'+':''}$ ${pl.toFixed(2)}</b></div>
+      <div class="c"><span>Maior valor exposto</span><b>$ ${E.ex.toFixed(2)}</b><span>${E.exT?hmsOf(E.exT):''}</span></div><div class="c"><span>Maior queda do saldo</span><b>$ ${E.queda.toFixed(2)}</b></div><div class="c"><span>Maior aposta</span><b>$ ${E.maxA.toFixed(2)}</b></div></div>
+    <h2>Configuração</h2><div>Fonte: <b>${fonte}</b>${C.fonte!=='padroes'?` · horário 100% em ${NIVEL[mbHfNivel(w)]} · mín. ${C.hfMin} dias`:''} · Entrada $ ${(+C.val).toFixed(2)} · Gales: ${C.gale<0?'seguir o robô':C.gale?'G'+C.gale:'sem gale'} (${C.galeModo==='sinal'?'no próximo sinal':'nos jogos seguintes'}, ${{fator:'× '+C.fat,zero:'só recuperar',lucro:'recuperar + lucro'}[C.galeCalc||'fator']}) · Recuperação: ${+C.rec?C.rec+' green(s)'+(+C.recLucro?' + lucro':' sem lucro'):'desligada'}${+C.recMax?' · aposta máx $ '+C.recMax:''} · Stop win ${+C.sw||'—'} · Stop loss ${+C.sl||'—'}<br>Virtual: ${+V.vOn?mbVRegraTxt(w):'desligado'}</div>
+    <h2>Entradas reais (${L.length})</h2><table><tr><th>Data</th><th>Jogo</th><th>Cor</th><th>Sinal</th><th>Nível</th><th>Aposta</th><th>Resultado</th><th>Saldo</th></tr>
+    ${(()=>{ let acc=0; return L.map(x=>{ acc+=(+x.profit||0); const d=new Date((x.planT||x.T)*1000); return `<tr><td>${d.toLocaleDateString('pt-BR')}</td><td>${hmsOf(x.planT||x.T)}</td><td>${x.mcor?'ÍMPAR':'PAR'}</td><td>${esc((x.nome||'').replace(/^🤖 \d+s · /,''))}</td><td>${x.gk!=null?(x.gk?'G'+x.gk+'·sinal':'TS'):(NIVEL[x.nivel]||'G'+x.nivel)}</td><td>$ ${(+x.stake||0).toFixed(2)}</td><td class="${x.res==='green'?'g':x.res==='red'?'r':'mu'}">${x.res==='green'?'GREEN +'+(+x.profit).toFixed(2):x.res==='red'?'RED '+(+x.profit).toFixed(2):x.res}</td><td>${acc>=0?'+':''}${acc.toFixed(2)}</td></tr>`; }).join(''); })()}</table>
+    <h2>Sinais virtuais (${Hv.length})</h2>${Hv.length?`<table><tr><th>Data</th><th>Jogo</th><th>Cor</th><th>Sinal</th><th>Resultado</th></tr>${Hv.map(h=>`<tr><td>${new Date(h.T*1000).toLocaleDateString('pt-BR')}</td><td>${hmsOf(h.T)}</td><td>${h.alvo?'ÍMPAR':'PAR'}</td><td>${esc(h.nome||'')}</td><td class="${h.res==='W'?'g':'r'}">${h.res==='W'?'WIN virtual':'LOSS virtual'}</td></tr>`).join('')}</table>`:'<div class="mu">Nenhum.</div>'}
+    <h2>Como cada regra virtual teria se saído</h2>${tab.innerHTML}
+    <h2>Eventos (${s.log.length})</h2><table>${s.log.map(e=>`<tr><td style="width:80px">${new Date(e.t).toLocaleTimeString('pt-BR')}</td><td>${esc(e.txt)}</td></tr>`).join('')}</table>
+    <script>setTimeout(()=>window.print(),500)<\/script></body></html>`;
+  const win=window.open('','_blank','width=1000,height=800');
+  if(win&&!win.closed){ win.document.write(html); win.document.close(); return; }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'})); a.download=`robo_${w}s_${new Date().toISOString().slice(0,10)}.html`; a.click();
+  alert('Pop-up bloqueado: baixei o relatório como .html — abra e use Imprimir → Salvar como PDF.');
+}
+
 // ---------- tela ----------
 function mbEsqHtml(w){
   const C=mbCfg(w), s=mbSt(w), ss=mbSess(w), inpt=(k,v,st)=>`<input type="number" step="${st}" value="${v}" onchange="mbSetCfg(${w},'${k}',+this.value)">`;
-  return `<div class="ms-box"><span class="ms-lb">VALOR DA ENTRADA</span><div class="ms-val">$ ${inpt('val',C.val,0.01)}</div></div>
+  return `${mbPresetsHtml(w)}<div class="ms-box"><span class="ms-lb">VALOR DA ENTRADA</span><div class="ms-val">$ ${inpt('val',C.val,0.01)}</div></div>
     <div class="ms-row2"><div class="ms-box"><span class="ms-lb">FATOR GALE</span><div class="ms-pm"><button onclick="mbSetCfg(${w},'fat',Math.max(1,Math.round((mbCfg(${w}).fat-0.1)*10)/10))">−</button><b>${(+C.fat).toFixed(1)}</b><button onclick="mbSetCfg(${w},'fat',Math.round((mbCfg(${w}).fat+0.1)*10)/10)">+</button></div></div>
       <div class="ms-box"><span class="ms-lb">GALES</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'gale',+this.value)">${[[-1,'seguir o robô'],[0,'sem gale'],[1,'G1'],[2,'G2'],[3,'G3'],[4,'G4'],[5,'G5'],[6,'G6']].map(([v,t])=>`<option value="${v}" ${+C.gale===v?'selected':''}>${t}</option>`).join('')}</select></div></div>
     <div class="ms-box"><span class="ms-lb">ONDE FAZ O GALE</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'galeModo',this.value)">
@@ -10035,11 +10223,13 @@ function mbEsqHtml(w){
     ${C.fonte==='hfix'?'':`<label class="ms-chk"><input type="checkbox" ${C.so100?'checked':''} onchange="mbSetCfg(${w},'so100',this.checked?1:0)"> só robôs 100% (nenhum red no banco)</label>
     <label class="ms-chk"><input type="checkbox" ${C.soAuto?'checked':''} onchange="mbSetCfg(${w},'soAuto',this.checked?1:0)"> só robôs automáticos ♻</label>`}
     <div class="ms-nota">0 no stop = sem stop. Gale ${C.gale<0?'até G2':C.gale?'até G'+C.gale:'desligado'} · ×${(+C.fat).toFixed(1)} · ${C.galeModo==='sinal'?'cada sinal é 1 entrada; depois de red a próxima entrada sobe de nível':'gale nos jogos logo depois da entrada'}</div>
+    ${mbVBoxHtml(w)}
     <span class="ms-lb">SESSÃO DO ROBÔ ${w}s</span><div class="ms-sess" id="msSess"></div>
     ${s.on?`<button class="ms-go stop" onclick="mbParar(${w})">⏹ PARAR ROBÔ ${w}s</button>`:`<button class="ms-go" onclick="mbIniciar(${w})">▶ INICIAR ROBÔ ${w}s</button>`}
     ${s.parou&&!s.on?`<div class="ms-nota" style="color:#fca5a5">${s.parou}</div>`:''}`;
 }
-function mbCentroHtml(w){
+function mbCentroHtml(w){ return mbCentroBase(w)+mbVStatusHtml(w); }
+function mbCentroBase(w){
   const s=mbSt(w), o=mbAberta(w), now=dmNow();
   if(!s.on) return `<div class="ms-faixa">${s.parou?'⏹ '+s.parou+' · ':''}Robô ${w}s parado — ajuste e clique em INICIAR</div>`;
   if(o){ const Tg=o.T+o.g*o.step; return `<div class="ms-faixa on">🤖 ${o.mcor?'ÍMPAR':'PAR'} · ${o.g?'GALE '+o.g:'ENTRADA'} no jogo ${hmsOf(Tg)} · ${o.estado==='aguardando'?`faltam ${Math.max(0,Math.ceil(Tg-now))}s`:o.estado}<div style="font-size:11px;font-weight:600;opacity:.85">${o.nome.replace(/^🤖 \d+s · /,'')}</div></div>`; }
@@ -10080,9 +10270,14 @@ function mbFilaPadroes(w){
     return `<div class="ms-hl" style="grid-template-columns:26px 1fr 110px 70px 150px"><span class="mu">${i+1}</span><span>${rbName(x.rb)}</span><span>${x.st.done} casos · <b>${(x.st.rate*100).toFixed(0)}%</b></span><span><span class="okc">${pl.g}</span>/<span class="ruimc">${pl.r}</span></span><span>${p?`<span class="ms-pisca">entrada ${hmsOf(p.entryT/1000)}</span>`:'<span class="mu">aguardando</span>'}</span></div>`; }).join('');
 }
 function mbHistHtml(w){
-  const s=mbSt(w), E=mbSess(w).L.slice(-20).reverse(), ev=s.log.slice(-25).reverse();
-  return `<div class="ms-lb">ENTRADAS DO ROBÔ</div><div class="ms-hist" style="max-height:200px">${E.length?E.map(x=>`<div class="ms-hl"><span>${hmsOf(x.planT||x.T)}</span><span>${(x.mcor?'ÍMPAR · ':'PAR · ')+x.nome.replace(/^🤖 \d+s · /,'')}</span><span>${x.gk!=null?(x.gk?'G'+x.gk+'·sinal':'TS'):(NIVEL[x.nivel]||'G'+x.nivel)}</span><span>${x.stake?'$ '+(+x.stake).toFixed(2):'—'}</span><span class="${x.res==='green'?'okc':x.res==='red'?'ruimc':'mu'}">${x.res==='green'?'✅ +'+(+x.profit).toFixed(2):x.res==='red'?'❌ '+(+x.profit).toFixed(2):x.res}</span></div>`).join(''):'<div class="mu" style="padding:8px">Nenhuma entrada ainda.</div>'}</div>
-    <div class="ms-lb" style="margin-top:8px">EVENTOS</div><div class="ms-hist" style="max-height:200px">${ev.length?ev.map(e=>`<div class="ms-hl" style="grid-template-columns:70px 1fr"><span>${new Date(e.t).toLocaleTimeString('pt-BR')}</span><span class="${e.tipo==='g'?'okc':e.tipo==='r'?'ruimc':''}">${e.txt}</span></div>`).join(''):'<div class="mu" style="padding:8px">—</div>'}</div>`;
+  const s=mbSt(w), tudo=cfg.mb_histTudo, Lall=tudo?DM.log.filter(x=>x.src==='mbot'&&x.mw===w):mbSess(w).L, E=Lall.slice().reverse(), ev=s.log.slice().reverse(), X=mbExpo(w), Xt=tudo?mbExpo(w,Lall):X;
+  const acA=Lall.filter(x=>x.res==='green').length, erA=Lall.filter(x=>x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0))).length, plA=Lall.reduce((a,x)=>a+(+x.profit||0),0);
+  return `<div class="ms-lb" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">ENTRADAS DO ROBÔ <span class="mu">(${E.length} · ${acA}✅ ${erA}❌ · <span class="${plA>=0?'okc':'ruimc'}">${plA>=0?'+':''}$ ${plA.toFixed(2)}</span>)</span>
+      <span style="margin-left:auto;display:flex;gap:6px"><button class="mb-mini ${tudo?'':'on'}" onclick="cfg.mb_histTudo=0;saveCfg();mesaRender(true)">sessão</button><button class="mb-mini ${tudo?'on':''}" onclick="cfg.mb_histTudo=1;saveCfg();mesaRender(true)">histórico completo</button><button class="mb-mini pdf" onclick="mbPdf(${w})">📄 baixar PDF</button></span></div>
+    <div class="ms-hist" style="max-height:${tudo?420:220}px">${E.length?E.map(x=>`<div class="ms-hl"><span>${hmsOf(x.planT||x.T)}</span><span>${(x.mcor?'ÍMPAR · ':'PAR · ')+x.nome.replace(/^🤖 \d+s · /,'')}</span><span>${x.gk!=null?(x.gk?'G'+x.gk+'·sinal':'TS'):(NIVEL[x.nivel]||'G'+x.nivel)}</span><span>${x.stake?'$ '+(+x.stake).toFixed(2):'—'}</span><span class="${x.res==='green'?'okc':x.res==='red'?'ruimc':'mu'}">${x.res==='green'?'✅ +'+(+x.profit).toFixed(2):x.res==='red'?'❌ '+(+x.profit).toFixed(2):x.res}</span></div>`).join(''):'<div class="mu" style="padding:8px">Nenhuma entrada ainda.</div>'}</div>
+    <div class="ms-lb" style="margin-top:8px">EVENTOS</div><div class="ms-hist" style="max-height:200px">${ev.length?ev.map(e=>`<div class="ms-hl" style="grid-template-columns:70px 1fr"><span>${new Date(e.t).toLocaleTimeString('pt-BR')}</span><span class="${e.tipo==='g'?'okc':e.tipo==='r'?'ruimc':''}">${e.txt}</span></div>`).join(''):'<div class="mu" style="padding:8px">—</div>'}</div>
+    <div class="mb-expo"><div><span>📉 MAIOR VALOR EXPOSTO</span><b>$ ${Xt.ex.toFixed(2)}</b><i>${Xt.exT?'às '+hmsOf(Xt.exT):'—'}</i></div><div><span>MAIOR QUEDA DO SALDO</span><b>$ ${Xt.queda.toFixed(2)}</b><i>do topo até o fundo</i></div><div><span>MAIOR APOSTA</span><b>$ ${Xt.maxA.toFixed(2)}</b><i>${tudo?'histórico completo':'nesta sessão'}</i></div></div>
+    <div class="ms-lb" style="margin-top:10px">👻 COMO CADA REGRA VIRTUAL TERIA SE SAÍDO · ${w}s</div><div class="ms-hist" style="max-height:330px;padding:4px 0">${mbVTabela(w)}</div>`;
 }
 
 
