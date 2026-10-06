@@ -502,7 +502,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.66 · 06/10/2026 · 🎮 Mesa: recuperação automática depois do red (recupera a perda em 2 greens)';
+const VERSAO='v3.67 · 06/10/2026 · 🎮 Mesa: valor do gale "só recuperar" (empata, expõe menos a banca) e recuperação com ou sem lucro';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8512,7 +8512,9 @@ async function dmComprar(o){
   const st0=o.stakeBase||dmStake0();
   let stake=o.stakeFix&&g===0?o.stakeFix:st0;
   if(g>0 && !o.stakeFix){
-    if(o.fator) stake=st0*Math.pow(o.fator,g);
+    if(o.galeCalc==='zero') stake=Math.ceil(o.perda/(o.ratio||r0||0.95)*100)/100;                 // só recupera o que perdeu (empata)
+    else if(o.galeCalc==='lucro') stake=(o.perda+st0*(o.ratio||r0||0.95))/(o.ratio||r0||0.95);     // recupera + o lucro da entrada
+    else if(o.fator) stake=st0*Math.pow(o.fator,g);
     else if((cfg.dm_galeModo||'auto')==='auto' && o.ratio) stake=(o.perda+dmStake0()*o.ratio)/o.ratio;       // recupera as perdas + o lucro da 1ª entrada
     else stake=dmStake0()*Math.pow(+cfg.dm_mult||2.1,g);
   }
@@ -9894,7 +9896,7 @@ document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.
 // se dois robôs pedem o mesmo jogo, entra só no primeiro da lista; se pedem PAR e ÍMPAR no mesmo jogo, aborta.
 // A decisão é tomada ~3s antes do jogo, quando todos os sinais daquele jogo já apareceram.
 // =====================================================================================
-const MB_DEF={val:0.35,fat:2.2,gale:-1,sw:0,sl:0,so100:1,soAuto:0,fonte:'padroes',hfMin:5,hfDias:7,hfLvl:-1,galeModo:'seguido',rec:2,recMax:0};
+const MB_DEF={val:0.35,fat:2.2,gale:-1,sw:0,sl:0,so100:1,soAuto:0,fonte:'padroes',hfMin:5,hfDias:7,hfLvl:-1,galeModo:'seguido',rec:2,recMax:0,galeCalc:'fator',recLucro:1};
 // pagamento do PAR/ÍMPAR (lucro ÷ aposta) medido nos greens da sessão; sem histórico usa 0,95
 function mbRatio(w){ const G=DM.log.filter(x=>(x.src==='mbot'||x.src==='mesa')&&x.res==='green'&&+x.stake>0&&+x.profit>0).slice(-20); if(!G.length) return 0.95; return G.reduce((a,x)=>a+x.profit/x.stake,0)/G.length; }
 // 🔁 recuperação: refaz a sessão do início e diz quanto falta recuperar e em quantos greens
@@ -9910,12 +9912,19 @@ function mbRec(w){
     else if(x.res==='green'&&k!=null){ k--; if(k<=0) k=N; }       // ainda falta: divide de novo
   }
   const falta=Math.max(0,Math.round((pico-pl)*100)/100), r=mbRatio(w), base=Math.max(0.35,+C.val||0.35)*r;
-  const on=N>0&&k!=null&&falta>0.009;
-  const alvo=on?falta/k+base:0;
+  const on=N>0&&k!=null&&falta>0.05;
+  const alvo=on?falta/k+(+C.recLucro?base:0):0;
   return {on,falta,k:on?k:0,N,alvo:Math.round(alvo*100)/100,stake:on?Math.round(alvo/r*100)/100:0,r,pl,pico};
 }
 // gale no próximo sinal: nível atual calculado pelas entradas da sessão (green zera; red sobe; passou do último gale, zera)
-function mbGaleK(w){ const C=mbCfg(w), G=C.gale<0?2:+C.gale; let k=0; for(const x of mbSess(w).L){ if(x.gk==null) continue; if(x.res==='green') k=0; else if(x.res==='red'){ k++; if(k>G) k=0; } } return k; }
+function mbGaleK(w){ return mbGaleCiclo(w).k; }
+function mbGaleCiclo(w){ const C=mbCfg(w), G=C.gale<0?2:+C.gale; let k=0,perda=0; for(const x of mbSess(w).L){ if(x.gk==null) continue; if(x.res==='green'){ k=0; perda=0; } else if(x.res==='red'){ k++; perda+=+x.stake||0; if(k>G){ k=0; perda=0; } } } return {k,perda}; }
+// valor da entrada no gale "no próximo sinal" conforme o modo escolhido
+function mbStakeSinal(w){ const C=mbCfg(w), base=Math.max(0.35,+C.val||0.35), {k,perda}=mbGaleCiclo(w), r=mbRatio(w);
+  if(!k) return base;
+  if(C.galeCalc==='zero') return Math.max(0.35,Math.ceil(perda/r*100)/100);
+  if(C.galeCalc==='lucro') return Math.max(0.35,Math.round((perda+base*r)/r*100)/100);
+  return Math.round(base*Math.pow(Math.max(1,+C.fat||2.2),k)*100)/100; }
 let MB={};   // estado por tempo: {on,ini,taken:Set,log:[],stats:Map}
 function mbSt(w){ return MB[w]||(MB[w]={on:false,ini:0,taken:new Set(),feitos:new Set(),log:[],stats:new Map(),parou:''}); }
 function mbCfg(w){ return {...MB_DEF,...((cfg.mbot||{})[w]||{})}; }
@@ -9993,8 +10002,8 @@ function mbTick(){
     const g=ok[0], gale=C.gale<0?g.gale:C.gale, base=Math.max(0.35,+C.val||0.35), fat=Math.max(1,+C.fat||2.2);
     const R=mbRec(w), rec=R.on?{recAlvo:R.alvo,recMax:+C.recMax||0,ratio:R.r}:{}, rtxt=R.on?` · 🔁 recuperando $ ${R.falta.toFixed(2)} (${R.k} green${R.k>1?'s':''}) → aposta $ ${Math.min(R.stake,+C.recMax||Infinity).toFixed(2)}`:'';
     if(C.galeModo==='sinal'){ const k=mbGaleK(w), G=C.gale<0?2:+C.gale;
-      dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:0,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.round(base*Math.pow(fat,k)*100)/100,fator:fat,mcor:g.alvo,gk:k,gmax:G,...rec}); }
-    else dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:base,fator:fat,mcor:g.alvo,...rec});
+      dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:0,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:mbStakeSinal(w),fator:fat,mcor:g.alvo,gk:k,gmax:G,...rec}); }
+    else dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:base,fator:fat,galeCalc:C.galeCalc,mcor:g.alvo,...rec});
     if(R.on) mbLog(w,`🔁 ${hmsOf(T/1000)}: modo recuperação${rtxt}`,'evt');
     s.feitos.add(g.key);
     mbLog(w,`🎯 ${hh}: ENTRADA ${g.alvo?'ÍMPAR':'PAR'} · ${g.nome}${ok.length>1?` (outros ${ok.length-1} da mesma cor ficaram de fora)`:''}`,'g');
@@ -10010,10 +10019,13 @@ function mbEsqHtml(w){
       <div class="ms-box"><span class="ms-lb">GALES</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'gale',+this.value)">${[[-1,'seguir o robô'],[0,'sem gale'],[1,'G1'],[2,'G2'],[3,'G3'],[4,'G4'],[5,'G5'],[6,'G6']].map(([v,t])=>`<option value="${v}" ${+C.gale===v?'selected':''}>${t}</option>`).join('')}</select></div></div>
     <div class="ms-box"><span class="ms-lb">ONDE FAZ O GALE</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'galeModo',this.value)">
       <option value="seguido" ${C.galeModo!=='sinal'?'selected':''}>nos jogos seguintes (${w}s depois)</option><option value="sinal" ${C.galeModo==='sinal'?'selected':''}>no próximo sinal (aposta maior)</option></select>
+      <span class="ms-lb" style="display:block;margin-top:8px">VALOR DO GALE</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'galeCalc',this.value)">${[['fator','× fator '+(+C.fat).toFixed(1)+' (lucra no gale)'],['zero','🛡 só recuperar (empata, expõe menos)'],['lucro','recuperar + lucro da entrada']].map(([v,t])=>`<option value="${v}" ${C.galeCalc===v?'selected':''}>${t}</option>`).join('')}</select>
+      <div class="ms-nota" style="margin-top:4px">${mbGaleTabela(w)}</div>
       ${C.galeModo==='sinal'?`<div class="ms-nota" style="margin-top:4px">Agora no nível <b>${mbGaleK(w)?'G'+mbGaleK(w):'entrada'}</b> · próxima aposta <b>$ ${(Math.max(0.35,+C.val||0.35)*Math.pow(Math.max(1,+C.fat||2.2),mbGaleK(w))).toFixed(2)}</b></div>`:''}</div>
     <div class="ms-box"><span class="ms-lb">🔁 DEPOIS DO RED, RECUPERAR EM</span>
       <div class="ms-row2" style="margin-top:4px"><select class="ms-sel" onchange="mbSetCfg(${w},'rec',+this.value)">${[[0,'desligado'],[1,'1 green'],[2,'2 greens'],[3,'3 greens'],[4,'4 greens'],[5,'5 greens']].map(([v,t])=>`<option value="${v}" ${+C.rec===v?'selected':''}>${t}</option>`).join('')}</select>
-      <label class="ms-chk">aposta máx $ <input type="number" min="0" step="1" value="${C.recMax}" style="width:60px" onchange="mbSetCfg(${w},'recMax',+this.value)"></label></div>
+      <label class="ms-chk"><input type="checkbox" ${+C.recLucro?'checked':''} onchange="mbSetCfg(${w},'recLucro',this.checked?1:0)"> + lucro</label></div>
+      <div class="ms-row2" style="margin-top:4px"><label class="ms-chk">aposta máx $ <input type="number" min="0" step="1" value="${C.recMax}" style="width:60px" onchange="mbSetCfg(${w},'recMax',+this.value)"></label></div>
       <div id="msRec" class="ms-nota" style="margin-top:4px"></div></div>
     <div class="ms-row2"><div class="ms-box"><span class="ms-lb">STOP WIN $</span><div class="ms-val" style="font-size:18px">${inpt('sw',C.sw,1)}</div></div>
       <div class="ms-box"><span class="ms-lb">STOP LOSS $</span><div class="ms-val" style="font-size:18px">${inpt('sl',C.sl,1)}</div></div></div>
@@ -10034,13 +10046,22 @@ function mbCentroHtml(w){
   const ult=s.log.at(-1);
   return `<div class="ms-faixa ${ult&&Date.now()-ult.t<8000?(ult.tipo==='r'?'r':ult.tipo==='g'?'g':''):''}">${ult&&Date.now()-ult.t<8000?ult.txt:`🔎 Robô ${w}s ligado · aguardando sinal de ${mbRobos(w).length} robô(s)`}</div>`;
 }
+// tabela de valores de cada gale no modo escolhido (para o usuário ver a exposição)
+function mbGaleTabela(w){
+  const C=mbCfg(w), G=C.gale<0?2:+C.gale, base=Math.max(0.35,+C.val||0.35), r=mbRatio(w), fat=Math.max(1,+C.fat||2.2);
+  if(!G) return 'Sem gale.';
+  let perda=0; const L=[];
+  for(let g=0;g<=G;g++){ let st=g===0?base:C.galeCalc==='zero'?Math.ceil(perda/r*100)/100:C.galeCalc==='lucro'?(perda+base*r)/r:base*Math.pow(fat,g); st=Math.max(0.35,Math.round(st*100)/100);
+    L.push(`${g?'G'+g:'TS'} $ ${st.toFixed(2)} <span class="mu">(${(st*r-perda>=0?'+':'')}${(st*r-perda).toFixed(2)})</span>`); perda+=st; }
+  return L.join(' · ')+` · <b>perda máx $ ${perda.toFixed(2)}</b>`;
+}
 function mbRecTxt(w){
   const C=mbCfg(w), R=mbRec(w);
   if(!R.N) return 'Desligado: depois do red volta para a entrada normal.';
   if(!R.on) return `Sem perda para recuperar · se der RED, o robô divide a perda em ${R.N} green${R.N>1?'s':''} (pagamento ${(R.r*100).toFixed(0)}%)`;
   const cap=+C.recMax>0&&R.stake>+C.recMax;
   return `<b style="color:#facc15">🔁 RECUPERANDO</b> · falta <b>$ ${R.falta.toFixed(2)}</b> · ${R.k} green${R.k>1?'s':''} restante${R.k>1?'s':''}<br>
-    próxima aposta <b>$ ${(cap?+C.recMax:R.stake).toFixed(2)}</b> = ($ ${R.falta.toFixed(2)} ÷ ${R.k} + lucro $ ${(R.alvo-R.falta/R.k).toFixed(2)}) ÷ ${R.r.toFixed(2)}${cap?' <span class="ruimc">· travada no máximo</span>':''}`;
+    próxima aposta <b>$ ${(cap?+C.recMax:R.stake).toFixed(2)}</b> = ($ ${R.falta.toFixed(2)} ÷ ${R.k}${+C.recLucro?` + lucro $ ${(R.alvo-R.falta/R.k).toFixed(2)}`:''}) ÷ ${R.r.toFixed(2)}${cap?' <span class="ruimc">· travada no máximo</span>':''}`;
 }
 function mbFilaHtml(w){
   const C=mbCfg(w); let hf='';
