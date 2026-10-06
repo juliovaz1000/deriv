@@ -279,6 +279,9 @@ button.cfon{background:linear-gradient(90deg,#0891b2,#7c3aed);border-color:trans
 .il2entrada.ok{border-color:var(--g);animation:none}.il2entrada.ruim{border-color:var(--v);animation:none}
 @keyframes il2pulse{0%,100%{box-shadow:0 0 0 rgba(6,182,212,0)}50%{box-shadow:0 0 18px rgba(6,182,212,.55)}}
 .il2tp{background:rgba(6,182,212,.2)!important;color:#22d3ee!important}
+.il2conf{margin:6px 0;padding:6px 8px;border-radius:8px;border:1px dashed rgba(6,182,212,.5);font-size:12px}.il2conf.ok{border:1px solid var(--g);background:rgba(34,197,94,.08)}.il2conf.contra{border:1px solid var(--v);background:rgba(239,68,68,.08)}
+.r5b{display:inline-flex;flex-direction:column;align-items:center;margin-right:3px;vertical-align:top}.r5b i{font-style:normal;font-size:12px;font-weight:900;line-height:1;margin-top:1px}
+.r5chip{display:inline-block;font-size:11px;padding:1px 6px;margin:1px 2px;border-radius:8px;border:1px solid rgba(34,197,94,.5);color:#86efac}.r5chip.ruim{border-color:rgba(239,68,68,.6);color:#fca5a5}
 #il2Btn{border-color:#06b6d4;color:#22d3ee}#il2Btn.il2on{background:#0e7490;color:#fff;border-color:#22d3ee}
 #srobPop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:9999;overflow-y:auto}
 .srobpc{background:var(--p1);border:1px solid #8b5cf6;border-radius:14px;padding:18px 20px;width:min(580px,98vw);max-height:90vh;overflow-y:auto}
@@ -309,7 +312,7 @@ button.dmon{background:linear-gradient(90deg,#7c3aed,#2563eb);border-color:trans
 .dmpanel{border-color:#7c3aed;background:linear-gradient(135deg,rgba(124,58,237,.10),var(--p1))}
 .wbtn{padding:2px 7px;font-size:11px;margin-right:3px}.wbtn.on{background:var(--az);border-color:var(--az);color:#fff}
 .uotag{display:inline-block;padding:2px 8px;border-radius:6px;font-weight:800;font-size:12px;color:#fff;white-space:nowrap}
-.uotag.uoU{background:linear-gradient(90deg,#0ea5e9,#2563eb)}.uotag.uoO{background:linear-gradient(90deg,#f59e0b,#db2777)}
+.uotag.uoU{background:linear-gradient(90deg,#0ea5e9,#2563eb)}.uotag.uoO{background:linear-gradient(90deg,#f59e0b,#db2777)}.uotag.uoM{background:linear-gradient(90deg,#a855f7,#6366f1)}.rbcard.uorob.uoM{border-left:4px solid #a855f7}
 .uohead{background:linear-gradient(135deg,#131a26,#1a1530)}
 .uowins{display:inline-flex;gap:4px}.uowins button{padding:4px 10px}.uowins button.on{background:linear-gradient(90deg,#3b82f6,#8b5cf6);border-color:transparent;color:#fff}
 .uosubs{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 12px}.uosubs button{background:var(--p1);border:1px solid var(--bd);color:var(--mu)}.uosubs button.on{background:linear-gradient(90deg,#1e3a8a,#5b21b6);color:#fff;border-color:transparent}
@@ -356,6 +359,54 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 #nuvemPop .rbpt{font-size:18px;font-weight:800;margin-bottom:6px}
 #nuvemBtn{padding:3px 9px;border-radius:10px;font-size:12px}#nuvemBtn.nvok{border-color:var(--g);color:var(--g)}#nuvemBtn.nverr{border-color:var(--am);color:var(--am)}
 </style>
+<style>
+#mesaPop{position:fixed;inset:0;z-index:10002;display:none;background:#08060f;overflow:auto}
+.ms{--mr:#7c3aed;--mr2:#a855f7;--mg:#1b1a24;--mb:#2a2638;width:100%;max-width:1500px;margin:0 auto;padding:12px 16px;color:#ece9f6;font-family:system-ui,"Segoe UI",Roboto,sans-serif}
+.ms-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.ms-logo{font-weight:900;font-size:18px;letter-spacing:.5px;background:linear-gradient(90deg,#c084fc,#7c3aed);-webkit-background-clip:text;color:transparent}.ms-logo small{font-size:11px;color:#8b84a3;-webkit-text-fill-color:#8b84a3;margin-left:6px}
+.ms-sel{background:var(--mg);border:1px solid var(--mb);color:#ece9f6;border-radius:9px;padding:6px 10px}
+.ms-saldo{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:4px 12px}.ms-saldo span{font-size:9px;color:#8b84a3;letter-spacing:.6px}.ms-saldo b{font-size:16px}
+.ms-x,.ms-con{background:var(--mg);border:1px solid var(--mb);color:#ece9f6;border-radius:9px;padding:7px 12px;cursor:pointer;font-weight:700}.ms-con{background:linear-gradient(90deg,var(--mr2),var(--mr));border:0}
+.ms-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.ms-tab{background:var(--mg);border:1px solid var(--mb);border-radius:12px;padding:10px 12px;color:#ece9f6;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.ms-tab>b{font-size:15px;letter-spacing:1px}.ms-tab.on{border-color:var(--mr2);background:linear-gradient(135deg,rgba(124,58,237,.35),var(--mg));box-shadow:0 0 18px rgba(168,85,247,.25)}
+.ms-tl{font-size:12px;color:#a49dbb}.ms-tl em{font-style:normal;display:inline-flex;width:20px;height:20px;border-radius:5px;align-items:center;justify-content:center;font-weight:800;color:#fff;margin-right:4px}.ms-tl em.par{background:var(--mr)}.ms-tl em.imp{background:#3a3648}
+.ms-pisca{color:#facc15;animation:pisca 1s infinite}
+.ms-corpo{display:grid;grid-template-columns:360px 1fr;gap:14px}
+.ms-corpo>div,.ms-row2>div,.ms-tab{min-width:0}.ms-val input{min-width:0}
+@media(max-width:900px){.ms-corpo{grid-template-columns:minmax(0,1fr)}.ms-tabs{gap:6px}.ms-tab{padding:8px}.ms-tab>b{font-size:12px}.ms-tl{font-size:10px}.ms-b.g{width:64px;height:90px;font-size:30px}.ms-b.g span{width:50px;height:50px;border-width:3px}.ms-reel{gap:5px;min-height:120px}.ms-hl{grid-template-columns:62px 1fr 34px 64px 72px;font-size:11px}.ms{padding:10px}}
+.ms-esq,.ms-dir{background:#100d1a;border:1px solid var(--mb);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.ms-box{background:var(--mg);border:1px solid var(--mb);border-radius:11px;padding:8px 12px}.ms-lb{font-size:10px;color:#8b84a3;letter-spacing:.8px;font-weight:700}
+.ms-val{display:flex;align-items:center;gap:4px;font-size:22px;font-weight:800}.ms-val input{background:transparent;border:0;color:#fff;font-size:22px;font-weight:800;width:100%;text-align:right;padding:0}
+.ms-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ms-pm{display:flex;align-items:center;justify-content:space-between;margin-top:3px}.ms-pm b{font-size:17px}
+.ms-pm button{width:30px;height:30px;border-radius:8px;background:#26222f;border:1px solid var(--mb);color:#fff;font-weight:900;cursor:pointer;padding:0}
+.ms-qv{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.ms-qv button{background:var(--mg);border:1px solid var(--mb);color:#ece9f6;border-radius:10px;padding:10px 0;font-weight:800;cursor:pointer}.ms-qv button.on{border-color:var(--mr2);background:rgba(124,58,237,.25)}
+.ms-nota{font-size:11px;color:#8b84a3}
+.ms-sess{display:grid;grid-template-columns:repeat(3,1fr);background:var(--mg);border:1px solid var(--mb);border-radius:11px;padding:14px 4px;text-align:center}.ms-sess b{display:block;font-size:20px}.ms-sess span{font-size:10px;color:#8b84a3;letter-spacing:.6px}
+.ms-bt{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}.ms-bt button{height:78px;border-radius:12px;font-size:22px;font-weight:900;letter-spacing:1px;cursor:pointer;color:#fff;border:1px solid var(--mb)}
+.ms-bt .par{background:linear-gradient(160deg,#a855f7,#6d28d9)}.ms-bt .imp{background:linear-gradient(160deg,#3a3648,#1f1c29)}.ms-bt button:active{transform:scale(.97)}
+.ms-faixa{background:var(--mg);border:1px solid var(--mb);border-radius:11px;padding:10px;text-align:center;font-weight:800}.ms-faixa.on{background:linear-gradient(90deg,var(--mr2),var(--mr));border:0;animation:none}.ms-faixa.g{background:rgba(34,197,94,.18);border-color:#22c55e;color:#86efac}.ms-faixa.r{background:rgba(239,68,68,.15);border-color:#ef4444;color:#fca5a5}
+.ms-reel{display:flex;justify-content:center;align-items:center;gap:10px;min-height:190px;padding:10px 0;overflow:hidden}
+.ms-b{border-radius:10px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:900;width:44px;height:42px;font-size:15px;line-height:1}.ms-b:not(.g) i{font-style:normal;font-size:9px;font-weight:600;opacity:.8;margin-top:3px}
+.ms-b.par{background:var(--mr)}.ms-b.imp{background:#2e2a3b}
+.ms-b.g{width:110px;height:140px;font-size:56px;opacity:.55}.ms-b.g span{width:84px;height:84px;border-radius:50%;border:4px solid rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center}.ms-b.g i{font-style:normal;font-size:11px;font-weight:600;margin-top:6px;opacity:.85}
+.ms-b.g.ult{opacity:1;transform:scale(1.12);box-shadow:0 0 0 3px #fff,0 0 30px rgba(168,85,247,.6)}
+.ms-crono{text-align:center;font-size:13px;color:#a49dbb}.ms-cbar{height:6px;background:var(--mg);border-radius:9px;overflow:hidden;margin-bottom:6px}.ms-cbar i{display:block;height:100%;background:linear-gradient(90deg,var(--mr2),var(--mr));transition:width .25s linear}
+.ms-strip{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;background:var(--mg);border-radius:11px;padding:8px}
+.ms-hist{max-height:260px;overflow:auto;background:var(--mg);border-radius:11px}.ms-hl{display:grid;grid-template-columns:80px 1fr 60px 80px 90px;gap:6px;padding:7px 10px;border-bottom:1px solid var(--mb);font-size:13px}
+.okc{color:#4ade80}.ruimc{color:#f87171}
+#mesaBtn{border-color:#a855f7;color:#d8b4fe;font-weight:800}
+.mb-pres{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.mb-chip{display:inline-flex;border:1px solid var(--mb);border-radius:9px;overflow:hidden;background:#26222f}.mb-chip button{background:transparent;border:0;color:#ece9f6;padding:6px 9px;cursor:pointer;font-weight:700;font-size:12px}.mb-chip button small{color:#a49dbb;font-weight:600}.mb-chip .x{color:#f87171;border-left:1px solid var(--mb);padding:6px 7px}.mb-chip.on{border-color:#22c55e;box-shadow:0 0 0 1px #22c55e}
+.mb-mini{background:var(--mg);border:1px solid var(--mb);color:#cfc9e2;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:0}.mb-mini.on{background:var(--mr);color:#fff;border-color:var(--mr)}.mb-mini.pdf{background:#1f2937;color:#fde68a}
+.mb-expo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.mb-expo>div{background:var(--mg);border:1px solid var(--mb);border-radius:11px;padding:10px;text-align:center}.mb-expo span{display:block;font-size:10px;color:#8b84a3;letter-spacing:.6px;font-weight:700}.mb-expo b{display:block;font-size:20px;color:#fbbf24;margin:3px 0}.mb-expo i{font-style:normal;font-size:11px;color:#8b84a3}
+.mb-vst{margin-top:8px;border-radius:11px;padding:8px 12px;text-align:center;border:1px dashed #a855f7;background:rgba(168,85,247,.08)}.mb-vst.operando{border:1px solid #22c55e;background:rgba(34,197,94,.1)}
+.mb-vb{display:inline-flex;width:22px;height:22px;border-radius:6px;align-items:center;justify-content:center;font-weight:900;font-size:11px;margin:0 2px;color:#fff}.mb-vb.w{background:#16a34a}.mb-vb.l{background:#dc2626}
+.ms-modos{display:flex;gap:4px;background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:3px}.ms-modos button{background:transparent;border:0;color:#a49dbb;border-radius:8px;padding:7px 12px;font-weight:800;cursor:pointer}.ms-modos button.on{background:linear-gradient(90deg,var(--mr2),var(--mr));color:#fff}
+.ms-relogio{display:flex;align-items:center;gap:6px;background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:6px 12px;font-size:18px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.ms-chk{display:flex;align-items:center;gap:6px;font-size:12px;color:#cfc9e2}
+.ms-go{height:64px;border-radius:12px;font-size:19px;font-weight:900;letter-spacing:.5px;color:#fff;border:0;cursor:pointer;background:linear-gradient(160deg,#22c55e,#15803d);margin-top:4px}.ms-go.stop{background:linear-gradient(160deg,#ef4444,#991b1b)}
+.ms-strip{justify-content:flex-start!important}
+</style>
 </head>
 <body>
 <header>
@@ -387,6 +438,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
   <span id="repairBox" style="display:none"></span>
   <button id="ilBtn" onclick="ilLigar(!cfg.il_on)" title="junta 5s + 10s + 20s só com fontes 100%">🔗 INTERLIGAR</button>
   <button id="il2Btn" onclick="il2Abrir()" title="interligado só com padrões vindo de 2 reds + 1 green atual">🔁 2R+G</button>
+  <button id="mesaBtn" onclick="mesaNovaAba()" title="tela de operar na Deriv com 10s, 20s e 30s separados">🎮 MESA</button>
   <button id="srobBtn" onclick="srobOpen()" title="5 robôs automáticos com regra de sono/deleção">🎯 SOMENTE ROBÔ</button>
   <span id="demoBox" style="display:none"></span>
   <span id="atuBox" style="display:none" onclick="atuAbrir()" title="clique para ver todas as atualizações"></span>
@@ -414,6 +466,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 <div id="il2Pop" onclick="if(event.target===this)il2Fechar()"></div>
 <div id="nuvemPop" onclick="if(event.target===this)this.style.display='none'"></div>
 <div id="cf2Pop"></div>
+<div id="mesaPop"></div>
 
 <script type="text/plain" id="userscript">// ==UserScript==
 // @name         Dólar Par/Ímpar — Ponte API
@@ -454,7 +507,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.48 · 04/10/2026 · 🔁 2R+G: escolher os tempos das fontes (ex.: só 20s)';
+const VERSAO='v3.69 · 06/10/2026 · virtual mostra só o campo usado · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -1033,12 +1086,79 @@ function hpPills(o, off, step) {
 }
 // 🔁 retomada: pagou ≥ minRun horas seguidas, depois ficou k horas sem pagar e agora deu 1 green
 // devolve quantas horas seguidas pagava antes da falha (0 = não é retomada)
+// 🏆 máximas pagando: para cada horário (mm:ss + alvo), a maior sequência de horas pagando e quando ela aconteceu
+function hpMaxScan(G, alvoFilter, L) {
+  const step = G.step, gpm = 60 / step, out = [];
+  for (let m = 0; m < 60; m++) for (let j = 0; j < gpm; j++) {
+    const off = m * 60 + j * step;
+    for (const alvo of [0, 1]) {
+      if (alvoFilter !== 'all' && +alvoFilter !== alvo) continue;
+      let n = 0, ok = 0, run = 0, ini = 0, max = 0, mIni = 0, mFim = 0, ult = 0, q = 0;
+      for (let hh = G.T0; hh + off <= G.last; hh += 3600) {
+        const T = hh + off; if (T < G.first) continue;
+        const r = gResult(gLadder(G, T, alvo, 2), L); if (r < 0) continue;
+        n++; ult = T;
+        if (r) { ok++; if (!run) ini = T; run++; if (run > max) { max = run; mIni = ini; mFim = T; } } else { run = 0; q++; }
+      }
+      if (n) out.push({ off, m, j, alvo, n, ok, max, mIni, mFim, cur: run, curIni: run ? ini : 0, ult, reds: q });
+    }
+  }
+  return out;
+}
+// filtro "Retomada / Em red agora" da aba (usado também nas confirmações do 2R+G)
+function hpRetFiltra(rows, Lk, minOc) {
+  const retK = String(cfg.hpRet || '0'), retMin = Math.max(1, +(cfg.hpRetMin ?? 6) || 6);
+  if (retK === '0') return [];
+  return rows.map(r => { const o = r.L[Lk]; if (o.n < minOc) return null;
+      const emRed = retK[0] === 'r', ks = retK === '23' ? [2, 3] : retK === 'r123' ? [1, 2, 3] : [+retK.replace('r', '')];
+      for (const k of ks) { const run = emRed ? hpEmRed(o, k, retMin) : hpRetomada(o, k, retMin); if (run) return { ...r, run, k, emRed, next: hpNext(r.off) }; } return null; })
+    .filter(Boolean).sort((a, b) => a.next - b.next);
+}
+// 🔴 em red agora: pagava ≥ minRun horas seguidas e as últimas k horas não pagaram (sem green ainda)
+function hpEmRed(o, k, minRun) {
+  const r = o.hist.map(x => x.r), n = r.length;
+  if (n < k + 1) return 0;
+  for (let i = n - k; i < n; i++) if (r[i] !== 0) return 0;
+  let run = 0; for (let i = n - 1 - k; i >= 0 && r[i] === 1; i--) run++;
+  return run >= minRun ? run : 0;
+}
 function hpRetomada(o, k, minRun) {
   const r = o.hist.map(x => x.r), n = r.length;
   if (n < k + 2 || r[n - 1] !== 1) return 0;
   for (let i = n - 1 - k; i < n - 1; i++) if (r[i] !== 0) return 0;
   let run = 0; for (let i = n - 2 - k; i >= 0 && r[i] === 1; i--) run++;
   return run >= minRun ? run : 0;
+}
+function hpMaxHtml(G, Lk, step, minOc) {
+  if (!+(cfg.hpMaxOn ?? 1)) return `<div class="panel"><h3>🏆 Máximas pagando <small><button onclick="cfg.hpMaxOn=1;saveCfg();fillRes()">mostrar</button></small></h3></div>`;
+  let M = hpMaxScan(G, cfg.hpAlvo ?? 'all', Lk).filter(r => r.n >= minOc);
+  if (cfg.hpMin !== 'all' && cfg.hpMin !== undefined && cfg.hpMin !== '') M = M.filter(r => r.m === +cfg.hpMin);
+  const minMax = Math.max(1, +(cfg.hpMaxMin ?? 6) || 6);
+  const top = M.filter(r => r.max >= minMax).sort((a, b) => b.max - a.max || b.ok / b.n - a.ok / a.n).slice(0, +(cfg.hpMaxTop ?? 60));
+  const dh = T => { const d = new Date(T * 1000); return `${p2d(d.getDate())}/${p2d(d.getMonth() + 1)} ${hmsOf(T)}`; };
+  // por minuto: a maior máxima de cada minuto e onde foi
+  const porMin = [...Array(60).keys()].map(m => { const A = M.filter(r => r.m === m); if (!A.length) return null; const b = A.reduce((x, y) => y.max > x.max ? y : x);
+    return { m, b, media: A.reduce((s, r) => s + r.max, 0) / A.length, n6: A.filter(r => r.max >= minMax).length }; }).filter(Boolean);
+  // por hora do dia: quantas máximas (≥ mín.) estavam pagando em cada hora do relógio
+  const porHora = [...Array(24)].map(() => 0); for (const r of top) for (let T = r.mIni; T <= r.mFim; T += 3600) porHora[new Date(T * 1000).getHours()]++;
+  const pmax = Math.max(1, ...porHora);
+  return `<div class="panel" style="border-color:#eab308"><h3>🏆 Máximas pagando <small>maior sequência de horas pagando (${NIVEL[Lk]}) de cada horário · com a hora e o minuto exatos de início e fim</small></h3>
+    <div class="ctl"><label>Máxima de pelo menos <input type="number" min="1" value="${minMax}" style="width:55px" onchange="cfg.hpMaxMin=+this.value;saveCfg();fillRes()"> h</label>
+      <label>Mostrar <select onchange="cfg.hpMaxTop=+this.value;saveCfg();fillRes()">${[30, 60, 120, 300].map(v => `<option ${+(cfg.hpMaxTop ?? 60) === v ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+      <button onclick="cfg.hpMaxOn=0;saveCfg();fillRes()">esconder</button>
+      <span class="mu" style="font-size:12px">${top.length} horários com máxima ≥ ${minMax}h · usa o período, alvo, minuto e mín. ocorrências lá de cima</span></div>
+    ${top.length ? `<div class="tw" style="max-height:420px"><table><tr><th>Horário</th><th>Alvo</th><th>Máxima</th><th>Começou</th><th>Terminou</th><th>Situação agora</th><th>Taxa</th><th>Próxima</th></tr>
+      ${top.map(r => { const vivo = r.cur > 0 && r.mFim === r.ult && r.cur === r.max;
+        return `<tr class="${vivo ? 'hpstrong' : ''}"><td><b>:${msOf(r.off)}</b></td><td>${tagc(r.alvo)}</td><td class="ok"><b>${r.max}h</b></td><td>${dh(r.mIni)}</td><td>${dh(r.mFim)}</td>
+        <td>${vivo ? '<span class="ok"><b>🔥 na máxima agora</b></span>' : r.cur ? `<span class="ok">pagando ${r.cur}h</span>` : '<span class="ruim">em red</span>'}</td>
+        <td>${(100 * r.ok / r.n).toFixed(1)}% <span class="mu">${r.ok}/${r.n}</span></td><td>${hmsOf(hpNext(r.off))}</td></tr>`; }).join('')}</table></div>`
+      : `<div class="nota">Nenhum horário com máxima ≥ ${minMax}h nesse filtro.</div>`}
+    <div class="grid2" style="margin-top:10px">
+      <div><b style="font-size:12px">⏱ Por minuto (maior máxima de cada minuto)</b><div class="tw" style="max-height:300px"><table><tr><th>Minuto</th><th>Maior máxima</th><th>Horário / alvo</th><th>Quando</th><th>Média</th><th>≥ ${minMax}h</th></tr>
+        ${porMin.sort((a, b) => b.b.max - a.b.max).map(x => `<tr><td><b>:${p2d(x.m)}</b></td><td class="ok"><b>${x.b.max}h</b></td><td>:${msOf(x.b.off)} ${tagc(x.b.alvo)}</td><td class="mu">${dh(x.b.mIni).slice(6, 11)} → ${dh(x.b.mFim).slice(6, 11)}</td><td>${x.media.toFixed(1)}h</td><td>${x.n6}</td></tr>`).join('')}</table></div></div>
+      <div><b style="font-size:12px">🕐 Horas do dia em que essas máximas estavam pagando</b><div class="tw" style="max-height:300px"><table><tr><th>Hora</th><th>Máximas pagando</th><th></th></tr>
+        ${porHora.map((n, hh) => `<tr><td>${p2d(hh)}h</td><td><b>${n}</b></td><td style="width:60%"><div style="height:8px;border-radius:4px;background:#eab308;width:${(100 * n / pmax).toFixed(0)}%"></div></td></tr>`).join('')}</table></div></div>
+    </div></div>`;
 }
 VIEWS.hpag = { nome: '🕐 Horas Pagantes', html() {
   return `<div class="panel"><h3>🕐 Horas pagantes — minuto + segundo exato</h3>
@@ -1049,7 +1169,7 @@ VIEWS.hpag = { nome: '🕐 Horas Pagantes', html() {
       <label>A partir de ${inp('hpMinSeq', 45)} h seguidas</label>
       <label>Mín. ocorrências ${inp('hpMinOc', 45)}</label>
       <label>Minuto ${sel('hpMin', [['all', 'todos'], ...[...Array(60).keys()].map(m => [m, ':' + p2d(m)])])}</label>
-      <label style="border:1px solid #f59e0b;border-radius:8px;padding:3px 8px">🔁 Retomada ${sel('hpRet', [['0', 'desligada'], ['2', '2h sem pagar + 1 green'], ['3', '3h sem pagar + 1 green'], ['23', '2h ou 3h + 1 green']])}</label>
+      <label style="border:1px solid #f59e0b;border-radius:8px;padding:3px 8px">🔁 Retomada ${sel('hpRet', [['0', 'desligada'], ['2', '2h sem pagar + 1 green'], ['3', '3h sem pagar + 1 green'], ['r1', '🔴 em red agora: 1h sem pagar'], ['r2', '🔴 em red agora: 2h sem pagar'], ['r3', '🔴 em red agora: 3h sem pagar'], ['r123', '🔴 em red agora: 1h a 3h sem pagar'], ['23', '2h ou 3h + 1 green']])}</label>
       <label>pagava antes ≥ ${inp('hpRetMin', 45)} h</label>
     </div>
     <div class="nota">Banco <b>${cfg.bank}</b> · ${intervalSummary()}. Cada sinal é um horário exato dentro da hora (ex.: <b>:30:10</b>) e é conferido hora após hora.
@@ -1069,16 +1189,14 @@ VIEWS.hpag = { nome: '🕐 Horas Pagantes', html() {
     .sort((a, b) => b.L[Lk].cur - a.L[Lk].cur || b.L[Lk].rate - a.L[Lk].rate || b.L[Lk].n - a.L[Lk].n);
   // 🔁 retomada (independe do filtro "a partir de")
   const retK = String(cfg.hpRet || '0'), retMin = Math.max(1, +(cfg.hpRetMin ?? 6) || 6);
-  const ret = retK === '0' ? [] : rows.map(r => { const o = r.L[Lk]; if (o.n < minOc) return null;
-      for (const k of retK === '23' ? [2, 3] : [+retK]) { const run = hpRetomada(o, k, retMin); if (run) return { ...r, run, k, next: hpNext(r.off) }; } return null; })
-    .filter(Boolean).sort((a, b) => a.next - b.next);
-  const retHtml = retK === '0' ? '' : `<div class="panel" style="border-color:#f59e0b"><h3>🔁 Retomada <small>pagou ≥ ${retMin}h seguidas · ficou ${retK === '23' ? '2 ou 3' : retK}h sem pagar · agora 1 green (${NIVEL[Lk]}) · ${ret.length} horários</small></h3>
+  const ret = hpRetFiltra(rows, Lk, minOc);
+  const retHtml = retK === '0' ? '' : `<div class="panel" style="border-color:#f59e0b"><h3>${retK[0] === 'r' ? '🔴 Em red agora' : '🔁 Retomada'} <small>pagou ≥ ${retMin}h seguidas · ${retK[0] === 'r' ? `está há ${retK === 'r123' ? '1 a 3' : retK.slice(1)}h sem pagar, ainda sem green` : `ficou ${retK === '23' ? '2 ou 3' : retK}h sem pagar · agora 1 green`} (${NIVEL[Lk]}) · ${ret.length} horários</small></h3>
     ${ret.length ? `<div class="tw"><table><tr><th>Próxima entrada</th><th>Alvo</th><th>Escada</th><th>Pagava antes</th><th>Sem pagar</th><th>Agora</th><th>Taxa</th><th>Hora por hora (recente à esquerda)</th></tr>
     ${ret.map(r => { const o = r.L[Lk]; return `<tr class="${r.next - Date.now() / 1000 <= 600 ? 'hpstrong' : ''}"><td><b>${hmsOf(r.next)}</b> <span class="mu">:${msOf(r.off)}</span></td><td>${tagc(r.alvo)}</td>
       <td class="mu">${[0, 1, 2].slice(0, Lk + 1).map(g => NIVEL[g] + ' ' + hmsOf(r.next + g * step).slice(3)).join(' → ')}</td>
-      <td class="ok"><b>${r.run}h</b></td><td class="ruim"><b>${r.k}h</b></td><td class="ok">✅ 1</td><td>${(o.rate * 100).toFixed(1)}% <span class="mu">${o.ok}/${o.n}</span></td>
-      <td><div class="hppills">${hpPills({ hist: o.hist.slice(-(r.run + r.k + 1)) }, r.off, step)}</div></td></tr>`; }).join('')}</table></div>`
-      : '<div class="nota">Nenhum horário em retomada agora com esse filtro.</div>'}</div>`;
+      <td class="ok"><b>${r.run}h</b></td><td class="ruim"><b>${r.k}h</b></td><td class="${r.emRed ? 'ruim' : 'ok'}">${r.emRed ? '❌ red' : '✅ 1'}</td><td>${(o.rate * 100).toFixed(1)}% <span class="mu">${o.ok}/${o.n}</span></td>
+      <td><div class="hppills">${hpPills({ hist: o.hist.slice(-(r.run + r.k + (r.emRed ? 0 : 1))) }, r.off, step)}</div></td></tr>`; }).join('')}</table></div>`
+      : `<div class="nota">Nenhum horário ${retK[0] === 'r' ? 'em red agora' : 'em retomada agora'} com esse filtro.</div>`}</div>`;
   const prox = fil.map(r => ({ ...r, next: hpNext(r.off) })).filter(r => r.next - Date.now() / 1000 <= 3600).sort((a, b) => a.next - b.next).slice(0, 40);
   const horas = Math.round((G.last - G.first) / 3600);
   const lvCells = r => [0, 1, 2].map(l => { const o = r.L[l]; return `<td class="${l === Lk ? 'hpsel' : ''}"><b>${o.cur}h</b> · ${o.n ? (o.rate * 100).toFixed(0) + '%' : '—'} · máx ${o.max}h</td>`; }).join('');
@@ -1087,7 +1205,7 @@ VIEWS.hpag = { nome: '🕐 Horas Pagantes', html() {
     ${card('Passando no filtro', num(fil.length), `≥ ${minSeq}h seguidas · ≥ ${minOc} ocorr.`)}
     ${card('Horas no período', num(horas), `${fmtT(G.first * 1000)} →`)}
     ${card('Ordenando por', NIVEL[Lk], 'sequência atual de horas')}
-  </div>${retHtml}
+  </div>${retHtml}${hpMaxHtml(G, Lk, step, minOc)}
   <div class="panel"><h3>⏭ Próximos sinais <small>próximos 60 minutos, em ordem de horário</small></h3>
     ${prox.length ? `<div class="tw"><table><tr><th>Entrada</th><th>Alvo</th><th>Escada</th><th>${NIVEL[Lk]} seguidas</th><th>Taxa</th><th>Onde pagou</th></tr>
     ${prox.map(r => { const o = r.L[Lk]; return `<tr class="${o.cur >= 4 ? 'hpstrong' : ''}"><td><b>${hmsOf(r.next)}</b></td><td>${tagc(r.alvo)}</td>
@@ -5446,6 +5564,9 @@ function il2Tempos() { return IL_TEMPOS.filter(s => +(cfg['il2_t' + s] ?? cfg['i
 function il2Nivel() { return Math.max(0, Math.min(2, +(cfg.il2_nivel ?? 0))); }
 function il2Gale() { return Math.max(0, Math.min(2, +(cfg.il2_gale ?? 1))); }
 function il2MinF() { return Math.max(1, +(cfg.il2_minF ?? 2)); }
+// foto da configuração do popup na hora em que a entrada abriu (fica salva na entrada e no relatório)
+function il2CfgFoto() { return { nivel: il2Nivel(), gale: il2Gale(), minF: il2MinF(), alvo: +(cfg.il2_alvo ?? ilAlvoS()), tempos: il2Tempos(), modos: il2Modos(), bloq: +(cfg.il2_bloq ?? 1), fontes: ['sc', 'rb', 'sr', 'hp', 'col'].filter(k => +(cfg['il2_' + k] ?? 1)) }; }
+function il2CfgTxt(c) { if (!c) return ''; return `padrão 100% ${IL_NT[c.nivel]} · entrada ${c.gale ? 'até ' + IL_NT[c.gale] : 'tiro seco'} · mín. ${c.minF} fonte${c.minF > 1 ? 's' : ''} · jogo ${c.alvo}s · tempos ${c.tempos.join('/')}s · ${c.modos.map(m => IL2_MODOS[m].tag).join(' ')}${c.bloq ? ' · bloqueia contra' : ''}`; }
 function il2Slim(x) { return { s: x.s, tipo: x.tipo, txt: x.txt, casos: x.casos, md: x.md }; }
 function il2Load() { try { IL2.log = JSON.parse(localStorage.getItem('dpi_il2_log') || '[]') || []; } catch (e) { IL2.log = []; } }
 function il2Save() { try { localStorage.setItem('dpi_il2_log', JSON.stringify(IL2.log.slice(-5000))); } catch (e) {} }
@@ -5538,13 +5659,23 @@ function il2Scan() {
     if (ab) { if (!ab.fim && ab.g === 0 && g.T - agora > 1000 && g.f[ab.alvo].length > ab.fontes.length) ab.fontes = g.f[ab.alvo].map(il2Slim); continue; }
     for (const alvo of [0, 1]) {
       if (!il2Cond(g, alvo) || g.T - agora < lead) continue;
-      const E = { id: 'IL2' + g.T, T0: g.T, alvo, g: 0, tent: [], fim: false, abriu: Date.now(), fontes: g.f[alvo].map(il2Slim), contra: g.f[1 - alvo].length, gstep: (+(cfg.il2_alvo ?? ilAlvoS())) * 1000 };
+      const E = { id: 'IL2' + g.T, T0: g.T, alvo, g: 0, tent: [], fim: false, abriu: Date.now(), cf: il2CfgFoto(), fontes: g.f[alvo].map(il2Slim), contra: g.f[1 - alvo].length, gstep: (+(cfg.il2_alvo ?? ilAlvoS())) * 1000 };
       IL2.abertas.push(E); IL2.abertas.sort((a, b) => a.T0 - b.T0);
+      try { E.conf = il2Confs(E); } catch (e) {}
+      il2Demo(E);
       try { beep(); setTimeout(beep, 250); } catch (e) {}
       if (+(cfg.il2_pop ?? 1)) il2Abrir();
       break;
     }
   }
+}
+// 💼 conta DEMO: 0 desligado · 1 todas as entradas · 2 só com confirmação a favor (e nenhuma contra)
+function il2Demo(E) {
+  const m = +(cfg.il2_demo ?? 0); if (!m || E.demo || typeof dmRegistrar !== 'function') return;
+  if (m === 2) { const C = E.conf || { a: [], c: [] }; if (!C.a.length || C.c.length) return; }
+  if (E.T0 / 1000 - srvNow() < 1.5) return;                                  // tarde demais para comprar no segundo certo
+  E.demo = 1;
+  dmRegistrar({ key: 'il2|' + E.id, src: '2R+G', nome: `🔁 2R+G ${E.fontes.length}f${E.conf && E.conf.a.length ? ' +' + E.conf.a.length + '✔' : ''}`, sym: curSym(), T: E.T0 / 1000, step: E.gstep / 1000, maxN: E.cf ? E.cf.gale : il2Gale(), ct: E.alvo ? 'DIGITODD' : 'DIGITEVEN' });
 }
 function il2Resolve() {
   const agora = srvNow() * 1000;
@@ -5554,13 +5685,13 @@ function il2Resolve() {
     const x = ilDig(Tg);
     if (!x) { if (agora > Tg + 25000) il2Fecha(E, 'sem dado'); continue; }
     E.tent.push({ g: E.g, T: Tg, d: x.d, p: x.p });
-    if (x.p === E.alvo) il2Fecha(E, 'green'); else if (E.g >= il2Gale()) il2Fecha(E, 'red'); else E.g++;
+    if (x.p === E.alvo) il2Fecha(E, 'green'); else if (E.g >= (E.cf ? E.cf.gale : il2Gale())) il2Fecha(E, 'red'); else E.g++;
   }
   IL2.abertas = IL2.abertas.filter(e => !e.fim || Date.now() - e.fimT < 10000);
 }
 function il2Fecha(E, res) {
   E.fim = true; E.fimT = Date.now(); E.res = res;
-  if (res === 'green' || res === 'red') { IL2.log.push({ T0: E.T0, alvo: E.alvo, res, nivel: res === 'green' ? E.g : -1, gale: il2Gale(), tent: E.tent, fontes: E.fontes, contra: E.contra }); il2Save(); }
+  if (res === 'green' || res === 'red') { IL2.log.push({ T0: E.T0, alvo: E.alvo, res, nivel: res === 'green' ? E.g : -1, gale: E.cf ? E.cf.gale : il2Gale(), cf: E.cf, conf: E.conf ? { a: E.conf.a.map(x => x.k), c: E.conf.c.map(x => x.k) } : null, tent: E.tent, fontes: E.fontes, contra: E.contra }); il2Save(); }
   il2Render();
 }
 // ---------- tela (popup ciano) ----------
@@ -5568,14 +5699,55 @@ function il2Abrir() { IL2.open = true; const p = $('#il2Pop'); if (!p) return; p
 function il2Fechar() { IL2.open = false; const p = $('#il2Pop'); if (p) p.style.display = 'none'; }
 function il2Btn() { const b = $('#il2Btn'); if (!b) return; const E = IL2.abertas.find(e => !e.fim); b.className = il2On() ? 'il2on' : ''; b.textContent = E ? `🔁 2R+G: ${E.alvo ? 'ÍMPAR' : 'PAR'} ${hmsOf(E.T0 / 1000)}` : il2On() ? '🔁 2R+G ●' : '🔁 2R+G'; }
 function il2Set(k, v) { cfg[k] = v; saveCfg(); IL2.bk = {}; IL2.hp = {}; IL2.col = {}; IL2.k = ''; il2Render(true); }
+// ✔ confirmações de outras ferramentas para o mesmo jogo: 🔗 Interligado · 🎯 Somente Robô · 🕐 Horas pagantes (filtro da aba)
+let IL2_HPC = {};
+function il2HpConf(s) {
+  const bank = d5BankName(s), C = IL2_HPC[bank] || (IL2_HPC[bank] = {}), key = [cfg.hpRet, cfg.hpRetMin, cfg.hpOrd, cfg.hpMinSeq, cfg.hpMinOc, cfg.hpPer].join('|');
+  if (C.rows && C.key === key && Date.now() - C.t < 60000) return C;
+  C.key = key; C.t = Date.now(); C.rows = []; C.modo = '';
+  try {
+    const W = liveW(bank) || []; if (W.length < 500) return C;
+    const per = +cfg.hpPer || 0, G = gridBuild(W, s, per ? W.at(-1).t - per * 3600e3 : 0); if (!G) return C;
+    const Lk = cfg.hpOrd === 'ts' ? 0 : cfg.hpOrd === 'g1' ? 1 : 2, minOc = Math.max(1, +cfg.hpMinOc || 1), rows = hpScan(G, 'all'), retK = String(cfg.hpRet || '0');
+    if (retK !== '0') { C.rows = hpRetFiltra(rows, Lk, minOc).map(r => ({ off: r.off, alvo: r.alvo, txt: `${r.emRed ? '🔴 em red ' + r.k + 'h' : '🔁 retomada ' + r.k + 'h'} · pagava ${r.run}h` })); C.modo = retK[0] === 'r' ? 'em red agora' : 'retomada'; }
+    else { const min = Math.max(1, +cfg.hpMinSeq || 1); C.rows = rows.filter(r => r.L[Lk].n >= minOc && r.L[Lk].cur >= min).map(r => ({ off: r.off, alvo: r.alvo, txt: `${r.L[Lk].cur}h seguidas pagando` })); C.modo = `≥ ${min}h seguidas`; }
+    C.lv = Lk;
+  } catch (e) { console.warn('2R+G conf horas', e); }
+  return C;
+}
+function il2Confs(E) {
+  const out = { a: [], c: [] }, T = E.T0, s = Math.round(E.gstep / 1000);
+  const put = (alvo, x) => (alvo === E.alvo ? out.a : out.c).push(x);
+  // 🔗 interligado: fontes 100% apontando este jogo (e entrada aberta do interligado)
+  try {
+    if (Date.now() - (IL.scanT || 0) > 15000) { IL.agenda = ilColeta(); IL.scanT = Date.now(); }
+    const g = (IL.agenda || []).find(x => x.T === T);
+    if (g) for (const al of [0, 1]) if (g.f[al].length) put(al, { k: 'il', txt: `🔗 Interligado: ${g.f[al].length} fonte${g.f[al].length > 1 ? 's' : ''} 100% (${[...new Set(g.f[al].map(f => f.s))].join('/')}s)` });
+    const ia = (IL.abertas || []).find(x => x.T0 === T && !x.fim); if (ia) put(ia.alvo, { k: 'il', txt: '🔗 Interligado abriu entrada neste jogo' });
+  } catch (e) {}
+  // 🎯 somente robô
+  for (const g of SROB_SIG) { if (g.done || g.dorm) continue; for (let k = 0; k <= g.nivel; k++) if (g.entryT + k * g.step === T) { put(g.alvo, { k: 'sr', txt: `🎯 Somente Robô ${g.slot + 1}: ${g.nome}${k ? ' (' + IL_NT[k] + ')' : ''}` }); break; } }
+  // 🕐 horas pagantes (com o filtro da aba: retomada / em red agora / ≥ N h)
+  try { const C = il2HpConf(s), off = (((T / 1000) % 3600) + 3600) % 3600; for (const r of C.rows) for (let k = 0; k <= (C.lv || 0); k++) if (r.off + k * s === off) { put(r.alvo, { k: 'hp', txt: `🕐 Horas pagantes :${msOf(r.off)} (${C.modo}) · ${r.txt}${k ? ' · ' + IL_NT[k] : ''}` }); break; } } catch (e) {}
+  return out;
+}
+function il2ConfHtml(E) {
+  const C = E.fim && E.conf ? E.conf : il2Confs(E);
+  if (!E.fim) E.conf = C;
+  if (!C.a.length && !C.c.length) return '<div class="il2conf mu">✔ Confirmações: nenhuma das outras ferramentas (🔗 interligado, 🎯 somente robô, 🕐 horas pagantes) aponta este jogo.</div>';
+  return `<div class="il2conf ${C.a.length && !C.c.length ? 'ok' : C.c.length ? 'contra' : ''}"><b>✔ Confirmações: ${C.a.length} a favor${C.c.length ? ` · <span class="ruim">${C.c.length} contra</span>` : ''}</b>
+    ${C.a.map(x => `<div>✅ ${x.txt} → ${tagc(E.alvo)}</div>`).join('')}${C.c.map(x => `<div class="ruim">⚠ ${x.txt} → ${tagc(1 - E.alvo)}</div>`).join('')}</div>`;
+}
 function il2EntradaHtml(E) {
   const Tg = (E.T0 + E.g * E.gstep) / 1000, falta = Math.ceil(Tg - srvNow());
   const tp = [...new Set(E.fontes.map(f => f.s))].sort((a, b) => a - b).map(s => `<span class="iltp il2tp">${s}s ×${E.fontes.filter(f => f.s === s).length}</span>`).join(' ');
   return `<div class="il2entrada ${E.fim ? (E.res === 'green' ? 'ok' : 'ruim') : ''}">
     <div style="font-size:12px">${tp} · ${E.fontes.length} fonte${E.fontes.length > 1 ? 's' : ''} · ${[...new Set(E.fontes.map(f => f.md).filter(Boolean))].map(m => IL2_MODOS[m].txt).join(' / ')} · ${E.contra ? `<span class="ruim">${E.contra} contra</span>` : 'nenhuma contra'}</div>
     <div class="rbpbig">ENTRAR ${tagc(E.alvo)} às <b>${hmsOf(E.T0 / 1000)}</b></div>
-    ${il2Gale() ? `<div class="mu" style="font-size:12px">${[0, 1, 2].slice(0, il2Gale() + 1).map(g => `${IL_NT[g]} ${hmsOf((E.T0 + g * E.gstep) / 1000)}`).join(' → ')}</div>` : ''}
+    ${(E.cf ? E.cf.gale : il2Gale()) ? `<div class="mu" style="font-size:12px">${[0, 1, 2].slice(0, (E.cf ? E.cf.gale : il2Gale()) + 1).map(g => `${IL_NT[g]} ${hmsOf((E.T0 + g * E.gstep) / 1000)}`).join(' → ')}</div>` : ''}
+    ${E.cf ? `<div style="font-size:11px;color:#67e8f9;margin-top:2px">⚙ ${il2CfgTxt(E.cf)}</div>` : ''}
     <div style="font-size:15px;font-weight:800;margin:6px 0">${E.fim ? (E.res === 'green' ? `<span class="ok">✅ GREEN ${IL_NT[E.g]} · ${E.tent.map(t => t.d).join(' / ')}</span>` : E.res === 'red' ? `<span class="ruim">❌ RED · ${E.tent.map(t => t.d).join(' / ')}</span>` : 'sem dado') : `${IL_NT[E.g]} ${hmsOf(Tg)} · ${falta > 0 ? 'faltam ' + falta + 's' : 'em jogo…'}`}</div>
+    ${il2ConfHtml(E)}
     <div class="nota" style="margin:0">${E.fontes.map(f => `<span class="iltp il2tp">${f.s}s</span> ${f.md ? IL2_MODOS[f.md].tag + ' ' : ''}${IL2_TIPO[f.tipo] || ''} · ${f.txt} <span class="mu">(${f.casos})</span>`).join('<br>')}</div></div>`;
 }
 function il2AgendaHtml() {
@@ -5605,11 +5777,31 @@ function il2RelHtml() {
         <h4>Por modo</h4>${tab('Modo', (() => { const M = new Map(); for (const x of L) for (const m of new Set(x.fontes.map(f => f.md || 'RRG'))) { if (!M.has(m)) M.set(m, []); M.get(m).push(x); } return [...M.entries()].map(([m, A]) => [IL2_MODOS[m] ? IL2_MODOS[m].tag + ' ' + IL2_MODOS[m].txt : m, A]); })())}
         <h4>Por tempos</h4>${tab('Tempos', ilAgrupa(L, x => [...new Set(x.fontes.map(f => f.s))].sort((a, b) => a - b).join(' + ') + 's'))}</div>
     </div>
-    <h4>📋 Entradas (mais nova em cima)</h4><div class="tw" style="max-height:260px"><table><tr><th>Jogo</th><th>Alvo</th><th>Fontes</th><th>Dígitos</th><th>Resultado</th></tr>${L.slice().reverse().slice(0, 500).map(x => `<tr><td>${dh(x.T0)}</td><td>${tagc(x.alvo)}</td><td style="text-align:left;font-size:11px">${x.fontes.map(f => `${f.s}s ${IL2_TIPO[f.tipo].split(' ')[0]}${f.md ? IL2_MODOS[f.md].tag : ''} ${f.txt}`).join('<br>')}</td><td>${x.tent.map(t => t.d).join(' / ')}</td><td class="${x.res === 'green' ? 'ok' : 'ruim'}"><b>${x.res === 'green' ? '✅ ' + IL_NT[x.nivel] : '❌ RED'}</b></td></tr>`).join('')}</table></div>`
+    <h4>✔ Por confirmação</h4>${tab('Confirmação', ilAgrupa(L, x => !x.conf ? '(antes desta versão)' : x.conf.c.length ? 'com confirmação contra' : x.conf.a.length ? `com ${x.conf.a.length} a favor (${[...new Set(x.conf.a)].map(k => ({ il: '🔗', sr: '🎯', hp: '🕐' })[k]).join('')})` : 'sem confirmação'))}
+    <h4>⚙ Por configuração usada</h4>${tab('Configuração', ilAgrupa(L, x => x.cf ? il2CfgTxt(x.cf) : '(antes desta versão)'))}
+    <h4>📋 Entradas (mais nova em cima)</h4><div class="tw" style="max-height:260px"><table><tr><th>Jogo</th><th>Alvo</th><th>Config.</th><th>Fontes</th><th>Dígitos</th><th>Resultado</th></tr>${L.slice().reverse().slice(0, 500).map(x => `<tr><td>${dh(x.T0)}</td><td>${tagc(x.alvo)}</td><td style="font-size:10px;text-align:left">${x.cf ? il2CfgTxt(x.cf) : '—'}</td><td style="text-align:left;font-size:11px">${x.fontes.map(f => `${f.s}s ${IL2_TIPO[f.tipo].split(' ')[0]}${f.md ? IL2_MODOS[f.md].tag : ''} ${f.txt}`).join('<br>')}</td><td>${x.tent.map(t => t.d).join(' / ')}</td><td class="${x.res === 'green' ? 'ok' : 'ruim'}"><b>${x.res === 'green' ? '✅ ' + IL_NT[x.nivel] : '❌ RED'}</b></td></tr>`).join('')}</table></div>`
     : '<div class="nota">Nenhuma entrada do 2R+G fechada neste período ainda.</div>'}`;
 }
 // 📜 histórico: em cada padrão do scanner (banco do jogo alvo), toda vez que o passado dele batia com o modo, o que deu a entrada seguinte
 let IL2_HIST = { k: '', R: null };
+// ⏱ jogos de 5s para conferir a "recuperação no 5s" depois de um red (memória + IndexedDB)
+let IL2_5S = { k: '', M: null, carregando: false };
+function il2Map5(ini, fim) {
+  const bank = d5BankName(5), L = liveW(bank) || [], k = bank + '|' + Math.floor(ini / 600000) + '|' + Math.floor(Date.now() / 120000);
+  if (IL2_5S.M && IL2_5S.k === k) return IL2_5S.M;
+  const M = new Map(); for (const x of L) M.set(x.t, x);
+  if (!IL2_5S.carregando && (!L.length || L[0].t > ini) && typeof idbRange === 'function') {
+    IL2_5S.carregando = true;
+    idbRange(bank, ini - 60000, fim + 60000).then(A => { const N = new Map(M); for (const x of A || []) N.set(x.t, x); IL2_5S = { k, M: N, carregando: false }; IL2_HIST.k = ''; const e = $('#il2Hist'); if (e) e.innerHTML = il2HistHtml(); }).catch(() => { IL2_5S.carregando = false; });
+  }
+  IL2_5S = { k, M, carregando: IL2_5S.carregando }; return M;
+}
+// depois do red: entra na mesma cor nos próximos jogos de 5s (até N tiros). out: 0 = 1º tiro, 1 = 2º… · -1 red · null sem dado
+function il2Rec5(M, tFim, alvo) {
+  const seq = [];
+  for (let i = 1; i <= 120; i++) { const T = tFim + i * 5000, x = M.get(T); if (!x) return { T: null, n: i - 1, seg: null, falta: true, seq }; seq.push({ T, d: x.d, p: x.p }); if (x.p === alvo) return { T, n: i, seg: i * 5, seq }; }
+  return { T: null, n: 120, seg: null, seq };                 // não veio em 10 min
+}
 function il2HistCalc() {
   const s = +(cfg.il2_alvo ?? ilAlvoS()), W = ilW(s), key = [s, W.length, Math.floor(Date.now() / 600000), il2Nivel(), il2Gale(), ilMinCasos(), cfg.il_pulo].join('|');
   if (IL2_HIST.k === key) return IL2_HIST.R;
@@ -5633,6 +5825,12 @@ function il2HistCalc() {
     }
   }
   ev.sort((a, b) => a.T - b.T);
+
+  if (ev.length) { const M5 = il2Map5(ev[0].T, ev.at(-1).T + (gale + 1) * s * 1000), d5 = {};
+    for (const e of ev) if (e.out < 0) { e.tFim = e.T + gale * s * 1000; e.r5 = il2Rec5(M5, e.tFim, e.alvo); }
+    R.r5carregando = IL2_5S.carregando; }
+  for (const m in IL2_MODOS) R.M[m].r5 = { segs: [], sem: 0 };
+  for (const e of ev) if (e.out < 0 && e.r5) { const o = R.M[e.m].r5; if (e.r5.seg == null) o.sem++; else o.segs.push(e.r5.seg); }
   for (const e of ev) { const o = R.M[e.m]; o.n++; if (e.out >= 0) { o.g++; o.lv[e.out]++; o.seqR = 0; } else { o.seqR++; o.maxR = Math.max(o.maxR, o.seqR); } o.ult.push(e); if (o.ult.length > 12) o.ult.shift(); }
   R.ev = ev;
   IL2_HIST = { k: key, R }; return R;
@@ -5641,16 +5839,110 @@ function il2HistHtml() {
   let R; try { R = il2HistCalc(); } catch (e) { return '<div class="nota">Não deu para calcular o histórico agora.</div>'; }
   if (!R || R.n < 500) return '<div class="nota">Poucos jogos no banco para olhar o passado.</div>';
   const pc = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
-  return `<div class="tw"><table><tr><th style="text-align:left">Modo</th><th>Vezes</th><th>Green</th><th>TS/G1/G2</th><th>Red</th><th>%</th><th>Reds seg. (máx.)</th><th style="text-align:left">Últimas (mais recente à direita)</th></tr>
+  return `<div class="tw"><table><tr><th style="text-align:left">Modo</th><th>Vezes</th><th>Green</th><th>TS/G1/G2</th><th>Red</th><th>%</th><th>Reds seg. (máx.)</th><th>Depois do red, no 5s</th><th style="text-align:left">Últimas (mais recente à direita)</th></tr>
     ${Object.entries(IL2_MODOS).map(([m, M]) => { const o = R.M[m]; return `<tr style="${il2Modos().includes(m) ? '' : 'opacity:.55'}"><td style="text-align:left">${M.tag} ${M.txt}</td><td>${o.n}</td><td class="ok">${o.g}</td><td>${o.lv.slice(0, il2Gale() + 1).join('/')}</td><td class="ruim">${o.n - o.g}</td><td><b class="${o.n >= 10 ? (o.g / o.n >= 0.5 ? 'ok' : 'ruim') : ''}">${pc(o.g, o.n)}</b></td><td>${o.maxR}</td>
+      <td style="white-space:nowrap;font-size:12px">${il2R5Resumo(o.r5)}</td>
       <td style="text-align:left">${o.ult.map(e => `<span class="hppill ${e.out >= 0 ? 'g' : 'v'}" title="${hmsOf(e.T / 1000)}">${hmsOf(e.T / 1000).slice(0, 5)} ${e.out >= 0 ? '✅' + IL_NT[e.out] : '❌'}</span>`).join('') || '<span class="mu">nunca</span>'}</td></tr>`; }).join('')}</table></div>
   <div style="margin:8px 0"><button onclick="il2PDF('hist')" style="border:2px solid #06b6d4;background:#0e7490;color:#fff;font-weight:800;padding:7px 14px;border-radius:9px">⬇ Baixar histórico do passado (PDF) — ${num(il2HistFiltro(R).length)} ocorrências</button></div>
   ${il2HistListaHtml(R)}
+  <div class="nota" style="margin:4px 0 0">⏱ <b>Depois do red</b>: quando a entrada de ${R.s}s dá red, mostra os jogos de <b>5s</b> que vieram logo depois, na mesma cor da entrada: <b class="ruim">✗</b> = não pagou · <b class="ok">✓</b> = green (passe o mouse na bolinha para ver a hora). Precisa da captura de 5s ligada no período${R.r5carregando ? ' · <i>carregando jogos de 5s do banco…</i>' : ''}.</div>
   <div class="nota" style="margin:4px 0 0">Banco de ${R.s}s · ${num(R.n)} jogos · padrões do scanner (somas, duplas, trios, números) com ≥ ${ilMinCasos()} casos, 100% em ${IL_NT[il2Nivel()]} antes da falha · entrada conferida ${il2Gale() ? 'até ' + IL_NT[il2Gale()] : 'no tiro seco'}. É cada padrão sozinho (sem cruzar fontes) — serve para saber se o modo costuma pagar.</div>`;
 }
 function il2DHS(t) { const d = new Date(t); return `${p2d(d.getDate())}/${p2d(d.getMonth() + 1)}/${d.getFullYear()} ${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
 function il2HistFiltro(R) { const fm = cfg.il2_hFm || 'todos', fr = cfg.il2_hFr || 'todos', ff = cfg.il2_hFf || 'todos';
   return (R.ev || []).filter(e => (fm === 'todos' || e.m === fm) && (fr === 'todos' || (fr === 'g' ? e.out >= 0 : e.out < 0)) && (ff === 'todos' || e.fam === ff)); }
+// 💰 simulação de banca no histórico: gale (×fator dentro da entrada), mão fixa só TS, e mão fixa subindo ×fator depois de red
+function il2SimCfg() { return { e: Math.max(0.01, +(cfg.il2_sEnt ?? 0.35)), f: Math.max(1, +(cfg.il2_sFat ?? 2.2)), p: Math.max(0.01, +(cfg.il2_sPay ?? 95) / 100), prog: Math.max(1, +(cfg.il2_sProg ?? 3)), gale: il2Gale() }; }
+function il2SimLinhas(L) {   // L em ordem de tempo; devolve o valor de cada estratégia por entrada
+  const c = il2SimCfg(); let a = 0, b = 0, d = 0, k = 0;
+  return L.map(e => {
+    // A) gale dentro da entrada: TS, G1 (×f), G2 (×f²)
+    let va; if (e.out >= 0) { let gasto = 0; for (let i = 0; i < e.out; i++) gasto += c.e * c.f ** i; va = c.e * c.f ** e.out * c.p - gasto; } else { va = 0; for (let i = 0; i <= c.gale; i++) va -= c.e * c.f ** i; }
+    // B) mão fixa sem gale: só o tiro seco
+    const vb = e.out === 0 ? c.e * c.p : -c.e;
+    // C) mão fixa sem gale, mas depois de red a próxima entrada sobe ×f (até N vezes, depois volta)
+    const st = c.e * c.f ** k, vd = e.out === 0 ? st * c.p : -st; k = e.out === 0 ? 0 : (k + 1 >= c.prog ? 0 : k + 1);
+    a += va; b += vb; d += vd;
+    return { va, vb, vd, sa: a, sb: b, sd: d, st };
+  });
+}
+function il2SimResumo(L) {
+  const S = il2SimLinhas(L), c = il2SimCfg();
+  const est = (k, sk) => { let pico = 0, dd = 0, seq = 0, mseq = 0; for (const x of S) { pico = Math.max(pico, x[sk]); dd = Math.max(dd, pico - x[sk]); if (x[k] < 0) { seq++; mseq = Math.max(mseq, seq); } else seq = 0; }
+    const pos = S.filter(x => x[k] > 0), neg = S.filter(x => x[k] < 0);
+    return { tot: S.length ? S.at(-1)[sk] : 0, pos: pos.length, neg: neg.length, ganho: pos.reduce((s, x) => s + x[k], 0), perda: neg.reduce((s, x) => s + x[k], 0), dd, mseq, por: S.length ? (S.at(-1)[sk]) / S.length : 0 }; };
+  let gastoMax = 0; for (let i = 0; i <= c.gale; i++) gastoMax += c.e * c.f ** i;
+  return { S, A: est('va', 'sa'), B: est('vb', 'sb'), C: est('vd', 'sd'), gastoMax, stMax: Math.max(c.e, ...S.map(x => x.st)), c };
+}
+const brl = v => (v < 0 ? '−' : v > 0 ? '+' : '') + 'R$ ' + Math.abs(v).toFixed(2).replace('.', ',');
+function il2SimHtml(R) {
+  const L = il2HistFiltro(R), Z = il2SimResumo(L), c = Z.c, inp = (k, def, st, w) => `<input type="number" step="${st}" value="${cfg[k] ?? def}" style="width:${w}px" onchange="cfg.${k}=+this.value;saveCfg();$('#il2Hist').innerHTML=il2HistHtml()">`;
+  const cls = v => v > 0 ? 'ok' : v < 0 ? 'ruim' : '';
+  const lin = (nome, x, extra) => `<tr><td style="text-align:left"><b>${nome}</b><div class="mu" style="font-size:11px">${extra}</div></td><td>${x.pos}</td><td>${x.neg}</td><td class="ok">${brl(x.ganho)}</td><td class="ruim">${brl(x.perda)}</td><td class="${cls(x.tot)}"><b>${brl(x.tot)}</b></td><td>${brl(x.por)}</td><td class="ruim">${brl(-x.dd)}</td><td>${x.mseq}</td></tr>`;
+  const tsN = L.filter(e => e.out === 0).length, pTS = L.length ? tsN / L.length : 0, beFixa = 1 / (1 + c.p);
+  const vTS = c.e * c.p, vG1 = c.e * c.f * c.p - c.e, vRed = -Z.gastoMax;
+  // pior sequência de reds já vista × quanto custa
+  return `<div style="border:1px solid rgba(6,182,212,.5);border-radius:10px;padding:8px 10px;margin:8px 0">
+    <b style="color:#67e8f9">💰 Simulação de banca no histórico</b> <span class="mu" style="font-size:11px">(${num(L.length)} entradas do filtro, na ordem em que aconteceram)</span>
+    <div class="ctl" style="margin-top:6px"><label>Entrada R$ ${inp('il2_sEnt', 0.35, 0.05, 70)}</label><label>Fator do gale × ${inp('il2_sFat', 2.2, 0.1, 60)}</label>
+      <label>Payout (lucro %) ${inp('il2_sPay', 95, 1, 55)}</label><label>Subir depois de red até ${inp('il2_sProg', 3, 1, 45)} vezes</label>
+      <span class="mu" style="font-size:11px">gale ${c.gale ? 'até ' + IL_NT[c.gale] : 'desligado'} (o mesmo da "Entrada" lá em cima)</span></div>
+    <div class="nota" style="margin:0 0 6px">Valores por entrada: <b>gale</b> → TS ${brl(vTS)}${c.gale >= 1 ? ` · G1 ${brl(vG1)}` : ''}${c.gale >= 2 ? ` · G2 ${brl(c.e * c.f ** 2 * c.p - c.e - c.e * c.f)}` : ''} · red ${brl(vRed)} &nbsp;|&nbsp; <b>mão fixa</b> → green ${brl(vTS)} · red ${brl(-c.e)}</div>
+    <div class="tw"><table><tr><th style="text-align:left">Estratégia</th><th>Positivas</th><th>Negativas</th><th>Ganhou</th><th>Perdeu</th><th>Resultado</th><th>Média/entrada</th><th>Pior queda</th><th>Negativas seguidas</th></tr>
+      ${lin(`Com gale ×${c.f} ${c.gale ? '(até ' + IL_NT[c.gale] + ')' : ''}`, Z.A, `arrisca até ${brl(Z.gastoMax).slice(1)} por entrada`)}
+      ${lin('Mão fixa sem gale (só tiro seco)', Z.B, `${(100 * pTS).toFixed(1)}% de acerto no TS · precisa de ${(100 * beFixa).toFixed(1)}% para empatar`)}
+      ${lin(`Mão fixa, sobe ×${c.f} depois de red`, Z.C, `até ${c.prog} vez(es), maior entrada ${brl(Z.stMax).slice(1)}`)}
+    </table></div>
+    <div class="nota" style="margin:6px 0 0"><b>Leitura:</b> ${il2SimDicas(Z, L, pTS, beFixa)}</div>
+    ${il2FatorHtml(L)}</div>`;
+}
+// 🔎 testa fatores de gale (1,0 a 4,0) em cada nível até o gale configurado e mostra onde daria lucro
+function il2FatorHtml(L) {
+  const c = il2SimCfg(), G = c.gale, cnt = [0, 1, 2].map(k => L.filter(e => e.out === k).length), red = L.filter(e => e.out < 0).length;
+  if (L.length < 30) return '';
+  const ev = (f, gl) => { let v = 0; for (let k = 0; k <= gl; k++) { let gasto = 0; for (let i = 0; i < k; i++) gasto += c.e * f ** i; v += cnt[k] * (c.e * f ** k * c.p - gasto); }
+    const r = red + cnt.slice(gl + 1).reduce((a, b) => a + b, 0); let custo = 0; for (let i = 0; i <= gl; i++) custo += c.e * f ** i; return v - r * custo; };
+  // acerto de cada etapa: TS; G1 dado que o TS perdeu; G2 dado que o G1 perdeu
+  const chegou = [L.length, L.length - cnt[0], L.length - cnt[0] - cnt[1]], be = 1 / (1 + c.p);
+  const etapa = [0, 1, 2].slice(0, G + 1).map(k => ({ k, n: chegou[k], g: cnt[k], pct: chegou[k] ? cnt[k] / chegou[k] : 0 }));
+  const fs = []; for (let f = 1; f <= 4.0001; f += 0.1) fs.push(+f.toFixed(1));
+  const linhas = [0, 1, 2].slice(1, G + 1).map(gl => { const v = fs.map(f => ev(f, gl)), i = v.indexOf(Math.max(...v)); let custo = 0; for (let j = 0; j <= gl; j++) custo += c.e * fs[i] ** j; return { gl, v, best: fs[i], bv: v[i], custo }; });
+  const mostrar = [1.0, 1.5, 2.0, 2.2, 2.5, 3.0, 3.5, 4.0];
+  return `<details style="margin-top:8px" ${cfg.il2_fAberto ? 'open' : ''} ontoggle="cfg.il2_fAberto=this.open?1:0;saveCfg()"><summary style="cursor:pointer;color:#67e8f9;font-weight:700">🔎 Qual fator de gale daria lucro? (testa de 1,0 a 4,0)</summary>
+    <div class="nota" style="margin:6px 0">Acerto de cada etapa: ${etapa.map(x => `<b>${IL_NT[x.k]}</b> ${(100 * x.pct).toFixed(1)}% <span class="mu">(${x.g}/${x.n})</span> <span class="${x.pct > be ? 'ok' : 'ruim'}">${x.pct > be ? '▲' : '▼'}</span>`).join(' · ')} — cada etapa precisa passar de <b>${(100 * be).toFixed(1)}%</b> para valer a pena apostar mais nela. O fator só ajuda se a etapa do gale acerta acima disso; se acerta abaixo, quanto maior o fator, maior o prejuízo.</div>
+    ${linhas.length ? `<div class="tw"><table><tr><th>Gale até</th>${mostrar.map(f => `<th>×${f.toFixed(1).replace('.', ',')}</th>`).join('')}<th>Melhor</th><th></th></tr>
+      ${linhas.map(x => `<tr><td><b>${IL_NT[x.gl]}</b></td>${mostrar.map(f => { const v = x.v[fs.indexOf(f)]; return `<td class="${v > 0 ? 'ok' : 'ruim'}">${brl(v)}</td>`; }).join('')}
+        <td class="${x.bv > 0 ? 'ok' : 'ruim'}"><b>×${x.best.toFixed(1).replace('.', ',')} → ${brl(x.bv)}</b><div class="mu" style="font-size:10px">red custa ${brl(x.custo).slice(1)}</div></td>
+        <td>${x.bv > 0 ? `<button onclick="cfg.il2_sFat=${x.best};cfg.il2_gale=${x.gl};saveCfg();il2Render(true)">usar</button>` : ''}</td></tr>`).join('')}
+      <tr><td><b>sem gale</b></td><td colspan="${mostrar.length}" class="${ev(1, 0) > 0 ? 'ok' : 'ruim'}">${brl(ev(1, 0))} (o fator não muda nada no tiro seco)</td><td></td><td></td></tr></table></div>`
+      : '<div class="nota">A "Entrada" está em tiro seco — mude para até G1 ou até G2 lá em cima para testar fatores.</div>'}
+    <div class="nota" style="margin:4px 0 0">⚠ O fator "melhor" é escolhido olhando o mesmo passado — no futuro costuma render menos. Fator alto também faz cada red custar muito mais: confira a coluna "Pior queda" antes de usar.</div></details>`;
+}
+function il2SimDicas(Z, L, pTS, be) {
+  if (L.length < 30) return 'poucas entradas ainda — com menos de ~30 qualquer resultado pode ser sorte.';
+  const d = [], c = Z.c, best = [['com gale', Z.A], ['mão fixa', Z.B], ['mão fixa subindo após red', Z.C]].sort((a, b) => b[1].tot - a[1].tot)[0];
+  d.push(`no passado o melhor foi <b>${best[0]}</b> (${brl(best[1].tot)} em ${L.length} entradas).`);
+  if (pTS > be) d.push(`o TS acertou ${(100 * pTS).toFixed(1)}%, acima dos ${(100 * be).toFixed(1)}% que a mão fixa precisa — sem gale você arrisca só ${brl(c.e).slice(1)} por vez.`);
+  else d.push(`o TS acertou ${(100 * pTS).toFixed(1)}%, abaixo dos ${(100 * be).toFixed(1)}% que a mão fixa precisa — sem gale daria prejuízo.`);
+  if (c.gale) d.push(`no gale um red custa ${brl(Z.gastoMax).slice(1)} = ${(Z.gastoMax / (c.e * c.p)).toFixed(1)} greens de TS para recuperar.`);
+  d.push(`tenha banca de pelo menos ${brl(Math.max(Z.A.dd, Z.B.dd, Z.C.dd) * 2).slice(1)} (2× a pior queda já vista).`);
+  d.push('isso é o passado do mesmo banco usado para escolher os padrões — o futuro tende a ser pior que a simulação.');
+  return d.join(' ');
+}
+function il2R5Resumo(r, txt) {
+  if (!r) return '—'; const S = r.segs.map(x => x / 5); if (!S.length) return r.sem ? '<span class="mu">sem dado do 5s</span>' : '<span class="mu">—</span>';
+  const c = [1, 2, 3].map(k => S.filter(x => x === k).length), mais = S.filter(x => x >= 4).length;
+  if (txt) return `1ª jogada ${c[0]} · 2ª ${c[1]} · 3ª ${c[2]} · 4ª ou mais ${mais}`;
+  return `<span class="r5chip">✓ na 1ª <b>${c[0]}</b></span><span class="r5chip">✓ na 2ª <b>${c[1]}</b></span><span class="r5chip">✓ na 3ª <b>${c[2]}</b></span><span class="r5chip ${mais ? 'ruim' : ''}">4ª+ <b>${mais}</b></span>`;
+}
+function il2R5Cel(e, txt) {
+  if (e.out >= 0 || !e.r5) return txt ? '' : '<span class="mu">—</span>';
+  const r = e.r5, sq = (r.seq || []).slice(0, 12);
+  if (txt) return r.seg == null ? (r.falta ? 'sem dado do 5s' : 'não veio em 10 min') : sq.map(x => `${x.d}${x.p === e.alvo ? '✓' : '✗'}`).join(' ') + ` (${il2DHS(r.T).slice(11)})`;
+  const bolas = sq.map(x => { const ok = x.p === e.alvo; return `<span class="r5b" title="${il2DHS(x.T).slice(11)}"><span class="b ${x.p ? 'v' : 'g'}">${x.d}</span><i class="${ok ? 'ok' : 'ruim'}">${ok ? '✓' : '✗'}</i></span>`; }).join('');
+  if (r.seg == null) return bolas + (r.falta ? ' <span class="mu">sem dado</span>' : ' <span class="ruim">…</span>');
+  return bolas;
+}
 function il2HistListaHtml(R) {
   const L = il2HistFiltro(R).slice().reverse(), g = L.filter(e => e.out >= 0).length;
   const sel = (k, ops) => `<select onchange="cfg.${k}=this.value;saveCfg();$('#il2Hist').innerHTML=il2HistHtml()">${ops.map(([v, t]) => `<option value="${v}" ${(cfg[k] || 'todos') === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
@@ -5660,11 +5952,11 @@ function il2HistListaHtml(R) {
       <label>Tipo ${sel('il2_hFf', [['todos', 'todos'], ['Soma', 'somas'], ['Dupla', 'duplas'], ['Trio', 'trios'], ['Número', 'números']])}</label>
       <button onclick="il2PDF('hist')">⬇ baixar histórico completo (PDF)</button>
       <span class="mu" style="font-size:12px">${num(L.length)} no filtro · ${g} green · ${L.length - g} red · ${L.length ? (100 * g / L.length).toFixed(1) + '%' : '—'}</span></div>
-    <div class="tw" style="max-height:380px"><table><tr><th>Entrada (data hora:seg)</th><th>Modo</th><th style="text-align:left">Padrão</th><th>Gatilho</th><th>Gatilho saiu</th><th>Alvo</th><th>Antes (últimas 8)</th><th>Dígitos</th><th>Resultado</th></tr>
-    ${L.slice(0, 2000).map(e => `<tr><td><b>${il2DHS(e.T)}</b></td><td>${IL2_MODOS[e.m].tag}</td><td style="text-align:left;font-size:11px">${e.pad}</td><td>${e.gat}</td><td class="mu">${il2DHS(e.trigT).slice(11)}</td><td>${tagc(e.alvo)}</td>
+    <div class="tw" style="max-height:380px"><table><tr><th>Entrada (data hora:seg)</th><th>Modo</th><th style="text-align:left">Padrão</th><th>Gatilho</th><th>Gatilho saiu</th><th>Alvo</th><th>Antes (últimas 8)</th><th>Dígitos</th><th>Resultado</th><th>Se red: jogadas de 5s</th></tr>
+    ${L.slice(0, 2000).map((e, i) => { return `<tr><td><b>${il2DHS(e.T)}</b></td><td>${IL2_MODOS[e.m].tag}</td><td style="text-align:left;font-size:11px">${e.pad}</td><td>${e.gat}</td><td class="mu">${il2DHS(e.trigT).slice(11)}</td><td>${tagc(e.alvo)}</td>
       <td style="letter-spacing:1px;font-family:monospace">${[...e.ant].map(c => `<span class="${c === 'G' ? 'ok' : 'ruim'}">${c === 'G' ? '✅' : '❌'}</span>`).join('')}</td>
       <td>${e.ds.map((d, i) => `<span class="b ${d % 2 ? 'v' : 'g'}" title="${IL_NT[i]} ${il2DHS(e.T + i * R.s * 1000).slice(11)}">${d}</span>`).join(' ')}</td>
-      <td class="${e.out >= 0 ? 'ok' : 'ruim'}"><b>${e.out >= 0 ? '✅ ' + IL_NT[e.out] : '❌ RED'}</b></td></tr>`).join('')}</table></div>
+      <td class="${e.out >= 0 ? 'ok' : 'ruim'}"><b>${e.out >= 0 ? '✅ ' + IL_NT[e.out] : '❌ RED'}</b></td><td style="text-align:left;white-space:nowrap">${il2R5Cel(e)}</td></tr>`; }).join('')}</table></div>
     ${L.length > 2000 ? '<div class="nota">Mostrando as 2.000 mais novas na tela — o CSV traz todas.</div>' : ''}</details>`;
 }
 function il2HistCSV() {
@@ -5685,11 +5977,11 @@ function il2PDF(qual) {
     titulo = `Histórico 2R+G — ${s}s`;
     const acaso = [50, 75, 87.5][il2Gale()];
     corpo = `<h2>Resumo por modo</h2><div class="sub">Banco DERIV ${s}s · ${num(R.n)} jogos · padrões do scanner com ≥ ${ilMinCasos()} casos, 100% em ${IL_NT[il2Nivel()]} antes da falha · entrada ${il2Gale() ? 'até ' + IL_NT[il2Gale()] : 'tiro seco'} (o acaso daria ${acaso}%)</div>
-      ${tb(['Modo', 'Vezes', 'Green', 'TS/G1/G2', 'Red', '%', 'Reds seguidos (máx.)'], Object.entries(IL2_MODOS).map(([m, M]) => { const o = R.M[m]; return [M.txt, o.n, o.g, o.lv.slice(0, il2Gale() + 1).join('/'), o.n - o.g, `<b>${pc(o.g, o.n)}</b>`, o.maxR]; }))}
+      ${tb(['Modo', 'Vezes', 'Green', 'TS/G1/G2', 'Red', '%', 'Reds seguidos (máx.)', 'Depois do red, no 5s'], Object.entries(IL2_MODOS).map(([m, M]) => { const o = R.M[m]; return [M.txt, o.n, o.g, o.lv.slice(0, il2Gale() + 1).join('/'), o.n - o.g, `<b>${pc(o.g, o.n)}</b>`, o.maxR, il2R5Resumo(o.r5, 1)]; }))}
       <h2>Todas as ocorrências (${num(L.length)}) — mais nova primeiro</h2>
       <div class="sub">Filtro: modo ${cfg.il2_hFm || 'todos'} · resultado ${cfg.il2_hFr || 'todos'} · tipo ${cfg.il2_hFf || 'todos'} · ${L.filter(e => e.out >= 0).length} green · ${L.filter(e => e.out < 0).length} red</div>
-      ${tb(['Entrada', 'Modo', 'Padrão', 'Gatilho', 'Gatilho saiu', 'Alvo', 'Últimas 8 antes', 'TS', 'G1', 'G2', 'Resultado'], L.slice().reverse().map(e => [il2DHS(e.T), IL2_MODOS[e.m].txt, e.pad, e.gat, il2DHS(e.trigT).slice(11), cor(e.alvo), [...e.ant].map(c => c === 'G' ? '✅' : '❌').join(''),
-        ...[0, 1, 2].map(i => e.ds[i] != null ? `${il2DHS(e.T + i * s * 1000).slice(11)} · <b>${e.ds[i]}</b>` : ''), res(e.out >= 0, e.out)]))}`;
+      ${(() => { return tb(['Entrada', 'Modo', 'Padrão', 'Gatilho', 'Gatilho saiu', 'Alvo', 'Últimas 8 antes', 'TS', 'G1', 'G2', 'Resultado', 'Se red: jogadas de 5s'], L.map((e, i) => [il2DHS(e.T), IL2_MODOS[e.m].txt, e.pad, e.gat, il2DHS(e.trigT).slice(11), cor(e.alvo), [...e.ant].map(c => c === 'G' ? '✅' : '❌').join(''),
+        ...[0, 1, 2].map(i => e.ds[i] != null ? `${il2DHS(e.T + i * s * 1000).slice(11)} · <b>${e.ds[i]}</b>` : ''), res(e.out >= 0, e.out), il2R5Cel(e, 1)]).reverse()); })()}`;
   } else {
     const per = cfg.il2_relPer || 'all'; let ini = 0;
     if (per === 'hoje') { const d = new Date(); d.setHours(0, 0, 0, 0); ini = d.getTime(); } else if (per !== 'all') ini = Date.now() - (+per) * 3600e3;
@@ -5703,9 +5995,11 @@ function il2PDF(qual) {
       <h2>Por modo</h2>${tb(['Modo', 'Entradas', 'Green', 'Red', '%'], grupo(x => new Set(x.fontes.map(f => IL2_MODOS[f.md || 'RRG'].txt))))}
       <h2>Por tipo de fonte</h2>${tb(['Tipo', 'Entradas', 'Green', 'Red', '%'], grupo(x => new Set(x.fontes.map(f => (IL2_TIPO[f.tipo] || f.tipo).replace(/^\S+ /, '')))))}
       <h2>Por nº de fontes</h2>${tb(['Fontes', 'Entradas', 'Green', 'Red', '%'], grupo(x => [String(x.fontes.length)]))}
+      <h2>Por confirmação</h2>${tb(['Confirmação', 'Entradas', 'Green', 'Red', '%'], grupo(x => [!x.conf ? '(antes desta versão)' : x.conf.c.length ? 'com confirmação contra' : x.conf.a.length ? 'com ' + x.conf.a.length + ' a favor (' + [...new Set(x.conf.a)].map(k => ({ il: 'interligado', sr: 'somente robô', hp: 'horas pagantes' })[k]).join(' + ') + ')' : 'sem confirmação']))}
+      <h2>Por configuração usada</h2>${tb(['Configuração', 'Entradas', 'Green', 'Red', '%'], grupo(x => [x.cf ? il2CfgTxt(x.cf) : '(antes desta versão)']))}
       <h2>Hora a hora</h2>${tb(['Hora', 'Entradas', 'Green', 'Red', '%'], H.map(([k, A]) => { const gg = A.filter(x => x.res === 'green').length; return [il2DHS(+k).slice(0, 13) + 'h', A.length, gg, A.length - gg, `<b>${pc(gg, A.length)}</b>`]; }))}
       <h2>Todas as entradas — mais nova primeiro</h2>
-      ${tb(['Jogo', 'Alvo', 'Fontes', 'Tentativas (hora · dígito)', 'Resultado'], L.slice().reverse().map(x => [il2DHS(x.T0), cor(x.alvo), x.fontes.map(f => `${f.s}s · ${f.md ? IL2_MODOS[f.md].txt + ' · ' : ''}${(IL2_TIPO[f.tipo] || '').replace(/^\S+ /, '')} · ${f.txt}`).join('<br>'),
+      ${tb(['Jogo', 'Alvo', 'Configuração', 'Fontes', 'Tentativas (hora · dígito)', 'Resultado'], L.slice().reverse().map(x => [il2DHS(x.T0), cor(x.alvo), x.cf ? il2CfgTxt(x.cf) : '—', x.fontes.map(f => `${f.s}s · ${f.md ? IL2_MODOS[f.md].txt + ' · ' : ''}${(IL2_TIPO[f.tipo] || '').replace(/^\S+ /, '')} · ${f.txt}`).join('<br>'),
         x.tent.map(t => `${IL_NT[t.g]} ${il2DHS(t.T).slice(11)} · <b>${t.d}</b>`).join('<br>'), res(x.res === 'green', x.nivel)]))}`;
   }
   const w = window.open('', '_blank', 'width=1000,height=760');
@@ -5754,6 +6048,10 @@ function il2Render(full) {
       <label>Mín. fontes ${op('il2_minF', 2, [[1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5']])}</label>
       <label>Jogo de ${op('il2_alvo', ilAlvoS(), [[5, '5s'], [10, '10s'], [20, '20s'], [30, '30s']])}</label>
       ${chk('il2_bloq', 'bloquear se houver contra')}${chk('il2_pop', 'abrir popup na entrada')}</div>
+    <div class="ctl" style="border:1px solid #8b5cf6;border-radius:10px;padding:6px 8px"><b style="font-size:12px;color:#c4b5fd">💼 Conta DEMO:</b>
+      <select onchange="il2Set('il2_demo',+this.value)">${[[0, 'desligado'], [1, 'operar todas as entradas'], [2, 'operar só com confirmação a favor']].map(([v, t]) => `<option value="${v}" ${+(cfg.il2_demo ?? 0) === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      <span class="mu" style="font-size:11px">${typeof DM !== 'undefined' && DM.ok && DM.virt ? `<span class="ok">conectada (${DM.loginid})</span>` : '<span class="ruim">conta demo não conectada — conecte na aba 💼 Conta Demo</span>'} · entrada, gale e stops vêm da aba 💼 Conta Demo · o gale segue o "Entrada até" daqui</span></div>
+    <div class="nota" style="margin:0 0 6px;color:#67e8f9">💾 Configuração salva neste navegador — vale para as próximas entradas; cada entrada guarda a configuração com que abriu (aparece no popup e no relatório).</div>
     <div class="ctl"><label>Horas pagantes: pagava ≥ ${op('il2_hpMin', 6, [[3, '3h'], [4, '4h'], [6, '6h'], [8, '8h'], [10, '10h'], [12, '12h']])}</label>
       <label>Colunas: vinha ≥ ${op('il2_colMin', 3, [[2, '2×'], [3, '3×'], [4, '4×'], [5, '5×'], [6, '6×']])}</label>
 </div>
@@ -5770,7 +6068,7 @@ function il2Render(full) {
 setInterval(() => {
   if (!il2On() && !IL2.open) return;
   try {
-    if (il2On()) il2Resolve();
+    if (il2On()) { il2Resolve(); for (const E of IL2.abertas) if (!E.fim && E.g === 0 && E.T0 / 1000 - srvNow() > 1) { try { E.conf = il2Confs(E); } catch (e) {} il2Demo(E); } }
     const k = il2Tempos().map(s => { const W = liveW(d5BankName(s)); return W && W.length ? W.at(-1).t : 0; }).join('|');
     if (k !== IL2.k || Date.now() - IL2.scanT > 20000) { IL2.k = k; il2Scan(); }
     il2Render(false);
@@ -6179,7 +6477,7 @@ function esPanelHtml(){
 // ---------- 🔐 entrar com a Deriv sem copiar token (OAuth) ----------
 function dmAppId(){ return String(cfg.dm_appId||'').trim().replace(/[^A-Za-z0-9_-]/g,''); }
 function dmAppNovo(){ return /[A-Za-z]/.test(dmAppId()); }          // App ID com letras = portal novo (developers.deriv.com)
-function dmRedir(){ return location.origin+'/'; }
+function dmRedir(){ return location.origin+location.pathname.replace(/[^/]*$/,''); }   // volta para a pasta do site (funciona na raiz da Netlify e em subpasta do GitHub Pages)
 function dmB64u(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
 async function dmOAuth(){
   const id=dmAppId();
@@ -6241,14 +6539,17 @@ async function dmConectarNovo(oa){
       catch(e2){ dmSet('⛔ O acesso expirou — clique de novo em 🔐 ENTRAR COM A DERIV. ('+e2.message+')'); return; }
     } else { dmSet('⛔ '+e.message+(e.status===401?' — clique de novo em 🔐 ENTRAR COM A DERIV.':'')); return; }
   }
+  return dmAbrirNovo(j,'pelo login da Deriv');
+}
+async function dmAbrirNovo(j,como){
   if(!/\/ws\/demo/.test(j.url)){ dmSet('⛔ Endereço recebido não é de conta DEMO — bloqueado.'); return; }
   dmDesconectar(true);
   try{ await dmAbrir(j.url); }catch(e){ dmSet('Falhou ao abrir a conexão DEMO: '+e.message); return; }
   DM.novo=true; DM.ok=true; DM.virt=true; DM.loginid='DEMO '+j.account_id; DM.cur=j.currency||'USD'; DM.bal=+j.balance;
-  DM.sess={pl:0,n:0,g:0,r:0,ini:Date.now()}; DM.parado='';
+  if(!DM.rcN) DM.sess={pl:0,n:0,g:0,r:0,ini:Date.now()}; DM.parado=''; DM.querOn=true; const rc=DM.rcN; DM.rcN=0;
   try{ const b=await dmSend({balance:1,subscribe:1},8000); if(b.balance) DM.bal=+b.balance.balance; }catch(e){}
   await dmSyncRelogio();
-  dmSet(`✅ Conectado pelo login da Deriv na conta <b>${DM.loginid}</b> · saldo ${isFinite(DM.bal)?DM.bal.toFixed(2):'—'} ${DM.cur}${DM.offOk?` · relógio do PC ${DM.off>=0?'atrasado':'adiantado'} ${Math.abs(DM.off).toFixed(2)}s (já corrigido)`:''}`);
+  dmSet(`✅ ${rc?'Reconectado':'Conectado'} ${como} na conta <b>${DM.loginid}</b>${DM.ultQueda&&rc?` (caiu: ${DM.ultQueda})`:''} · saldo ${isFinite(DM.bal)?DM.bal.toFixed(2):'—'} ${DM.cur}${DM.offOk?` · relógio do PC ${DM.off>=0?'atrasado':'adiantado'} ${Math.abs(DM.off).toFixed(2)}s (já corrigido)`:''}`);
   if(S.tab==='demo') renderTab();
 }
 esLoad();
@@ -7078,12 +7379,12 @@ VIEWS.srob={nome:'⏱ Robôs de segundos',live:srLive,html(){
 // =====================================================================================
 const UO_MK=[]; for(let b=1;b<=9;b++) UO_MK.push({mk:'U',b}); for(let b=0;b<=8;b++) UO_MK.push({mk:'O',b});
 const UO_NM=UO_MK.length;
-function uoBase(m,lvl=0){ const p=m.mk==='U'?m.b/10:(9-m.b)/10; return 1-Math.pow(1-p,lvl+1); }
-function uoWin(m,d){ return m.mk==='U'?d<m.b:d>m.b; }
-function uoNome(m){ return (m.mk==='U'?'UNDER ':'OVER ')+m.b; }
-function uoTag(m){ return `<span class="uotag ${m.mk==='U'?'uoU':'uoO'}">${uoNome(m)}</span>`; }
+function uoBase(m,lvl=0){ const p=m.mk==='U'?m.b/10:m.mk==='O'?(9-m.b)/10:0.1; return 1-Math.pow(1-p,lvl+1); }
+function uoWin(m,d){ return m.mk==='U'?d<m.b:m.mk==='O'?d>m.b:d===m.b; }
+function uoNome(m){ return (m.mk==='U'?'UNDER ':m.mk==='O'?'OVER ':'DÍGITO ')+m.b; }
+function uoTag(m){ return `<span class="uotag ${m.mk==='U'?'uoU':m.mk==='O'?'uoO':'uoM'}">${uoNome(m)}</span>`; }
 const UO_PER=[[1,'1 hora'],[3,'3 horas'],[6,'6 horas'],[12,'12 horas'],[24,'24 horas'],[72,'3 dias'],[168,'7 dias'],[360,'15 dias'],[720,'30 dias'],[0,'todo o banco']];
-const UO_SUBS=[['visao','Visão geral'],['opor','🔥 Oportunidades'],['horas','⏰ Horários pagantes'],['porhora','🕐 Por hora'],['minutos','Minutos pagantes'],['segundos','Segundos pagantes'],
+const UO_SUBS=[['visao','Visão geral'],['padroes','🎯 Padrões 100%'],['opor','🔥 Oportunidades'],['horas','⏰ Horários pagantes'],['porhora','🕐 Por hora'],['minutos','Minutos pagantes'],['segundos','Segundos pagantes'],
   ['barreira','Análise por barreira'],['comparar','Comparar janelas'],['maximas','Máximas e sequências'],['criar','🤖 Criar robôs'],['robos','Robôs criados'],['backtest','🧪 Backtest'],['sinais','Histórico de sinais']];
 let UO_DATA={}, UO_SCAN={}, UO_BUSY=false, UOB=[], UO_LOG=[], UO_TLOG=[], UO_PREV=null, UO_PREV_CHECK=new Set(), UO_BT=null, UO_STATS={}, UO_SIG=[], UO_POP=null, UO_EDIT=null;
 function uoSym(){ const s=cfg.uo_sym||curSym(); return SYMS_ALL.some(x=>x[0]===s)?s:'R_100'; }
@@ -7281,8 +7582,8 @@ async function uoDetalhe(src,i){
   p.style.display='flex';
 }
 // ---------- robôs Under/Over ----------
-function uoRobNome(rb){ const t=rb.rep==='dia'?`${p2d(rb.h)}:${p2d(rb.m)}:${p2d(rb.s)}`:(rb.m==null?'todo jogo':`:${p2d(rb.m)}:${p2d(rb.s??0)}`); return rb.nome||`${uoNome(rb)} — ${t} — ${rb.w}s`; }
-function uoRobTempo(rb){ return rb.rep==='dia'?`${p2d(rb.h)}:${p2d(rb.m)}:${p2d(rb.s)} todo dia`:(rb.m==null?'todo jogo':`:${p2d(rb.m)}:${p2d(rb.s??0)} toda hora`); }
+function uoRobNome(rb){ if(rb.trig) return rb.nome||`${uoNome(rb)} — ${uoTrigTxt(rb.trig)}${rb.skip?' · pula '+rb.skip:''} — ${rb.w}s`; const t=rb.rep==='dia'?`${p2d(rb.h)}:${p2d(rb.m)}:${p2d(rb.s)}`:(rb.m==null?'todo jogo':`:${p2d(rb.m)}:${p2d(rb.s??0)}`); return rb.nome||`${uoNome(rb)} — ${t} — ${rb.w}s`; }
+function uoRobTempo(rb){ if(rb.trig) return `gatilho: ${uoTrigTxt(rb.trig)}${rb.skip?' · pula '+rb.skip+' casas':' · entra no próximo jogo'}`; return rb.rep==='dia'?`${p2d(rb.h)}:${p2d(rb.m)}:${p2d(rb.s)} todo dia`:(rb.m==null?'todo jogo':`:${p2d(rb.m)}:${p2d(rb.s??0)} toda hora`); }
 function uoCriarDeLinha(src,i){
   const r=(UO_LISTS[src]||[])[i]; if(!r) return;
   const rb=uoNovoRobo({mk:r.m.mk,b:r.m.b,w:r.w,sym:r.sym,lvl:r.lvl,rep:r.mode,off:r.off,perH:r.perH??+cfg.uo_per,st:r,on:true});
@@ -7292,7 +7593,7 @@ function uoCriarDeLinha(src,i){
 function uoNovoRobo(o){
   const rb={id:'UO'+Date.now()+Math.floor(Math.random()*1e4),mk:o.mk,b:o.b,w:o.w,sym:o.sym,lvl:o.lvl||0,rep:o.rep,perH:o.perH,
     h:o.rep==='dia'?Math.floor(o.off/3600):null,m:o.off!=null?Math.floor(o.off/60)%60:null,s:o.off!=null?o.off%60:null,
-    nome:o.nome||'',on:o.on!==false,popup:true,criado:Date.now(),
+    nome:o.nome||'',on:o.on!==false,popup:true,criado:Date.now(),trig:o.trig||null,skip:o.skip||0,
     st:o.st?{n:o.st.n,ok:o.st.ok,p:o.st.p,run:o.st.run,maxRR:o.st.maxRR,score:o.st.score}:null};
   rb.nome=rb.nome||uoRobNome(rb);
   UOB.unshift(rb); uoSave();
@@ -7326,7 +7627,7 @@ async function uoRobStats(rb,force){
   const c=UO_STATS[rb.id];
   if(c && !force && Date.now()-c.when<60000) return c;
   const D=await uoGetData(rb.w,rb.sym,rb.perH??24);
-  const res=uoResumo(uoRobOcc(rb,D.G));
+  const res=uoResumo(rb.trig?uoTrigOcc(rb,D.rows):uoRobOcc(rb,D.G));
   UO_STATS[rb.id]={...res,when:Date.now()};
   return UO_STATS[rb.id];
 }
@@ -7339,14 +7640,15 @@ function uoTickBus(sym,epoch,quote,digit){
 function uoLogT(o){ if(!cfg.uo_tlog) return; UO_TLOG.push({...o,t:Date.now()}); if(UO_TLOG.length>400) UO_TLOG.splice(0,UO_TLOG.length-400); }
 function uoCheck(){
   const now=srvNow(), lead=Math.max(5,+cfg.uo_lead||30);
+  try{ uoTrigWatch(); }catch(e){ console.warn('under/over gatilho',e); }
   for(const rb of UOB){
-    if(!rb.on) continue;
+    if(!rb.on||rb.trig) continue;
     const T=uoRobNext(rb,now-0.5);
     if(T-now<=lead && !UO_SIG.some(s=>s.rid===rb.id && s.T===T)){
       if(rb.m==null && UO_SIG.some(s=>s.rid===rb.id && !s.done)) continue;   // robô "todo jogo": uma entrada por vez
       const sig={key:`${rb.id}|${T}`,rid:rb.id,T,w:rb.w,sym:rb.sym,mk:rb.mk,b:rb.b,lvl:rb.lvl,res:[],done:false};
       UO_SIG.push(sig);
-      dmDoRobo(rb,'uo',{key:'uo|'+sig.key,nome:uoRobNome(rb),sym:rb.sym,T,step:rb.w,maxN:rb.lvl,ct:rb.mk==='U'?'DIGITUNDER':'DIGITOVER',barrier:rb.b});
+      dmDoRobo(rb,'uo',{key:'uo|'+sig.key,nome:uoRobNome(rb),sym:rb.sym,T,step:rb.w,maxN:rb.lvl,ct:uoCt(rb),barrier:rb.b});
       uoLogT({k:'sinal',rid:rb.id,nome:uoRobNome(rb),T});
       if(cfg.uo_popup && rb.popup!==false) uoPopup(rb,sig);
     }
@@ -7409,7 +7711,7 @@ function uoPopRefresh(){
 setInterval(()=>{ try{ uoCheck(); }catch(e){} },1000);
 function uoToggle(id,k){ const r=UOB.find(x=>x.id===id); if(!r) return; r[k]=r[k]===false?true:!r[k]; uoSave(); if(S.tab==='uo') uoLive(); }
 function uoApagar(id){ if(!confirm('Excluir este robô Under/Over?')) return; UOB=UOB.filter(x=>x.id!==id); uoSave(); fillRes(); }
-function uoEditar(id){ UO_EDIT=id; cfg.uo_sub='criar'; saveCfg(); renderTab(); }
+function uoEditar(id){ const x=UOB.find(r=>r.id===id); if(x&&x.trig){ alert('Robô de gatilho: para mudar, apague e crie outro na aba 🎯 Padrões 100%.'); return; } UO_EDIT=id; cfg.uo_sub='criar'; saveCfg(); renderTab(); }
 // ---------- varredura automática para criar robôs ----------
 async function uoBuscarMelhores(){
   if(UO_BUSY) return;
@@ -7690,16 +7992,16 @@ function uoSubCriar(){
       <td><button class="pri" onclick="uoPrevCriar(${i})">CRIAR</button> <button onclick="uoPrevIgnorar(${i})">IGNORAR</button> <button onclick="uoDetalhe('prev',${i})">detalhes</button></td></tr>`).join('')}</table></div></div>`:''}`;
 }
 function uoRoboCard(rb){
-  const st=UO_STATS[rb.id], pl=uoPlacar(rb.id), prox=uoRobNext(rb), lastSig=pl.L.at(-1);
+  const st=UO_STATS[rb.id], pl=uoPlacar(rb.id), pS=UO_SIG.find(s=>s.rid===rb.id&&!s.done), prox=rb.trig?(pS?pS.T:null):uoRobNext(rb), lastSig=pl.L.at(-1);
   if(!st || Date.now()-st.when>60000) uoRobStats(rb).then(()=>{ const el=document.getElementById('uoc_'+rb.id); if(el) el.outerHTML=uoRoboCard(rb); });
   const pend=UO_SIG.find(s=>s.rid===rb.id&&!s.done);
-  return `<div class="rbcard uorob ${rb.mk==='U'?'uoU':'uoO'} ${rb.on?'':'off'}" id="uoc_${rb.id}">
+  return `<div class="rbcard uorob ${rb.mk==='U'?'uoU':rb.mk==='O'?'uoO':'uoM'} ${rb.on?'':'off'}" id="uoc_${rb.id}">
     <div class="rbt">${pend?'⚡ ':''}🤖 ${uoNome(rb)} <span class="mu" style="font-size:12px">${rb.nome&&rb.nome!==uoRobNome({...rb,nome:''})?rb.nome:''}</span></div>
     <div class="nota" style="margin:2px 0">Mercado: <b style="color:var(--tx)">${symNome(rb.sym)}</b> · ⏱ <b style="color:var(--tx)">${rb.w}s</b> · ⏰ ${uoRobTempo(rb)} · 📊 ${uoPerLbl(rb.perH??24)} analisadas · ${rb.lvl?'até '+NIVEL[rb.lvl]:'tiro seco'}</div>
     ${st?`<div class="uorow"><span>Acertos: <b class="ok">${st.ok}</b></span><span>Falhas: <b class="ruim">${st.red}</b></span><span>Taxa: <b>${(st.p*100).toFixed(1)}%</b> <span class="mu">acaso ${(uoBase(rb,rb.lvl)*100).toFixed(0)}%</span></span></div>
     <div class="uorow mu"><span>Seq. atual: ${st.run} greens</span><span>Maior: ${st.maxRun}</span><span>Máx. reds: ${st.maxRR}</span></div>
     <div class="uorow mu"><span>Último resultado: ${st.last?(st.last.r?'<span class="ok">GREEN</span>':'<span class="ruim">RED</span>'):'—'}</span><span>${st.last?hmsOf(st.last.T):''}</span></div>`:'<div class="nota">calculando histórico…</div>'}
-    <div class="uorow mu"><span>Ao vivo: <b class="ok">${pl.g}✅</b> <b class="ruim">${pl.r}❌</b></span><span>Último sinal: ${lastSig?hmsOf(lastSig.T):'—'}</span><span>Próximo: <b style="color:var(--tx)">${hmsOf(prox)}</b></span></div>
+    <div class="uorow mu"><span>Ao vivo: <b class="ok">${pl.g}✅</b> <b class="ruim">${pl.r}❌</b></span><span>Último sinal: ${lastSig?hmsOf(lastSig.T):'—'}</span><span>Próximo: <b style="color:var(--tx)">${prox?hmsOf(prox):'esperando gatilho'}</b></span></div>
     <div class="uorow mu"><span>Última atualização: ${st?new Date(st.when).toLocaleTimeString('pt-BR'):'—'}</span></div>
     <div class="rbactions"><button onclick="uoToggle('${rb.id}','on')">${rb.on?'🟢 ativo':'⚫ desativado'}</button><button onclick="uoToggle('${rb.id}','popup')">${rb.popup!==false?'🔔 popup':'🔕 popup'}</button><button onclick="uoEditar('${rb.id}')">✏️ editar</button>${dmBtn('uo',rb)}<button class="dan" onclick="uoApagar('${rb.id}')">🗑</button></div>
   </div>`;
@@ -7772,6 +8074,250 @@ function uoSubSinais(){
     ${cfg.uo_tlog?`<div class="tw" style="max-height:320px"><table><tr><th>Hora</th><th>Evento</th><th>Symbol</th><th>Epoch</th><th>Quote</th><th>Último dígito</th><th>Robô / estratégia</th><th>Resultado</th></tr>
     ${UO_TLOG.slice().reverse().map(x=>`<tr><td>${new Date(x.t).toLocaleTimeString('pt-BR')}</td><td>${x.k==='tick'?'tick recebido':x.k==='sinal'?'robô verificado → sinal':'resultado'}</td><td>${x.sym||''}</td><td class="dvmono">${x.epoch||x.T||''}</td><td class="dvmono">${x.quote??''}</td><td>${x.digit??(x.ds||[]).join('/')}</td><td style="text-align:left">${x.nome||''}</td><td>${x.res||''}</td></tr>`).join('')}</table></div>`:'<div class="nota">Log desligado.</div>'}</div>`;
 }
+// =====================================================================================
+// 🎯 PADRÕES 100% UNDER / OVER — gatilho (número chamando, dupla, trio, soma, sequência baixo/alto)
+// + pulo de casas + mercado UNDER/OVER (ou dígito exato), horas pagantes e horário fixo, em qualquer janela (5s…30s).
+// Só entra o que nunca deu red nos 70% mais antigos E repetiu 100% nos 30% mais novos, e cuja chance de ser
+// pura sorte (acaso^casos) fica abaixo do limite escolhido.
+// =====================================================================================
+const UOP_FAMS=[['num','🔢 Número chamando (depois do X)'],['dupla','Duplas'],['trio','Trios'],['soma','➕ Somas (Σ2–Σ5)'],['faixa','📶 Seq. baixo/alto'],['chama','🎯 + dígito exato (MATCH)'],['hora','🕐 Horas pagantes'],['dia','🕒 Horário fixo']];
+const UOP_DEF={uo_pp:24,uo_pskip:10,uo_pmin:15,uo_pminTe:5,uo_pval:1,uo_psorte:1,uo_ptop:100,uo_pminH:10,uo_pminD:4,uo_pord:'sorte'};
+const UO_MKM=[...Array(10).keys()].map(b=>({mk:'M',b}));
+let UOP={res:null,busy:false,chk:new Set()};
+function uopF(k){ const o=cfg.uo_pf||{}; return o[k]!==0 && !(k==='chama'&&o[k]===undefined); }
+function uopWins(){ const o=cfg.uo_pw||{5:1,20:1}; return D5_STEPS.filter(w=>o[w]); }
+function uoCt(rb){ return rb.mk==='U'?'DIGITUNDER':rb.mk==='O'?'DIGITOVER':'DIGITMATCH'; }
+function uoTrigTxt(t){
+  if(!t) return '';
+  if(t.kind==='num') return `depois do número ${t.d}`;
+  if(t.kind==='dupla') return `dupla ${t.a}-${t.b}`;
+  if(t.kind==='trio') return `trio ${t.a}-${t.b}-${t.c}`;
+  if(t.kind==='soma') return `Σ${t.n} últimos final ${t.mod}`;
+  if(t.kind==='faixa') return `${t.x}× ${t.c?'ALTO (5–9)':'BAIXO (0–4)'} seguidos`;
+  return '';
+}
+function uoTrigDec(f,k){
+  if(f==='num') return {kind:'num',d:k};
+  if(f==='dupla') return {kind:'dupla',a:Math.floor(k/10),b:k%10};
+  if(f==='trio') return {kind:'trio',a:Math.floor(k/100),b:Math.floor(k/10)%10,c:k%10};
+  if(f==='soma') return {kind:'soma',n:Math.floor(k/10),mod:k%10};
+  return {kind:'faixa',c:k>>4,x:k&15};
+}
+// o gatilho aconteceu no jogo i? (A = lista de dígitos)
+function uoTrigAt(A,i,t){
+  if(i<0||A[i]==null) return false;
+  switch(t.kind){
+    case 'num': return A[i]===t.d;
+    case 'dupla': return i>=1&&A[i-1]===t.a&&A[i]===t.b;
+    case 'trio': return i>=2&&A[i-2]===t.a&&A[i-1]===t.b&&A[i]===t.c;
+    case 'soma': { if(i<t.n-1) return false; let s=0; for(let k=i-t.n+1;k<=i;k++){ if(A[k]==null) return false; s+=A[k]; } return s%10===t.mod; }
+    case 'faixa': { const c=x=>x>=5?1:0; if(c(A[i])!==t.c) return false; let k=0; while(i-k>=0&&A[i-k]!=null&&c(A[i-k])===t.c&&k<=t.x) k++; return k===t.x; }
+  }
+  return false;
+}
+// ocorrências históricas de um robô de gatilho (para o card do robô)
+function uoTrigOcc(rb,rows){
+  const A=rows.map(x=>x.d), out=[], m={mk:rb.mk,b:rb.b}, L=rb.lvl||0;
+  for(let i=0;i<A.length;i++){
+    if(!uoTrigAt(A,i,rb.trig)) continue;
+    const b=i+1+(+rb.skip||0); if(b+L>=A.length) break;
+    let h=-1; for(let g=0;g<=L;g++) if(A[b+g]!=null&&uoWin(m,A[b+g])){ h=g; break; }
+    out.push({T:rows[b].t/1000,r:h>=0?1:0,h});
+  }
+  return out;
+}
+// ao vivo: robô de gatilho arma a entrada quando o gatilho sai
+function uoTrigWatch(){
+  for(const rb of UOB){
+    if(!rb.on||!rb.trig) continue;
+    const bank=d5BankName(rb.w,rb.sym), W=LIVE[bank];
+    if(!W){ LIVE[bank]=[]; if(typeof DB!=='undefined'&&DB) idbTail(bank,LIVE_CAP).then(a=>{ if(!LIVE[bank].length) LIVE[bank]=a; }); continue; }
+    const last=W.at(-1); if(!last||rb._lt===last.t) continue; rb._lt=last.t;
+    if(srvNow()-last.t/1000>3*rb.w) continue;
+    if(UO_SIG.some(s=>s.rid===rb.id&&!s.done)) continue;
+    const A=W.slice(-14).map(x=>x.d);
+    if(!uoTrigAt(A,A.length-1,rb.trig)) continue;
+    const T=Math.round(last.t/1000)+((+rb.skip||0)+1)*rb.w;
+    const sig={key:`${rb.id}|${T}`,rid:rb.id,T,w:rb.w,sym:rb.sym,mk:rb.mk,b:rb.b,lvl:rb.lvl,res:[],done:false};
+    UO_SIG.push(sig);
+    dmDoRobo(rb,'uo',{key:'uo|'+sig.key,nome:uoRobNome(rb),sym:rb.sym,T,step:rb.w,maxN:rb.lvl,ct:uoCt(rb),barrier:rb.b});
+    uoLogT({k:'sinal',rid:rb.id,nome:uoRobNome(rb),T});
+    if(cfg.uo_popup && rb.popup!==false) uoPopup(rb,sig);
+  }
+}
+// varredura de uma janela
+async function uopScanWin(w,sym,perH,lvl){
+  const D0=await uoGetData(w,sym,perH), rows=D0.rows.filter(x=>x.d!=null), N=rows.length;
+  const info={w,bank:D0.bank,n:N,raw:0,esp:0,testados:0,fam:{}};
+  if(N<200) return {list:[],info:{...info,erro:`só ${N} jogos no banco ${D0.bank} neste período`}};
+  const D=new Int8Array(N); for(let i=0;i<N;i++) D[i]=rows[i].d;
+  const MK=UO_MK.concat(uopF('chama')?UO_MKM:[]), NM=MK.length;
+  const WIN=new Uint8Array(NM*10); MK.forEach((m,mi)=>{ for(let d=0;d<10;d++) WIN[mi*10+d]=uoWin(m,d)?1:0; });
+  const LG=MK.map(m=>Math.log10(uoBase(m,lvl)));
+  const S=Math.max(0,Math.min(20,+(cfg.uo_pskip??10)))+1, val=+(cfg.uo_pval??1), cut=val?Math.floor(N*0.7):N;
+  const min=Math.max(3,+(cfg.uo_pmin??15)), minTe=val?Math.max(1,+(cfg.uo_pminTe??5)):0, maxLg=Math.log10(Math.max(1e-9,+(cfg.uo_psorte??1)/100));
+  const fam={}, add=(f,k,i)=>{ const M=fam[f]||(fam[f]=new Map()); let a=M.get(k); if(!a){ a=[]; M.set(k,a); } a.push(i); };
+  let run=0;
+  for(let i=0;i<N;i++){
+    const c=D[i]>=5?1:0; run=(i&&((D[i-1]>=5?1:0)===c))?run+1:1;
+    if(uopF('num')) add('num',D[i],i);
+    if(uopF('dupla')&&i>=1) add('dupla',D[i-1]*10+D[i],i);
+    if(uopF('trio')&&i>=2) add('trio',D[i-2]*100+D[i-1]*10+D[i],i);
+    if(uopF('soma')) for(let n=2;n<=5;n++){ if(i<n-1) break; let s=0; for(let k=i-n+1;k<=i;k++) s+=D[k]; add('soma',n*10+s%10,i); }
+    if(uopF('faixa')&&run<=8) add('faixa',c*16+run,i);
+  }
+  const out=[], acc=new Int32Array(S*NM*8); let t0=performance.now();
+  for(const f of Object.keys(fam)){
+    let nf=0;
+    for(const [k,st] of fam[f]){
+      if(st.length<min) continue;
+      acc.fill(0);
+      for(const i of st){
+        const te=i>=cut?4:0;
+        for(let s=0;s<S;s++){
+          const b=i+1+s; if(b+lvl>=N) break;
+          const d0=D[b], d1=lvl>=1?D[b+1]:0, d2=lvl>=2?D[b+2]:0, o=s*NM*8+te;
+          for(let m=0;m<NM;m++){ const w0=m*10; const h=WIN[w0+d0]?0:(lvl>=1&&WIN[w0+d1])?1:(lvl>=2&&WIN[w0+d2])?2:3; acc[o+m*8+h]++; }
+        }
+      }
+      for(let s=0;s<S;s++){
+        let best=null;
+        for(let m=0;m<NM;m++){
+          const o=s*NM*8+m*8, trN=acc[o]+acc[o+1]+acc[o+2]+acc[o+3], teN=acc[o+4]+acc[o+5]+acc[o+6]+acc[o+7];
+          if(trN<min||teN<minTe) continue;
+          info.testados++;
+          const tot=trN+teN, lg=tot*LG[m];
+          if(lg<=maxLg) info.esp+=Math.pow(10,lg);           // quantos dariam 100% só por sorte
+          if(acc[o+3]||acc[o+7]||lg>maxLg) continue;
+          info.raw++;
+          if(!best||lg<best.lg) best={w,sym,f,k,trig:uoTrigDec(f,k),skip:s,m:MK[m],lvl,trN,teN,tot,sg:acc[o]+acc[o+4],g1:acc[o+1]+acc[o+5],g2:acc[o+2]+acc[o+6],p0:uoBase(MK[m],lvl),lg};
+        }
+        if(best){ out.push(best); nf++; }       // um mercado por gatilho+pulo (o mais difícil de ser sorte)
+      }
+      if(performance.now()-t0>40){ uoMsg(`⏳ ${D0.bank} · ${f} · ${num(out.length)} padrões 100% até agora`); await uoSleep(0); t0=performance.now(); }
+    }
+    info.fam[f]=nf;
+  }
+  // horas pagantes (toda hora) e horário fixo (todo dia)
+  for(const mode of ['hora','dia']){
+    if(!uopF(mode)||!D0.G) continue;
+    uoMsg(`⏳ ${D0.bank} · ${mode==='dia'?'horário fixo':'horas pagantes'}…`);
+    const R=await uoScanHorarios(D0,mode,lvl); if(!R) continue;
+    const mn=mode==='dia'?Math.max(2,+(cfg.uo_pminD??4)):Math.max(3,+(cfg.uo_pminH??10)); let nf=0;
+    for(let o=0;o<R.nOff;o++){
+      let best=null;
+      for(let mi=0;mi<UO_NM;mi++){
+        const k=o*UO_NM+mi, n=R.n[k]; if(n<mn) continue;
+        info.testados++;
+        const lg=n*Math.log10(uoBase(UO_MK[mi],lvl));
+        if(lg<=maxLg) info.esp+=Math.pow(10,lg);
+        if(R.ok[k]!==n||lg>maxLg) continue;
+        info.raw++;
+        if(!best||lg<best.lg) best={w,sym,f:mode,off:o*R.step,m:UO_MK[mi],lvl,tot:n,trN:n,teN:0,run:R.run[k],p0:uoBase(UO_MK[mi],lvl),lg};
+      }
+      if(best){ out.push(best); nf++; }
+    }
+    info.fam[mode]=nf;
+  }
+  return {list:out,info};
+}
+async function uopVarrer(){
+  if(UOP.busy) return; UOP.busy=true; UOP.chk=new Set();
+  const wins=uopWins(), sym=uoSym(), perH=+(cfg.uo_pp??24), lvl=+cfg.uo_lvl||0, t0=performance.now(), all=[], info=[];
+  if(!wins.length){ uoMsg('Marque pelo menos uma janela.'); UOP.busy=false; return; }
+  try{
+    for(const w of wins){ const r=await uopScanWin(w,sym,perH,lvl); info.push(r.info); all.push(...r.list); }
+    UOP.res={list:all,info,when:Date.now(),lvl,sym,perH,ms:Math.round(performance.now()-t0)};
+    uoMsg(`✅ Varredura concluída: ${num(all.length)} padrões 100% em ${wins.map(w=>w+'s').join(', ')} · ${(UOP.res.ms/1000).toFixed(1)}s`);
+  }catch(e){ uoMsg('⚠ Erro na varredura: '+(e.message||e)); console.warn(e); }
+  finally{ UOP.busy=false; }
+  if(S.tab==='uo') fillRes();
+}
+function uopLista(){
+  if(!UOP.res) return [];
+  const o=cfg.uo_pord||'sorte', L=UOP.res.list.slice();
+  const fn={sorte:(a,b)=>a.lg-b.lg||b.tot-a.tot, casos:(a,b)=>b.tot-a.tot||a.lg-b.lg, ts:(a,b)=>((b.sg??-1)/b.tot)-((a.sg??-1)/a.tot)||a.lg-b.lg, agora:(a,b)=>(uopAgora(a).t||1e15)-(uopAgora(b).t||1e15)||a.lg-b.lg}[o]||((a,b)=>a.lg-b.lg);
+  return L.sort(fn).slice(0,Math.max(10,Math.min(500,+(cfg.uo_ptop??100))));
+}
+function uopFmtSorte(lg){ const x=Math.pow(10,-lg); return x>=1e6?'1 em '+(x/1e6).toFixed(x>=1e7?0:1).replace('.',',')+' mi':'1 em '+Math.round(x).toLocaleString('pt-BR'); }
+function uopGat(r){
+  if(r.f==='hora') return `🕐 :${p2d(Math.floor(r.off/60))}:${p2d(r.off%60)} toda hora`;
+  if(r.f==='dia') return `🕒 ${p2d(Math.floor(r.off/3600))}:${p2d(Math.floor(r.off/60)%60)}:${p2d(r.off%60)} todo dia`;
+  return uoTrigTxt(r.trig);
+}
+// situação agora: armado (gatilho saiu e a entrada vem aí) ou próximo horário
+function uopAgora(r){
+  if(r.f==='hora'||r.f==='dia'){ const T=uoNext(r.off,r.f); return {t:T,arm:T-Date.now()/1000<=120,html:`<span class="${T-Date.now()/1000<=120?'sclive arm':'mu'}">próx. ${hmsOf(T)} · em ${uoTempo(T-Date.now()/1000)}</span>`}; }
+  const W=LIVE[d5BankName(r.w,r.sym)]||[]; if(!W.length) return {t:null,html:'<span class="mu">—</span>'};
+  const A=W.slice(-(r.skip+16)).map(x=>x.d), n=A.length;
+  for(let j=0;j<=r.skip;j++) if(uoTrigAt(A,n-1-j,r.trig)){
+    const falta=r.skip-j+1, T=Math.round(W.at(-1).t/1000)+falta*r.w;
+    return {t:T,arm:true,html:`<span class="sclive arm">⏳ ENTRA ${hmsOf(T)} · ${falta===1?'próximo jogo':'daqui '+falta+' jogos'}</span>`};
+  }
+  return {t:null,html:'<span class="mu">esperando gatilho</span>'};
+}
+function uopCriar(i,silencioso){
+  const r=(UOP.vis||[])[i]; if(!r||r.criado) return;
+  const st={n:r.tot,ok:r.tot,p:1,run:r.run||r.tot,maxRR:0,score:0};
+  const base={mk:r.m.mk,b:r.m.b,w:r.w,sym:r.sym,lvl:r.lvl,perH:UOP.res.perH,st};
+  const rb=(r.f==='hora'||r.f==='dia')?uoNovoRobo({...base,rep:r.f,off:r.off}):uoNovoRobo({...base,rep:'gatilho',trig:r.trig,skip:r.skip});
+  r.criado=1;
+  if(!silencioso){ status(`🤖 Robô criado: ${uoRobNome(rb)}`,'ok'); fillRes(); }
+}
+function uopCriarSel(){
+  if(!UOP.chk.size){ alert('Marque pelo menos um padrão.'); return; }
+  let n=0; for(const i of UOP.chk){ if(UOP.vis[i]&&!UOP.vis[i].criado){ uopCriar(i,true); n++; } }
+  UOP.chk=new Set(); status(`🤖 ${n} robô(s) Under/Over criado(s) — veja em "Robôs criados"`,'ok'); fillRes();
+}
+function uopTabela(){
+  const L=uopLista(); UOP.vis=L;
+  if(!L.length) return '<div class="nota">Nenhum padrão 100% passou nos filtros. Aumente o período, diminua o mínimo de casos ou aceite chance de sorte maior.</div>';
+  const nomeF={num:'Número',dupla:'Dupla',trio:'Trio',soma:'Soma',faixa:'Baixo/alto',hora:'Hora pagante',dia:'Horário fixo'};
+  return `<div class="tw" style="max-height:620px"><table><tr><th></th><th>#</th><th>Janela</th><th>Tipo</th><th style="text-align:left">Gatilho / horário</th><th>Pulo</th><th>Entrar</th><th>Casos</th><th>TS/G1/G2</th><th>Acaso</th><th>Chance de sorte</th><th style="text-align:left">Agora</th><th></th></tr>
+  ${L.map((r,i)=>{ const a=uopAgora(r); return `<tr class="${a.arm?'scativo':''}"><td><input type="checkbox" ${UOP.chk.has(i)?'checked':''} ${r.criado?'disabled':''} onchange="this.checked?UOP.chk.add(${i}):UOP.chk.delete(${i})"></td>
+    <td>${i+1}</td><td><b>${r.w}s</b></td><td>${nomeF[r.f]||r.f}</td><td style="text-align:left"><b>${uopGat(r)}</b></td><td>${r.f==='hora'||r.f==='dia'?'—':r.skip?'pula '+r.skip:'próximo'}</td><td>${uoTag(r.m)}</td>
+    <td><b>${r.tot}</b>${r.teN?` <span class="mu">(${r.trN}+${r.teN} conf.)</span>`:''}</td><td>${r.sg!=null?`${r.sg}/${r.g1}/${r.g2}`:'—'}</td><td>${(r.p0*100).toFixed(1)}%</td>
+    <td class="${r.lg<=-4?'ok':''}">${uopFmtSorte(r.lg)}</td><td style="text-align:left">${a.html}</td>
+    <td>${r.criado?'<span class="ok">✔ criado</span>':`<button class="pri" onclick="uopCriar(${i})">🤖 robô</button>`}</td></tr>`; }).join('')}</table></div>`;
+}
+function uoSubPadroes(){
+  for(const [k,v] of Object.entries(UOP_DEF)) if(cfg[k]===undefined) cfg[k]=v;
+  const lvl=+cfg.uo_lvl||0, R=UOP.res;
+  const fams=UOP_FAMS.map(([k,t])=>`<label><input type="checkbox" ${uopF(k)?'checked':''} onchange="cfg.uo_pf={...(cfg.uo_pf||{}),${k}:this.checked?1:0};saveCfg()"> ${t}</label>`).join('');
+  const wins=D5_STEPS.map(w=>`<label><input type="checkbox" ${uopWins().includes(w)?'checked':''} onchange="cfg.uo_pw={...(cfg.uo_pw||{5:1,20:1}),${w}:this.checked?1:0};saveCfg()"> ${w}s</label>`).join('');
+  let resumo='';
+  if(R){
+    resumo=`<div class="cards">${R.info.map(x=>x.erro?card(`${x.w}s`,'—',x.erro):card(`${x.w}s · ${num(x.n)} jogos`,`${num(x.raw)} <span style="font-size:12px">100%</span>`,
+      `${Object.entries(x.fam).map(([f,n])=>`${f} ${n}`).join(' · ')}<br>só por sorte daria ~<b>${x.esp<10?x.esp.toFixed(1):num(Math.round(x.esp))}</b> ${x.raw>3*x.esp+2?'<span class="ok">→ bem acima do acaso</span>':'<span class="ruim">→ parecido com o acaso, cuidado</span>'}`)).join('')}</div>
+      ${(()=>{ const sR=R.info.reduce((s,x)=>s+(x.raw||0),0), sE=R.info.reduce((s,x)=>s+(x.esp||0),0); return sR&&sR<=3*sE+2?`<div class="uoaviso" style="border-color:var(--v)">⚠ A quantidade de padrões 100% está perto do que sairia por pura sorte. Aumente "Mín. casos", deixe a conferência ligada ou baixe a "chance de sorte" para 0,1%.</div>`:''; })()}`;
+  }
+  return `<div class="panel" style="border-color:var(--am)"><h3>🎯 Padrões 100% UNDER / OVER <small>${symNome(uoSym())} · ${lvl?'até '+NIVEL[lvl]:'tiro seco'} (troque em "Entrada" lá em cima)</small></h3>
+    <div class="ctl"><b style="font-size:12px">Janelas:</b> ${wins}
+      <label>Período ${sel('uo_pp',[[3,'3 horas'],[6,'6 horas'],[12,'12 horas'],[24,'24 horas'],[72,'3 dias'],[168,'7 dias'],[360,'15 dias'],[720,'30 dias']])}</label></div>
+    <div class="ctl"><b style="font-size:12px">Procurar:</b> ${fams}</div>
+    <div class="ctl">
+      <label>Pular até ${sel('uo_pskip',[[0,'0 (próximo jogo)'],[3,'3 casas'],[5,'5 casas'],[10,'10 casas'],[15,'15 casas'],[20,'20 casas']])}</label>
+      <label>Mín. casos ${inp('uo_pmin',45)}</label>
+      <label><input type="checkbox" ${+(cfg.uo_pval??1)?'checked':''} onchange="cfg.uo_pval=this.checked?1:0;saveCfg()"> conferir nos 30% mais novos (mín. ${inp('uo_pminTe',35)} casos)</label>
+      <label>Chance de ser sorte ≤ ${sel('uo_psorte',[[5,'5%'],[1,'1%'],[0.1,'0,1%'],[0.01,'0,01%']])}</label>
+      <label>Horas pag.: mín. ${inp('uo_pminH',35)} h · Horário fixo: mín. ${inp('uo_pminD',35)} dias</label>
+    </div>
+    <div class="ctl">
+      <button class="pri" style="background:linear-gradient(90deg,#f59e0b,#ef4444);border:0" onclick="this.disabled=true;this.textContent='varrendo…';setTimeout(uopVarrer,30)" ${UOP.busy?'disabled':''}>🔎 VARRER PADRÕES 100%</button>
+      <label>Ordenar ${sel('uo_pord',[['sorte','mais difícil de ser sorte'],['casos','mais casos'],['ts','mais tiro seco'],['agora','entram primeiro']])}</label>
+      <label>Mostrar ${inp('uo_ptop',50)}</label>
+      ${R?`<button onclick="UOP.chk=new Set((UOP.vis||[]).map((_,i)=>i).filter(i=>!UOP.vis[i].criado));fillRes()">marcar todos</button><button onclick="UOP.chk=new Set();fillRes()">desmarcar</button><button class="pri" onclick="uopCriarSel()">🤖 CRIAR ROBÔS MARCADOS</button>`:''}
+    </div>
+    <div class="nota">Exemplo do que ele acha: <b>"depois do número 7, pula 2 casas, entra UNDER 3"</b>, <b>"dupla 4-9 → próximo jogo OVER 6"</b>, <b>"Σ3 últimos final 2 → pula 5 → UNDER 5"</b>, <b>"3× ALTO seguidos → OVER 3"</b>, <b>"hora pagante :27:15 → UNDER 6"</b>.
+      Para cada gatilho + pulo ele testa UNDER 1–9 e OVER 0–8 (e o dígito exato, se marcado) e mostra só o mercado mais difícil de ter dado 100% por sorte.
+      <b>Chance de sorte</b> = probabilidade de acertar todos os casos por acaso (ex.: UNDER 9 acerta 90% sozinho, então 100% em 20 casos não quer dizer nada). Robôs criados aqui entram na aba "Robôs criados", abrem popup e podem operar na 💼 Conta Demo.</div>
+  </div>
+  ${R?resumo+`<div class="panel"><h3>Padrões encontrados <small>${num(R.list.length)} · varrido ${new Date(R.when).toLocaleTimeString('pt-BR')} · ${uoPerLbl(R.perH)} · ${R.lvl?'até '+NIVEL[R.lvl]:'tiro seco'}</small></h3><div id="uopTab">${uopTabela()}</div></div>`
+    :'<div class="panel"><div class="nota">Escolha janelas e tipos e clique em <b>🔎 VARRER PADRÕES 100%</b>. Com 5s e 24h são ~17 mil jogos — leva alguns segundos.</div></div>'}
+  ${UO_AVISO}`;
+}
+setInterval(()=>{ if(S.tab==='uo'&&(cfg.uo_sub||'visao')==='padroes'&&UOP.res&&!UOP.busy){ const e=$('#uopTab'); if(e){ const sc=e.querySelector('.tw')?.scrollTop||0; e.innerHTML=uopTabela(); const t=e.querySelector('.tw'); if(t) t.scrollTop=sc; } } },3000);
+
 function uoLive(){
   if(S.tab!=='uo') return;
   const sub=cfg.uo_sub||'visao';
@@ -7787,7 +8333,7 @@ VIEWS.uo={nome:'📊 Under / Over',live:uoLive,html(){
   const sub=cfg.uo_sub||'visao';
   const top=sub!=='opor'&&uoScanOk('hora')?uoOporMini():'';
   const body={visao:uoSubVisao,opor:uoSubOpor,horas:()=>uoSubHoras(cfg.uo_mode==='dia'?'dia':'hora'),porhora:uoSubPorHora,minutos:()=>uoSubAgg('min'),segundos:()=>uoSubAgg('seg'),
-    barreira:uoSubBarreira,comparar:uoSubComparar,maximas:uoSubMaximas,criar:uoSubCriar,robos:uoSubRobos,backtest:uoSubBacktest,sinais:uoSubSinais}[sub]||uoSubVisao;
+    padroes:uoSubPadroes,barreira:uoSubBarreira,comparar:uoSubComparar,maximas:uoSubMaximas,criar:uoSubCriar,robos:uoSubRobos,backtest:uoSubBacktest,sinais:uoSubSinais}[sub]||uoSubVisao;
   return top+body();
 }};
 // painel curto de oportunidades no topo de todas as sub-telas
@@ -7856,25 +8402,58 @@ function dmSend(o,timeout=20000){
     DM.ws.send(JSON.stringify(o));
   });
 }
+// token novo da Deriv (começa com pat_): pede a lista de contas e um endereço já autorizado (OTP) da conta DEMO
+async function dmRest(met,path,tok,aid){
+  const r=await fetch('https://api.derivws.com'+path,{method:met,headers:{'Authorization':'Bearer '+tok,'Deriv-App-ID':aid,'Content-Type':'application/json'}});
+  let j={}; try{ j=await r.json(); }catch(e){}
+  if(!r.ok){ const m=(j.errors&&j.errors[0]&&(j.errors[0].message||j.errors[0].code))||(j.error&&(j.error.message||j.error.code))||j.message||('erro '+r.status); const e=new Error(m); e.status=r.status; throw e; }
+  return j;
+}
+async function dmConectarPAT(tok){
+  const aid=dmAppId();
+  if(!aid){ dmSet('⛔ Token novo (pat_…) precisa do <b>App ID</b>: crie um aplicativo em <b>developers.deriv.com</b>, copie o App ID e cole no campo <b>App ID</b> aqui embaixo. Depois clique em 🔌 CONECTAR de novo.'); if(S.tab==='demo') renderTab(); return; }
+  dmSet('🔑 Token novo: pedindo à Deriv a conta DEMO…');
+  let j=null;
+  try{
+    const a=await dmRest('GET','/trading/v1/options/accounts',tok,aid);
+    const L=Array.isArray(a.data)?a.data:Array.isArray(a.accounts)?a.accounts:Array.isArray(a)?a:(a.data&&Array.isArray(a.data.accounts)?a.data.accounts:[]);
+    const ehDemo=x=>/demo|virtual/i.test(String(x.account_type??x.type??''))||x.is_virtual===1||x.is_virtual===true||/^VR/i.test(String(x.account_id??x.loginid??''));
+    const d=L.find(ehDemo);
+    if(!d){ dmSet(`⛔ O token não mostrou nenhuma conta DEMO (${L.length} conta(s) encontradas). Crie o token com a conta demo liberada.`); return; }
+    const id=d.account_id??d.id??d.loginid;
+    const o=await dmRest('POST',`/trading/v1/options/accounts/${encodeURIComponent(id)}/otp`,tok,aid);
+    const url=(o.data&&o.data.url)||o.url;
+    j={url,account_id:id,currency:d.currency||'USD',balance:d.balance};
+  }catch(e){
+    if(e instanceof TypeError){                              // o navegador bloqueou a chamada direta: tenta pela função do site (só na Netlify)
+      try{ const k=await dmApi({acao:'otp',client_id:aid,token:tok}); j=k; }
+      catch(e2){ dmSet('⛔ O navegador não deixou falar direto com a Deriv e a função do site não respondeu ('+e2.message+'). Abra pelo site da Netlify ou use um token antigo.'); return; }
+    } else { dmSet('⛔ Deriv recusou o token novo: '+e.message+(e.status===401||e.status===403?' — confira se o token tem o escopo <b>trade</b> e se o App ID é do mesmo usuário.':'')); return; }
+  }
+  if(!j||!j.url){ dmSet('⛔ A Deriv não devolveu o endereço da conta DEMO.'); return; }
+  try{ localStorage.setItem('dpi_demo_tok_pat_ok','1'); }catch(e){}
+  return dmAbrirNovo(j,'pelo token novo');
+}
 async function dmConectar(){
   const tokIn=$('#dmTok')?.value?.trim(); if(tokIn) DM._tok=tokIn;
   DM.novo=false; const oa=dmOa2(); if(!tokIn && oa && oa.at) return dmConectarNovo(oa);
   const tok=dmToken(); if(!tok){ dmSet('Cole o token da conta DEMO.'); return; }
   if($('#dmLembrar')?.checked){ try{ localStorage.setItem('dpi_demo_tok',tok); }catch(e){} }
+  if(/^pat_/i.test(tok)) return dmConectarPAT(tok);
   dmDesconectar(true);
   const aid=dmAppNovo()?'':dmAppId(); const urls=(cfg.dm_url?[cfg.dm_url]:[]).concat(aid?[`wss://ws.derivws.com/websockets/v3?app_id=${aid}`,`wss://ws.binaryws.com/websockets/v3?app_id=${aid}`]:DM_URLS_DEF);
   for(const url of urls){
     dmSet(`Conectando em ${url.replace(/\?.*/,'')}…`);
     try{ await dmAbrir(url); break; }catch(e){ dmSet('Falhou: '+e.message); }
   }
-  if(!DM.ws) return;
+  if(!DM.ws){ dmSet('⛔ Não consegui conectar no endereço antigo da Deriv. Se o seu token começa com <b>pat_</b> (token novo), cole o <b>App ID</b> e clique de novo em 🔌 CONECTAR — ele usa o endereço novo.'); return; }
   try{
     const a=await dmSend({authorize:tok});
     const au=a.authorize||{};
     DM.ok=true; DM.loginid=au.loginid||''; DM.cur=au.currency||'USD'; DM.bal=+au.balance;
     DM.virt=(+au.is_virtual===1) || /^VR/i.test(DM.loginid);
     if(!DM.virt){ dmSet(`⛔ O token é da conta <b>REAL</b> ${DM.loginid}. Este HTML só opera em conta DEMO (login começando com VRTC). Nenhuma ordem será enviada.`); dmHeader(); if(S.tab==='demo') renderTab(); return; }
-    DM.sess={pl:0,n:0,g:0,r:0,ini:Date.now()}; DM.parado='';
+    if(!DM.rcN) DM.sess={pl:0,n:0,g:0,r:0,ini:Date.now()}; DM.parado=''; DM.querOn=true; DM.rcN=0;
     try{ await dmSend({balance:1,subscribe:1}); }catch(e){}
     await dmSyncRelogio();
     dmSet(`✅ Conectado na conta DEMO <b>${DM.loginid}</b> · saldo ${DM.bal.toFixed(2)} ${DM.cur} · relógio do PC ${DM.off>=0?'atrasado':'adiantado'} ${Math.abs(DM.off).toFixed(2)}s em relação à Deriv (já corrigido)`);
@@ -7887,7 +8466,9 @@ function dmAbrir(url){
     const to=setTimeout(()=>{ try{ws.close();}catch(e){} rej(new Error('tempo esgotado')); },10000);
     ws.onopen=()=>{ clearTimeout(to); DM.ws=ws; res(); };
     ws.onerror=()=>{ clearTimeout(to); rej(new Error('falha de conexão')); };
-    ws.onclose=()=>{ if(DM.ws===ws){ DM.ws=null; DM.ok=false; dmSet('desconectado da Deriv'); if(S.tab==='demo') fillRes(); } };
+    ws.onclose=ev=>{ if(DM.ws===ws){ DM.ws=null; DM.ok=false; const mot=`código ${ev&&ev.code||'?'}${ev&&ev.reason?' · '+ev.reason:''}`; DM.ultQueda=mot;
+      if(DM.querOn){ dmSet(`⚠ A Deriv fechou a conexão (${mot}) — reconectando…`); dmReconectar(); } else dmSet(`desconectado da Deriv (${mot})`);
+      if(S.tab==='demo') fillRes(); } };
     ws.onmessage=ev=>{
       let j; try{ j=JSON.parse(ev.data); }catch(e){ return; }
       if(j.msg_type==='balance' && j.balance){ DM.bal=+j.balance.balance; dmHeader(); }
@@ -7897,13 +8478,23 @@ function dmAbrir(url){
     };
   });
 }
-function dmDesconectar(silencioso){ try{ DM.ws?.close(); }catch(e){} DM.ws=null; DM.ok=false; DM.virt=false; if(!silencioso){ dmSet('desconectado'); if(S.tab==='demo') fillRes(); } dmHeader(); }
-function dmEsquecer(){ try{ localStorage.removeItem('dpi_demo_tok'); localStorage.removeItem('dpi_demo_tok_oa2'); }catch(e){} DM._tok=''; dmDesconectar(); dmSet('Token apagado deste navegador.'); }
+function dmDesconectar(silencioso){ if(!silencioso){ DM.querOn=false; clearTimeout(DM.rcT); } try{ DM.ws?.close(); }catch(e){} DM.ws=null; DM.ok=false; DM.virt=false; if(!silencioso){ dmSet('desconectado'); if(S.tab==='demo') fillRes(); } dmHeader(); }
+// 🔁 reconexão automática: a conexão nova (OTP) é de uso único — cada reconexão pede um endereço novo à Deriv
+function dmReconectar(){
+  clearTimeout(DM.rcT); if(!DM.querOn) return;
+  DM.rcN=(DM.rcN||0)+1; const esp=[1,2,5,10,20,30][Math.min(DM.rcN-1,5)];
+  dmSet(`⚠ Conexão com a Deriv caiu${DM.ultQueda?' ('+DM.ultQueda+')':''} — reconectando em ${esp}s (tentativa ${DM.rcN})…`);
+  DM.rcT=setTimeout(async()=>{ if(!DM.querOn||DM.ok) return; try{ await dmConectar(); }catch(e){} if(!DM.ok&&DM.querOn) dmReconectar(); },esp*1000);
+}
+// 💓 sinal de vida a cada 20s (a Deriv fecha conexões paradas)
+setInterval(()=>{ if(DM.ok&&DM.ws&&DM.ws.readyState===1) dmSend({ping:1},10000).catch(()=>{}); },20000);
+function dmEsquecer(){ DM.querOn=false; clearTimeout(DM.rcT); try{ localStorage.removeItem('dpi_demo_tok'); localStorage.removeItem('dpi_demo_tok_oa2'); }catch(e){} DM._tok=''; dmDesconectar(); dmSet('Token apagado deste navegador.'); }
 // ---------- ordens ----------
 function dmStake0(){ return Math.max(0.35,Math.round((+cfg.dm_stake||0.35)*100)/100); }
 function dmPodeOperar(o){
-  if(!DM.ok||!DM.virt) return 'conta demo não conectada';
-  if(o&&o.es) return esPode();                                   // ordens da estratégia usam os stops dela
+  if((!DM.ok||!DM.virt) && !DM.querOn) return 'conta demo não conectada';   // querOn = já conectou numa DEMO e está reconectando
+  if(o&&o.es) return esPode();
+  if(o&&o.man) return '';                                       // entrada manual da 🎮 Mesa                                   // ordens da estratégia usam os stops dela
   if(!cfg.dm_on) return 'operação automática desligada';
   const sl=+cfg.dm_stopLoss||0, sw=+cfg.dm_stopWin||0;
   if(sl>0 && DM.sess.pl<=-sl){ DM.parado=`stop loss (${DM.sess.pl.toFixed(2)})`; return DM.parado; }
@@ -7912,6 +8503,7 @@ function dmPodeOperar(o){
 }
 // registra uma entrada vinda de qualquer robô (par/ímpar, segundos ou Under/Over)
 function dmRegistrar(o){
+  if(typeof MESA_TAB!=='undefined'&&MESA_TAB&&!['mesa','mbot'].includes(o.src)) return;   // na aba da Mesa só a Mesa opera (evita entrada dobrada)
   if(!o.sym){ dmAddLog({...o,res:'não enviada',obs:'banco sem mercado Deriv (use um banco DERIV …)',stake:0,profit:0}); return; }
   const motivo=dmPodeOperar(o);
   if(motivo){ dmAddLog({...o,res:'não enviada',obs:motivo,stake:0,profit:0}); return; }
@@ -7919,16 +8511,21 @@ function dmRegistrar(o){
   DM.orders.push({...o,g:0,tent:[],perda:0,estado:'aguardando',criado:Date.now()});
   dmSet(`📌 Entrada agendada: ${o.nome} · ${hmsOf(o.T)}`);
 }
-function dmCtLabel(o){ return {DIGITEVEN:'PAR',DIGITODD:'ÍMPAR',DIGITUNDER:'UNDER '+o.barrier,DIGITOVER:'OVER '+o.barrier}[o.ct]||o.ct; }
+function dmCtLabel(o){ return {DIGITEVEN:'PAR',DIGITODD:'ÍMPAR',DIGITUNDER:'UNDER '+o.barrier,DIGITOVER:'OVER '+o.barrier,DIGITMATCH:'DÍGITO '+o.barrier}[o.ct]||o.ct; }
 async function dmComprar(o){
   const g=o.g, r0=o.ratio||(o.ct==='DIGITEVEN'||o.ct==='DIGITODD'?0.95:null);
-  let stake=o.stakeFix&&g===0?o.stakeFix:dmStake0();
+  const st0=o.stakeBase||dmStake0();
+  let stake=o.stakeFix&&g===0?o.stakeFix:st0;
   if(g>0 && !o.stakeFix){
-    if((cfg.dm_galeModo||'auto')==='auto' && o.ratio) stake=(o.perda+dmStake0()*o.ratio)/o.ratio;       // recupera as perdas + o lucro da 1ª entrada
+    if(o.galeCalc==='zero') stake=Math.ceil(o.perda/(o.ratio||r0||0.95)*100)/100;                 // só recupera o que perdeu (empata)
+    else if(o.galeCalc==='lucro') stake=(o.perda+st0*(o.ratio||r0||0.95))/(o.ratio||r0||0.95);     // recupera + o lucro da entrada
+    else if(o.fator) stake=st0*Math.pow(o.fator,g);
+    else if((cfg.dm_galeModo||'auto')==='auto' && o.ratio) stake=(o.perda+dmStake0()*o.ratio)/o.ratio;       // recupera as perdas + o lucro da 1ª entrada
     else stake=dmStake0()*Math.pow(+cfg.dm_mult||2.1,g);
   }
+  if(o.recAlvo>0){ const rr=o.ratio||r0||0.95; stake=(o.perda+o.recAlvo)/rr; if(o.recMax>0&&stake>o.recMax) stake=o.recMax; }   // 🔁 recuperação: cobre o que perdeu nesta entrada + a meta do green
   stake=Math.max(0.35,Math.round(stake*100)/100);
-  const maxS=+cfg.dm_maxStake||0; if(maxS>0 && stake>maxS){ o.estado='parado'; dmAddLog({...o,res:'não enviada',obs:`stake ${stake} acima do máximo ${maxS}`,stake,profit:0,nivel:g}); return; }
+  const maxS=+cfg.dm_maxStake||0; if(maxS>0 && stake>maxS && !o.man){ o.estado='parado'; dmAddLog({...o,res:'não enviada',obs:`stake ${stake} acima do máximo ${maxS}`,stake,profit:0,nivel:g}); return; }
   const params={amount:stake,basis:'stake',contract_type:o.ct,currency:DM.cur||'USD',duration:1,duration_unit:'t'};
   params[DM.novo?'underlying_symbol':'symbol']=o.sym;                 // API nova usa underlying_symbol
   if(o.barrier!=null) params.barrier=String(o.barrier);
@@ -7988,6 +8585,7 @@ setInterval(()=>{
       if((cfg.dm_estrito??1) && now+dmLat()>J.fimJan-0.15){ o.estado='perdido'; dmAddLog({...o,res:'não enviada',obs:`sem tempo para acertar o tick ${hmsOf(J.alvo)} (${o.g?'G'+o.g:'TS'}) — modo estrito`,stake:0,profit:0,nivel:o.g,planT:Tg,alvo:J.alvo}); continue; }
       if(!(cfg.dm_estrito??1) && now>Tg+1){ o.estado='perdido'; dmAddLog({...o,res:'não enviada',obs:`perdeu o horário (${hmsOf(Tg)})`,stake:0,profit:0,nivel:o.g}); continue; }
       const m=dmPodeOperar(o); if(m){ o.estado='parado'; dmAddLog({...o,res:'não enviada',obs:m,stake:0,profit:0,nivel:o.g}); continue; }
+      if(!DM.ok||!DM.ws||DM.ws.readyState!==1){ o.estado='perdido'; dmAddLog({...o,res:'não enviada',obs:`conexão com a Deriv caída na hora da entrada (reconectando${DM.ultQueda?' · '+DM.ultQueda:''})`,stake:0,profit:0,nivel:o.g}); continue; }
       dmComprar(o);
     }
   }
@@ -8001,7 +8599,7 @@ async function dmCalibrar(){
   dmSet(`🎯 Contrato de teste agendado para o tick das ${hmsOf(T)} (${sym}, 0,35). Veja o resultado na tabela.`);
 }
 function dmAddLog(x){
-  DM.log.push({t:Date.now(),nome:x.nome,src:x.src,sym:x.sym,ct:dmCtLabel(x),T:x.T,nivel:x.nivel??0,stake:x.stake,profit:x.profit,res:x.res,obs:x.obs||'',cid:x.cid||'',exitT:x.exitT||0,exitQ:x.exitQ??'',entryT:x.entryT||0,planT:x.planT||x.T,alvo:x.alvo||0,pt:x.pt||0,certo:x.certo,bateu:x.bateu,dJogo:x.dJogo,dSaida:x.dSaida,bal:DM.bal});
+  DM.log.push({t:Date.now(),nome:x.nome,src:x.src,sym:x.sym,ct:dmCtLabel(x),T:x.T,nivel:x.nivel??0,stake:x.stake,profit:x.profit,res:x.res,obs:x.obs||'',cid:x.cid||'',exitT:x.exitT||0,exitQ:x.exitQ??'',entryT:x.entryT||0,planT:x.planT||x.T,alvo:x.alvo||0,pt:x.pt||0,certo:x.certo,bateu:x.bateu,dJogo:x.dJogo,dSaida:x.dSaida,bal:DM.bal,mw:(x.src==='mesa'||x.src==='mbot')?x.step:undefined,mmax:x.maxN,mcor:x.mcor,gk:x.gk,gmax:x.gmax});
   dmSaveLog(); if(S.tab==='demo') dmLive();
 }
 // ganchos chamados pelos robôs quando um sinal nasce
@@ -8050,8 +8648,9 @@ function dmOrdHtml(){
 }
 function dmRobosHtml(){
   const L=[...UOB.map(r=>['uo',r,uoRobNome(r),uoNome(r)]),...RBOTS.map(r=>['rb',r,rbName(r),r.alvo?'ÍMPAR':'PAR']),...SRB.map(r=>['sr',r,srNome(r),r.alvo?'ÍMPAR':'PAR'])];
-  if(!L.length) return '<div class="nota">Nenhum robô criado ainda.</div>';
-  return `<div class="tw" style="max-height:320px"><table><tr><th>Tipo</th><th>Robô</th><th>Contrato</th><th>Gale</th><th>Status</th><th>Na DEMO</th></tr>
+  const il2Row=`<tr><td>🔁 2R+G</td><td style="text-align:left">Interligado 2R+G (${il2Modos().map(m=>IL2_MODOS[m].tag).join(' ')} · tempos ${il2Tempos().join('/')}s)</td><td>PAR/ÍMPAR</td><td>${NIVEL[il2Gale()]}</td><td>${il2On()?'🟢':'⚫'}</td><td><select onchange="cfg.il2_demo=+this.value;saveCfg();dmLive()">${[[0,'desligado'],[1,'todas'],[2,'só com confirmação']].map(([v,t])=>`<option value="${v}" ${+(cfg.il2_demo??0)===v?'selected':''}>${t}</option>`).join('')}</select></td></tr>`;
+  if(!L.length) return `<div class="tw"><table><tr><th>Tipo</th><th>Robô</th><th>Contrato</th><th>Gale</th><th>Status</th><th>Na DEMO</th></tr>${il2Row}</table></div>`;
+  return `<div class="tw" style="max-height:320px"><table><tr><th>Tipo</th><th>Robô</th><th>Contrato</th><th>Gale</th><th>Status</th><th>Na DEMO</th></tr>${il2Row}
   ${L.map(([t,r,n,c])=>`<tr><td>${t==='uo'?'📊 Under/Over':t==='rb'?'🤖 Robôs':'⏱ Segundos'}</td><td style="text-align:left">${n}</td><td>${c}</td><td>${t==='uo'?NIVEL[r.lvl]:t==='rb'?NIVEL[rbNivel(r)]:NIVEL[r.nivel]}</td><td>${r.on?'🟢':'⚫'}</td><td>${dmBtn(t,r)}</td></tr>`).join('')}</table></div>`;
 }
 VIEWS.demo={nome:'💼 Conta Demo',live:dmLive,html(){
@@ -8062,6 +8661,7 @@ VIEWS.demo={nome:'💼 Conta Demo',live:dmLive,html(){
       <label><input type="checkbox" id="dmLembrar" ${localStorage.getItem('dpi_demo_tok')?'checked':''}> lembrar neste navegador</label>
       <button class="pri" onclick="dmConectar()">🔌 CONECTAR</button><button onclick="dmDesconectar()">desconectar</button><button class="dan" onclick="dmEsquecer()">apagar token</button>
     </div>
+    <div class="nota" style="margin:0 0 6px">🔑 <b>Token novo da Deriv (começa com <code>pat_</code>)</b>: cole o token acima <b>e</b> o <b>App ID</b> do seu aplicativo do developers.deriv.com no campo logo abaixo, depois clique em 🔌 CONECTAR. Token antigo (sem <code>pat_</code>) não precisa de App ID.</div>
     <div class="ctl"><button class="pri" onclick="dmOAuth()">🔐 ENTRAR COM A DERIV (sem token)</button><label>App ID ${inp('dm_appId',190,'placeholder="cole o App ID"')}</label>${dmOa2()?`<button onclick="dmConectar()">🔌 reconectar pelo login</button>`:''}</div>
     <details class="nota"><summary><b>Como liberar o "Entrar com a Deriv"</b> (uma vez só)</summary>
       1) Entre em <b>developers.deriv.com</b> com sua conta e crie um aplicativo (Create app) com <b>OAuth</b> e escopo <b>trade</b>.<br>
@@ -9180,6 +9780,507 @@ function _iaInjetaBadge(){
 
 })(); // =================== fim do IIFE 🧠 INTELIGÊNCIA ===================
 
+// =====================================================================================
+// 🎮 MESA PLAY — tela de operar na Deriv (conta DEMO) no estilo playdolar, com 10s / 20s / 30s separados.
+// Cada tempo tem o seu próprio banco, cronômetro, histórico, sessão e entradas. A ordem vai pelo motor da
+// conta demo (que acerta o tick do segundo do jogo) e o gale entra nos jogos seguintes do mesmo tempo.
+// =====================================================================================
+const MESA_TEMPOS=[5,10,20,30];
+let MESA={open:false,timer:null,ini:Date.now(),lastFull:''};
+function mesaW(){ const w=+cfg.mesa_w||20; return MESA_TEMPOS.includes(w)?w:20; }
+function mesaSym(){ const L=d5Syms(), s=cfg.mesa_sym||curSym(); return L.includes(s)?s:L[0]; }
+function mesaStake(){ return Math.max(0.35,Math.round((+(cfg.mesa_val??0.35))*100)/100); }
+function mesaFator(){ return Math.max(1,Math.round((+(cfg.mesa_fat??2.2))*10)/10); }
+function mesaGale(){ return Math.max(0,Math.min(6,+(cfg.mesa_gale??1))); }
+function mesaProxT(w){ return Math.ceil((dmNow()+2.6)/w)*w; }           // próximo jogo que ainda dá tempo de entrar
+function mesaSet(k,v){ cfg[k]=v; saveCfg(); mesaRender(true); }
+function mesaAbrir(){ MESA.open=true; const p=$('#mesaPop'); if(!p) return; p.style.display='flex'; mesaRender(true); clearInterval(MESA.timer); MESA.timer=setInterval(()=>mesaRender(false),250); }
+// a Mesa abre numa aba própria do navegador (#mesa); essa aba só opera o que é da Mesa
+const MESA_TAB=/#mesa\b/.test(location.hash);
+function mesaNovaAba(){ const u=location.href.split('#')[0]+'#mesa'; const t=window.open(u,'mesa_play'); if(!t) mesaAbrir(); else t.focus(); }
+function mesaSair(){ if(MESA_TAB){ const op=window.opener; try{ if(op&&!op.closed){ op.focus(); window.close(); return; } }catch(e){} location.href=location.href.split('#')[0]; } else mesaFechar(); }
+function mesaFechar(){ MESA.open=false; clearInterval(MESA.timer); const p=$('#mesaPop'); if(p) p.style.display='none'; }
+function mesaEntrar(alvo){
+  const w=mesaW(), sym=mesaSym();
+  if(!DM.ok||!DM.virt){ if(confirm('A conta DEMO da Deriv não está conectada. Abrir a aba 💼 Conta Demo para conectar?')){ mesaFechar(); S.tab='demo'; renderTab(); } return; }
+  const T=mesaProxT(w);
+  if(DM.orders.some(o=>o.src==='mesa'&&o.step===w&&['aguardando','comprando','em jogo'].includes(o.estado)&&o.mcor!==alvo)){ alert('Já tem uma entrada da outra cor aberta neste tempo.'); return; }
+  dmRegistrar({key:`mesa|${w}|${T}|${alvo}`,src:'mesa',man:1,nome:`🎮 Mesa ${w}s ${alvo?'ÍMPAR':'PAR'}`,sym,T,step:w,maxN:mesaGale(),ct:alvo?'DIGITODD':'DIGITEVEN',stakeBase:mesaStake(),fator:mesaFator(),mcor:alvo});
+  try{ beep(); }catch(e){}
+  mesaRender(false);
+}
+function mesaLogW(w){ return DM.log.filter(x=>x.src==='mesa'&&x.mw===w); }
+function mesaSess(w){
+  const L=mesaLogW(w).filter(x=>x.t>=MESA.ini);
+  const ac=L.filter(x=>x.res==='green').length, er=L.filter(x=>x.res==='red'&&x.nivel>=(x.mmax??0)).length;
+  return {ac,er,pl:L.reduce((s,x)=>s+(+x.profit||0),0)};
+}
+function mesaBalls(W,n,grande){
+  const L=grande?W.slice(-n):W.slice(-n).reverse();
+  return L.map((x,i,a)=>{ const ult=grande&&i===a.length-1; return `<div class="ms-b ${x.p?'imp':'par'} ${grande&&ult?'ult':''} ${grande?'g':''}" title="${hmsOf(x.t/1000)}"><span>${x.d}</span><i>${hmsOf(x.t/1000).slice(3)}</i></div>`; }).join('');
+}
+function mesaTabsHtml(){
+  const sym=mesaSym(), now=dmNow();
+  return MESA_TEMPOS.map(w=>{
+    const W=LIVE[d5BankName(w,sym)]||[], u=W.at(-1), falta=Math.ceil(Math.ceil(now/w)*w-now), s=mesaSess(w);
+    const rob=cfg.mesa_modo==='robo', ab=DM.orders.some(o=>o.src===(rob?'mbot':'mesa')&&o.step===w&&['aguardando','comprando','em jogo'].includes(o.estado)), s2=rob?mbSess(w):s;
+    return `<button class="ms-tab ${mesaW()===w?'on':''}" onclick="mesaSet('mesa_w',${w})">
+      <b>${w} SEGUNDOS</b><span class="ms-tl">${u?`<em class="${u.p?'imp':'par'}">${u.d}</em>`:''} próximo em <b>${falta}s</b>${ab?' · <span class="ms-pisca">● entrada</span>':''}</span>
+      <span class="ms-tl">${rob?(mbSt(w).on?'<b class="okc">🤖 ligado</b> · ':'🤖 parado · '):''}${s2.ac}✅ ${s2.er}❌ · <b class="${s2.pl>=0?'okc':'ruimc'}">${s2.pl>=0?'+':''}${s2.pl.toFixed(2)}</b></span></button>`;
+  }).join('');
+}
+function mesaCentroHtml(){
+  const w=mesaW(), sym=mesaSym(), W=LIVE[d5BankName(w,sym)]||[], now=dmNow();
+  const prox=Math.ceil(now/w)*w, falta=prox-now, pctv=Math.max(0,Math.min(100,100*(1-falta/w)));
+  const ab=DM.orders.filter(o=>o.src==='mesa'&&o.step===w&&['aguardando','comprando','em jogo'].includes(o.estado));
+  const ult=mesaLogW(w).at(-1);
+  let faixa;
+  if(ab.length){ const o=ab[0], Tg=o.T+o.g*o.step; faixa=`<div class="ms-faixa on">🎯 ${o.mcor?'ÍMPAR':'PAR'} · ${o.g?'GALE '+o.g:'ENTRADA'} no jogo ${hmsOf(Tg)} · R$ ${(o.g?mesaStake()*Math.pow(o.fator||mesaFator(),o.g):mesaStake()).toFixed(2)} · ${o.estado==='aguardando'?`faltam ${Math.max(0,Math.ceil(Tg-now))}s`:o.estado}</div>`; }
+  else if(ult&&Date.now()-ult.t<8000) faixa=`<div class="ms-faixa ${ult.res==='green'?'g':'r'}">${ult.res==='green'?`✅ GREEN ${NIVEL[ult.nivel]||'G'+ult.nivel} · +${(+ult.profit).toFixed(2)}`:ult.res==='red'?`❌ ${ult.nivel>=(ult.mmax??0)?'RED':'perdeu, vai pro gale'} · ${(+ult.profit).toFixed(2)}`:ult.res+' · '+ult.obs}</div>`;
+  else faixa=`<div class="ms-faixa">${DM.ok&&DM.virt?`Escolha PAR ou ÍMPAR · sua entrada vai no jogo <b>${hmsOf(mesaProxT(w))}</b>`:'⚠ Conecte a conta DEMO para operar'}</div>`;
+  return `${faixa}
+    <div class="ms-reel">${W.length?mesaBalls(W,7,true):'<div class="mu">aguardando jogos deste tempo…</div>'}</div>
+    <div class="ms-crono"><div class="ms-cbar"><i style="width:${pctv}%"></i></div><div><b>${hmsOf(prox)}</b> · próximo jogo de ${w}s em <b>${Math.ceil(falta)}s</b> · ${symNome(sym)}</div></div>`;
+}
+function mesaSessHtml(){
+  const s=mesaSess(mesaW());
+  return `<div><b>${s.ac}</b><span>ACERTOS</span></div><div><b>${s.er}</b><span>ERROS</span></div><div><b class="${s.pl>=0?'okc':'ruimc'}">${s.pl>=0?'+':''}$ ${s.pl.toFixed(2)}</b><span>RESULTADO</span></div>`;
+}
+function mesaHistHtml(){
+  const L=mesaLogW(mesaW()).slice(-30).reverse();
+  if(!L.length) return '<div class="mu" style="padding:8px">Nenhuma entrada neste tempo ainda.</div>';
+  return L.map(x=>`<div class="ms-hl"><span>${hmsOf(x.planT||x.T)}</span><span>${x.nome.replace(/^🎮 Mesa \d+s /,'')}</span><span>${NIVEL[x.nivel]||'G'+x.nivel}</span><span>${x.stake?'$ '+(+x.stake).toFixed(2):'—'}</span><span class="${x.res==='green'?'okc':x.res==='red'?'ruimc':'mu'}">${x.res==='green'?'✅ +'+(+x.profit).toFixed(2):x.res==='red'?'❌ '+(+x.profit).toFixed(2):x.res}</span></div>`).join('');
+}
+function mesaEsqManual(qv){ return `
+          <div class="ms-box"><span class="ms-lb">VALOR</span><div class="ms-val">$ <input type="number" step="0.01" min="0.35" value="${mesaStake()}" onchange="mesaSet('mesa_val',+this.value)"></div></div>
+          <div class="ms-row2"><div class="ms-box"><span class="ms-lb">FATOR GALE</span><div class="ms-pm"><button onclick="mesaSet('mesa_fat',Math.max(1,mesaFator()-0.1))">−</button><b>${mesaFator().toFixed(1)}</b><button onclick="mesaSet('mesa_fat',mesaFator()+0.1)">+</button></div></div>
+            <div class="ms-box"><span class="ms-lb">GALES</span><div class="ms-pm"><button onclick="mesaSet('mesa_gale',Math.max(0,mesaGale()-1))">−</button><b>${mesaGale()?'G'+mesaGale():'sem'}</b><button onclick="mesaSet('mesa_gale',Math.min(6,mesaGale()+1))">+</button></div></div></div>
+          <span class="ms-lb">VALORES RÁPIDOS</span>
+          <div class="ms-qv">${qv.map(v=>`<button class="${mesaStake()===v?'on':''}" onclick="mesaSet('mesa_val',${v})">$ ${String(v).replace('.',',')}</button>`).join('')}</div>
+          <div class="ms-nota">Gale: ${[...Array(mesaGale()+1).keys()].map(g=>`${g?'G'+g:'entrada'} $ ${(mesaStake()*Math.pow(mesaFator(),g)).toFixed(2)}`).join(' · ')}</div>
+          <span class="ms-lb">SUA SESSÃO · ${mesaW()}s</span><div class="ms-sess" id="msSess"></div>
+          <div class="ms-bt"><button class="par" onclick="mesaEntrar(0)">PAR</button><button class="imp" onclick="mesaEntrar(1)">ÍMPAR</button></div>
+`; }
+function mesaRender(full){
+  const p=$('#mesaPop'); if(!p||!MESA.open) return;
+  if(full||!$('#msCentro')||(cfg.mesa_modo==='robo')!==!!$('#msFila')){
+    const qv=[0.35,1,2,5,10,25,50,100];
+    p.innerHTML=`<div class="ms">
+      <div class="ms-top"><div style="font-size:22px">💵</div><div class="ms-logo">MESA PLAY <small>Deriv · DEMO</small></div>
+        <select class="ms-sel" onchange="mesaSet('mesa_sym',this.value)">${d5Syms().map(s=>`<option value="${s}" ${mesaSym()===s?'selected':''}>${symNome(s)}</option>`).join('')}</select>
+        <div class="ms-modos"><button class="${cfg.mesa_modo!=='robo'?'on':''}" onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button class="${cfg.mesa_modo==='robo'?'on':''}" onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS${MESA_TEMPOS.some(w=>mbSt(w).on)?' ●':''}</button></div>
+        <div class="ms-relogio" id="msClock"></div>
+        <div class="ms-saldo" id="msSaldo"></div><button class="ms-x" onclick="mesaSair()">${MESA_TAB?'↩ voltar ao início':'✕ sair'}</button></div>
+      <div class="ms-tabs" id="msTabs">${mesaTabsHtml()}</div>
+      <div class="ms-corpo">
+        <div class="ms-esq">${cfg.mesa_modo==='robo'?mbEsqHtml(mesaW()):mesaEsqManual(qv)}</div>
+        <div class="ms-dir"><div id="msCentro"></div>
+          <div class="ms-strip" id="msStrip"></div>
+          ${cfg.mesa_modo==='robo'?`<div class="ms-lb" style="margin-top:10px">ROBÔS DE ${mesaW()}s NA ORDEM <span class="mu">(se 2 pedem o mesmo jogo, vale o de cima)</span></div><div class="ms-hist" id="msFila" style="max-height:230px"></div><div id="msHist"></div>`
+            :`<div class="ms-lb" style="margin-top:10px">MINHAS ENTRADAS · ${mesaW()}s</div><div class="ms-hist" id="msHist"></div>`}</div>
+      </div></div>`;
+  }
+  const w=mesaW(), W=LIVE[d5BankName(w,mesaSym())]||[];
+  const k=[w,W.at(-1)?.t,DM.log.length,DM.orders.map(o=>o.estado+o.g).join(),Math.floor(dmNow())].join('|');
+  $('#msSaldo').innerHTML=DM.ok&&DM.virt?`<span>SALDO DEMO</span><b>$ ${DM.bal!=null?DM.bal.toFixed(2):'—'}</b>`:`<button class="ms-con" onclick="mesaFechar();S.tab='demo';renderTab()">CONECTAR DEMO</button>`;
+  const ck=$('#msClock'); if(ck){ const d=new Date(); ck.innerHTML=`<span>🕒</span>${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
+  const rob=cfg.mesa_modo==='robo';
+  const k2=k+'|'+(rob?mbSt(w).log.length+'|'+RB_PENDING.length+'|'+mbSt(w).on+'|'+(mbSt(w).vEstado||'')+'|'+(cfg.mb_histTudo||0):'');
+  if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); }
+  if(k2===MESA.lastFull) return; MESA.lastFull=k2;
+  $('#msTabs').innerHTML=mesaTabsHtml();
+  $('#msCentro').innerHTML=rob?mbCentroHtml(w):mesaCentroHtml();
+  $('#msStrip').innerHTML=mesaBalls(W,40,false);
+  if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); const ss=mbSess(w); $('#msSess').innerHTML=`<div><b>${ss.ac}</b><span>ACERTOS</span></div><div><b>${ss.er}</b><span>ERROS</span></div><div><b class="${ss.pl>=0?'okc':'ruimc'}">${ss.pl>=0?'+':''}$ ${ss.pl.toFixed(2)}</b><span>RESULTADO</span></div>`; $('#msFila').innerHTML=mbFilaHtml(w); $('#msHist').innerHTML=mbHistHtml(w); }
+  else { $('#msSess').innerHTML=mesaSessHtml(); $('#msHist').innerHTML=mesaHistHtml(); }
+}
+document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if(e.key==='p'||e.key==='P') mesaEntrar(0); if(e.key==='i'||e.key==='I') mesaEntrar(1); if(e.key==='Escape') mesaFechar(); if(['1','2','3','4'].includes(e.key)) mesaSet('mesa_w',MESA_TEMPOS[+e.key-1]); });
+// =====================================================================================
+// 🤖 ROBÔS DA MESA PLAY — entra sozinho na conta DEMO seguindo os robôs 100% de cada tempo (5s/10s/20s/30s)
+// Regras: 1 entrada por vez (enquanto a entrada e os gales não terminam, ignora novos sinais);
+// se dois robôs pedem o mesmo jogo, entra só no primeiro da lista; se pedem PAR e ÍMPAR no mesmo jogo, aborta.
+// A decisão é tomada ~3s antes do jogo, quando todos os sinais daquele jogo já apareceram.
+// =====================================================================================
+const MB_DEF={val:0.35,fat:2.2,gale:-1,sw:0,sl:0,so100:1,soAuto:0,fonte:'padroes',hfMin:5,hfDias:7,hfLvl:-1,galeModo:'seguido',rec:2,recMax:0,galeCalc:'fator',recLucro:1};
+// pagamento do PAR/ÍMPAR (lucro ÷ aposta) medido nos greens da sessão; sem histórico usa 0,95
+function mbRatio(w){ const G=DM.log.filter(x=>(x.src==='mbot'||x.src==='mesa')&&x.res==='green'&&+x.stake>0&&+x.profit>0).slice(-20); if(!G.length) return 0.95; return G.reduce((a,x)=>a+x.profit/x.stake,0)/G.length; }
+// 🔁 recuperação: refaz a sessão do início e diz quanto falta recuperar e em quantos greens
+// falta = maior saldo que a sessão já teve − saldo agora. Começa a recuperar depois de um RED final (perdeu no último gale).
+function mbRec(w){
+  const C=mbCfg(w), N=+C.rec||0, L=mbSess(w).L; let pl=0,pico=0,k=null;
+  for(const x of L){
+    pl+=(+x.profit||0);
+    if(pl>=pico-0.005){ pico=Math.max(pico,pl); k=null; continue; }
+    const fim=x.res==='green'||(x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0)));
+    if(!fim||!N) continue;
+    if(x.res==='red'&&k==null) k=N;
+    else if(x.res==='green'&&k!=null){ k--; if(k<=0) k=N; }       // ainda falta: divide de novo
+  }
+  const falta=Math.max(0,Math.round((pico-pl)*100)/100), r=mbRatio(w), base=Math.max(0.35,+C.val||0.35)*r;
+  const on=N>0&&k!=null&&falta>0.05;
+  const alvo=on?falta/k+(+C.recLucro?base:0):0;
+  return {on,falta,k:on?k:0,N,alvo:Math.round(alvo*100)/100,stake:on?Math.round(alvo/r*100)/100:0,r,pl,pico};
+}
+// gale no próximo sinal: nível atual calculado pelas entradas da sessão (green zera; red sobe; passou do último gale, zera)
+function mbGaleK(w){ return mbGaleCiclo(w).k; }
+function mbGaleCiclo(w){ const C=mbCfg(w), G=C.gale<0?2:+C.gale; let k=0,perda=0; for(const x of mbSess(w).L){ if(x.gk==null) continue; if(x.res==='green'){ k=0; perda=0; } else if(x.res==='red'){ k++; perda+=+x.stake||0; if(k>G){ k=0; perda=0; } } } return {k,perda}; }
+// valor da entrada no gale "no próximo sinal" conforme o modo escolhido
+function mbStakeSinal(w){ const C=mbCfg(w), base=Math.max(0.35,+C.val||0.35), {k,perda}=mbGaleCiclo(w), r=mbRatio(w);
+  if(!k) return base;
+  if(C.galeCalc==='zero') return Math.max(0.35,Math.ceil(perda/r*100)/100);
+  if(C.galeCalc==='lucro') return Math.max(0.35,Math.round((perda+base*r)/r*100)/100);
+  return Math.round(base*Math.pow(Math.max(1,+C.fat||2.2),k)*100)/100; }
+let MB={};   // estado por tempo: {on,ini,taken:Set,log:[],stats:Map}
+function mbSt(w){ return MB[w]||(MB[w]={on:false,ini:0,taken:new Set(),feitos:new Set(),log:[],stats:new Map(),parou:''}); }
+function mbCfg(w){ return {...MB_DEF,...((cfg.mbot||{})[w]||{})}; }
+function mbSetCfg(w,k,v){ cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w]={...mbCfg(w),[k]:v}; saveCfg(); mesaRender(true); }
+function mbLog(w,txt,tipo='evt'){ const s=mbSt(w); s.log.push({t:Date.now(),txt,tipo}); if(s.log.length>200) s.log.splice(0,s.log.length-200); }
+function mbBank(w){ return d5BankName(w,mesaSym()); }
+// taxa do robô no banco (com cache por jogo novo)
+function mbRate(rb,W){
+  const s=mbSt(rbStep(rb)), k=rb.id+'|'+(W.at(-1)?.t||0), c=s.stats.get(rb.id);
+  if(c&&c.k===k) return c.st;
+  const st=rbCurrentStats(rb,W); s.stats.set(rb.id,{k,st}); return st;
+}
+function mbRobos(w){
+  const bank=mbBank(w), C=mbCfg(w), W=liveW(bank)||[];
+  return RBOTS.filter(rb=>rb.bank===bank&&rb.on&&!rb.demo&&(!C.soAuto||rb.auto)).map(rb=>({rb,st:mbRate(rb,W)}))
+    .filter(x=>!C.so100||(x.st.done>0&&x.st.red===0));
+}
+function mbAberta(w){ return DM.orders.find(o=>o.src==='mbot'&&o.step===w&&['aguardando','comprando','em jogo'].includes(o.estado)); }
+function mbSess(w){
+  const s=mbSt(w), L=DM.log.filter(x=>x.src==='mbot'&&x.mw===w&&x.t>=(s.ini||MESA.ini));
+  return {ac:L.filter(x=>x.res==='green').length,er:L.filter(x=>x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0))).length,pl:L.reduce((a,x)=>a+(+x.profit||0),0),L};
+}
+function mbIniciar(w){
+  if(!DM.ok||!DM.virt){ if(confirm('A conta DEMO não está conectada. Abrir a aba 💼 Conta Demo?')){ mesaFechar(); S.tab='demo'; renderTab(); } return; }
+  const s=mbSt(w); s.on=true; s.ini=Date.now(); s.parou=''; s.taken=new Set(); s.feitos=new Set();
+  mbVEstado(w); s.vEstado='esperando'; s.vSeq=[]; s.vPend=[]; s.vReal=0; s.vLastLen=DM.log.filter(x=>x.src==='mbot'&&x.mw===w).length;
+  mbLog(w,`▶ Robô ${w}s iniciado · ${mbRobos(w).length} robô(s)${mbCfg(w).so100?' 100%':''} no banco ${mbBank(w)}`,'evt'); mesaRender(true);
+}
+function mbParar(w,motivo){ const s=mbSt(w); if(!s.on) return; s.on=false; s.parou=motivo||'parado por você'; mbLog(w,`⏹ Robô ${w}s parou: ${s.parou}`,'r'); try{ beep(); }catch(e){} if(MESA.open) mesaRender(true); }
+// horário fixo 100% da hora atual (e da próxima, para cobrir os próximos 60 min) no banco do tempo
+let MBHF={};
+function mbHfNivel(w){ const C=mbCfg(w); if(+C.hfLvl>=0) return Math.min(2,+C.hfLvl); if(C.galeModo==='sinal') return 0; return C.gale<0?2:Math.max(0,Math.min(2,+C.gale)); }
+async function mbHfLoad(w,forca){
+  const C=mbCfg(w), bank=mbBank(w), lvl=mbHfNivel(w), hr=new Date().getHours(), mn=Math.max(2,+C.hfMin||5), dias=Math.max(mn+1,+C.hfDias||7);
+  const key=[bank,lvl,hr,mn,dias].join('|'), c=MBHF[w];
+  if(c&&c.busy) return; if(!forca&&c&&c.key===key&&Date.now()-c.when<10*60e3) return;
+  MBHF[w]={...(c||{}),busy:true};
+  try{
+    const rows=await idbRange(bank,Date.now()-dias*86400e3-3600e3,Date.now()+60000), G=gridBuild(rows,w), out=[];
+    if(G) for(const h of [hr,(hr+1)%24]) for(const r of hfScan(G,String(h))){ const m=[r.ts,r.g1,r.g2][lvl]; if(m.n>=mn&&m.ok===m.n) out.push({off:r.off,alvo:r.alvo,n:m.n,slot:r.slotKey}); }
+    out.sort((a,b)=>b.n-a.n||a.off-b.off);
+    MBHF[w]={key,when:Date.now(),rows:out,dias:G?hfDayStarts(G).length:0,busy:false};
+  }catch(e){ console.warn('horário fixo mesa',e); MBHF[w]={key,when:Date.now(),rows:[],dias:0,busy:false}; }
+}
+function mbHfSinais(w){
+  const now=Date.now()/1000, H=MBHF[w]; if(!H||!H.rows) return [];
+  return H.rows.map((r,i)=>({r,i,T:hfNext(r.off)})).filter(x=>x.T-now<=3600)
+    .map(x=>({key:`hf|${w}|${x.T}|${x.r.alvo}`,entryT:x.T*1000,alvo:x.r.alvo,ord:100000+x.i,ok:true,gale:mbHfNivel(w),nome:`🕒 Horário fixo ${x.r.slot} · ${x.r.n} dias 100%`,curto:`HF ${x.r.slot}`}));
+}
+function mbTick(){
+  const now=dmNow();
+  for(const w of MESA_TEMPOS){
+    const s=mbSt(w); if(!s.on) continue;
+    const C=mbCfg(w), ss=mbSess(w), fonte=C.fonte||'padroes';
+    if(C.sw>0&&ss.pl>=C.sw){ mbParar(w,`🏁 stop win (+${ss.pl.toFixed(2)})`); continue; }
+    if(C.sl>0&&ss.pl<=-C.sl){ mbParar(w,`🛑 stop loss (${ss.pl.toFixed(2)})`); continue; }
+    if(!DM.ok&&!DM.querOn){ mbParar(w,'conta demo desconectada'); continue; }
+    try{ mbVTick(w); }catch(e){ console.warn('virtual',e); }
+    const bank=mbBank(w); let sigs=[];
+    if(fonte!=='hfix'){
+      const elig=new Map(mbRobos(w).map(x=>[x.rb.id,RBOTS.indexOf(x.rb)]));
+      for(const g of RB_PENDING){ if(g.done||g.bank!==bank) continue; const rb=RBOTS.find(x=>x.id===g.rbId); if(!rb) continue;
+        sigs.push({key:g.key,entryT:g.entryT,alvo:g.alvo,ord:elig.get(g.rbId)??1e9,ok:elig.has(g.rbId),gale:rbNivel(rb),nome:rbName(rb),curto:rbGat(rb)}); }
+    }
+    if(fonte!=='padroes'){ mbHfLoad(w); sigs=sigs.concat(mbHfSinais(w)); }
+    sigs=sigs.filter(g=>!s.taken.has(g.key)&&g.entryT/1000-now>1.6);
+    if(!sigs.length) continue;
+    const T=Math.min(...sigs.map(g=>g.entryT));
+    if(T/1000-now>3.4) continue;                       // decide ~3s antes, com todos os sinais do jogo já conhecidos
+    const doJogo=sigs.filter(g=>g.entryT===T);
+    doJogo.forEach(g=>s.taken.add(g.key));
+    const ok=doJogo.filter(g=>g.ok).sort((a,b)=>a.ord-b.ord);
+    if(!ok.length) continue;
+    const hh=hmsOf(T/1000);
+    if(mbAberta(w)||(+mbV(w).vOn&&mbVEstado(w).vPend.length)){ mbLog(w,`⏭ ${hh}: ${ok.length} sinal(is) ignorado(s) — já tem entrada ${mbAberta(w)?'aberta':'virtual em andamento'}`,'evt'); continue; }
+    if(new Set(ok.map(g=>g.alvo)).size>1){ mbLog(w,`⛔ ${hh}: ABORTADO — PAR e ÍMPAR no mesmo jogo (${ok.map(g=>(g.alvo?'Í ':'P ')+g.curto).join(' · ')})`,'r'); continue; }
+    const g=ok[0], gale=C.gale<0?g.gale:C.gale, base=Math.max(0.35,+C.val||0.35), fat=Math.max(1,+C.fat||2.2);
+    if(+mbV(w).vOn&&mbVEstado(w).vEstado==='esperando'){ mbVAnotar(w,g,T,C.galeModo==='sinal'?0:gale); continue; }
+    const R=mbRec(w), rec=R.on?{recAlvo:R.alvo,recMax:+C.recMax||0,ratio:R.r}:{}, rtxt=R.on?` · 🔁 recuperando $ ${R.falta.toFixed(2)} (${R.k} green${R.k>1?'s':''}) → aposta $ ${Math.min(R.stake,+C.recMax||Infinity).toFixed(2)}`:'';
+    if(C.galeModo==='sinal'){ const k=mbGaleK(w), G=C.gale<0?2:+C.gale;
+      dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:0,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:mbStakeSinal(w),fator:fat,mcor:g.alvo,gk:k,gmax:G,...rec}); }
+    else dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:base,fator:fat,galeCalc:C.galeCalc,mcor:g.alvo,...rec});
+    if(R.on) mbLog(w,`🔁 ${hmsOf(T/1000)}: modo recuperação${rtxt}`,'evt');
+    s.feitos.add(g.key);
+    mbLog(w,`🎯 ${hh}: ENTRADA ${g.alvo?'ÍMPAR':'PAR'} · ${g.nome}${ok.length>1?` (outros ${ok.length-1} da mesma cor ficaram de fora)`:''}`,'g');
+    try{ beep(); }catch(e){}
+  }
+}
+setInterval(()=>{ try{ mbTick(); }catch(e){ console.warn('robô mesa',e); } },300);
+// =====================================================================================
+// 👻 LOSS / WIN VIRTUAL + ⭐ CONFIGURAÇÕES SALVAS + 📉 MAIOR VALOR EXPOSTO + 📄 PDF — robô da Mesa
+// Virtual: enquanto "esperando", o robô NÃO aposta — só anota o resultado que o sinal teria dado.
+// Quando a regra bate (ex.: 2 loss virtuais seguidos) ele passa a "operando" e entra de verdade;
+// depois volta a esperar conforme a regra de volta (após green real, após red real, etc.).
+// Todo sinal (virtual e real) vai para um histórico salvo por tempo, usado na tabela "como teria sido".
+// =====================================================================================
+const MBV_DEF={vOn:0,vModo:'loss',vX:2,vY:2,vVolta:'green',vN:1};
+function mbV(w){ return {...MBV_DEF,...mbCfg(w)}; }
+function mbHistLoad(w){ try{ return JSON.parse(localStorage.getItem('mb_seq_'+w)||'[]')||[]; }catch(e){ return []; } }
+function mbHistSave(w,H){ try{ localStorage.setItem('mb_seq_'+w,JSON.stringify(H.slice(-3000))); }catch(e){} }
+function mbHistAdd(w,o){ const s=mbSt(w); if(!s.hist) s.hist=mbHistLoad(w); if(s.hist.some(x=>x.k===o.k)) return; s.hist.push(o); mbHistSave(w,s.hist); }
+function mbHist(w){ const s=mbSt(w); if(!s.hist) s.hist=mbHistLoad(w);
+  if(!s.histSeed){ s.histSeed=1; const ks=new Set(s.hist.map(h=>h.k)); let n=0;      // entradas reais antigas do histórico da demo também contam
+    for(const x of DM.log){ if(x.src!=='mbot'||x.mw!==w||(x.res!=='green'&&x.res!=='red')) continue; const fim=x.res==='green'||(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0)); if(!(x.gk!=null||fim)) continue;
+      const k='r|'+x.t+'|'+x.nome; if(ks.has(k)) continue; s.hist.push({k,T:x.planT||x.T,alvo:x.mcor,res:x.res==='green'?'W':'L',tipo:'r',nome:(x.nome||'').replace(/^🤖 \d+s · /,'')}); n++; }
+    if(n){ s.hist.sort((a,b)=>a.T-b.T); mbHistSave(w,s.hist); } }
+  return s.hist; }
+function mbVEstado(w){ const s=mbSt(w); if(!s.vEstado){ s.vEstado='esperando'; s.vSeq=[]; s.vPend=[]; s.vReal=0; s.vLastLen=0; } return s; }
+function mbVRegraTxt(w){
+  const V=mbV(w), L=`${V.vX} loss`, W=`${V.vY} win`;
+  const ent={loss:`depois de ${L} virtual seguidos`,win:`depois de ${W} virtual seguidos`,ou:`depois de ${L} OU ${W} virtual seguidos`,seq:`depois de ${W} e em seguida ${L} virtual`,seq2:`depois de ${L} e em seguida ${W} virtual`}[V.vModo];
+  const vol={green:'volta a esperar depois de um GREEN real',red:'volta a esperar depois de um RED real',qualquer:'volta a esperar depois de qualquer resultado real',n:`volta a esperar depois de ${V.vN} entrada(s) real(is)`}[V.vVolta];
+  return `Entra ${ent} · ${vol}`;
+}
+// a sequência (W/L) do fim bate com a regra?
+function mbVBate(seq,V){
+  const tail=(c)=>{ let n=0; for(let i=seq.length-1;i>=0&&seq[i]===c;i--) n++; return n; };
+  const fim=(a)=>a.length<=seq.length&&a.every((c,i)=>seq[seq.length-a.length+i]===c);
+  const X=Math.max(1,+V.vX||1), Y=Math.max(1,+V.vY||1);
+  if(V.vModo==='loss') return tail('L')>=X;
+  if(V.vModo==='win') return tail('W')>=Y;
+  if(V.vModo==='ou') return tail('L')>=X||tail('W')>=Y;
+  if(V.vModo==='seq') return fim([...Array(Y).fill('W'),...Array(X).fill('L')]);
+  if(V.vModo==='seq2') return fim([...Array(X).fill('L'),...Array(Y).fill('W')]);
+  return false;
+}
+// chamado pelo mbTick em vez de apostar quando está esperando
+function mbVAnotar(w,g,T,gale){
+  const s=mbVEstado(w);
+  s.vPend.push({T:T/1000,alvo:g.alvo,gale:gale,nome:g.nome,k:'v|'+g.key});
+  mbLog(w,`👻 ${hmsOf(T/1000)}: sinal VIRTUAL ${g.alvo?'ÍMPAR':'PAR'} · ${g.nome} (sem apostar)`,'evt');
+}
+// resolve os sinais virtuais com o resultado do jogo e confere as regras
+function mbVTick(w){
+  const s=mbVEstado(w), V=mbV(w), W=LIVE[mbBank(w)]||[], now=dmNow();
+  if(s.vPend.length){
+    const byT=new Map(W.slice(-400).map(x=>[Math.round(x.t/1000),x]));
+    s.vPend=s.vPend.filter(p=>{
+      let res=null;
+      for(let g=0;g<=p.gale;g++){
+        const r=byT.get(p.T+g*w);
+        if(!r){ if(now>p.T+g*w+3*w+5){ res='?'; } break; }
+        if(r.p===p.alvo){ res='W'; break; }
+        if(g===p.gale) res='L';
+      }
+      if(res===null) return true;
+      if(res==='?'){ mbLog(w,`👻 ${hmsOf(p.T)}: virtual sem resultado (faltou o jogo no banco)`,'evt'); return false; }
+      s.vSeq.push(res); if(s.vSeq.length>50) s.vSeq.shift();
+      mbHistAdd(w,{k:p.k,T:p.T,alvo:p.alvo,res,tipo:'v',nome:p.nome});
+      mbLog(w,`👻 ${hmsOf(p.T)}: ${res==='W'?'WIN':'LOSS'} virtual ${p.alvo?'ÍMPAR':'PAR'} · sequência ${s.vSeq.slice(-8).join('')}`,res==='W'?'g':'r');
+      if(V.vOn&&s.vEstado==='esperando'&&mbVBate(s.vSeq,V)){ s.vEstado='operando'; s.vReal=0; mbLog(w,`🚦 Regra virtual bateu (${s.vSeq.slice(-8).join('')}) — próximo sinal entra DE VERDADE`,'g'); try{ beep(); }catch(e){} }
+      return false;
+    });
+  }
+  // resultados reais novos → histórico + regra de volta
+  const L=DM.log.filter(x=>x.src==='mbot'&&x.mw===w);
+  if(s.vLastLen>L.length) s.vLastLen=0;
+  for(const x of L.slice(s.vLastLen)){
+    if(x.res!=='green'&&x.res!=='red') continue;
+    const fim=x.res==='green'||(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0));
+    if(x.gk!=null||fim) mbHistAdd(w,{k:'r|'+x.t+'|'+x.nome,T:x.planT||x.T,alvo:x.mcor,res:x.res==='green'?'W':'L',tipo:'r',nome:(x.nome||'').replace(/^🤖 \d+s · /,'')});
+    if(!fim||!V.vOn||s.vEstado!=='operando') continue;
+    s.vReal++;
+    const volta=V.vVolta==='green'?x.res==='green':V.vVolta==='red'?x.res==='red':V.vVolta==='qualquer'?true:s.vReal>=Math.max(1,+V.vN||1);
+    if(volta){ s.vEstado='esperando'; s.vSeq=[]; mbLog(w,`⏸ Voltou a esperar (${x.res==='green'?'GREEN':'RED'} real) — ${mbVRegraTxt(w).split(' · ')[0].toLowerCase()}`,'evt'); }
+  }
+  s.vLastLen=L.length;
+}
+// tabela "como teria sido": aplica cada regra no histórico de sinais (virtuais + reais) deste tempo
+function mbVSimular(H,V){
+  let est=V?'esperando':'operando', seq=[], n=0, ok=0, real=0;
+  for(const h of H){
+    if(est==='operando'){ n++; if(h.res==='W') ok++; real++;
+      if(V){ const volta=V.vVolta==='green'?h.res==='W':V.vVolta==='red'?h.res==='L':V.vVolta==='qualquer'?true:real>=Math.max(1,+V.vN||1); if(volta){ est='esperando'; seq=[]; } }
+      continue; }
+    seq.push(h.res); if(mbVBate(seq,V)){ est='operando'; real=0; }
+  }
+  return {n,ok,p:n?ok/n:0};
+}
+function mbVTabela(w){
+  const H=mbHist(w).slice().sort((a,b)=>a.T-b.T), V=mbV(w);
+  if(H.length<5) return `<div class="mu" style="padding:8px">Ainda tem ${H.length} sinal(is) guardado(s) neste tempo. Deixe o robô rodando (com ou sem virtual) que cada sinal vai sendo anotado e a tabela aparece.</div>`;
+  const base=mbVSimular(H,null), linhas=[['sem virtual (entra em tudo)',base,1]];
+  for(const m of ['loss','win']) for(let x=1;x<=5;x++){ const VV={...V,vModo:m,vX:x,vY:x}; linhas.push([`${m==='loss'?'após '+x+' LOSS':'após '+x+' WIN'} virtual`,mbVSimular(H,VV),0,m===V.vModo&&x===(m==='loss'?+V.vX:+V.vY)]); }
+  if(['ou','seq','seq2'].includes(V.vModo)) linhas.push([mbVRegraTxt(w).split(' · ')[0].replace('Entra ',''),mbVSimular(H,V),0,1]);
+  const r=mbRatio(w);
+  return `<div class="ms-nota" style="margin:2px 0 4px">Amostra: <b>${H.length}</b> sinais (${H.filter(h=>h.tipo==='v').length} virtuais + ${H.filter(h=>h.tipo==='r').length} reais) desde ${new Date(H[0].T*1000).toLocaleString('pt-BR')} · ${mbVRegraTxt(w).split(' · ')[1]} · saldo em entradas de $1, tiro seco</div>
+    <div class="ms-hl" style="grid-template-columns:1fr 70px 70px 80px;font-weight:700;color:#a49dbb"><span>Regra</span><span>Entradas</span><span>Acerto</span><span>Saldo $1</span></div>
+    ${linhas.map(([nome,R,b,sel])=>{ const sal=R.ok*r-(R.n-R.ok); return `<div class="ms-hl" style="grid-template-columns:1fr 70px 70px 80px;${sel?'background:rgba(168,85,247,.18)':''}"><span>${sel?'▶ ':''}${nome}</span><span>${R.n}</span><span class="${R.n&&R.p>=0.52?'okc':R.n&&R.p<0.5?'ruimc':''}">${R.n?(R.p*100).toFixed(1)+'%':'—'}</span><span class="${sal>=0?'okc':'ruimc'}">${R.n?(sal>=0?'+':'')+sal.toFixed(2):'—'}</span></div>`; }).join('')}
+    <div class="ms-nota" style="margin-top:4px">Poucos sinais = conclusão fraca: com menos de ~100 entradas a diferença entre as regras pode ser só sorte.</div>`;
+}
+// 📉 maior valor exposto: o quanto o saldo ficou abaixo do topo somado à aposta que estava em jogo naquele momento
+function mbExpo(w,L){
+  L=L||mbSess(w).L; let pl=0,pico=0,ex=0,exT=0,queda=0,maxA=0;
+  for(const x of L){ const st=+x.stake||0; if(!st&&!x.profit) continue; const e=(pico-pl)+st; if(e>ex){ ex=e; exT=x.planT||x.T; } if(st>maxA) maxA=st; pl+=(+x.profit||0); if(pl>pico) pico=pl; if(pico-pl>queda) queda=pico-pl; }
+  const o=mbAberta(w); if(o){ const st=o.tent?.at(-1)?.stake||0, e=(pico-pl)+st; if(e>ex){ ex=e; exT=o.T+o.g*o.step; } }
+  return {ex,exT,queda,maxA};
+}
+// ⭐ configurações salvas
+function mbPresets(){ return Array.isArray(cfg.mbPresets)?cfg.mbPresets:[]; }
+function mbPresetSalvar(w){
+  const el=$('#mbPresetNome'), nome=(el?.value||'').trim();
+  if(!nome){ alert('Dê um nome para a configuração (ex.: "Tiro seco horário fixo").'); el?.focus(); return; }
+  const L=mbPresets().filter(p=>!(p.nome===nome&&p.w===w));
+  L.unshift({id:'P'+Date.now(),nome,w,c:{...mbCfg(w)},sym:mesaSym(),criado:Date.now()});
+  cfg.mbPresets=L.slice(0,30); saveCfg(); mbLog(w,`⭐ Configuração "${nome}" salva`,'evt'); mesaRender(true);
+}
+function mbPresetUsar(id){
+  const p=mbPresets().find(x=>x.id===id); if(!p) return;
+  cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[p.w]={...p.c}; cfg.mesa_w=p.w; cfg.mesa_modo='robo'; if(p.sym) cfg.mesa_sym=p.sym; saveCfg();
+  const s=mbSt(p.w); if(s.on) mbParar(p.w,'trocou para a configuração "'+p.nome+'"');
+  mbIniciar(p.w); mbLog(p.w,`⭐ Usando a configuração "${p.nome}"`,'g'); mesaRender(true);
+}
+function mbPresetApagar(id){ const p=mbPresets().find(x=>x.id===id); if(!p||!confirm(`Apagar a configuração "${p.nome}"?`)) return; cfg.mbPresets=mbPresets().filter(x=>x.id!==id); saveCfg(); mesaRender(true); }
+function mbPresetsHtml(w){
+  const L=mbPresets();
+  return `<div class="ms-box" style="border-color:#a855f7"><span class="ms-lb">⭐ CONFIGURAÇÕES SALVAS</span>
+    ${L.length?`<div class="mb-pres">${L.map(p=>`<span class="mb-chip ${p.w===w&&mbSt(p.w).on?'on':''}"><button onclick="mbPresetUsar('${p.id}')" title="carregar e iniciar">▶ ${esc(p.nome)} <small>${p.w}s</small></button><button class="x" onclick="mbPresetApagar('${p.id}')" title="apagar">✕</button></span>`).join('')}</div>`:'<div class="ms-nota" style="margin:4px 0">Nenhuma ainda. Ajuste tudo abaixo e salve com um nome.</div>'}
+    <div style="display:flex;gap:6px;margin-top:6px"><input id="mbPresetNome" class="ms-sel" style="flex:1;min-width:0" placeholder="nome (ex.: Tiro seco HF)"><button class="ms-x" style="padding:6px 10px" onclick="mbPresetSalvar(${w})">💾 salvar</button></div></div>`;
+}
+function esc(t){ return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+// caixa do virtual (painel esquerdo)
+function mbVBoxHtml(w){
+  const V=mbV(w), sel=(k,opts)=>`<select class="ms-sel" onchange="mbSetCfg(${w},'${k}',this.value)">${opts.map(([v,t])=>`<option value="${v}" ${String(V[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
+  const num=(k,min)=>`<input type="number" min="${min}" value="${V[k]}" style="width:52px" onchange="mbSetCfg(${w},'${k}',+this.value)">`;
+  return `<div class="ms-box"><span class="ms-lb">👻 LOSS / WIN VIRTUAL</span>
+    <label class="ms-chk" style="margin-top:4px"><input type="checkbox" ${+V.vOn?'checked':''} onchange="mbSetCfg(${w},'vOn',this.checked?1:0)"> ativar (espera sem apostar até a regra bater)</label>
+    ${+V.vOn?`<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+      <label class="ms-chk">Entrar ${sel('vModo',[['loss','após X LOSS virtual'],['win','após Y WIN virtual'],['ou','após X LOSS ou Y WIN'],['seq','após Y WIN e depois X LOSS'],['seq2','após X LOSS e depois Y WIN']])}</label>
+      <div class="ms-row2">${V.vModo!=='win'?`<label class="ms-chk">X loss ${num('vX',1)}</label>`:''}${V.vModo!=='loss'?`<label class="ms-chk">Y win ${num('vY',1)}</label>`:''}</div>
+      <label class="ms-chk">Voltar a esperar ${sel('vVolta',[['green','depois de GREEN real'],['red','depois de RED real'],['qualquer','depois de qualquer resultado'],['n','depois de N entradas']])}${V.vVolta==='n'?' N '+num('vN',1):''}</label>
+      <div class="ms-nota">${mbVRegraTxt(w)}</div></div>`:''}</div>`;
+}
+// status do virtual (centro)
+function mbVStatusHtml(w){
+  const V=mbV(w); if(!+V.vOn) return '';
+  const s=mbVEstado(w), seq=s.vSeq.slice(-12);
+  const bolas=seq.map(c=>`<span class="mb-vb ${c==='W'?'w':'l'}">${c==='W'?'W':'L'}</span>`).join('')||'<span class="mu">nenhum resultado virtual ainda</span>';
+  const pend=s.vPend.length?` · ⏳ virtual ${hmsOf(s.vPend[0].T)}`:'';
+  return `<div class="mb-vst ${s.vEstado}"><b>${s.vEstado==='operando'?'🟢 OPERANDO DE VERDADE':'👻 ESPERANDO (virtual)'}</b>${pend}<div style="margin-top:4px">${bolas}</div><div class="ms-nota">${mbVRegraTxt(w)}</div></div>`;
+}
+// 📄 relatório completo para salvar em PDF
+function mbPdf(w){
+  const tudo=cfg.mb_histTudo, L=tudo?DM.log.filter(x=>x.src==='mbot'&&x.mw===w):mbSess(w).L, s=mbSt(w), C=mbCfg(w), V=mbV(w);
+  const ac=L.filter(x=>x.res==='green').length, er=L.filter(x=>x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0))).length, pl=L.reduce((a,x)=>a+(+x.profit||0),0), E=mbExpo(w,L);
+  const H=mbHist(w).slice().sort((a,b)=>a.T-b.T), Hv=H.filter(h=>h.tipo==='v');
+  const tab=document.createElement('div'); tab.innerHTML=mbVTabela(w);
+  const fonte={padroes:'robôs de padrão',hfix:'horário fixo 100%',ambos:'padrões + horário fixo'}[C.fonte||'padroes'];
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Robô ${w}s — ${new Date().toLocaleDateString('pt-BR')}</title><style>
+    body{font-family:Arial,sans-serif;color:#111;margin:0;padding:18px;font-size:12px}h1{font-size:20px;margin:0 0 2px}h2{font-size:14px;margin:18px 0 6px;border-bottom:2px solid #7c3aed;padding-bottom:3px}
+    .sub{color:#666;margin-bottom:10px}.cards{display:flex;gap:8px;flex-wrap:wrap}.c{border:1px solid #ddd;border-radius:8px;padding:8px 12px;min-width:110px}.c b{display:block;font-size:17px}.c span{color:#666;font-size:10px;text-transform:uppercase}
+    table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #e5e5e5;padding:4px 6px;text-align:left}th{background:#f3f0ff}.g{color:#15803d;font-weight:700}.r{color:#b91c1c;font-weight:700}.mu{color:#777}
+    .ms-hl{display:grid;grid-template-columns:1fr 70px 70px 80px;border-bottom:1px solid #eee;padding:3px 0}.okc{color:#15803d}.ruimc{color:#b91c1c}.ms-nota{color:#666;font-size:11px}@page{margin:12mm}</style></head><body>
+    <h1>🎮 Mesa Play — Robô ${w}s</h1><div class="sub">${tudo?'Histórico completo':'Sessão atual'} · ${symNome(mesaSym())} · gerado em ${new Date().toLocaleString('pt-BR')}</div>
+    <div class="cards"><div class="c"><span>Acertos</span><b class="g">${ac}</b></div><div class="c"><span>Erros</span><b class="r">${er}</b></div><div class="c"><span>Resultado</span><b class="${pl>=0?'g':'r'}">${pl>=0?'+':''}$ ${pl.toFixed(2)}</b></div>
+      <div class="c"><span>Maior valor exposto</span><b>$ ${E.ex.toFixed(2)}</b><span>${E.exT?hmsOf(E.exT):''}</span></div><div class="c"><span>Maior queda do saldo</span><b>$ ${E.queda.toFixed(2)}</b></div><div class="c"><span>Maior aposta</span><b>$ ${E.maxA.toFixed(2)}</b></div></div>
+    <h2>Configuração</h2><div>Fonte: <b>${fonte}</b>${C.fonte!=='padroes'?` · horário 100% em ${NIVEL[mbHfNivel(w)]} · mín. ${C.hfMin} dias`:''} · Entrada $ ${(+C.val).toFixed(2)} · Gales: ${C.gale<0?'seguir o robô':C.gale?'G'+C.gale:'sem gale'} (${C.galeModo==='sinal'?'no próximo sinal':'nos jogos seguintes'}, ${{fator:'× '+C.fat,zero:'só recuperar',lucro:'recuperar + lucro'}[C.galeCalc||'fator']}) · Recuperação: ${+C.rec?C.rec+' green(s)'+(+C.recLucro?' + lucro':' sem lucro'):'desligada'}${+C.recMax?' · aposta máx $ '+C.recMax:''} · Stop win ${+C.sw||'—'} · Stop loss ${+C.sl||'—'}<br>Virtual: ${+V.vOn?mbVRegraTxt(w):'desligado'}</div>
+    <h2>Entradas reais (${L.length})</h2><table><tr><th>Data</th><th>Jogo</th><th>Cor</th><th>Sinal</th><th>Nível</th><th>Aposta</th><th>Resultado</th><th>Saldo</th></tr>
+    ${(()=>{ let acc=0; return L.map(x=>{ acc+=(+x.profit||0); const d=new Date((x.planT||x.T)*1000); return `<tr><td>${d.toLocaleDateString('pt-BR')}</td><td>${hmsOf(x.planT||x.T)}</td><td>${x.mcor?'ÍMPAR':'PAR'}</td><td>${esc((x.nome||'').replace(/^🤖 \d+s · /,''))}</td><td>${x.gk!=null?(x.gk?'G'+x.gk+'·sinal':'TS'):(NIVEL[x.nivel]||'G'+x.nivel)}</td><td>$ ${(+x.stake||0).toFixed(2)}</td><td class="${x.res==='green'?'g':x.res==='red'?'r':'mu'}">${x.res==='green'?'GREEN +'+(+x.profit).toFixed(2):x.res==='red'?'RED '+(+x.profit).toFixed(2):x.res}</td><td>${acc>=0?'+':''}${acc.toFixed(2)}</td></tr>`; }).join(''); })()}</table>
+    <h2>Sinais virtuais (${Hv.length})</h2>${Hv.length?`<table><tr><th>Data</th><th>Jogo</th><th>Cor</th><th>Sinal</th><th>Resultado</th></tr>${Hv.map(h=>`<tr><td>${new Date(h.T*1000).toLocaleDateString('pt-BR')}</td><td>${hmsOf(h.T)}</td><td>${h.alvo?'ÍMPAR':'PAR'}</td><td>${esc(h.nome||'')}</td><td class="${h.res==='W'?'g':'r'}">${h.res==='W'?'WIN virtual':'LOSS virtual'}</td></tr>`).join('')}</table>`:'<div class="mu">Nenhum.</div>'}
+    <h2>Como cada regra virtual teria se saído</h2>${tab.innerHTML}
+    <h2>Eventos (${s.log.length})</h2><table>${s.log.map(e=>`<tr><td style="width:80px">${new Date(e.t).toLocaleTimeString('pt-BR')}</td><td>${esc(e.txt)}</td></tr>`).join('')}</table>
+    <script>setTimeout(()=>window.print(),500)<\/script></body></html>`;
+  const win=window.open('','_blank','width=1000,height=800');
+  if(win&&!win.closed){ win.document.write(html); win.document.close(); return; }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'})); a.download=`robo_${w}s_${new Date().toISOString().slice(0,10)}.html`; a.click();
+  alert('Pop-up bloqueado: baixei o relatório como .html — abra e use Imprimir → Salvar como PDF.');
+}
+
+// ---------- tela ----------
+function mbEsqHtml(w){
+  const C=mbCfg(w), s=mbSt(w), ss=mbSess(w), inpt=(k,v,st)=>`<input type="number" step="${st}" value="${v}" onchange="mbSetCfg(${w},'${k}',+this.value)">`;
+  return `${mbPresetsHtml(w)}<div class="ms-box"><span class="ms-lb">VALOR DA ENTRADA</span><div class="ms-val">$ ${inpt('val',C.val,0.01)}</div></div>
+    <div class="ms-row2"><div class="ms-box"><span class="ms-lb">FATOR GALE</span><div class="ms-pm"><button onclick="mbSetCfg(${w},'fat',Math.max(1,Math.round((mbCfg(${w}).fat-0.1)*10)/10))">−</button><b>${(+C.fat).toFixed(1)}</b><button onclick="mbSetCfg(${w},'fat',Math.round((mbCfg(${w}).fat+0.1)*10)/10)">+</button></div></div>
+      <div class="ms-box"><span class="ms-lb">GALES</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'gale',+this.value)">${[[-1,'seguir o robô'],[0,'sem gale'],[1,'G1'],[2,'G2'],[3,'G3'],[4,'G4'],[5,'G5'],[6,'G6']].map(([v,t])=>`<option value="${v}" ${+C.gale===v?'selected':''}>${t}</option>`).join('')}</select></div></div>
+    <div class="ms-box"><span class="ms-lb">ONDE FAZ O GALE</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'galeModo',this.value)">
+      <option value="seguido" ${C.galeModo!=='sinal'?'selected':''}>nos jogos seguintes (${w}s depois)</option><option value="sinal" ${C.galeModo==='sinal'?'selected':''}>no próximo sinal (aposta maior)</option></select>
+      <span class="ms-lb" style="display:block;margin-top:8px">VALOR DO GALE</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'galeCalc',this.value)">${[['fator','× fator '+(+C.fat).toFixed(1)+' (lucra no gale)'],['zero','🛡 só recuperar (empata, expõe menos)'],['lucro','recuperar + lucro da entrada']].map(([v,t])=>`<option value="${v}" ${C.galeCalc===v?'selected':''}>${t}</option>`).join('')}</select>
+      <div class="ms-nota" style="margin-top:4px">${mbGaleTabela(w)}</div>
+      ${C.galeModo==='sinal'?`<div class="ms-nota" style="margin-top:4px">Agora no nível <b>${mbGaleK(w)?'G'+mbGaleK(w):'entrada'}</b> · próxima aposta <b>$ ${(Math.max(0.35,+C.val||0.35)*Math.pow(Math.max(1,+C.fat||2.2),mbGaleK(w))).toFixed(2)}</b></div>`:''}</div>
+    <div class="ms-box"><span class="ms-lb">🔁 DEPOIS DO RED, RECUPERAR EM</span>
+      <div class="ms-row2" style="margin-top:4px"><select class="ms-sel" onchange="mbSetCfg(${w},'rec',+this.value)">${[[0,'desligado'],[1,'1 green'],[2,'2 greens'],[3,'3 greens'],[4,'4 greens'],[5,'5 greens']].map(([v,t])=>`<option value="${v}" ${+C.rec===v?'selected':''}>${t}</option>`).join('')}</select>
+      <label class="ms-chk"><input type="checkbox" ${+C.recLucro?'checked':''} onchange="mbSetCfg(${w},'recLucro',this.checked?1:0)"> + lucro</label></div>
+      <div class="ms-row2" style="margin-top:4px"><label class="ms-chk">aposta máx $ <input type="number" min="0" step="1" value="${C.recMax}" style="width:60px" onchange="mbSetCfg(${w},'recMax',+this.value)"></label></div>
+      <div id="msRec" class="ms-nota" style="margin-top:4px"></div></div>
+    <div class="ms-row2"><div class="ms-box"><span class="ms-lb">STOP WIN $</span><div class="ms-val" style="font-size:18px">${inpt('sw',C.sw,1)}</div></div>
+      <div class="ms-box"><span class="ms-lb">STOP LOSS $</span><div class="ms-val" style="font-size:18px">${inpt('sl',C.sl,1)}</div></div></div>
+    <div class="ms-box"><span class="ms-lb">FONTE DOS SINAIS</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'fonte',this.value)">${[['padroes','🤖 robôs de padrão (aba '+w+'s)'],['hfix','🕒 horário fixo 100% da hora atual'],['ambos','os dois juntos']].map(([v,t])=>`<option value="${v}" ${C.fonte===v?'selected':''}>${t}</option>`).join('')}</select>
+      ${C.fonte!=='padroes'?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">mín. dias 100% <input type="number" min="2" value="${C.hfMin}" style="width:52px" onchange="mbSetCfg(${w},'hfMin',+this.value)"></label><label class="ms-chk">olhar <input type="number" min="5" value="${C.hfDias}" style="width:52px" onchange="mbSetCfg(${w},'hfDias',+this.value)"> dias</label></div>
+      <label class="ms-chk" style="margin-top:6px">horário 100% em <select class="ms-sel" onchange="mbSetCfg(${w},'hfLvl',+this.value)">${[[-1,'igual ao gale'],[0,'tiro seco'],[1,'até G1'],[2,'até G2']].map(([v,t])=>`<option value="${v}" ${+C.hfLvl===v?'selected':''}>${t}</option>`).join('')}</select> <span class="mu">(agora: ${NIVEL[mbHfNivel(w)]})</span></label>`:''}</div>
+    ${C.fonte==='hfix'?'':`<label class="ms-chk"><input type="checkbox" ${C.so100?'checked':''} onchange="mbSetCfg(${w},'so100',this.checked?1:0)"> só robôs 100% (nenhum red no banco)</label>
+    <label class="ms-chk"><input type="checkbox" ${C.soAuto?'checked':''} onchange="mbSetCfg(${w},'soAuto',this.checked?1:0)"> só robôs automáticos ♻</label>`}
+    <div class="ms-nota">0 no stop = sem stop. Gale ${C.gale<0?'até G2':C.gale?'até G'+C.gale:'desligado'} · ×${(+C.fat).toFixed(1)} · ${C.galeModo==='sinal'?'cada sinal é 1 entrada; depois de red a próxima entrada sobe de nível':'gale nos jogos logo depois da entrada'}</div>
+    ${mbVBoxHtml(w)}
+    <span class="ms-lb">SESSÃO DO ROBÔ ${w}s</span><div class="ms-sess" id="msSess"></div>
+    ${s.on?`<button class="ms-go stop" onclick="mbParar(${w})">⏹ PARAR ROBÔ ${w}s</button>`:`<button class="ms-go" onclick="mbIniciar(${w})">▶ INICIAR ROBÔ ${w}s</button>`}
+    ${s.parou&&!s.on?`<div class="ms-nota" style="color:#fca5a5">${s.parou}</div>`:''}`;
+}
+function mbCentroHtml(w){ return mbCentroBase(w)+mbVStatusHtml(w); }
+function mbCentroBase(w){
+  const s=mbSt(w), o=mbAberta(w), now=dmNow();
+  if(!s.on) return `<div class="ms-faixa">${s.parou?'⏹ '+s.parou+' · ':''}Robô ${w}s parado — ajuste e clique em INICIAR</div>`;
+  if(o){ const Tg=o.T+o.g*o.step; return `<div class="ms-faixa on">🤖 ${o.mcor?'ÍMPAR':'PAR'} · ${o.g?'GALE '+o.g:'ENTRADA'} no jogo ${hmsOf(Tg)} · ${o.estado==='aguardando'?`faltam ${Math.max(0,Math.ceil(Tg-now))}s`:o.estado}<div style="font-size:11px;font-weight:600;opacity:.85">${o.nome.replace(/^🤖 \d+s · /,'')}</div></div>`; }
+  const ult=s.log.at(-1);
+  return `<div class="ms-faixa ${ult&&Date.now()-ult.t<8000?(ult.tipo==='r'?'r':ult.tipo==='g'?'g':''):''}">${ult&&Date.now()-ult.t<8000?ult.txt:`🔎 Robô ${w}s ligado · aguardando sinal de ${mbRobos(w).length} robô(s)`}</div>`;
+}
+// tabela de valores de cada gale no modo escolhido (para o usuário ver a exposição)
+function mbGaleTabela(w){
+  const C=mbCfg(w), G=C.gale<0?2:+C.gale, base=Math.max(0.35,+C.val||0.35), r=mbRatio(w), fat=Math.max(1,+C.fat||2.2);
+  if(!G) return 'Sem gale.';
+  let perda=0; const L=[];
+  for(let g=0;g<=G;g++){ let st=g===0?base:C.galeCalc==='zero'?Math.ceil(perda/r*100)/100:C.galeCalc==='lucro'?(perda+base*r)/r:base*Math.pow(fat,g); st=Math.max(0.35,Math.round(st*100)/100);
+    L.push(`${g?'G'+g:'TS'} $ ${st.toFixed(2)} <span class="mu">(${(st*r-perda>=0?'+':'')}${(st*r-perda).toFixed(2)})</span>`); perda+=st; }
+  return L.join(' · ')+` · <b>perda máx $ ${perda.toFixed(2)}</b>`;
+}
+function mbRecTxt(w){
+  const C=mbCfg(w), R=mbRec(w);
+  if(!R.N) return 'Desligado: depois do red volta para a entrada normal.';
+  if(!R.on) return `Sem perda para recuperar · se der RED, o robô divide a perda em ${R.N} green${R.N>1?'s':''} (pagamento ${(R.r*100).toFixed(0)}%)`;
+  const cap=+C.recMax>0&&R.stake>+C.recMax;
+  return `<b style="color:#facc15">🔁 RECUPERANDO</b> · falta <b>$ ${R.falta.toFixed(2)}</b> · ${R.k} green${R.k>1?'s':''} restante${R.k>1?'s':''}<br>
+    próxima aposta <b>$ ${(cap?+C.recMax:R.stake).toFixed(2)}</b> = ($ ${R.falta.toFixed(2)} ÷ ${R.k}${+C.recLucro?` + lucro $ ${(R.alvo-R.falta/R.k).toFixed(2)}`:''}) ÷ ${R.r.toFixed(2)}${cap?' <span class="ruimc">· travada no máximo</span>':''}`;
+}
+function mbFilaHtml(w){
+  const C=mbCfg(w); let hf='';
+  if(C.fonte!=='padroes'){ mbHfLoad(w); const H=MBHF[w], L=mbHfSinais(w).sort((a,b)=>a.entryT-b.entryT);
+    hf=`<div class="ms-hl" style="grid-template-columns:1fr;color:#c4b5fd;font-weight:700">🕒 Horário fixo ${w}s · 100% até ${NIVEL[mbHfNivel(w)]} · mín. ${C.hfMin} dias${H&&H.dias!=null?` · banco com ${H.dias} dia(s)`:''}${H&&H.busy?' · calculando…':''} · ${L.length} horário(s) nos próximos 60 min</div>`+
+      (L.length?L.slice(0,40).map(x=>`<div class="ms-hl" style="grid-template-columns:90px 70px 1fr 110px"><span><b>${hmsOf(x.entryT/1000)}</b></span><span class="${x.alvo?'ruimc':'okc'}"><b>${x.alvo?'ÍMPAR':'PAR'}</b></span><span>${x.nome.replace('🕒 Horário fixo ','')}</span><span>${mbSt(w).taken.has(x.key)?'<span class="mu">passou</span>':`faltam ${uoTempo(x.entryT/1000-dmNow())}`}</span></div>`).join('')
+        :`<div class="mu" style="padding:8px">${H&&H.dias!=null&&H.dias<C.hfMin?`O banco de ${w}s só tem ${H.dias} dia(s) — baixe mais dias em 📥 Histórico R_100.`:'Nenhum horário fixo 100% nesta hora.'}</div>`); }
+  if(C.fonte==='hfix') return hf;
+  return hf+mbFilaPadroes(w);
+}
+function mbFilaPadroes(w){
+  const L=mbRobos(w), now=dmNow();
+  const todos=RBOTS.filter(rb=>rb.bank===mbBank(w)).length;
+  if(!L.length) return `<div class="mu" style="padding:8px">Nenhum robô ${mbCfg(w).so100?'100% ':''}no banco ${mbBank(w)} (${todos} robô(s) no total). Os robôs ♻ automáticos da aba ⏱ ${w} segundos aparecem aqui sozinhos.</div>`;
+  return L.map((x,i)=>{ const p=RB_PENDING.find(g=>!g.done&&g.rbId===x.rb.id); const pl=rbPlacar(x.rb.id);
+    return `<div class="ms-hl" style="grid-template-columns:26px 1fr 110px 70px 150px"><span class="mu">${i+1}</span><span>${rbName(x.rb)}</span><span>${x.st.done} casos · <b>${(x.st.rate*100).toFixed(0)}%</b></span><span><span class="okc">${pl.g}</span>/<span class="ruimc">${pl.r}</span></span><span>${p?`<span class="ms-pisca">entrada ${hmsOf(p.entryT/1000)}</span>`:'<span class="mu">aguardando</span>'}</span></div>`; }).join('');
+}
+function mbHistHtml(w){
+  const s=mbSt(w), tudo=cfg.mb_histTudo, Lall=tudo?DM.log.filter(x=>x.src==='mbot'&&x.mw===w):mbSess(w).L, E=Lall.slice().reverse(), ev=s.log.slice().reverse(), X=mbExpo(w), Xt=tudo?mbExpo(w,Lall):X;
+  const acA=Lall.filter(x=>x.res==='green').length, erA=Lall.filter(x=>x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0))).length, plA=Lall.reduce((a,x)=>a+(+x.profit||0),0);
+  return `<div class="ms-lb" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">ENTRADAS DO ROBÔ <span class="mu">(${E.length} · ${acA}✅ ${erA}❌ · <span class="${plA>=0?'okc':'ruimc'}">${plA>=0?'+':''}$ ${plA.toFixed(2)}</span>)</span>
+      <span style="margin-left:auto;display:flex;gap:6px"><button class="mb-mini ${tudo?'':'on'}" onclick="cfg.mb_histTudo=0;saveCfg();mesaRender(true)">sessão</button><button class="mb-mini ${tudo?'on':''}" onclick="cfg.mb_histTudo=1;saveCfg();mesaRender(true)">histórico completo</button><button class="mb-mini pdf" onclick="mbPdf(${w})">📄 baixar PDF</button></span></div>
+    <div class="ms-hist" style="max-height:${tudo?420:220}px">${E.length?E.map(x=>`<div class="ms-hl"><span>${hmsOf(x.planT||x.T)}</span><span>${(x.mcor?'ÍMPAR · ':'PAR · ')+x.nome.replace(/^🤖 \d+s · /,'')}</span><span>${x.gk!=null?(x.gk?'G'+x.gk+'·sinal':'TS'):(NIVEL[x.nivel]||'G'+x.nivel)}</span><span>${x.stake?'$ '+(+x.stake).toFixed(2):'—'}</span><span class="${x.res==='green'?'okc':x.res==='red'?'ruimc':'mu'}">${x.res==='green'?'✅ +'+(+x.profit).toFixed(2):x.res==='red'?'❌ '+(+x.profit).toFixed(2):x.res}</span></div>`).join(''):'<div class="mu" style="padding:8px">Nenhuma entrada ainda.</div>'}</div>
+    <div class="ms-lb" style="margin-top:8px">EVENTOS</div><div class="ms-hist" style="max-height:200px">${ev.length?ev.map(e=>`<div class="ms-hl" style="grid-template-columns:70px 1fr"><span>${new Date(e.t).toLocaleTimeString('pt-BR')}</span><span class="${e.tipo==='g'?'okc':e.tipo==='r'?'ruimc':''}">${e.txt}</span></div>`).join(''):'<div class="mu" style="padding:8px">—</div>'}</div>
+    <div class="mb-expo"><div><span>📉 MAIOR VALOR EXPOSTO</span><b>$ ${Xt.ex.toFixed(2)}</b><i>${Xt.exT?'às '+hmsOf(Xt.exT):'—'}</i></div><div><span>MAIOR QUEDA DO SALDO</span><b>$ ${Xt.queda.toFixed(2)}</b><i>do topo até o fundo</i></div><div><span>MAIOR APOSTA</span><b>$ ${Xt.maxA.toFixed(2)}</b><i>${tudo?'histórico completo':'nesta sessão'}</i></div></div>
+    <div class="ms-lb" style="margin-top:10px">👻 COMO CADA REGRA VIRTUAL TERIA SE SAÍDO · ${w}s</div><div class="ms-hist" style="max-height:330px;padding:4px 0">${mbVTabela(w)}</div>`;
+}
+
+
 // ---------- render ----------
 const TAB_ORDER = ['hist', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
@@ -9561,7 +10662,7 @@ function srobScanRed(bank, nivel) {
       const mh = modos.find(m => SROB_RMODOS[m].hp && hpRetomada(o, SROB_RMODOS[m].hp, retMin));
       if (mh) { const run = hpRetomada(o, SROB_RMODOS[mh].hp, retMin); out.push({ rm: mh, kind: 'Hora', off: r.off, alvo: r.alvo, skip: 0, done: run, sg: o.pos[0], g1: o.pos[1], g2: o.pos[2], red, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: run, ts: o.pos[0], bank, modo: 'red' }); continue; }
       if (!srobFamOn('Hora') || o.n < minH || red < 1 || red > 2) continue;
-      const tail = o.hist.map(z => z.r), m = modos.find(m => srobCaudaOk(red, tail.slice(-SROB_RMODOS[m].cauda.length), m)); if (m) out.push({ rm: m, kind: 'Hora', off: r.off, alvo: r.alvo, skip: 0, done: o.n, sg: o.pos[0], g1: o.pos[1], g2: o.pos[2], red, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: o.n, ts: o.pos[0], bank, modo: 'red' }); }
+      const tail = o.hist.map(z => z.r), m = modos.find(m => !SROB_RMODOS[m].hp && srobCaudaOk(red, tail.slice(-SROB_RMODOS[m].cauda.length), m)); if (m) out.push({ rm: m, kind: 'Hora', off: r.off, alvo: r.alvo, skip: 0, done: o.n, sg: o.pos[0], g1: o.pos[1], g2: o.pos[2], red, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: o.n, ts: o.pos[0], bank, modo: 'red' }); }
     if (false) for (const r of hfScan(G, 'all')) { const o = [r.ts, r.g1, r.g2][nivel]; const ult = o.hist && o.hist.at(-1); // regra: vindo de red nunca é horário fixo
       if (o.n >= minD && o.n - o.ok === 1 && ult && ult.r === 0) { const x = { kind: 'Dia', off: r.off, alvo: r.alvo, skip: 0, done: o.n, sg: o.levels.ts, g1: o.levels.g1, g2: o.levels.g2, red: 1, test: { done: 0, sg: 0, g1: 0, g2: 0, red: 0 }, tot: o.n, ts: o.levels.ts, bank, modo: 'red' }; if (srobNextT(x, agora) - agora <= 3600) out.push(x); } }
   }
@@ -9826,6 +10927,15 @@ function afterUpdate(novo) {
   srLoadStore();
   if (SRB.some(r => r.on)) { cfg.sr_sym = SRB.find(r => r.on).sym; setTimeout(() => srCarregar(true), 4000); }
   srobLoad(); setTimeout(srobBtn, 1800);
+  if (MESA_TAB) {
+    document.title = '🎮 Mesa Play';
+    for (const f of ['rbPopup','srPopup','uoPopup','cfPopup','ilPopup','il2Abrir','srobOpen']) if (typeof window[f] === 'function') window[f] = () => {};
+    window.cf2PopMostra = () => {};
+    mesaAbrir();
+    if (dmToken() || dmOa2()) setTimeout(() => { if (!DM.ok) dmConectar(); }, 2500);
+  }
+  // as configurações da Mesa e da conta demo andam juntas entre a aba principal e a aba da Mesa
+  window.addEventListener('storage', e => { if (e.key !== 'dpi_cfg' || !e.newValue) return; try { const n = JSON.parse(e.newValue); for (const k in n) if (/^(mesa_|mbot|dm_)/.test(k)) cfg[k] = n[k]; } catch (_) {} });
   if (cfg.autoOn) { buscar(); clearInterval(S.timer); S.timer = setInterval(buscar, cfg.auto * 1000); }
   if (cfg.derivFallback) connectDerivFallback();
   // relógio dos robôs: abre o popup na hora certa e confere green/red mesmo sem dado novo
