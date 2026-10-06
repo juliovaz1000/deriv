@@ -367,7 +367,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .ms-sel{background:var(--mg);border:1px solid var(--mb);color:#ece9f6;border-radius:9px;padding:6px 10px}
 .ms-saldo{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:4px 12px}.ms-saldo span{font-size:9px;color:#8b84a3;letter-spacing:.6px}.ms-saldo b{font-size:16px}
 .ms-x,.ms-con{background:var(--mg);border:1px solid var(--mb);color:#ece9f6;border-radius:9px;padding:7px 12px;cursor:pointer;font-weight:700}.ms-con{background:linear-gradient(90deg,var(--mr2),var(--mr));border:0}
-.ms-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.ms-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
 .ms-tab{background:var(--mg);border:1px solid var(--mb);border-radius:12px;padding:10px 12px;color:#ece9f6;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px}
 .ms-tab>b{font-size:15px;letter-spacing:1px}.ms-tab.on{border-color:var(--mr2);background:linear-gradient(135deg,rgba(124,58,237,.35),var(--mg));box-shadow:0 0 18px rgba(168,85,247,.25)}
 .ms-tl{font-size:12px;color:#a49dbb}.ms-tl em{font-style:normal;display:inline-flex;width:20px;height:20px;border-radius:5px;align-items:center;justify-content:center;font-weight:800;color:#fff;margin-right:4px}.ms-tl em.par{background:var(--mr)}.ms-tl em.imp{background:#3a3648}
@@ -396,6 +396,11 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .ms-hist{max-height:260px;overflow:auto;background:var(--mg);border-radius:11px}.ms-hl{display:grid;grid-template-columns:80px 1fr 60px 80px 90px;gap:6px;padding:7px 10px;border-bottom:1px solid var(--mb);font-size:13px}
 .okc{color:#4ade80}.ruimc{color:#f87171}
 #mesaBtn{border-color:#a855f7;color:#d8b4fe;font-weight:800}
+.ms-modos{display:flex;gap:4px;background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:3px}.ms-modos button{background:transparent;border:0;color:#a49dbb;border-radius:8px;padding:7px 12px;font-weight:800;cursor:pointer}.ms-modos button.on{background:linear-gradient(90deg,var(--mr2),var(--mr));color:#fff}
+.ms-relogio{display:flex;align-items:center;gap:6px;background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:6px 12px;font-size:18px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.ms-chk{display:flex;align-items:center;gap:6px;font-size:12px;color:#cfc9e2}
+.ms-go{height:64px;border-radius:12px;font-size:19px;font-weight:900;letter-spacing:.5px;color:#fff;border:0;cursor:pointer;background:linear-gradient(160deg,#22c55e,#15803d);margin-top:4px}.ms-go.stop{background:linear-gradient(160deg,#ef4444,#991b1b)}
+.ms-strip{justify-content:flex-start!important}
 </style>
 </head>
 <body>
@@ -497,7 +502,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.62 · 05/10/2026 · 🎮 Mesa Play: operar PAR/ÍMPAR na DEMO com 10s, 20s e 30s separados';
+const VERSAO='v3.63 · 05/10/2026 · 🎮 Mesa Play: aba 🤖 Robôs (entra sozinho nos robôs 100%), 5s, relógio e fita com o mais novo em cima';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8585,7 +8590,7 @@ async function dmCalibrar(){
   dmSet(`🎯 Contrato de teste agendado para o tick das ${hmsOf(T)} (${sym}, 0,35). Veja o resultado na tabela.`);
 }
 function dmAddLog(x){
-  DM.log.push({t:Date.now(),nome:x.nome,src:x.src,sym:x.sym,ct:dmCtLabel(x),T:x.T,nivel:x.nivel??0,stake:x.stake,profit:x.profit,res:x.res,obs:x.obs||'',cid:x.cid||'',exitT:x.exitT||0,exitQ:x.exitQ??'',entryT:x.entryT||0,planT:x.planT||x.T,alvo:x.alvo||0,pt:x.pt||0,certo:x.certo,bateu:x.bateu,dJogo:x.dJogo,dSaida:x.dSaida,bal:DM.bal,mw:x.src==='mesa'?x.step:undefined,mmax:x.maxN,mcor:x.mcor});
+  DM.log.push({t:Date.now(),nome:x.nome,src:x.src,sym:x.sym,ct:dmCtLabel(x),T:x.T,nivel:x.nivel??0,stake:x.stake,profit:x.profit,res:x.res,obs:x.obs||'',cid:x.cid||'',exitT:x.exitT||0,exitQ:x.exitQ??'',entryT:x.entryT||0,planT:x.planT||x.T,alvo:x.alvo||0,pt:x.pt||0,certo:x.certo,bateu:x.bateu,dJogo:x.dJogo,dSaida:x.dSaida,bal:DM.bal,mw:(x.src==='mesa'||x.src==='mbot')?x.step:undefined,mmax:x.maxN,mcor:x.mcor});
   dmSaveLog(); if(S.tab==='demo') dmLive();
 }
 // ganchos chamados pelos robôs quando um sinal nasce
@@ -9771,7 +9776,7 @@ function _iaInjetaBadge(){
 // Cada tempo tem o seu próprio banco, cronômetro, histórico, sessão e entradas. A ordem vai pelo motor da
 // conta demo (que acerta o tick do segundo do jogo) e o gale entra nos jogos seguintes do mesmo tempo.
 // =====================================================================================
-const MESA_TEMPOS=[10,20,30];
+const MESA_TEMPOS=[5,10,20,30];
 let MESA={open:false,timer:null,ini:Date.now(),lastFull:''};
 function mesaW(){ const w=+cfg.mesa_w||20; return MESA_TEMPOS.includes(w)?w:20; }
 function mesaSym(){ const L=d5Syms(), s=cfg.mesa_sym||curSym(); return L.includes(s)?s:L[0]; }
@@ -9798,16 +9803,17 @@ function mesaSess(w){
   return {ac,er,pl:L.reduce((s,x)=>s+(+x.profit||0),0)};
 }
 function mesaBalls(W,n,grande){
-  return W.slice(-n).map((x,i,a)=>{ const ult=i===a.length-1; return `<div class="ms-b ${x.p?'imp':'par'} ${grande&&ult?'ult':''} ${grande?'g':''}" title="${hmsOf(x.t/1000)}"><span>${x.d}</span>${grande?`<i>${hmsOf(x.t/1000).slice(3)}</i>`:''}</div>`; }).join('');
+  const L=grande?W.slice(-n):W.slice(-n).reverse();
+  return L.map((x,i,a)=>{ const ult=grande&&i===a.length-1; return `<div class="ms-b ${x.p?'imp':'par'} ${grande&&ult?'ult':''} ${grande?'g':''}" title="${hmsOf(x.t/1000)}"><span>${x.d}</span>${grande?`<i>${hmsOf(x.t/1000).slice(3)}</i>`:''}</div>`; }).join('');
 }
 function mesaTabsHtml(){
   const sym=mesaSym(), now=dmNow();
   return MESA_TEMPOS.map(w=>{
     const W=LIVE[d5BankName(w,sym)]||[], u=W.at(-1), falta=Math.ceil(Math.ceil(now/w)*w-now), s=mesaSess(w);
-    const ab=DM.orders.some(o=>o.src==='mesa'&&o.step===w&&['aguardando','comprando','em jogo'].includes(o.estado));
+    const rob=cfg.mesa_modo==='robo', ab=DM.orders.some(o=>o.src===(rob?'mbot':'mesa')&&o.step===w&&['aguardando','comprando','em jogo'].includes(o.estado)), s2=rob?mbSess(w):s;
     return `<button class="ms-tab ${mesaW()===w?'on':''}" onclick="mesaSet('mesa_w',${w})">
       <b>${w} SEGUNDOS</b><span class="ms-tl">${u?`<em class="${u.p?'imp':'par'}">${u.d}</em>`:''} próximo em <b>${falta}s</b>${ab?' · <span class="ms-pisca">● entrada</span>':''}</span>
-      <span class="ms-tl">${s.ac}✅ ${s.er}❌ · <b class="${s.pl>=0?'okc':'ruimc'}">${s.pl>=0?'+':''}${s.pl.toFixed(2)}</b></span></button>`;
+      <span class="ms-tl">${rob?(mbSt(w).on?'<b class="okc">🤖 ligado</b> · ':'🤖 parado · '):''}${s2.ac}✅ ${s2.er}❌ · <b class="${s2.pl>=0?'okc':'ruimc'}">${s2.pl>=0?'+':''}${s2.pl.toFixed(2)}</b></span></button>`;
   }).join('');
 }
 function mesaCentroHtml(){
@@ -9832,17 +9838,7 @@ function mesaHistHtml(){
   if(!L.length) return '<div class="mu" style="padding:8px">Nenhuma entrada neste tempo ainda.</div>';
   return L.map(x=>`<div class="ms-hl"><span>${hmsOf(x.planT||x.T)}</span><span>${x.nome.replace(/^🎮 Mesa \d+s /,'')}</span><span>${NIVEL[x.nivel]||'G'+x.nivel}</span><span>${x.stake?'$ '+(+x.stake).toFixed(2):'—'}</span><span class="${x.res==='green'?'okc':x.res==='red'?'ruimc':'mu'}">${x.res==='green'?'✅ +'+(+x.profit).toFixed(2):x.res==='red'?'❌ '+(+x.profit).toFixed(2):x.res}</span></div>`).join('');
 }
-function mesaRender(full){
-  const p=$('#mesaPop'); if(!p||!MESA.open) return;
-  if(full||!$('#msCentro')){
-    const qv=[0.35,1,2,5,10,25,50,100];
-    p.innerHTML=`<div class="ms">
-      <div class="ms-top"><div style="font-size:22px">💵</div><div class="ms-logo">MESA PLAY <small>Deriv · DEMO</small></div>
-        <select class="ms-sel" onchange="mesaSet('mesa_sym',this.value)">${d5Syms().map(s=>`<option value="${s}" ${mesaSym()===s?'selected':''}>${symNome(s)}</option>`).join('')}</select>
-        <div class="ms-saldo" id="msSaldo"></div><button class="ms-x" onclick="mesaFechar()">✕ sair</button></div>
-      <div class="ms-tabs" id="msTabs">${mesaTabsHtml()}</div>
-      <div class="ms-corpo">
-        <div class="ms-esq">
+function mesaEsqManual(qv){ return `
           <div class="ms-box"><span class="ms-lb">VALOR</span><div class="ms-val">$ <input type="number" step="0.01" min="0.35" value="${mesaStake()}" onchange="mesaSet('mesa_val',+this.value)"></div></div>
           <div class="ms-row2"><div class="ms-box"><span class="ms-lb">FATOR GALE</span><div class="ms-pm"><button onclick="mesaSet('mesa_fat',Math.max(1,mesaFator()-0.1))">−</button><b>${mesaFator().toFixed(1)}</b><button onclick="mesaSet('mesa_fat',mesaFator()+0.1)">+</button></div></div>
             <div class="ms-box"><span class="ms-lb">GALES</span><div class="ms-pm"><button onclick="mesaSet('mesa_gale',Math.max(0,mesaGale()-1))">−</button><b>${mesaGale()?'G'+mesaGale():'sem'}</b><button onclick="mesaSet('mesa_gale',Math.min(6,mesaGale()+1))">+</button></div></div></div>
@@ -9851,23 +9847,140 @@ function mesaRender(full){
           <div class="ms-nota">Gale: ${[...Array(mesaGale()+1).keys()].map(g=>`${g?'G'+g:'entrada'} $ ${(mesaStake()*Math.pow(mesaFator(),g)).toFixed(2)}`).join(' · ')}</div>
           <span class="ms-lb">SUA SESSÃO · ${mesaW()}s</span><div class="ms-sess" id="msSess"></div>
           <div class="ms-bt"><button class="par" onclick="mesaEntrar(0)">PAR</button><button class="imp" onclick="mesaEntrar(1)">ÍMPAR</button></div>
-        </div>
+`; }
+function mesaRender(full){
+  const p=$('#mesaPop'); if(!p||!MESA.open) return;
+  if(full||!$('#msCentro')){
+    const qv=[0.35,1,2,5,10,25,50,100];
+    p.innerHTML=`<div class="ms">
+      <div class="ms-top"><div style="font-size:22px">💵</div><div class="ms-logo">MESA PLAY <small>Deriv · DEMO</small></div>
+        <select class="ms-sel" onchange="mesaSet('mesa_sym',this.value)">${d5Syms().map(s=>`<option value="${s}" ${mesaSym()===s?'selected':''}>${symNome(s)}</option>`).join('')}</select>
+        <div class="ms-modos"><button class="${cfg.mesa_modo!=='robo'?'on':''}" onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button class="${cfg.mesa_modo==='robo'?'on':''}" onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS${MESA_TEMPOS.some(w=>mbSt(w).on)?' ●':''}</button></div>
+        <div class="ms-relogio" id="msClock"></div>
+        <div class="ms-saldo" id="msSaldo"></div><button class="ms-x" onclick="mesaFechar()">✕ sair</button></div>
+      <div class="ms-tabs" id="msTabs">${mesaTabsHtml()}</div>
+      <div class="ms-corpo">
+        <div class="ms-esq">${cfg.mesa_modo==='robo'?mbEsqHtml(mesaW()):mesaEsqManual(qv)}</div>
         <div class="ms-dir"><div id="msCentro"></div>
           <div class="ms-strip" id="msStrip"></div>
-          <div class="ms-lb" style="margin-top:10px">MINHAS ENTRADAS · ${mesaW()}s</div><div class="ms-hist" id="msHist"></div></div>
+          ${cfg.mesa_modo==='robo'?`<div class="ms-lb" style="margin-top:10px">ROBÔS DE ${mesaW()}s NA ORDEM <span class="mu">(se 2 pedem o mesmo jogo, vale o de cima)</span></div><div class="ms-hist" id="msFila" style="max-height:230px"></div><div id="msHist"></div>`
+            :`<div class="ms-lb" style="margin-top:10px">MINHAS ENTRADAS · ${mesaW()}s</div><div class="ms-hist" id="msHist"></div>`}</div>
       </div></div>`;
   }
   const w=mesaW(), W=LIVE[d5BankName(w,mesaSym())]||[];
   const k=[w,W.at(-1)?.t,DM.log.length,DM.orders.map(o=>o.estado+o.g).join(),Math.floor(dmNow())].join('|');
   $('#msSaldo').innerHTML=DM.ok&&DM.virt?`<span>SALDO DEMO</span><b>$ ${DM.bal!=null?DM.bal.toFixed(2):'—'}</b>`:`<button class="ms-con" onclick="mesaFechar();S.tab='demo';renderTab()">CONECTAR DEMO</button>`;
-  if(k===MESA.lastFull) return; MESA.lastFull=k;
+  const ck=$('#msClock'); if(ck){ const d=new Date(); ck.innerHTML=`<span>🕒</span>${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
+  const rob=cfg.mesa_modo==='robo';
+  const k2=k+'|'+(rob?mbSt(w).log.length+'|'+RB_PENDING.length+'|'+mbSt(w).on:'');
+  if(k2===MESA.lastFull) return; MESA.lastFull=k2;
   $('#msTabs').innerHTML=mesaTabsHtml();
-  $('#msCentro').innerHTML=mesaCentroHtml();
-  $('#msStrip').innerHTML=mesaBalls(W,30,false);
-  $('#msSess').innerHTML=mesaSessHtml();
-  $('#msHist').innerHTML=mesaHistHtml();
+  $('#msCentro').innerHTML=rob?mbCentroHtml(w):mesaCentroHtml();
+  $('#msStrip').innerHTML=mesaBalls(W,40,false);
+  if(rob){ const ss=mbSess(w); $('#msSess').innerHTML=`<div><b>${ss.ac}</b><span>ACERTOS</span></div><div><b>${ss.er}</b><span>ERROS</span></div><div><b class="${ss.pl>=0?'okc':'ruimc'}">${ss.pl>=0?'+':''}$ ${ss.pl.toFixed(2)}</b><span>RESULTADO</span></div>`; $('#msFila').innerHTML=mbFilaHtml(w); $('#msHist').innerHTML=mbHistHtml(w); }
+  else { $('#msSess').innerHTML=mesaSessHtml(); $('#msHist').innerHTML=mesaHistHtml(); }
 }
-document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if(e.key==='p'||e.key==='P') mesaEntrar(0); if(e.key==='i'||e.key==='I') mesaEntrar(1); if(e.key==='Escape') mesaFechar(); if(['1','2','3'].includes(e.key)) mesaSet('mesa_w',MESA_TEMPOS[+e.key-1]); });
+document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if(e.key==='p'||e.key==='P') mesaEntrar(0); if(e.key==='i'||e.key==='I') mesaEntrar(1); if(e.key==='Escape') mesaFechar(); if(['1','2','3','4'].includes(e.key)) mesaSet('mesa_w',MESA_TEMPOS[+e.key-1]); });
+// =====================================================================================
+// 🤖 ROBÔS DA MESA PLAY — entra sozinho na conta DEMO seguindo os robôs 100% de cada tempo (5s/10s/20s/30s)
+// Regras: 1 entrada por vez (enquanto a entrada e os gales não terminam, ignora novos sinais);
+// se dois robôs pedem o mesmo jogo, entra só no primeiro da lista; se pedem PAR e ÍMPAR no mesmo jogo, aborta.
+// A decisão é tomada ~3s antes do jogo, quando todos os sinais daquele jogo já apareceram.
+// =====================================================================================
+const MB_DEF={val:0.35,fat:2.2,gale:-1,sw:0,sl:0,so100:1,soAuto:0};
+let MB={};   // estado por tempo: {on,ini,taken:Set,log:[],stats:Map}
+function mbSt(w){ return MB[w]||(MB[w]={on:false,ini:0,taken:new Set(),feitos:new Set(),log:[],stats:new Map(),parou:''}); }
+function mbCfg(w){ return {...MB_DEF,...((cfg.mbot||{})[w]||{})}; }
+function mbSetCfg(w,k,v){ cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w]={...mbCfg(w),[k]:v}; saveCfg(); mesaRender(true); }
+function mbLog(w,txt,tipo='evt'){ const s=mbSt(w); s.log.push({t:Date.now(),txt,tipo}); if(s.log.length>200) s.log.splice(0,s.log.length-200); }
+function mbBank(w){ return d5BankName(w,mesaSym()); }
+// taxa do robô no banco (com cache por jogo novo)
+function mbRate(rb,W){
+  const s=mbSt(rbStep(rb)), k=rb.id+'|'+(W.at(-1)?.t||0), c=s.stats.get(rb.id);
+  if(c&&c.k===k) return c.st;
+  const st=rbCurrentStats(rb,W); s.stats.set(rb.id,{k,st}); return st;
+}
+function mbRobos(w){
+  const bank=mbBank(w), C=mbCfg(w), W=liveW(bank)||[];
+  return RBOTS.filter(rb=>rb.bank===bank&&rb.on&&!rb.demo&&(!C.soAuto||rb.auto)).map(rb=>({rb,st:mbRate(rb,W)}))
+    .filter(x=>!C.so100||(x.st.done>0&&x.st.red===0));
+}
+function mbAberta(w){ return DM.orders.find(o=>o.src==='mbot'&&o.step===w&&['aguardando','comprando','em jogo'].includes(o.estado)); }
+function mbSess(w){
+  const s=mbSt(w), L=DM.log.filter(x=>x.src==='mbot'&&x.mw===w&&x.t>=(s.ini||MESA.ini));
+  return {ac:L.filter(x=>x.res==='green').length,er:L.filter(x=>x.res==='red'&&x.nivel>=(x.mmax??0)).length,pl:L.reduce((a,x)=>a+(+x.profit||0),0),L};
+}
+function mbIniciar(w){
+  if(!DM.ok||!DM.virt){ if(confirm('A conta DEMO não está conectada. Abrir a aba 💼 Conta Demo?')){ mesaFechar(); S.tab='demo'; renderTab(); } return; }
+  const s=mbSt(w); s.on=true; s.ini=Date.now(); s.parou=''; s.taken=new Set(); s.feitos=new Set();
+  mbLog(w,`▶ Robô ${w}s iniciado · ${mbRobos(w).length} robô(s)${mbCfg(w).so100?' 100%':''} no banco ${mbBank(w)}`,'evt'); mesaRender(true);
+}
+function mbParar(w,motivo){ const s=mbSt(w); if(!s.on) return; s.on=false; s.parou=motivo||'parado por você'; mbLog(w,`⏹ Robô ${w}s parou: ${s.parou}`,'r'); try{ beep(); }catch(e){} if(MESA.open) mesaRender(true); }
+function mbTick(){
+  const now=dmNow();
+  for(const w of MESA_TEMPOS){
+    const s=mbSt(w); if(!s.on) continue;
+    const C=mbCfg(w), ss=mbSess(w);
+    if(C.sw>0&&ss.pl>=C.sw){ mbParar(w,`🏁 stop win (+${ss.pl.toFixed(2)})`); continue; }
+    if(C.sl>0&&ss.pl<=-C.sl){ mbParar(w,`🛑 stop loss (${ss.pl.toFixed(2)})`); continue; }
+    if(!DM.ok&&!DM.querOn){ mbParar(w,'conta demo desconectada'); continue; }
+    const bank=mbBank(w), elig=new Map(mbRobos(w).map((x,i)=>[x.rb.id,{...x,ord:RBOTS.indexOf(x.rb)}]));
+    // sinais vivos do banco deste tempo, por jogo de entrada
+    const sigs=RB_PENDING.filter(g=>!g.done&&g.bank===bank&&!s.taken.has(g.key)&&g.entryT/1000-now>1.6);
+    if(!sigs.length) continue;
+    const T=Math.min(...sigs.map(g=>g.entryT));
+    if(T/1000-now>3.4) continue;                       // ainda não é hora de decidir este jogo
+    const doJogo=sigs.filter(g=>g.entryT===T);
+    doJogo.forEach(g=>s.taken.add(g.key));
+    const ok=doJogo.filter(g=>elig.has(g.rbId)).sort((a,b)=>elig.get(a.rbId).ord-elig.get(b.rbId).ord);
+    if(!ok.length) continue;
+    const hh=hmsOf(T/1000);
+    if(mbAberta(w)){ mbLog(w,`⏭ ${hh}: ${ok.length} sinal(is) ignorado(s) — já tem entrada aberta`,'evt'); continue; }
+    const cores=new Set(ok.map(g=>g.alvo));
+    if(cores.size>1){ mbLog(w,`⛔ ${hh}: ABORTADO — PAR e ÍMPAR no mesmo jogo (${ok.map(g=>{ const r=RBOTS.find(x=>x.id===g.rbId); return (g.alvo?'Í':'P')+' '+rbGat(r); }).join(' · ')})`,'r'); continue; }
+    const g=ok[0], rb=RBOTS.find(x=>x.id===g.rbId), gale=C.gale<0?rbNivel(rb):C.gale;
+    dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${rbName(rb)}`,sym:mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.max(0.35,+C.val||0.35),fator:Math.max(1,+C.fat||2.2),mcor:g.alvo});
+    s.feitos.add(g.key);
+    mbLog(w,`🎯 ${hh}: ENTRADA ${g.alvo?'ÍMPAR':'PAR'} · ${rbName(rb)}${ok.length>1?` (outros ${ok.length-1} da mesma cor ficaram de fora)`:''}`,'g');
+    try{ beep(); }catch(e){}
+  }
+}
+setInterval(()=>{ try{ mbTick(); }catch(e){ console.warn('robô mesa',e); } },300);
+// ---------- tela ----------
+function mbEsqHtml(w){
+  const C=mbCfg(w), s=mbSt(w), ss=mbSess(w), inpt=(k,v,st)=>`<input type="number" step="${st}" value="${v}" onchange="mbSetCfg(${w},'${k}',+this.value)">`;
+  return `<div class="ms-box"><span class="ms-lb">VALOR DA ENTRADA</span><div class="ms-val">$ ${inpt('val',C.val,0.01)}</div></div>
+    <div class="ms-row2"><div class="ms-box"><span class="ms-lb">FATOR GALE</span><div class="ms-pm"><button onclick="mbSetCfg(${w},'fat',Math.max(1,Math.round((mbCfg(${w}).fat-0.1)*10)/10))">−</button><b>${(+C.fat).toFixed(1)}</b><button onclick="mbSetCfg(${w},'fat',Math.round((mbCfg(${w}).fat+0.1)*10)/10)">+</button></div></div>
+      <div class="ms-box"><span class="ms-lb">GALES</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'gale',+this.value)">${[[-1,'seguir o robô'],[0,'sem gale'],[1,'G1'],[2,'G2'],[3,'G3'],[4,'G4'],[5,'G5'],[6,'G6']].map(([v,t])=>`<option value="${v}" ${+C.gale===v?'selected':''}>${t}</option>`).join('')}</select></div></div>
+    <div class="ms-row2"><div class="ms-box"><span class="ms-lb">STOP WIN $</span><div class="ms-val" style="font-size:18px">${inpt('sw',C.sw,1)}</div></div>
+      <div class="ms-box"><span class="ms-lb">STOP LOSS $</span><div class="ms-val" style="font-size:18px">${inpt('sl',C.sl,1)}</div></div></div>
+    <label class="ms-chk"><input type="checkbox" ${C.so100?'checked':''} onchange="mbSetCfg(${w},'so100',this.checked?1:0)"> só robôs 100% (nenhum red no banco)</label>
+    <label class="ms-chk"><input type="checkbox" ${C.soAuto?'checked':''} onchange="mbSetCfg(${w},'soAuto',this.checked?1:0)"> só robôs automáticos ♻</label>
+    <div class="ms-nota">0 no stop = sem stop. Gale ${C.gale<0?'igual ao do robô (até G2)':C.gale?'até G'+C.gale:'desligado'} · ×${(+C.fat).toFixed(1)}</div>
+    <span class="ms-lb">SESSÃO DO ROBÔ ${w}s</span><div class="ms-sess" id="msSess"></div>
+    ${s.on?`<button class="ms-go stop" onclick="mbParar(${w})">⏹ PARAR ROBÔ ${w}s</button>`:`<button class="ms-go" onclick="mbIniciar(${w})">▶ INICIAR ROBÔ ${w}s</button>`}
+    ${s.parou&&!s.on?`<div class="ms-nota" style="color:#fca5a5">${s.parou}</div>`:''}`;
+}
+function mbCentroHtml(w){
+  const s=mbSt(w), o=mbAberta(w), now=dmNow();
+  if(!s.on) return `<div class="ms-faixa">${s.parou?'⏹ '+s.parou+' · ':''}Robô ${w}s parado — ajuste e clique em INICIAR</div>`;
+  if(o){ const Tg=o.T+o.g*o.step; return `<div class="ms-faixa on">🤖 ${o.mcor?'ÍMPAR':'PAR'} · ${o.g?'GALE '+o.g:'ENTRADA'} no jogo ${hmsOf(Tg)} · ${o.estado==='aguardando'?`faltam ${Math.max(0,Math.ceil(Tg-now))}s`:o.estado}<div style="font-size:11px;font-weight:600;opacity:.85">${o.nome.replace(/^🤖 \d+s · /,'')}</div></div>`; }
+  const ult=s.log.at(-1);
+  return `<div class="ms-faixa ${ult&&Date.now()-ult.t<8000?(ult.tipo==='r'?'r':ult.tipo==='g'?'g':''):''}">${ult&&Date.now()-ult.t<8000?ult.txt:`🔎 Robô ${w}s ligado · aguardando sinal de ${mbRobos(w).length} robô(s)`}</div>`;
+}
+function mbFilaHtml(w){
+  const L=mbRobos(w), now=dmNow();
+  const todos=RBOTS.filter(rb=>rb.bank===mbBank(w)).length;
+  if(!L.length) return `<div class="mu" style="padding:8px">Nenhum robô ${mbCfg(w).so100?'100% ':''}no banco ${mbBank(w)} (${todos} robô(s) no total). Os robôs ♻ automáticos da aba ⏱ ${w} segundos aparecem aqui sozinhos.</div>`;
+  return L.map((x,i)=>{ const p=RB_PENDING.find(g=>!g.done&&g.rbId===x.rb.id); const pl=rbPlacar(x.rb.id);
+    return `<div class="ms-hl" style="grid-template-columns:26px 1fr 110px 70px 150px"><span class="mu">${i+1}</span><span>${rbName(x.rb)}</span><span>${x.st.done} casos · <b>${(x.st.rate*100).toFixed(0)}%</b></span><span><span class="okc">${pl.g}</span>/<span class="ruimc">${pl.r}</span></span><span>${p?`<span class="ms-pisca">entrada ${hmsOf(p.entryT/1000)}</span>`:'<span class="mu">aguardando</span>'}</span></div>`; }).join('');
+}
+function mbHistHtml(w){
+  const s=mbSt(w), E=mbSess(w).L.slice(-20).reverse(), ev=s.log.slice(-25).reverse();
+  return `<div class="ms-lb">ENTRADAS DO ROBÔ</div><div class="ms-hist" style="max-height:200px">${E.length?E.map(x=>`<div class="ms-hl"><span>${hmsOf(x.planT||x.T)}</span><span>${(x.mcor?'ÍMPAR · ':'PAR · ')+x.nome.replace(/^🤖 \d+s · /,'')}</span><span>${NIVEL[x.nivel]||'G'+x.nivel}</span><span>${x.stake?'$ '+(+x.stake).toFixed(2):'—'}</span><span class="${x.res==='green'?'okc':x.res==='red'?'ruimc':'mu'}">${x.res==='green'?'✅ +'+(+x.profit).toFixed(2):x.res==='red'?'❌ '+(+x.profit).toFixed(2):x.res}</span></div>`).join(''):'<div class="mu" style="padding:8px">Nenhuma entrada ainda.</div>'}</div>
+    <div class="ms-lb" style="margin-top:8px">EVENTOS</div><div class="ms-hist" style="max-height:200px">${ev.length?ev.map(e=>`<div class="ms-hl" style="grid-template-columns:70px 1fr"><span>${new Date(e.t).toLocaleTimeString('pt-BR')}</span><span class="${e.tipo==='g'?'okc':e.tipo==='r'?'ruimc':''}">${e.txt}</span></div>`).join(''):'<div class="mu" style="padding:8px">—</div>'}</div>`;
+}
+
 
 // ---------- render ----------
 const TAB_ORDER = ['hist', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
