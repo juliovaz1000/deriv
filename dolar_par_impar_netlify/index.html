@@ -502,7 +502,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.65 · 05/10/2026 · 🎮 Mesa: horário em cada rodada · robô com gale no próximo sinal · filtro do horário fixo separado do gale';
+const VERSAO='v3.66 · 06/10/2026 · 🎮 Mesa: recuperação automática depois do red (recupera a perda em 2 greens)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8516,6 +8516,7 @@ async function dmComprar(o){
     else if((cfg.dm_galeModo||'auto')==='auto' && o.ratio) stake=(o.perda+dmStake0()*o.ratio)/o.ratio;       // recupera as perdas + o lucro da 1ª entrada
     else stake=dmStake0()*Math.pow(+cfg.dm_mult||2.1,g);
   }
+  if(o.recAlvo>0){ const rr=o.ratio||r0||0.95; stake=(o.perda+o.recAlvo)/rr; if(o.recMax>0&&stake>o.recMax) stake=o.recMax; }   // 🔁 recuperação: cobre o que perdeu nesta entrada + a meta do green
   stake=Math.max(0.35,Math.round(stake*100)/100);
   const maxS=+cfg.dm_maxStake||0; if(maxS>0 && stake>maxS && !o.man){ o.estado='parado'; dmAddLog({...o,res:'não enviada',obs:`stake ${stake} acima do máximo ${maxS}`,stake,profit:0,nivel:g}); return; }
   const params={amount:stake,basis:'stake',contract_type:o.ct,currency:DM.cur||'USD',duration:1,duration_unit:'t'};
@@ -9878,11 +9879,12 @@ function mesaRender(full){
   const ck=$('#msClock'); if(ck){ const d=new Date(); ck.innerHTML=`<span>🕒</span>${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
   const rob=cfg.mesa_modo==='robo';
   const k2=k+'|'+(rob?mbSt(w).log.length+'|'+RB_PENDING.length+'|'+mbSt(w).on:'');
+  if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); }
   if(k2===MESA.lastFull) return; MESA.lastFull=k2;
   $('#msTabs').innerHTML=mesaTabsHtml();
   $('#msCentro').innerHTML=rob?mbCentroHtml(w):mesaCentroHtml();
   $('#msStrip').innerHTML=mesaBalls(W,40,false);
-  if(rob){ const ss=mbSess(w); $('#msSess').innerHTML=`<div><b>${ss.ac}</b><span>ACERTOS</span></div><div><b>${ss.er}</b><span>ERROS</span></div><div><b class="${ss.pl>=0?'okc':'ruimc'}">${ss.pl>=0?'+':''}$ ${ss.pl.toFixed(2)}</b><span>RESULTADO</span></div>`; $('#msFila').innerHTML=mbFilaHtml(w); $('#msHist').innerHTML=mbHistHtml(w); }
+  if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); const ss=mbSess(w); $('#msSess').innerHTML=`<div><b>${ss.ac}</b><span>ACERTOS</span></div><div><b>${ss.er}</b><span>ERROS</span></div><div><b class="${ss.pl>=0?'okc':'ruimc'}">${ss.pl>=0?'+':''}$ ${ss.pl.toFixed(2)}</b><span>RESULTADO</span></div>`; $('#msFila').innerHTML=mbFilaHtml(w); $('#msHist').innerHTML=mbHistHtml(w); }
   else { $('#msSess').innerHTML=mesaSessHtml(); $('#msHist').innerHTML=mesaHistHtml(); }
 }
 document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if(e.key==='p'||e.key==='P') mesaEntrar(0); if(e.key==='i'||e.key==='I') mesaEntrar(1); if(e.key==='Escape') mesaFechar(); if(['1','2','3','4'].includes(e.key)) mesaSet('mesa_w',MESA_TEMPOS[+e.key-1]); });
@@ -9892,7 +9894,26 @@ document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.
 // se dois robôs pedem o mesmo jogo, entra só no primeiro da lista; se pedem PAR e ÍMPAR no mesmo jogo, aborta.
 // A decisão é tomada ~3s antes do jogo, quando todos os sinais daquele jogo já apareceram.
 // =====================================================================================
-const MB_DEF={val:0.35,fat:2.2,gale:-1,sw:0,sl:0,so100:1,soAuto:0,fonte:'padroes',hfMin:5,hfDias:7,hfLvl:-1,galeModo:'seguido'};
+const MB_DEF={val:0.35,fat:2.2,gale:-1,sw:0,sl:0,so100:1,soAuto:0,fonte:'padroes',hfMin:5,hfDias:7,hfLvl:-1,galeModo:'seguido',rec:2,recMax:0};
+// pagamento do PAR/ÍMPAR (lucro ÷ aposta) medido nos greens da sessão; sem histórico usa 0,95
+function mbRatio(w){ const G=DM.log.filter(x=>(x.src==='mbot'||x.src==='mesa')&&x.res==='green'&&+x.stake>0&&+x.profit>0).slice(-20); if(!G.length) return 0.95; return G.reduce((a,x)=>a+x.profit/x.stake,0)/G.length; }
+// 🔁 recuperação: refaz a sessão do início e diz quanto falta recuperar e em quantos greens
+// falta = maior saldo que a sessão já teve − saldo agora. Começa a recuperar depois de um RED final (perdeu no último gale).
+function mbRec(w){
+  const C=mbCfg(w), N=+C.rec||0, L=mbSess(w).L; let pl=0,pico=0,k=null;
+  for(const x of L){
+    pl+=(+x.profit||0);
+    if(pl>=pico-0.005){ pico=Math.max(pico,pl); k=null; continue; }
+    const fim=x.res==='green'||(x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0)));
+    if(!fim||!N) continue;
+    if(x.res==='red'&&k==null) k=N;
+    else if(x.res==='green'&&k!=null){ k--; if(k<=0) k=N; }       // ainda falta: divide de novo
+  }
+  const falta=Math.max(0,Math.round((pico-pl)*100)/100), r=mbRatio(w), base=Math.max(0.35,+C.val||0.35)*r;
+  const on=N>0&&k!=null&&falta>0.009;
+  const alvo=on?falta/k+base:0;
+  return {on,falta,k:on?k:0,N,alvo:Math.round(alvo*100)/100,stake:on?Math.round(alvo/r*100)/100:0,r,pl,pico};
+}
 // gale no próximo sinal: nível atual calculado pelas entradas da sessão (green zera; red sobe; passou do último gale, zera)
 function mbGaleK(w){ const C=mbCfg(w), G=C.gale<0?2:+C.gale; let k=0; for(const x of mbSess(w).L){ if(x.gk==null) continue; if(x.res==='green') k=0; else if(x.res==='red'){ k++; if(k>G) k=0; } } return k; }
 let MB={};   // estado por tempo: {on,ini,taken:Set,log:[],stats:Map}
@@ -9970,9 +9991,11 @@ function mbTick(){
     if(mbAberta(w)){ mbLog(w,`⏭ ${hh}: ${ok.length} sinal(is) ignorado(s) — já tem entrada aberta`,'evt'); continue; }
     if(new Set(ok.map(g=>g.alvo)).size>1){ mbLog(w,`⛔ ${hh}: ABORTADO — PAR e ÍMPAR no mesmo jogo (${ok.map(g=>(g.alvo?'Í ':'P ')+g.curto).join(' · ')})`,'r'); continue; }
     const g=ok[0], gale=C.gale<0?g.gale:C.gale, base=Math.max(0.35,+C.val||0.35), fat=Math.max(1,+C.fat||2.2);
+    const R=mbRec(w), rec=R.on?{recAlvo:R.alvo,recMax:+C.recMax||0,ratio:R.r}:{}, rtxt=R.on?` · 🔁 recuperando $ ${R.falta.toFixed(2)} (${R.k} green${R.k>1?'s':''}) → aposta $ ${Math.min(R.stake,+C.recMax||Infinity).toFixed(2)}`:'';
     if(C.galeModo==='sinal'){ const k=mbGaleK(w), G=C.gale<0?2:+C.gale;
-      dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:0,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.round(base*Math.pow(fat,k)*100)/100,fator:fat,mcor:g.alvo,gk:k,gmax:G}); }
-    else dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:base,fator:fat,mcor:g.alvo});
+      dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:0,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.round(base*Math.pow(fat,k)*100)/100,fator:fat,mcor:g.alvo,gk:k,gmax:G,...rec}); }
+    else dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:base,fator:fat,mcor:g.alvo,...rec});
+    if(R.on) mbLog(w,`🔁 ${hmsOf(T/1000)}: modo recuperação${rtxt}`,'evt');
     s.feitos.add(g.key);
     mbLog(w,`🎯 ${hh}: ENTRADA ${g.alvo?'ÍMPAR':'PAR'} · ${g.nome}${ok.length>1?` (outros ${ok.length-1} da mesma cor ficaram de fora)`:''}`,'g');
     try{ beep(); }catch(e){}
@@ -9988,6 +10011,10 @@ function mbEsqHtml(w){
     <div class="ms-box"><span class="ms-lb">ONDE FAZ O GALE</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'galeModo',this.value)">
       <option value="seguido" ${C.galeModo!=='sinal'?'selected':''}>nos jogos seguintes (${w}s depois)</option><option value="sinal" ${C.galeModo==='sinal'?'selected':''}>no próximo sinal (aposta maior)</option></select>
       ${C.galeModo==='sinal'?`<div class="ms-nota" style="margin-top:4px">Agora no nível <b>${mbGaleK(w)?'G'+mbGaleK(w):'entrada'}</b> · próxima aposta <b>$ ${(Math.max(0.35,+C.val||0.35)*Math.pow(Math.max(1,+C.fat||2.2),mbGaleK(w))).toFixed(2)}</b></div>`:''}</div>
+    <div class="ms-box"><span class="ms-lb">🔁 DEPOIS DO RED, RECUPERAR EM</span>
+      <div class="ms-row2" style="margin-top:4px"><select class="ms-sel" onchange="mbSetCfg(${w},'rec',+this.value)">${[[0,'desligado'],[1,'1 green'],[2,'2 greens'],[3,'3 greens'],[4,'4 greens'],[5,'5 greens']].map(([v,t])=>`<option value="${v}" ${+C.rec===v?'selected':''}>${t}</option>`).join('')}</select>
+      <label class="ms-chk">aposta máx $ <input type="number" min="0" step="1" value="${C.recMax}" style="width:60px" onchange="mbSetCfg(${w},'recMax',+this.value)"></label></div>
+      <div id="msRec" class="ms-nota" style="margin-top:4px"></div></div>
     <div class="ms-row2"><div class="ms-box"><span class="ms-lb">STOP WIN $</span><div class="ms-val" style="font-size:18px">${inpt('sw',C.sw,1)}</div></div>
       <div class="ms-box"><span class="ms-lb">STOP LOSS $</span><div class="ms-val" style="font-size:18px">${inpt('sl',C.sl,1)}</div></div></div>
     <div class="ms-box"><span class="ms-lb">FONTE DOS SINAIS</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'fonte',this.value)">${[['padroes','🤖 robôs de padrão (aba '+w+'s)'],['hfix','🕒 horário fixo 100% da hora atual'],['ambos','os dois juntos']].map(([v,t])=>`<option value="${v}" ${C.fonte===v?'selected':''}>${t}</option>`).join('')}</select>
@@ -10006,6 +10033,14 @@ function mbCentroHtml(w){
   if(o){ const Tg=o.T+o.g*o.step; return `<div class="ms-faixa on">🤖 ${o.mcor?'ÍMPAR':'PAR'} · ${o.g?'GALE '+o.g:'ENTRADA'} no jogo ${hmsOf(Tg)} · ${o.estado==='aguardando'?`faltam ${Math.max(0,Math.ceil(Tg-now))}s`:o.estado}<div style="font-size:11px;font-weight:600;opacity:.85">${o.nome.replace(/^🤖 \d+s · /,'')}</div></div>`; }
   const ult=s.log.at(-1);
   return `<div class="ms-faixa ${ult&&Date.now()-ult.t<8000?(ult.tipo==='r'?'r':ult.tipo==='g'?'g':''):''}">${ult&&Date.now()-ult.t<8000?ult.txt:`🔎 Robô ${w}s ligado · aguardando sinal de ${mbRobos(w).length} robô(s)`}</div>`;
+}
+function mbRecTxt(w){
+  const C=mbCfg(w), R=mbRec(w);
+  if(!R.N) return 'Desligado: depois do red volta para a entrada normal.';
+  if(!R.on) return `Sem perda para recuperar · se der RED, o robô divide a perda em ${R.N} green${R.N>1?'s':''} (pagamento ${(R.r*100).toFixed(0)}%)`;
+  const cap=+C.recMax>0&&R.stake>+C.recMax;
+  return `<b style="color:#facc15">🔁 RECUPERANDO</b> · falta <b>$ ${R.falta.toFixed(2)}</b> · ${R.k} green${R.k>1?'s':''} restante${R.k>1?'s':''}<br>
+    próxima aposta <b>$ ${(cap?+C.recMax:R.stake).toFixed(2)}</b> = ($ ${R.falta.toFixed(2)} ÷ ${R.k} + lucro $ ${(R.alvo-R.falta/R.k).toFixed(2)}) ÷ ${R.r.toFixed(2)}${cap?' <span class="ruimc">· travada no máximo</span>':''}`;
 }
 function mbFilaHtml(w){
   const C=mbCfg(w); let hf='';
