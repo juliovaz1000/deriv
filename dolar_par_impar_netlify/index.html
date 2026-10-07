@@ -518,7 +518,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.75 · 06/10/2026 · ⭐ configurações salvas não somem mais (guardadas à parte) · 🔀 interligado: depois de RED recupera no tempo mais quente (W virtual) · 🎮 Mesa: 🔗 robô interligado (vários tempos, 1 entrada por vez) · ⏸ pausa por instabilidade · 👀 observador silencioso · 🏆 melhores agora + 🧠 escolhe sozinho · 🔕 popups desligados (botão para ligar) · 🔤 siglas W/L no robô da Mesa · 🎮 Mesa: relatório zera a cada início + 📚 sessões anteriores · 🌐 MERCADOS (qual volatilidade está melhor) · ⏱ jogos de 2s · 📊 Under/Over: 🔢 Máximas por número + 💰 pagamento de cada mercado · virtual mostra só o campo usado · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
+const VERSAO='v3.76 · 06/10/2026 · 🔗 interligado desliga os tempos soltos · ⏹ parar todos · ⭐ configurações salvas não somem mais (guardadas à parte) · 🔀 interligado: depois de RED recupera no tempo mais quente (W virtual) · 🎮 Mesa: 🔗 robô interligado (vários tempos, 1 entrada por vez) · ⏸ pausa por instabilidade · 👀 observador silencioso · 🏆 melhores agora + 🧠 escolhe sozinho · 🔕 popups desligados (botão para ligar) · 🔤 siglas W/L no robô da Mesa · 🎮 Mesa: relatório zera a cada início + 📚 sessões anteriores · 🌐 MERCADOS (qual volatilidade está melhor) · ⏱ jogos de 2s · 📊 Under/Over: 🔢 Máximas por número + 💰 pagamento de cada mercado · virtual mostra só o campo usado · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -9921,7 +9921,7 @@ function mesaTabsHtml(){
     const rob=cfg.mesa_modo==='robo', ab=DM.orders.some(o=>o.src===(rob?'mbot':'mesa')&&o.step===w&&['aguardando','comprando','em jogo'].includes(o.estado)), s2=rob?mbSess(w):s;
     return `<button class="ms-tab ${mesaW()===w?'on':''}" onclick="mesaSet('mesa_w',${w})">
       <b>${w} SEGUNDOS</b><span class="ms-tl">${u?`<em class="${u.p?'imp':'par'}">${u.d}</em>`:''} próximo em <b>${falta}s</b>${ab?' · <span class="ms-pisca">● entrada</span>':''}</span>
-      <span class="ms-tl">${rob?(mbSt(w).on?(mbSt(w).pausa?'<b class="ruimc">⏸ pausa</b> · ':'<b class="okc">🤖 ligado</b> · ')+(mbLinkAtivo(w)?'🔗 ':''):'🤖 parado · '):''}${s2.ac}✅ ${s2.er}❌ · <b class="${s2.pl>=0?'okc':'ruimc'}">${s2.pl>=0?'+':''}${s2.pl.toFixed(2)}</b></span></button>`;
+      <span class="ms-tl">${rob?(mbSt(w).on?(mbSt(w).pausa?'<b class="ruimc">⏸ pausa</b> · ':'<b class="okc">🤖 ligado</b> · ')+(mbLinkAtivo(w)?'🔗 ':(+mbLink().on?'<b class="ruimc">⚠ solto</b> · ':'')):'🤖 parado · '):''}${s2.ac}✅ ${s2.er}❌ · <b class="${s2.pl>=0?'okc':'ruimc'}">${s2.pl>=0?'+':''}${s2.pl.toFixed(2)}</b></span></button>`;
   }).join('');
 }
 function mesaLatHtml(w){ if(w>2) return ''; const l=Math.round(dmLat()*1000); return `<div class="ms-nota" style="text-align:center;margin-top:4px;color:${l>600?'#f87171':l>400?'#fbbf24':'#4ade80'}">⏱ jogo de 2s · latência ${l} ms ${l>600?'— alta, a ordem pode cair no tick errado':'— ok'}</div>`; }
@@ -9966,6 +9966,7 @@ function mesaRender(full){
         <select class="ms-sel" onchange="mesaSet('mesa_sym',this.value)">${d5Syms().map(s=>`<option value="${s}" ${mesaSym()===s?'selected':''}>${symNome(s)}</option>`).join('')}</select>
         <div class="ms-modos"><button class="${cfg.mesa_modo!=='robo'?'on':''}" onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button class="${cfg.mesa_modo==='robo'?'on':''}" onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS${MESA_TEMPOS.some(w=>mbSt(w).on)?' ●':''}</button></div>
         <button class="ms-x" onclick="mkAbrir()" title="qual volatilidade está melhor agora">🌐 MERCADOS</button>
+        ${MESA_TEMPOS.some(w=>mbSt(w).on)?`<button class="ms-x" style="border-color:#ef4444;color:#fca5a5" onclick="mbPararTodos()" title="desliga todos os robôs da Mesa">⏹ PARAR TODOS</button>`:''}
         <div class="ms-relogio" id="msClock"></div>
         <div class="ms-saldo" id="msSaldo"></div><button class="ms-x" onclick="mesaSair()">${MESA_TAB?'↩ voltar ao início':'✕ sair'}</button></div>
       <div class="ms-tabs" id="msTabs">${mesaTabsHtml()}</div><div id="msBest"></div>
@@ -10050,6 +10051,12 @@ function mbSess(w){
   const s=mbSt(w), L=DM.log.filter(x=>x.src==='mbot'&&x.mw===w&&x.t>=(s.ini||MESA.ini));
   return {ac:L.filter(x=>x.res==='green').length,er:L.filter(x=>x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0))).length,pl:L.reduce((a,x)=>a+(+x.profit||0),0),L};
 }
+function mbIniciarBtn(w){
+  const L=mbLink();
+  if(+L.on&&!L.ws.includes(w)){ cfg.mb_link={...L,ws:[...L.ws,w].sort((a,b)=>a-b)}; saveCfg(); mbIniciar(w); mbLog(w,`🔗 ${w}s entrou no interligado (${mbLink().ws.map(x=>x+'s').join(' + ')})`,'evt'); mesaRender(true); return; }
+  mbIniciar(w);
+}
+function mbPararTodos(){ const L=mbLink(); if(+L.on){ cfg.mb_link={...L,on:0}; saveCfg(); } for(const w of MESA_TEMPOS) if(mbSt(w).on) mbParar(w,'⏹ parar todos'); mesaRender(true); }
 function mbIniciar(w){
   if(!DM.ok||!DM.virt){ if(confirm('A conta DEMO não está conectada. Abrir a aba 💼 Conta Demo?')){ mesaFechar(); S.tab='demo'; renderTab(); } return; }
   const s=mbSt(w); s.on=true; s.ini=Date.now(); s.parou=''; s.taken=new Set(); s.feitos=new Set(); s.log=[]; s.conf='';
@@ -10105,6 +10112,7 @@ function mbLinkIniciar(){
   if(!DM.ok||!DM.virt){ mbIniciar(w0); return; }
   if(+L.copy){ cfg.mbot={...(cfg.mbot||{})}; for(const w of L.ws) if(w!==w0) cfg.mbot[w]={...mbCfg(w0)}; }
   cfg.mb_link={...L,on:1}; saveCfg();
+  for(const w of MESA_TEMPOS) if(!L.ws.includes(w)&&mbSt(w).on) mbParar(w,'desligado: não faz parte do interligado');
   for(const w of L.ws){ if(mbSt(w).on) mbParar(w,'reiniciado no interligado'); mbIniciar(w); mbLog(w,`🔗 Interligado com ${L.ws.map(x=>x+'s').join(' + ')} — 1 entrada por vez no total`,'evt'); }
   mesaRender(true);
 }
@@ -10585,7 +10593,7 @@ function mbEsqHtml(w){
     ${mbVBoxHtml(w)}
     ${mbPausaHtml(w)}
     <span class="ms-lb">SESSÃO DO ROBÔ ${w}s</span><div class="ms-sess" id="msSess"></div>
-    ${s.on?`<button class="ms-go stop" onclick="mbParar(${w})">⏹ PARAR ROBÔ ${w}s</button>`:`<button class="ms-go" onclick="mbIniciar(${w})">▶ INICIAR ROBÔ ${w}s</button>`}
+    ${s.on?`<button class="ms-go stop" onclick="mbParar(${w})">⏹ PARAR ROBÔ ${w}s</button>`:`<button class="ms-go" onclick="mbIniciarBtn(${w})">▶ ${+mbLink().on?'COLOCAR NO INTERLIGADO '+w+'s':'INICIAR ROBÔ '+w+'s'}</button>`}
     ${s.parou&&!s.on?`<div class="ms-nota" style="color:#fca5a5">${s.parou}</div>`:''}`;
 }
 function mbCentroHtml(w){ const p=mbSt(w).pausa&&!+mbV(w).vOn?`<div class="mb-vst esperando"><b>⏸ EM PAUSA (hora instável)</b> · últimos ${mbHistTail(w,+mbCfg(w).pN||10).map(c=>mbSgCaixas(c)).join('')}</div>`:''; return mbCentroBase(w)+p+mbVStatusHtml(w)+mesaLatHtml(w); }
