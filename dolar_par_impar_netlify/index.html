@@ -518,7 +518,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.74 · 06/10/2026 · 🔀 interligado: depois de RED recupera no tempo mais quente (W virtual) · 🎮 Mesa: 🔗 robô interligado (vários tempos, 1 entrada por vez) · ⏸ pausa por instabilidade · 👀 observador silencioso · 🏆 melhores agora + 🧠 escolhe sozinho · 🔕 popups desligados (botão para ligar) · 🔤 siglas W/L no robô da Mesa · 🎮 Mesa: relatório zera a cada início + 📚 sessões anteriores · 🌐 MERCADOS (qual volatilidade está melhor) · ⏱ jogos de 2s · 📊 Under/Over: 🔢 Máximas por número + 💰 pagamento de cada mercado · virtual mostra só o campo usado · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
+const VERSAO='v3.75 · 06/10/2026 · ⭐ configurações salvas não somem mais (guardadas à parte) · 🔀 interligado: depois de RED recupera no tempo mais quente (W virtual) · 🎮 Mesa: 🔗 robô interligado (vários tempos, 1 entrada por vez) · ⏸ pausa por instabilidade · 👀 observador silencioso · 🏆 melhores agora + 🧠 escolhe sozinho · 🔕 popups desligados (botão para ligar) · 🔤 siglas W/L no robô da Mesa · 🎮 Mesa: relatório zera a cada início + 📚 sessões anteriores · 🌐 MERCADOS (qual volatilidade está melhor) · ⏱ jogos de 2s · 📊 Under/Over: 🔢 Máximas por número + 💰 pagamento de cada mercado · virtual mostra só o campo usado · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10398,13 +10398,17 @@ function mbExpo(w,L){
   return {ex,exT,queda,maxA};
 }
 // ⭐ configurações salvas
-function mbPresets(){ return Array.isArray(cfg.mbPresets)?cfg.mbPresets:[]; }
+// guardadas numa chave própria do navegador: a aba principal e a aba da Mesa não apagam uma a outra
+function mbPresets(){ let L=[]; try{ L=JSON.parse(localStorage.getItem('mb_presets_v1')||'[]')||[]; }catch(e){}
+  if(Array.isArray(cfg.mbPresets)&&cfg.mbPresets.length){ const ids=new Set(L.map(p=>p.id)); for(const p of cfg.mbPresets) if(!ids.has(p.id)) L.push(p); mbPresetsGravar(L); delete cfg.mbPresets; saveCfg(); }
+  return L; }
+function mbPresetsGravar(L){ try{ localStorage.setItem('mb_presets_v1',JSON.stringify(L.slice(0,50))); }catch(e){ alert('Não consegui salvar a configuração no navegador.'); } }
 function mbPresetSalvar(w){
   const el=$('#mbPresetNome'), nome=(el?.value||'').trim();
   if(!nome){ alert('Dê um nome para a configuração (ex.: "Tiro seco horário fixo").'); el?.focus(); return; }
   const L=mbPresets().filter(p=>!(p.nome===nome&&p.w===w));
   L.unshift({id:'P'+Date.now(),nome,w,c:{...mbCfg(w)},sym:mesaSym(),criado:Date.now()});
-  cfg.mbPresets=L.slice(0,30); saveCfg(); mbLog(w,`⭐ Configuração "${nome}" salva`,'evt'); mesaRender(true);
+  mbPresetsGravar(L); mbLog(w,`⭐ Configuração "${nome}" salva`,'evt'); mesaRender(true);
 }
 function mbPresetUsar(id){
   const p=mbPresets().find(x=>x.id===id); if(!p) return;
@@ -10412,7 +10416,7 @@ function mbPresetUsar(id){
   const s=mbSt(p.w); if(s.on) mbParar(p.w,'trocou para a configuração "'+p.nome+'"');
   mbIniciar(p.w); mbSt(p.w).conf=p.nome; mbLog(p.w,`⭐ Usando a configuração "${p.nome}"`,'g'); mesaRender(true);
 }
-function mbPresetApagar(id){ const p=mbPresets().find(x=>x.id===id); if(!p||!confirm(`Apagar a configuração "${p.nome}"?`)) return; cfg.mbPresets=mbPresets().filter(x=>x.id!==id); saveCfg(); mesaRender(true); }
+function mbPresetApagar(id){ const p=mbPresets().find(x=>x.id===id); if(!p||!confirm(`Apagar a configuração "${p.nome}"?`)) return; mbPresetsGravar(mbPresets().filter(x=>x.id!==id)); mesaRender(true); }
 function mbPresetsHtml(w){
   const L=mbPresets();
   return `<div class="ms-box" style="border-color:#a855f7"><span class="ms-lb">⭐ CONFIGURAÇÕES SALVAS</span>
@@ -11299,7 +11303,7 @@ function afterUpdate(novo) {
     if (dmToken() || dmOa2()) setTimeout(() => { if (!DM.ok) dmConectar(); }, 2500);
   }
   // as configurações da Mesa e da conta demo andam juntas entre a aba principal e a aba da Mesa
-  window.addEventListener('storage', e => { if (e.key !== 'dpi_cfg' || !e.newValue) return; try { const n = JSON.parse(e.newValue); for (const k in n) if (/^(mesa_|mbot|dm_)/.test(k)) cfg[k] = n[k]; } catch (_) {} });
+  window.addEventListener('storage', e => { if (e.key === 'mb_presets_v1' && typeof MESA !== 'undefined' && MESA.open) { mesaRender(true); return; } if (e.key !== 'dpi_cfg' || !e.newValue) return; try { const n = JSON.parse(e.newValue); for (const k in n) if (/^(mesa_|mbot|mb_|dm_|popups_on)/.test(k)) cfg[k] = n[k]; } catch (_) {} });
   if (cfg.autoOn) { buscar(); clearInterval(S.timer); S.timer = setInterval(buscar, cfg.auto * 1000); }
   if (cfg.derivFallback) connectDerivFallback();
   // relógio dos robôs: abre o popup na hora certa e confere green/red mesmo sem dado novo
