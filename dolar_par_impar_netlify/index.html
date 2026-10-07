@@ -370,7 +370,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .ms-sel{background:var(--mg);border:1px solid var(--mb);color:#ece9f6;border-radius:9px;padding:6px 10px}
 .ms-saldo{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:4px 12px}.ms-saldo span{font-size:9px;color:#8b84a3;letter-spacing:.6px}.ms-saldo b{font-size:16px}
 .ms-x,.ms-con{background:var(--mg);border:1px solid var(--mb);color:#ece9f6;border-radius:9px;padding:7px 12px;cursor:pointer;font-weight:700}.ms-con{background:linear-gradient(90deg,var(--mr2),var(--mr));border:0}
-.ms-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.ms-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
 .ms-tab{background:var(--mg);border:1px solid var(--mb);border-radius:12px;padding:10px 12px;color:#ece9f6;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px}
 .ms-tab>b{font-size:15px;letter-spacing:1px}.ms-tab.on{border-color:var(--mr2);background:linear-gradient(135deg,rgba(124,58,237,.35),var(--mg));box-shadow:0 0 18px rgba(168,85,247,.25)}
 .ms-tl{font-size:12px;color:#a49dbb}.ms-tl em{font-style:normal;display:inline-flex;width:20px;height:20px;border-radius:5px;align-items:center;justify-content:center;font-weight:800;color:#fff;margin-right:4px}.ms-tl em.par{background:var(--mr)}.ms-tl em.imp{background:#3a3648}
@@ -398,7 +398,12 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .ms-strip{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;background:var(--mg);border-radius:11px;padding:8px}
 .ms-hist{max-height:260px;overflow:auto;background:var(--mg);border-radius:11px}.ms-hl{display:grid;grid-template-columns:80px 1fr 60px 80px 90px;gap:6px;padding:7px 10px;border-bottom:1px solid var(--mb);font-size:13px}
 .okc{color:#4ade80}.ruimc{color:#f87171}
-#mesaBtn{border-color:#a855f7;color:#d8b4fe;font-weight:800}
+#mesaBtn{border-color:#a855f7;color:#d8b4fe;font-weight:800}#mkBtn{border-color:#38bdf8;color:#7dd3fc;font-weight:800}
+#mkPop{position:fixed;inset:0;z-index:10005;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.75);overflow:auto;padding:24px 12px}
+.mk-box{background:var(--bg2,#12141c);border:1px solid #38bdf8;border-radius:14px;padding:16px;max-width:1150px;width:100%}.mk-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.mb-best{position:fixed;right:14px;bottom:14px;z-index:10003;width:400px;max-width:calc(100vw - 28px);background:#14111f;border:1px solid #f59e0b;border-radius:12px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.6);font-size:12px}
+.mb-bestbtn{position:fixed;right:14px;bottom:14px;z-index:10003;background:#14111f;border:1px solid #f59e0b;color:#fbbf24;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer}
+.mb-bl{display:grid;grid-template-columns:1fr 70px 46px 48px;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid #2a2638}.mb-bl i{font-style:normal;color:#8b84a3;font-size:10px}
 .mb-pres{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.mb-chip{display:inline-flex;border:1px solid var(--mb);border-radius:9px;overflow:hidden;background:#26222f}.mb-chip button{background:transparent;border:0;color:#ece9f6;padding:6px 9px;cursor:pointer;font-weight:700;font-size:12px}.mb-chip button small{color:#a49dbb;font-weight:600}.mb-chip .x{color:#f87171;border-left:1px solid var(--mb);padding:6px 7px}.mb-chip.on{border-color:#22c55e;box-shadow:0 0 0 1px #22c55e}
 .mb-mini{background:var(--mg);border:1px solid var(--mb);color:#cfc9e2;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:0}.mb-mini.on{background:var(--mr);color:#fff;border-color:var(--mr)}.mb-mini.pdf{background:#1f2937;color:#fde68a}
 .mb-expo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.mb-expo>div{background:var(--mg);border:1px solid var(--mb);border-radius:11px;padding:10px;text-align:center}.mb-expo span{display:block;font-size:10px;color:#8b84a3;letter-spacing:.6px;font-weight:700}.mb-expo b{display:block;font-size:20px;color:#fbbf24;margin:3px 0}.mb-expo i{font-style:normal;font-size:11px;color:#8b84a3}
@@ -441,6 +446,8 @@ tr.scativo td{background:rgba(245,197,24,.07)}
   <span id="repairBox" style="display:none"></span>
   <button id="ilBtn" onclick="ilLigar(!cfg.il_on)" title="junta 5s + 10s + 20s só com fontes 100%">🔗 INTERLIGAR</button>
   <button id="il2Btn" onclick="il2Abrir()" title="interligado só com padrões vindo de 2 reds + 1 green atual">🔁 2R+G</button>
+  <button id="popBtn" onclick="popToggle()" title="ligar/desligar todos os popups automáticos">🔕 POPUPS</button>
+  <button id="mkBtn" onclick="mkAbrir()" title="qual volatilidade está melhor agora">🌐 MERCADOS</button>
   <button id="mesaBtn" onclick="mesaNovaAba()" title="tela de operar na Deriv com 10s, 20s e 30s separados">🎮 MESA</button>
   <button id="srobBtn" onclick="srobOpen()" title="5 robôs automáticos com regra de sono/deleção">🎯 SOMENTE ROBÔ</button>
   <span id="demoBox" style="display:none"></span>
@@ -470,6 +477,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 <div id="nuvemPop" onclick="if(event.target===this)this.style.display='none'"></div>
 <div id="cf2Pop"></div>
 <div id="mesaPop"></div>
+<div id="mkPop"></div>
 
 <script type="text/plain" id="userscript">// ==UserScript==
 // @name         Dólar Par/Ímpar — Ponte API
@@ -510,7 +518,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.70 · 06/10/2026 · 📊 Under/Over: 🔢 Máximas por número + 💰 pagamento de cada mercado · virtual mostra só o campo usado · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
+const VERSAO='v3.74 · 06/10/2026 · 🔀 interligado: depois de RED recupera no tempo mais quente (W virtual) · 🎮 Mesa: 🔗 robô interligado (vários tempos, 1 entrada por vez) · ⏸ pausa por instabilidade · 👀 observador silencioso · 🏆 melhores agora + 🧠 escolhe sozinho · 🔕 popups desligados (botão para ligar) · 🔤 siglas W/L no robô da Mesa · 🎮 Mesa: relatório zera a cada início + 📚 sessões anteriores · 🌐 MERCADOS (qual volatilidade está melhor) · ⏱ jogos de 2s · 📊 Under/Over: 🔢 Máximas por número + 💰 pagamento de cada mercado · virtual mostra só o campo usado · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -1239,7 +1247,7 @@ function gameIntervalSec(){
   const fromBank=bankIntervalSec(cfg.bank);
   if(fromBank) return fromBank;
   const v=+cfg.derivInterval||20;
-  return [5,10,15,20,30].includes(v)?v:20;
+  return D5_STEPS.includes(v)?v:20;
 }
 function gamesPerMinute(){
   return 60/gameIntervalSec();
@@ -1252,7 +1260,7 @@ function gameSeconds(){
 }
 function derivBankName(){
   const v=+cfg.derivInterval||gameIntervalSec();
-  return `DERIV ${curSym()} · ${[5,10,15,20,30].includes(v)?v:20}s`;
+  return `DERIV ${curSym()} · ${D5_STEPS.includes(v)?v:20}s`;
 }
 function intervalSummary(){
   const step=gameIntervalSec();
@@ -1285,7 +1293,7 @@ function selectedIntervalInfo(){
 }
 async function setDerivInterval(v){
   const n=+v;
-  if(![5,10,15,20,30].includes(n))return;
+  if(!D5_STEPS.includes(n))return;
   cfg.derivInterval=n;
   cfg.bank=d5BankName(n,curSym());   // a captura grava todas as janelas juntas; aqui só troca o banco visto
   saveCfg();
@@ -1297,7 +1305,7 @@ async function setDerivInterval(v){
 // Regra do jogo: o resultado do segundo X é o último tick com horário ≤ X (o mesmo usado no 📥 Histórico).
 // A captura segue o horário (epoch) do próprio tick da Deriv. Nunca cria tick artificial: sem tick, sem jogo.
 // Uma única conexão WebSocket assina todos os mercados escolhidos (gerenciador central de ticks).
-const D5_STEPS=[5,10,15,20,30];
+const D5_STEPS=[2,5,10,15,20,30];
 const LIVE_CAP=6000;
 const SYMS_ALL=[['R_10','Volatility 10'],['R_25','Volatility 25'],['R_50','Volatility 50'],['R_75','Volatility 75'],['R_100','Volatility 100'],
   ['1HZ10V','Volatility 10 (1s)'],['1HZ25V','Volatility 25 (1s)'],['1HZ50V','Volatility 50 (1s)'],['1HZ75V','Volatility 75 (1s)'],['1HZ100V','Volatility 100 (1s)']];
@@ -3426,8 +3434,8 @@ VIEWS.r100hist={nome:'📥 Histórico R_100',html(){
       <label>Mercado ${histSymSel()}</label>
       <label>Intervalo
         <select id="hdlStep" title="janela">
-          <option value="all" selected>todos (5s, 10s, 15s, 20s e 30s)</option>
-          ${[5,10,15,20,30].map(v=>`<option value="${v}">${v} segundos</option>`).join('')}
+          <option value="all" selected>todos (2s, 5s, 10s, 15s, 20s e 30s)</option>
+          ${D5_STEPS.map(v=>`<option value="${v}">${v} segundos</option>`).join('')}
         </select>
       </label>
       <label>Período
@@ -3495,7 +3503,7 @@ VIEWS.r100hist={nome:'📥 Histórico R_100',html(){
     <h3>Estimativa de quantidade</h3>
     <div class="tw"><table>
       <tr><th>Intervalo</th><th>Por minuto</th><th>24 horas</th><th>3 dias</th><th>7 dias</th></tr>
-      ${[5,10,15,20,30].map(s=>{
+      ${D5_STEPS.map(s=>{
         const pm=60/s;
         return `<tr><td><b>${s}s</b></td><td>${pm}</td><td>${num(pm*60*24)}</td><td>${num(pm*60*24*3)}</td><td>${num(pm*60*24*7)}</td></tr>`;
       }).join('')}
@@ -9870,7 +9878,7 @@ function _iaInjetaBadge(){
 // Cada tempo tem o seu próprio banco, cronômetro, histórico, sessão e entradas. A ordem vai pelo motor da
 // conta demo (que acerta o tick do segundo do jogo) e o gale entra nos jogos seguintes do mesmo tempo.
 // =====================================================================================
-const MESA_TEMPOS=[5,10,20,30];
+const MESA_TEMPOS=[2,5,10,20,30];
 let MESA={open:false,timer:null,ini:Date.now(),lastFull:''};
 function mesaW(){ const w=+cfg.mesa_w||20; return MESA_TEMPOS.includes(w)?w:20; }
 function mesaSym(){ const L=d5Syms(), s=cfg.mesa_sym||curSym(); return L.includes(s)?s:L[0]; }
@@ -9882,6 +9890,8 @@ function mesaSet(k,v){ cfg[k]=v; saveCfg(); mesaRender(true); }
 function mesaAbrir(){ MESA.open=true; const p=$('#mesaPop'); if(!p) return; p.style.display='flex'; mesaRender(true); clearInterval(MESA.timer); MESA.timer=setInterval(()=>mesaRender(false),250); }
 // a Mesa abre numa aba própria do navegador (#mesa); essa aba só opera o que é da Mesa
 const MESA_TAB=/#mesa\b/.test(location.hash);
+function popBtnUi(){ const b=$('#popBtn'); if(!b) return; const on=+cfg.popups_on; b.textContent=on?'🔔 POPUPS LIGADOS':'🔕 POPUPS DESLIGADOS'; b.style.borderColor=on?'#22c55e':'#6b7280'; b.style.color=on?'#86efac':'#9ca3af'; }
+function popToggle(){ cfg.popups_on=+cfg.popups_on?0:1; saveCfg(); popBtnUi(); status(+cfg.popups_on?'🔔 Popups automáticos LIGADOS':'🔕 Popups automáticos DESLIGADOS — os botões "abrir popup" continuam funcionando','ok'); }
 function mesaNovaAba(){ const u=location.href.split('#')[0]+'#mesa'; const t=window.open(u,'mesa_play'); if(!t) mesaAbrir(); else t.focus(); }
 function mesaSair(){ if(MESA_TAB){ const op=window.opener; try{ if(op&&!op.closed){ op.focus(); window.close(); return; } }catch(e){} location.href=location.href.split('#')[0]; } else mesaFechar(); }
 function mesaFechar(){ MESA.open=false; clearInterval(MESA.timer); const p=$('#mesaPop'); if(p) p.style.display='none'; }
@@ -9911,9 +9921,10 @@ function mesaTabsHtml(){
     const rob=cfg.mesa_modo==='robo', ab=DM.orders.some(o=>o.src===(rob?'mbot':'mesa')&&o.step===w&&['aguardando','comprando','em jogo'].includes(o.estado)), s2=rob?mbSess(w):s;
     return `<button class="ms-tab ${mesaW()===w?'on':''}" onclick="mesaSet('mesa_w',${w})">
       <b>${w} SEGUNDOS</b><span class="ms-tl">${u?`<em class="${u.p?'imp':'par'}">${u.d}</em>`:''} próximo em <b>${falta}s</b>${ab?' · <span class="ms-pisca">● entrada</span>':''}</span>
-      <span class="ms-tl">${rob?(mbSt(w).on?'<b class="okc">🤖 ligado</b> · ':'🤖 parado · '):''}${s2.ac}✅ ${s2.er}❌ · <b class="${s2.pl>=0?'okc':'ruimc'}">${s2.pl>=0?'+':''}${s2.pl.toFixed(2)}</b></span></button>`;
+      <span class="ms-tl">${rob?(mbSt(w).on?(mbSt(w).pausa?'<b class="ruimc">⏸ pausa</b> · ':'<b class="okc">🤖 ligado</b> · ')+(mbLinkAtivo(w)?'🔗 ':''):'🤖 parado · '):''}${s2.ac}✅ ${s2.er}❌ · <b class="${s2.pl>=0?'okc':'ruimc'}">${s2.pl>=0?'+':''}${s2.pl.toFixed(2)}</b></span></button>`;
   }).join('');
 }
+function mesaLatHtml(w){ if(w>2) return ''; const l=Math.round(dmLat()*1000); return `<div class="ms-nota" style="text-align:center;margin-top:4px;color:${l>600?'#f87171':l>400?'#fbbf24':'#4ade80'}">⏱ jogo de 2s · latência ${l} ms ${l>600?'— alta, a ordem pode cair no tick errado':'— ok'}</div>`; }
 function mesaCentroHtml(){
   const w=mesaW(), sym=mesaSym(), W=LIVE[d5BankName(w,sym)]||[], now=dmNow();
   const prox=Math.ceil(now/w)*w, falta=prox-now, pctv=Math.max(0,Math.min(100,100*(1-falta/w)));
@@ -9925,7 +9936,7 @@ function mesaCentroHtml(){
   else faixa=`<div class="ms-faixa">${DM.ok&&DM.virt?`Escolha PAR ou ÍMPAR · sua entrada vai no jogo <b>${hmsOf(mesaProxT(w))}</b>`:'⚠ Conecte a conta DEMO para operar'}</div>`;
   return `${faixa}
     <div class="ms-reel">${W.length?mesaBalls(W,7,true):'<div class="mu">aguardando jogos deste tempo…</div>'}</div>
-    <div class="ms-crono"><div class="ms-cbar"><i style="width:${pctv}%"></i></div><div><b>${hmsOf(prox)}</b> · próximo jogo de ${w}s em <b>${Math.ceil(falta)}s</b> · ${symNome(sym)}</div></div>`;
+    <div class="ms-crono"><div class="ms-cbar"><i style="width:${pctv}%"></i></div><div><b>${hmsOf(prox)}</b> · próximo jogo de ${w}s em <b>${Math.ceil(falta)}s</b> · ${symNome(sym)}</div>${mesaLatHtml(w)}</div>`;
 }
 function mesaSessHtml(){
   const s=mesaSess(mesaW());
@@ -9954,9 +9965,10 @@ function mesaRender(full){
       <div class="ms-top"><div style="font-size:22px">💵</div><div class="ms-logo">MESA PLAY <small>Deriv · DEMO</small></div>
         <select class="ms-sel" onchange="mesaSet('mesa_sym',this.value)">${d5Syms().map(s=>`<option value="${s}" ${mesaSym()===s?'selected':''}>${symNome(s)}</option>`).join('')}</select>
         <div class="ms-modos"><button class="${cfg.mesa_modo!=='robo'?'on':''}" onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button class="${cfg.mesa_modo==='robo'?'on':''}" onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS${MESA_TEMPOS.some(w=>mbSt(w).on)?' ●':''}</button></div>
+        <button class="ms-x" onclick="mkAbrir()" title="qual volatilidade está melhor agora">🌐 MERCADOS</button>
         <div class="ms-relogio" id="msClock"></div>
         <div class="ms-saldo" id="msSaldo"></div><button class="ms-x" onclick="mesaSair()">${MESA_TAB?'↩ voltar ao início':'✕ sair'}</button></div>
-      <div class="ms-tabs" id="msTabs">${mesaTabsHtml()}</div>
+      <div class="ms-tabs" id="msTabs">${mesaTabsHtml()}</div><div id="msBest"></div>
       <div class="ms-corpo">
         <div class="ms-esq">${cfg.mesa_modo==='robo'?mbEsqHtml(mesaW()):mesaEsqManual(qv)}</div>
         <div class="ms-dir"><div id="msCentro"></div>
@@ -9972,6 +9984,7 @@ function mesaRender(full){
   const rob=cfg.mesa_modo==='robo';
   const k2=k+'|'+(rob?mbSt(w).log.length+'|'+RB_PENDING.length+'|'+mbSt(w).on+'|'+(mbSt(w).vEstado||'')+'|'+(cfg.mb_histTudo||0):'');
   if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); }
+  { const b=$('#msBest'); if(b&&(full||!MESA._bt||Date.now()-MESA._bt>30000)){ MESA._bt=Date.now(); b.innerHTML=mbBestHtml(); } }
   if(k2===MESA.lastFull) return; MESA.lastFull=k2;
   $('#msTabs').innerHTML=mesaTabsHtml();
   $('#msCentro').innerHTML=rob?mbCentroHtml(w):mesaCentroHtml();
@@ -9979,7 +9992,7 @@ function mesaRender(full){
   if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); const ss=mbSess(w); $('#msSess').innerHTML=`<div><b>${ss.ac}</b><span>ACERTOS</span></div><div><b>${ss.er}</b><span>ERROS</span></div><div><b class="${ss.pl>=0?'okc':'ruimc'}">${ss.pl>=0?'+':''}$ ${ss.pl.toFixed(2)}</b><span>RESULTADO</span></div>`; $('#msFila').innerHTML=mbFilaHtml(w); $('#msHist').innerHTML=mbHistHtml(w); }
   else { $('#msSess').innerHTML=mesaSessHtml(); $('#msHist').innerHTML=mesaHistHtml(); }
 }
-document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if(e.key==='p'||e.key==='P') mesaEntrar(0); if(e.key==='i'||e.key==='I') mesaEntrar(1); if(e.key==='Escape') mesaFechar(); if(['1','2','3','4'].includes(e.key)) mesaSet('mesa_w',MESA_TEMPOS[+e.key-1]); });
+document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if(e.key==='p'||e.key==='P') mesaEntrar(0); if(e.key==='i'||e.key==='I') mesaEntrar(1); if(e.key==='Escape') mesaFechar(); if(['1','2','3','4','5'].includes(e.key)) mesaSet('mesa_w',MESA_TEMPOS[+e.key-1]); });
 // =====================================================================================
 // 🤖 ROBÔS DA MESA PLAY — entra sozinho na conta DEMO seguindo os robôs 100% de cada tempo (5s/10s/20s/30s)
 // Regras: 1 entrada por vez (enquanto a entrada e os gales não terminam, ignora novos sinais);
@@ -9992,7 +10005,7 @@ function mbRatio(w){ const G=DM.log.filter(x=>(x.src==='mbot'||x.src==='mesa')&&
 // 🔁 recuperação: refaz a sessão do início e diz quanto falta recuperar e em quantos greens
 // falta = maior saldo que a sessão já teve − saldo agora. Começa a recuperar depois de um RED final (perdeu no último gale).
 function mbRec(w){
-  const C=mbCfg(w), N=+C.rec||0, L=mbSess(w).L; let pl=0,pico=0,k=null;
+  const C=mbCfg(w), N=+C.rec||0, L=(mbLinkAtivo(w)&&+mbLink().quente)?mbLinkL():mbSess(w).L; let pl=0,pico=0,k=null;
   for(const x of L){
     pl+=(+x.profit||0);
     if(pl>=pico-0.005){ pico=Math.max(pico,pl); k=null; continue; }
@@ -10039,11 +10052,11 @@ function mbSess(w){
 }
 function mbIniciar(w){
   if(!DM.ok||!DM.virt){ if(confirm('A conta DEMO não está conectada. Abrir a aba 💼 Conta Demo?')){ mesaFechar(); S.tab='demo'; renderTab(); } return; }
-  const s=mbSt(w); s.on=true; s.ini=Date.now(); s.parou=''; s.taken=new Set(); s.feitos=new Set();
+  const s=mbSt(w); s.on=true; s.ini=Date.now(); s.parou=''; s.taken=new Set(); s.feitos=new Set(); s.log=[]; s.conf='';
   mbVEstado(w); s.vEstado='esperando'; s.vSeq=[]; s.vPend=[]; s.vReal=0; s.vLastLen=DM.log.filter(x=>x.src==='mbot'&&x.mw===w).length;
   mbLog(w,`▶ Robô ${w}s iniciado · ${mbRobos(w).length} robô(s)${mbCfg(w).so100?' 100%':''} no banco ${mbBank(w)}`,'evt'); mesaRender(true);
 }
-function mbParar(w,motivo){ const s=mbSt(w); if(!s.on) return; s.on=false; s.parou=motivo||'parado por você'; mbLog(w,`⏹ Robô ${w}s parou: ${s.parou}`,'r'); try{ beep(); }catch(e){} if(MESA.open) mesaRender(true); }
+function mbParar(w,motivo){ const s=mbSt(w); if(!s.on) return; s.on=false; s.parou=motivo||'parado por você'; try{ mbSessSalvar(w,s.parou); }catch(e){} mbLog(w,`⏹ Robô ${w}s parou: ${s.parou}`,'r'); try{ beep(); }catch(e){} if(MESA.open) mesaRender(true); }
 // horário fixo 100% da hora atual (e da próxima, para cobrir os próximos 60 min) no banco do tempo
 let MBHF={};
 function mbHfNivel(w){ const C=mbCfg(w); if(+C.hfLvl>=0) return Math.min(2,+C.hfLvl); if(C.galeModo==='sinal') return 0; return C.gale<0?2:Math.max(0,Math.min(2,+C.gale)); }
@@ -10064,14 +10077,83 @@ function mbHfSinais(w){
   return H.rows.map((r,i)=>({r,i,T:hfNext(r.off)})).filter(x=>x.T-now<=3600)
     .map(x=>({key:`hf|${w}|${x.T}|${x.r.alvo}`,entryT:x.T*1000,alvo:x.r.alvo,ord:100000+x.i,ok:true,gale:mbHfNivel(w),nome:`🕒 Horário fixo ${x.r.slot} · ${x.r.n} dias 100%`,curto:`HF ${x.r.slot}`}));
 }
+// 🔗 robô interligado: vários tempos ao mesmo tempo, mas 1 entrada por vez no total
+// 🔀 recuperação no tempo mais quente (interligado): depois de um RED, a próxima entrada real só sai
+// no tempo com mais WIN virtual nos últimos N resultados; o prejuízo é somado entre os tempos.
+function mbLinkL(){ const L=mbLink(); return L.ws.flatMap(w=>mbSt(w).on?mbSess(w).L:[]).sort((a,b)=>a.t-b.t); }
+function mbLinkFalta(){ let pl=0,pico=0,red=false; for(const x of mbLinkL()){ pl+=(+x.profit||0); if(pl>=pico-0.005){ pico=Math.max(pico,pl); red=false; } else if(x.res==='red') red=true; } return pico-pl>0.05?Math.round((pico-pl)*100)/100:0; }
+function mbLinkQuente(){
+  const L=mbLink(), N=Math.max(3,+L.qN||6), min=Math.max(1,Math.min(N,+L.qMin||4)); let best=null;
+  for(const w of L.ws){ if(!mbSt(w).on) continue; const t=mbHistTail(w,N); if(t.length<N) continue; const W=t.filter(c=>c==='W').length; if(W<min) continue;
+    if(!best||W>best.W||(W===best.W&&mbHist(w).at(-1)?.T>mbHist(best.w).at(-1)?.T)) best={w,W,N,t:t.join('')}; }
+  return best;
+}
+function mbHotHtml(){
+  const L=mbLink(); const on=+L.quente;
+  let st=''; if(on&&+L.on){ const f=mbLinkFalta(), q=mbLinkQuente(); st=`<div class="ms-nota" style="margin-top:4px">${f?`<b class="ruimc">recuperando $ ${f.toFixed(2)}</b> · `:'sem prejuízo · '}${q?`🔥 mais quente: <b>${q.w}s</b> (${q.W}/${q.N} W · ${q.t})`:'nenhum tempo quente agora — recuperação espera'}</div>`; }
+  return `<label class="ms-chk" style="margin-top:6px"><input type="checkbox" ${on?'checked':''} onchange="mbLinkSet('quente',this.checked?1:0)"> 🔀 depois de RED, recuperar no tempo mais quente</label>
+    ${on?`<div class="ms-row2" style="margin-top:4px"><label class="ms-chk">quente = <input type="number" min="1" value="${+L.qMin||4}" style="width:40px" onchange="mbLinkSet('qMin',+this.value)"> W</label><label class="ms-chk">nos últimos <input type="number" min="3" value="${+L.qN||6}" style="width:40px" onchange="mbLinkSet('qN',+this.value)"></label></div>${st}`:''}`;
+}
+function mbLink(){ return {on:0,ws:[],sw:0,sl:0,copy:1,...(cfg.mb_link||{})}; }
+function mbLinkSet(k,v){ cfg.mb_link={...mbLink(),[k]:v}; saveCfg(); mesaRender(true); }
+function mbLinkTog(w,on){ const L=mbLink(), S=new Set(L.ws); if(on) S.add(w); else S.delete(w); mbLinkSet('ws',[...S].sort((a,b)=>a-b)); }
+function mbLinkAtivo(w){ const L=mbLink(); return +L.on&&L.ws.includes(w); }
+function mbAbertaGlobal(w){ const L=mbLink(); return mbLinkAtivo(w)?L.ws.some(x=>mbAberta(x)):mbAberta(w); }
+function mbLinkPl(){ const L=mbLink(); return L.ws.reduce((a,w)=>a+(mbSt(w).on?mbSess(w).pl:0),0); }
+function mbLinkIniciar(){
+  const L=mbLink(), w0=mesaW(); if(!L.ws.length){ alert('Marque pelo menos um tempo nos quadradinhos.'); return; }
+  if(!DM.ok||!DM.virt){ mbIniciar(w0); return; }
+  if(+L.copy){ cfg.mbot={...(cfg.mbot||{})}; for(const w of L.ws) if(w!==w0) cfg.mbot[w]={...mbCfg(w0)}; }
+  cfg.mb_link={...L,on:1}; saveCfg();
+  for(const w of L.ws){ if(mbSt(w).on) mbParar(w,'reiniciado no interligado'); mbIniciar(w); mbLog(w,`🔗 Interligado com ${L.ws.map(x=>x+'s').join(' + ')} — 1 entrada por vez no total`,'evt'); }
+  mesaRender(true);
+}
+function mbLinkParar(motivo){ const L=mbLink(); cfg.mb_link={...L,on:0}; saveCfg(); for(const w of L.ws) mbParar(w,motivo||'interligado parado'); mesaRender(true); }
+function mbLinkHtml(){
+  const L=mbLink(), on=+L.on;
+  return `<div class="ms-box" style="border-color:${on?'#22c55e':'#38bdf8'}"><span class="ms-lb">🔗 ROBÔ INTERLIGADO ${on?'<b class="okc">● LIGADO</b>':''}</span>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">${MESA_TEMPOS.map(w=>`<label class="ms-chk" style="background:#26222f;border:1px solid var(--mb);border-radius:8px;padding:4px 8px"><input type="checkbox" ${L.ws.includes(w)?'checked':''} ${on?'disabled':''} onchange="mbLinkTog(${w},this.checked)"> ${w}s</label>`).join('')}
+      <button class="mb-mini" ${on?'disabled':''} onclick="mbLinkSet('ws',[...MESA_TEMPOS])">todos</button></div>
+    <label class="ms-chk"><input type="checkbox" ${+L.copy?'checked':''} ${on?'disabled':''} onchange="mbLinkSet('copy',this.checked?1:0)"> copiar a configuração deste tempo (${mesaW()}s) para os marcados</label>
+    ${mbHotHtml()}
+    <div class="ms-row2" style="margin-top:6px"><label class="ms-chk">stop win total $ <input type="number" min="0" value="${+L.sw||0}" style="width:60px" onchange="mbLinkSet('sw',+this.value)"></label><label class="ms-chk">stop loss total $ <input type="number" min="0" value="${+L.sl||0}" style="width:60px" onchange="mbLinkSet('sl',+this.value)"></label></div>
+    ${on?`<div class="ms-nota" style="margin-top:4px">Somado: <b class="${mbLinkPl()>=0?'okc':'ruimc'}">${mbLinkPl()>=0?'+':''}$ ${mbLinkPl().toFixed(2)}</b> · ${L.ws.map(w=>`${w}s ${mbSt(w).on?'🟢':'⚫'}`).join(' · ')}</div>
+      <button class="ms-go stop" style="height:46px;font-size:15px" onclick="mbLinkParar()">⏹ PARAR INTERLIGADO</button>`
+      :`<button class="ms-go" style="height:46px;font-size:15px;background:linear-gradient(160deg,#0ea5e9,#0369a1)" onclick="mbLinkIniciar()">▶ INICIAR INTERLIGADO (${L.ws.length} tempo${L.ws.length!==1?'s':''})</button>`}
+    <div class="ms-nota">Cada tempo procura os sinais dele; quando um entra, os outros esperam a entrada (e os gales) terminar. Se não tem sinal num, entra no outro.</div></div>`;
+}
+// ⏸ pausa por instabilidade: muitos LOSS nos últimos resultados → só virtual até os WIN passarem os LOSS
+function mbPausa(w){
+  const s=mbSt(w), C=mbCfg(w);
+  if(!+C.pOn){ if(s.pausa){ s.pausa=false; } return false; }
+  const N=Math.max(4,+C.pN||10), lim=Math.max(2,Math.min(N,+C.pLim||6)), t=mbHistTail(w,N);
+  if(t.length<N) return !!s.pausa;
+  const L=t.filter(x=>x==='L').length, W=N-L;
+  if(!s.pausa&&L>=lim){ s.pausa=true; mbLog(w,`⏸ PAUSA: ${L} LOSS nos últimos ${N} (${t.join('')}) — hora instável, só virtual até os WIN passarem os LOSS`,'r'); try{ beep(); }catch(e){} }
+  else if(s.pausa&&W>L){ s.pausa=false; mbLog(w,`▶ Fim da pausa: ${W} WIN × ${L} LOSS nos últimos ${N} (${t.join('')}) — voltando a operar`,'g'); }
+  return !!s.pausa;
+}
+function mbPausaHtml(w){
+  const C=mbCfg(w), on=+C.pOn;
+  return `<div class="ms-box"><span class="ms-lb">⏸ PAUSA POR INSTABILIDADE</span>
+    <label class="ms-chk" style="margin-top:4px"><input type="checkbox" ${on?'checked':''} onchange="mbSetCfg(${w},'pOn',this.checked?1:0)"> pausar quando a hora ficar ruim</label>
+    ${on?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">olhar últimos <input type="number" min="4" value="${+C.pN||10}" style="width:46px" onchange="mbSetCfg(${w},'pN',+this.value)"></label><label class="ms-chk">pausa com <input type="number" min="2" value="${+C.pLim||6}" style="width:46px" onchange="mbSetCfg(${w},'pLim',+this.value)"> LOSS</label></div>
+      <div class="ms-nota">Pausa quando ${+C.pLim||6}+ dos últimos ${+C.pN||10} resultados (virtuais e reais) forem LOSS. Durante a pausa ele não aposta, só anota virtual, e volta quando os WIN passarem os LOSS nesses ${+C.pN||10}.${mbSt(w).pausa?' <b class="ruimc">⏸ EM PAUSA AGORA</b>':''}</div>`:''}</div>`;
+}
 function mbTick(){
-  const now=dmNow();
+  const now=dmNow(), L=mbLink();
+  // stop somado do interligado
+  if(+L.on){ const pl=mbLinkPl(); if(+L.sw>0&&pl>=+L.sw) mbLinkParar(`🏁 stop win do interligado (+${pl.toFixed(2)})`); else if(+L.sl>0&&pl<=-L.sl) mbLinkParar(`🛑 stop loss do interligado (${pl.toFixed(2)})`); }
   for(const w of MESA_TEMPOS){
-    const s=mbSt(w); if(!s.on) continue;
-    const C=mbCfg(w), ss=mbSess(w), fonte=C.fonte||'padroes';
-    if(C.sw>0&&ss.pl>=C.sw){ mbParar(w,`🏁 stop win (+${ss.pl.toFixed(2)})`); continue; }
-    if(C.sl>0&&ss.pl<=-C.sl){ mbParar(w,`🛑 stop loss (${ss.pl.toFixed(2)})`); continue; }
-    if(!DM.ok&&!DM.querOn){ mbParar(w,'conta demo desconectada'); continue; }
+    const s=mbSt(w), obs=!s.on;                 // obs = observador silencioso (robô parado): só anota virtual
+    if(obs&&!+(cfg.mb_obs??1)) continue;
+    const C=mbCfg(w), fonte=C.fonte||'padroes';
+    if(!obs){
+      const ss=mbSess(w);
+      if(C.sw>0&&ss.pl>=C.sw){ mbParar(w,`🏁 stop win (+${ss.pl.toFixed(2)})`); continue; }
+      if(C.sl>0&&ss.pl<=-C.sl){ mbParar(w,`🛑 stop loss (${ss.pl.toFixed(2)})`); continue; }
+      if(!DM.ok&&!DM.querOn){ mbParar(w,'conta demo desconectada'); continue; }
+    }
     try{ mbVTick(w); }catch(e){ console.warn('virtual',e); }
     const bank=mbBank(w); let sigs=[];
     if(fonte!=='hfix'){
@@ -10080,19 +10162,25 @@ function mbTick(){
         sigs.push({key:g.key,entryT:g.entryT,alvo:g.alvo,ord:elig.get(g.rbId)??1e9,ok:elig.has(g.rbId),gale:rbNivel(rb),nome:rbName(rb),curto:rbGat(rb)}); }
     }
     if(fonte!=='padroes'){ mbHfLoad(w); sigs=sigs.concat(mbHfSinais(w)); }
-    sigs=sigs.filter(g=>!s.taken.has(g.key)&&g.entryT/1000-now>1.6);
+    sigs=sigs.filter(g=>!s.taken.has(g.key)&&g.entryT/1000-now>(w<=2?1.2:1.6));
     if(!sigs.length) continue;
     const T=Math.min(...sigs.map(g=>g.entryT));
-    if(T/1000-now>3.4) continue;                       // decide ~3s antes, com todos os sinais do jogo já conhecidos
+    if(T/1000-now>(w<=2?2.4:3.4)) continue;                       // decide ~3s antes, com todos os sinais do jogo já conhecidos
     const doJogo=sigs.filter(g=>g.entryT===T);
     doJogo.forEach(g=>s.taken.add(g.key));
     const ok=doJogo.filter(g=>g.ok).sort((a,b)=>a.ord-b.ord);
     if(!ok.length) continue;
-    const hh=hmsOf(T/1000);
-    if(mbAberta(w)||(+mbV(w).vOn&&mbVEstado(w).vPend.length)){ mbLog(w,`⏭ ${hh}: ${ok.length} sinal(is) ignorado(s) — já tem entrada ${mbAberta(w)?'aberta':'virtual em andamento'}`,'evt'); continue; }
-    if(new Set(ok.map(g=>g.alvo)).size>1){ mbLog(w,`⛔ ${hh}: ABORTADO — PAR e ÍMPAR no mesmo jogo (${ok.map(g=>(g.alvo?'Í ':'P ')+g.curto).join(' · ')})`,'r'); continue; }
-    const g=ok[0], gale=C.gale<0?g.gale:C.gale, base=Math.max(0.35,+C.val||0.35), fat=Math.max(1,+C.fat||2.2);
-    if(+mbV(w).vOn&&mbVEstado(w).vEstado==='esperando'){ mbVAnotar(w,g,T,C.galeModo==='sinal'?0:gale); continue; }
+    const hh=hmsOf(T/1000), vs=mbVEstado(w);
+    if(new Set(ok.map(g=>g.alvo)).size>1){ if(!obs) mbLog(w,`⛔ ${hh}: ABORTADO — PAR e ÍMPAR no mesmo jogo (${ok.map(g=>(g.alvo?'Í ':'P ')+g.curto).join(' · ')})`,'r'); continue; }
+    const g=ok[0], gale=C.gale<0?g.gale:C.gale, base=Math.max(0.35,+C.val||0.35), fat=Math.max(1,+C.fat||2.2), gv=C.galeModo==='sinal'?0:gale;
+    if(obs){ if(!vs.vPend.length) mbVAnotar(w,g,T,gv,true); continue; }
+    const pausa=mbPausa(w), esperando=+mbV(w).vOn&&vs.vEstado==='esperando';
+    if((esperando||pausa)&&vs.vPend.length){ continue; }
+    if(esperando||pausa){ mbVAnotar(w,g,T,gv); continue; }
+    if(mbAbertaGlobal(w)){ mbLog(w,`⏭ ${hh}: ${ok.length} sinal(is) ignorado(s) — já tem entrada aberta${mbAberta(w)?'':' em outro tempo (interligado)'}`,'evt'); if(!vs.vPend.length) mbVAnotar(w,g,T,gv,true); continue; }
+    if(mbLinkAtivo(w)&&+L.quente){ const falta=mbLinkFalta(); if(falta>0){ const q=mbLinkQuente();
+        if(!q||q.w!==w){ mbLog(w,`🔀 ${hh}: sinal virou virtual — recuperando $ ${falta.toFixed(2)} ${q?`no ${q.w}s (mais quente: ${q.W}/${q.N} W)`:'só quando algum tempo esquentar'}`,'evt'); if(!vs.vPend.length) mbVAnotar(w,g,T,gv,true); continue; }
+        mbLog(w,`🔥 ${hh}: recuperação no ${w}s — o mais quente agora (${q.W}/${q.N} W · ${q.t})`,'g'); } }
     const R=mbRec(w), rec=R.on?{recAlvo:R.alvo,recMax:+C.recMax||0,ratio:R.r}:{}, rtxt=R.on?` · 🔁 recuperando $ ${R.falta.toFixed(2)} (${R.k} green${R.k>1?'s':''}) → aposta $ ${Math.min(R.stake,+C.recMax||Infinity).toFixed(2)}`:'';
     if(C.galeModo==='sinal'){ const k=mbGaleK(w), G=C.gale<0?2:+C.gale;
       dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:0,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:mbStakeSinal(w),fator:fat,mcor:g.alvo,gk:k,gmax:G,...rec}); }
@@ -10103,6 +10191,50 @@ function mbTick(){
     try{ beep(); }catch(e){}
   }
 }
+// =====================================================================================
+// 🏆 MELHORES AGORA — testa as regras nos resultados recentes de cada tempo e mostra as melhores
+// As siglas são escolhidas nos 2/3 mais antigos e medidas no 1/3 mais novo (para não se enganar).
+// =====================================================================================
+function mbSiglasSeq(S,minN){ const M=new Map(); for(let k=2;k<=5;k++) for(let i=k;i<S.length;i++){ const p=S.slice(i-k,i); let o=M.get(p); if(!o){ o={p,n:0,w:0}; M.set(p,o); } o.n++; if(S[i]==='W') o.w++; }
+  return [...M.values()].filter(o=>o.n>=minN).map(o=>({...o,r:o.w/o.n})).sort((a,b)=>b.r-a.r||b.n-a.n); }
+function mbRegraNome(P){ if(!+P.vOn) return 'sem virtual (entra em tudo)'; return {loss:`após ${P.vX} LOSS virtual`,win:`após ${P.vY} WIN virtual`,ou:`após ${P.vX} LOSS ou ${P.vY} WIN`,sigla:`siglas ${(P.vSiglas||[]).join(' / ')}`}[P.vModo]||P.vModo; }
+function mbBestCalc(){
+  const horas=+(cfg.mb_bestH??3), minN=+(cfg.mb_bestN??20), out=[], de=Date.now()/1000-horas*3600;
+  for(const w of MESA_TEMPOS){
+    const H=mbHist(w).filter(h=>h.T>=de).sort((a,b)=>a.T-b.T); if(H.length<15) continue;
+    const V=mbV(w), cands=[{vOn:0},...[1,2,3,4].map(x=>({vOn:1,vModo:'loss',vX:x})),...[1,2,3].map(y=>({vOn:1,vModo:'win',vY:y})),{vOn:1,vModo:'ou',vX:2,vY:2}];
+    const corte=Math.floor(H.length*2/3), S1=H.slice(0,corte).map(h=>h.res).join(''), top=mbSiglasSeq(S1,5).slice(0,3).map(o=>o.p);
+    for(const P of cands){ const R=mbVSimular(H,+P.vOn?{...V,...P}:null); if(R.n>=minN) out.push({w,P,nome:mbRegraNome(P),...R}); }
+    if(top.length){ const P={vOn:1,vModo:'sigla',vSiglas:top}; const R=mbVSimular(H.slice(corte),{...V,...P}); if(R.n>=Math.max(5,Math.floor(minN/2))) out.push({w,P,nome:mbRegraNome(P)+' (validada)',...R}); }
+  }
+  out.sort((a,b)=>b.p-a.p||b.n-a.n);
+  return {out,horas,minN};
+}
+function mbBestUsar(w,P,iniciar){
+  cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w]={...mbCfg(w),...P}; saveCfg();
+  mbLog(w,`🏆 Estratégia em uso: ${mbRegraNome({...mbV(w),...P})}`,'g');
+  if(iniciar&&!mbSt(w).on){ const L=mbLink(); if(+L.on&&!L.ws.includes(w)){ cfg.mb_link={...L,ws:[...L.ws,w].sort((a,b)=>a-b)}; saveCfg(); } mbIniciar(w); }
+  cfg.mesa_w=w; saveCfg(); mesaRender(true);
+}
+// 🧠 o robô escolhe sozinho: a cada 10 min aplica a melhor regra de cada tempo que está rodando
+setInterval(()=>{ try{ if(!+cfg.mb_auto) return; const B=mbBestCalc();
+  for(const w of MESA_TEMPOS){ if(!mbSt(w).on) continue; const best=B.out.find(r=>r.w===w); if(!best) continue;
+    const atual=mbRegraNome(mbV(w)); if(atual===best.nome.replace(' (validada)','')) continue;
+    cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w]={...mbCfg(w),...best.P}; saveCfg();
+    mbLog(w,`🧠 Robô trocou a estratégia sozinho → ${best.nome} (${(best.p*100).toFixed(0)}% em ${best.n} nas últimas ${B.horas}h)`,'g'); }
+  if(MESA.open) mesaRender(true); }catch(e){ console.warn('auto estratégia',e); } },600000);
+function mbBestHtml(){
+  if(!+(cfg.mb_bestOpen??1)) return `<button class="mb-bestbtn" onclick="cfg.mb_bestOpen=1;saveCfg();mesaRender(true)">🏆 MELHORES AGORA</button>`;
+  const B=mbBestCalc(), r=0.95;
+  return `<div class="mb-best"><div style="display:flex;align-items:center;gap:6px"><b>🏆 MELHORES AGORA</b><button class="mb-mini" style="margin-left:auto" onclick="cfg.mb_bestOpen=0;saveCfg();mesaRender(true)">—</button></div>
+    <div class="ms-nota" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0">últimas <select class="ms-sel" style="padding:2px 4px" onchange="cfg.mb_bestH=+this.value;saveCfg();mesaRender(true)">${[1,2,3,6,12,24].map(h=>`<option value="${h}" ${B.horas===h?'selected':''}>${h}h</option>`).join('')}</select>
+      mín. <input type="number" min="3" value="${B.minN}" style="width:40px" onchange="cfg.mb_bestN=+this.value;saveCfg();mesaRender(true)"> entradas</div>
+    <label class="ms-chk"><input type="checkbox" ${+(cfg.mb_obs??1)?'checked':''} onchange="cfg.mb_obs=this.checked?1:0;saveCfg();mesaRender(true)"> 👀 observar os 5 tempos em silêncio (virtual)</label>
+    <label class="ms-chk"><input type="checkbox" ${+cfg.mb_auto?'checked':''} onchange="cfg.mb_auto=this.checked?1:0;saveCfg();mesaRender(true)"> 🧠 robô escolhe a estratégia sozinho (10 min)</label>
+    <div style="max-height:300px;overflow:auto;margin-top:6px">${B.out.length?B.out.slice(0,10).map(x=>{ const sal=x.ok*r-(x.n-x.ok); return `<div class="mb-bl"><span><b>${x.w}s</b> · ${x.nome}</span><span class="${x.p>=0.53?'okc':x.p<0.48?'ruimc':''}">${(x.p*100).toFixed(0)}% <i>(${x.n})</i></span><span class="${sal>=0?'okc':'ruimc'}">${sal>=0?'+':''}${sal.toFixed(1)}</span><button class="mb-mini on" onclick='mbBestUsar(${x.w},${JSON.stringify(x.P)},1)'>usar</button></div>`; }).join(''):`<div class="mu" style="padding:6px">Juntando dados… cada tempo precisa de ${B.minN}+ entradas nas últimas ${B.horas}h. Com o 👀 observador ligado isso enche sozinho.</div>`}</div>
+    <div class="ms-nota" style="margin-top:4px">% = acerto que a regra teria tido · saldo em entradas de $1. Poucas entradas = pode ser sorte.</div></div>`;
+}
+
 setInterval(()=>{ try{ mbTick(); }catch(e){ console.warn('robô mesa',e); } },300);
 // =====================================================================================
 // 👻 LOSS / WIN VIRTUAL + ⭐ CONFIGURAÇÕES SALVAS + 📉 MAIOR VALOR EXPOSTO + 📄 PDF — robô da Mesa
@@ -10113,6 +10245,56 @@ setInterval(()=>{ try{ mbTick(); }catch(e){ console.warn('robô mesa',e); } },30
 // =====================================================================================
 const MBV_DEF={vOn:0,vModo:'loss',vX:2,vY:2,vVolta:'green',vN:1};
 function mbV(w){ return {...MBV_DEF,...mbCfg(w)}; }
+// =====================================================================================
+// 🔤 SIGLAS W/L — o robô guarda a sequência de resultados (virtuais + reais) de cada tempo
+// e mede, para cada sigla (ex.: WLLW), o que veio LOGO DEPOIS. As melhores das últimas horas
+// podem virar regra do robô: "entrar quando a sequência terminar em WLL" etc.
+// =====================================================================================
+function mbHistTail(w,n=8){ return mbHist(w).slice(-n).map(h=>h.res); }
+function mbSiglas(w,horas,minN){
+  const ate=Date.now()/1000, de=horas>0?ate-horas*3600:0;
+  const H=mbHist(w).filter(h=>h.T>=de).sort((a,b)=>a.T-b.T), S=H.map(h=>h.res).join('');
+  const meio=Math.floor(S.length/2), M=new Map();
+  for(let k=2;k<=5;k++) for(let i=k;i<S.length;i++){
+    const pat=S.slice(i-k,i); let o=M.get(pat); if(!o){ o={pat,n:0,w:0,n1:0,w1:0,n2:0,w2:0}; M.set(pat,o); }
+    const win=S[i]==='W'; o.n++; if(win) o.w++; if(i<meio){ o.n1++; if(win) o.w1++; } else { o.n2++; if(win) o.w2++; }
+  }
+  const base=S.length?(S.split('W').length-1)/S.length:0.5, tail=S.slice(-5);
+  const L=[...M.values()].filter(o=>o.n>=Math.max(2,minN)).map(o=>({...o,p:o.w/o.n,agora:tail.endsWith(o.pat)}));
+  L.sort((a,b)=>b.p-a.p||b.n-a.n);
+  return {L,base,total:S.length,de:H[0]?.T,tail:S.slice(-8)};
+}
+function mbSgCaixas(pat){ return [...pat].map(c=>`<span class="mb-vb ${c==='W'?'w':'l'}">${c}</span>`).join(''); }
+function mbSgUsar(w,pat){
+  const V=mbV(w), L=new Set(V.vSiglas||[]);
+  if(L.has(pat)) L.delete(pat); else L.add(pat);
+  cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w]={...mbCfg(w),vSiglas:[...L],vModo:L.size?'sigla':(V.vModo==='sigla'?'loss':V.vModo),vOn:L.size?1:V.vOn}; saveCfg(); mesaRender(true);
+}
+function mbSgMelhores(w){
+  const C=mbV(w), R=mbSiglas(w,+(cfg.mb_sgH??6),+(cfg.mb_sgMin??8)), top=R.L.filter(x=>x.p>R.base).slice(0,Math.max(1,+C.vSiglaN||3)).map(x=>x.pat);
+  cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w]={...mbCfg(w),vSiglas:top,vModo:'sigla',vOn:1}; saveCfg();
+  mbLog(w,`🔤 Siglas em uso: ${top.join(', ')||'nenhuma acima da média'} (melhores das últimas ${+(cfg.mb_sgH??6)||'todas as'} h)`,'evt'); mesaRender(true);
+}
+// troca automática: refaz as melhores siglas a cada 10 min
+setInterval(()=>{ try{ for(const w of MESA_TEMPOS){ const V=mbV(w); if(mbSt(w).on&&V.vModo==='sigla'&&+V.vSiglaAuto) mbSgMelhores(w); } }catch(e){} },600000);
+function mbSgHtml(w){
+  const V=mbV(w), h=+(cfg.mb_sgH??6), mn=+(cfg.mb_sgMin??8), R=mbSiglas(w,h,mn), usadas=new Set(V.vSiglas||[]);
+  const selH=`<select class="ms-sel" onchange="cfg.mb_sgH=+this.value;saveCfg();mesaRender(true)">${[[1,'1 hora'],[3,'3 horas'],[6,'6 horas'],[12,'12 horas'],[24,'24 horas'],[72,'3 dias'],[0,'tudo']].map(([v,t])=>`<option value="${v}" ${h===v?'selected':''}>${t}</option>`).join('')}</select>`;
+  const head=`<div class="ms-nota" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0">Últimas ${selH} · mín. <input type="number" min="2" value="${mn}" style="width:46px" onchange="cfg.mb_sgMin=+this.value;saveCfg();mesaRender(true)"> vezes
+    · <b>${R.total}</b> resultados · média geral <b>${(R.base*100).toFixed(1)}%</b> W · agora termina em ${mbSgCaixas(R.tail)||'—'}
+    <span style="margin-left:auto;display:flex;gap:6px;align-items:center">usar as <input type="number" min="1" max="10" value="${+V.vSiglaN||3}" style="width:40px" onchange="mbSetCfg(${w},'vSiglaN',+this.value)"> melhores
+    <button class="mb-mini on" onclick="mbSgMelhores(${w})">🔤 usar no robô</button>
+    <label class="ms-chk"><input type="checkbox" ${+V.vSiglaAuto?'checked':''} onchange="mbSetCfg(${w},'vSiglaAuto',this.checked?1:0)"> atualizar sozinho (10 min)</label></span></div>`;
+  if(R.total<20) return head+`<div class="mu" style="padding:8px">Poucos resultados guardados (${R.total}). Deixe o robô rodando com o 👻 virtual ligado — cada sinal vira uma letra W ou L e as siglas aparecem aqui.</div>`;
+  const linhas=R.L.slice(0,40).map(x=>`<div class="ms-hl" style="grid-template-columns:150px 54px 76px 170px 100px 1fr;${usadas.has(x.pat)?'background:rgba(168,85,247,.18)':''}">
+    <span>${mbSgCaixas(x.pat)}</span><span>${x.n}×</span><span class="${x.p>=R.base+0.05?'okc':x.p<R.base-0.05?'ruimc':''}"><b>${(x.p*100).toFixed(0)}%</b> W</span>
+    <span class="mu">antes ${x.n1?(x.w1/x.n1*100).toFixed(0)+'%':'—'} · depois ${x.n2?(x.w2/x.n2*100).toFixed(0)+'%':'—'}</span>
+    <span>${x.agora?'<span class="ms-pisca">● bate AGORA</span>':''}</span>
+    <span style="text-align:right"><button class="mb-mini ${usadas.has(x.pat)?'on':''}" onclick="mbSgUsar(${w},'${x.pat}')">${usadas.has(x.pat)?'✔ no robô':'➕ usar'}</button></span></div>`).join('');
+  return head+`<div class="ms-hl" style="grid-template-columns:150px 54px 76px 170px 100px 1fr;font-weight:700;color:#a49dbb"><span>Sigla</span><span>Vezes</span><span>Próximo</span><span>1ª metade · 2ª metade</span><span></span><span></span></div>${linhas}
+    <div class="ms-nota" style="margin-top:4px">"Próximo" = quantas vezes o sinal <b>seguinte</b> a essa sigla deu WIN. Confie só em siglas com bastante vezes e que fiquem boas <b>nas duas metades</b> do período — se estiver bom só numa metade, é acaso. Num jogo aleatório todas tendem à média geral.</div>`;
+}
+
 function mbHistLoad(w){ try{ return JSON.parse(localStorage.getItem('mb_seq_'+w)||'[]')||[]; }catch(e){ return []; } }
 function mbHistSave(w,H){ try{ localStorage.setItem('mb_seq_'+w,JSON.stringify(H.slice(-3000))); }catch(e){} }
 function mbHistAdd(w,o){ const s=mbSt(w); if(!s.hist) s.hist=mbHistLoad(w); if(s.hist.some(x=>x.k===o.k)) return; s.hist.push(o); mbHistSave(w,s.hist); }
@@ -10125,7 +10307,7 @@ function mbHist(w){ const s=mbSt(w); if(!s.hist) s.hist=mbHistLoad(w);
 function mbVEstado(w){ const s=mbSt(w); if(!s.vEstado){ s.vEstado='esperando'; s.vSeq=[]; s.vPend=[]; s.vReal=0; s.vLastLen=0; } return s; }
 function mbVRegraTxt(w){
   const V=mbV(w), L=`${V.vX} loss`, W=`${V.vY} win`;
-  const ent={loss:`depois de ${L} virtual seguidos`,win:`depois de ${W} virtual seguidos`,ou:`depois de ${L} OU ${W} virtual seguidos`,seq:`depois de ${W} e em seguida ${L} virtual`,seq2:`depois de ${L} e em seguida ${W} virtual`}[V.vModo];
+  const ent={loss:`depois de ${L} virtual seguidos`,win:`depois de ${W} virtual seguidos`,ou:`depois de ${L} OU ${W} virtual seguidos`,sigla:`quando a sequência terminar em ${(V.vSiglas||[]).join(' / ')||'(escolha as siglas abaixo)'}`,seq:`depois de ${W} e em seguida ${L} virtual`,seq2:`depois de ${L} e em seguida ${W} virtual`}[V.vModo];
   const vol={green:'volta a esperar depois de um GREEN real',red:'volta a esperar depois de um RED real',qualquer:'volta a esperar depois de qualquer resultado real',n:`volta a esperar depois de ${V.vN} entrada(s) real(is)`}[V.vVolta];
   return `Entra ${ent} · ${vol}`;
 }
@@ -10139,13 +10321,14 @@ function mbVBate(seq,V){
   if(V.vModo==='ou') return tail('L')>=X||tail('W')>=Y;
   if(V.vModo==='seq') return fim([...Array(Y).fill('W'),...Array(X).fill('L')]);
   if(V.vModo==='seq2') return fim([...Array(X).fill('L'),...Array(Y).fill('W')]);
+  if(V.vModo==='sigla') return (V.vSiglas||[]).some(p=>p&&fim([...p]));
   return false;
 }
 // chamado pelo mbTick em vez de apostar quando está esperando
-function mbVAnotar(w,g,T,gale){
+function mbVAnotar(w,g,T,gale,mudo){
   const s=mbVEstado(w);
   s.vPend.push({T:T/1000,alvo:g.alvo,gale:gale,nome:g.nome,k:'v|'+g.key});
-  mbLog(w,`👻 ${hmsOf(T/1000)}: sinal VIRTUAL ${g.alvo?'ÍMPAR':'PAR'} · ${g.nome} (sem apostar)`,'evt');
+  if(!mudo) mbLog(w,`👻 ${hmsOf(T/1000)}: sinal VIRTUAL ${g.alvo?'ÍMPAR':'PAR'} · ${g.nome} (sem apostar)`,'evt');
 }
 // resolve os sinais virtuais com o resultado do jogo e confere as regras
 function mbVTick(w){
@@ -10161,11 +10344,12 @@ function mbVTick(w){
         if(g===p.gale) res='L';
       }
       if(res===null) return true;
-      if(res==='?'){ mbLog(w,`👻 ${hmsOf(p.T)}: virtual sem resultado (faltou o jogo no banco)`,'evt'); return false; }
+      if(res==='?'){ if(mbSt(w).on) mbLog(w,`👻 ${hmsOf(p.T)}: virtual sem resultado (faltou o jogo no banco)`,'evt'); return false; }
       s.vSeq.push(res); if(s.vSeq.length>50) s.vSeq.shift();
       mbHistAdd(w,{k:p.k,T:p.T,alvo:p.alvo,res,tipo:'v',nome:p.nome});
-      mbLog(w,`👻 ${hmsOf(p.T)}: ${res==='W'?'WIN':'LOSS'} virtual ${p.alvo?'ÍMPAR':'PAR'} · sequência ${s.vSeq.slice(-8).join('')}`,res==='W'?'g':'r');
-      if(V.vOn&&s.vEstado==='esperando'&&mbVBate(s.vSeq,V)){ s.vEstado='operando'; s.vReal=0; mbLog(w,`🚦 Regra virtual bateu (${s.vSeq.slice(-8).join('')}) — próximo sinal entra DE VERDADE`,'g'); try{ beep(); }catch(e){} }
+      if(mbSt(w).on) mbLog(w,`👻 ${hmsOf(p.T)}: ${res==='W'?'WIN':'LOSS'} virtual ${p.alvo?'ÍMPAR':'PAR'} · sequência ${s.vSeq.slice(-8).join('')}`,res==='W'?'g':'r');
+      const sq=V.vModo==='sigla'?mbHistTail(w):s.vSeq;
+      if(mbSt(w).on&&V.vOn&&s.vEstado==='esperando'&&mbVBate(sq,V)){ s.vEstado='operando'; s.vReal=0; mbLog(w,`🚦 Regra virtual bateu (${sq.slice(-8).join('')}) — próximo sinal entra DE VERDADE`,'g'); try{ beep(); }catch(e){} }
       return false;
     });
   }
@@ -10185,12 +10369,12 @@ function mbVTick(w){
 }
 // tabela "como teria sido": aplica cada regra no histórico de sinais (virtuais + reais) deste tempo
 function mbVSimular(H,V){
-  let est=V?'esperando':'operando', seq=[], n=0, ok=0, real=0;
+  let est=V?'esperando':'operando', seq=[], all=[], n=0, ok=0, real=0;
   for(const h of H){
-    if(est==='operando'){ n++; if(h.res==='W') ok++; real++;
+    if(est==='operando'){ n++; if(h.res==='W') ok++; real++; all.push(h.res);
       if(V){ const volta=V.vVolta==='green'?h.res==='W':V.vVolta==='red'?h.res==='L':V.vVolta==='qualquer'?true:real>=Math.max(1,+V.vN||1); if(volta){ est='esperando'; seq=[]; } }
       continue; }
-    seq.push(h.res); if(mbVBate(seq,V)){ est='operando'; real=0; }
+    seq.push(h.res); all.push(h.res); if(mbVBate(V&&V.vModo==='sigla'?all:seq,V)){ est='operando'; real=0; }
   }
   return {n,ok,p:n?ok/n:0};
 }
@@ -10199,7 +10383,7 @@ function mbVTabela(w){
   if(H.length<5) return `<div class="mu" style="padding:8px">Ainda tem ${H.length} sinal(is) guardado(s) neste tempo. Deixe o robô rodando (com ou sem virtual) que cada sinal vai sendo anotado e a tabela aparece.</div>`;
   const base=mbVSimular(H,null), linhas=[['sem virtual (entra em tudo)',base,1]];
   for(const m of ['loss','win']) for(let x=1;x<=5;x++){ const VV={...V,vModo:m,vX:x,vY:x}; linhas.push([`${m==='loss'?'após '+x+' LOSS':'após '+x+' WIN'} virtual`,mbVSimular(H,VV),0,m===V.vModo&&x===(m==='loss'?+V.vX:+V.vY)]); }
-  if(['ou','seq','seq2'].includes(V.vModo)) linhas.push([mbVRegraTxt(w).split(' · ')[0].replace('Entra ',''),mbVSimular(H,V),0,1]);
+  if(['ou','seq','seq2','sigla'].includes(V.vModo)) linhas.push([mbVRegraTxt(w).split(' · ')[0].replace('Entra ',''),mbVSimular(H,V),0,1]);
   const r=mbRatio(w);
   return `<div class="ms-nota" style="margin:2px 0 4px">Amostra: <b>${H.length}</b> sinais (${H.filter(h=>h.tipo==='v').length} virtuais + ${H.filter(h=>h.tipo==='r').length} reais) desde ${new Date(H[0].T*1000).toLocaleString('pt-BR')} · ${mbVRegraTxt(w).split(' · ')[1]} · saldo em entradas de $1, tiro seco</div>
     <div class="ms-hl" style="grid-template-columns:1fr 70px 70px 80px;font-weight:700;color:#a49dbb"><span>Regra</span><span>Entradas</span><span>Acerto</span><span>Saldo $1</span></div>
@@ -10226,7 +10410,7 @@ function mbPresetUsar(id){
   const p=mbPresets().find(x=>x.id===id); if(!p) return;
   cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[p.w]={...p.c}; cfg.mesa_w=p.w; cfg.mesa_modo='robo'; if(p.sym) cfg.mesa_sym=p.sym; saveCfg();
   const s=mbSt(p.w); if(s.on) mbParar(p.w,'trocou para a configuração "'+p.nome+'"');
-  mbIniciar(p.w); mbLog(p.w,`⭐ Usando a configuração "${p.nome}"`,'g'); mesaRender(true);
+  mbIniciar(p.w); mbSt(p.w).conf=p.nome; mbLog(p.w,`⭐ Usando a configuração "${p.nome}"`,'g'); mesaRender(true);
 }
 function mbPresetApagar(id){ const p=mbPresets().find(x=>x.id===id); if(!p||!confirm(`Apagar a configuração "${p.nome}"?`)) return; cfg.mbPresets=mbPresets().filter(x=>x.id!==id); saveCfg(); mesaRender(true); }
 function mbPresetsHtml(w){
@@ -10243,22 +10427,23 @@ function mbVBoxHtml(w){
   return `<div class="ms-box"><span class="ms-lb">👻 LOSS / WIN VIRTUAL</span>
     <label class="ms-chk" style="margin-top:4px"><input type="checkbox" ${+V.vOn?'checked':''} onchange="mbSetCfg(${w},'vOn',this.checked?1:0)"> ativar (espera sem apostar até a regra bater)</label>
     ${+V.vOn?`<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
-      <label class="ms-chk">Entrar ${sel('vModo',[['loss','após X LOSS virtual'],['win','após Y WIN virtual'],['ou','após X LOSS ou Y WIN'],['seq','após Y WIN e depois X LOSS'],['seq2','após X LOSS e depois Y WIN']])}</label>
-      <div class="ms-row2">${V.vModo!=='win'?`<label class="ms-chk">X loss ${num('vX',1)}</label>`:''}${V.vModo!=='loss'?`<label class="ms-chk">Y win ${num('vY',1)}</label>`:''}</div>
+      <label class="ms-chk">Entrar ${sel('vModo',[['loss','após X LOSS virtual'],['win','após Y WIN virtual'],['ou','após X LOSS ou Y WIN'],['seq','após Y WIN e depois X LOSS'],['seq2','após X LOSS e depois Y WIN'],['sigla','🔤 por SIGLA (W/L)']])}</label>
+      ${V.vModo==='sigla'?`<div class="ms-nota">Siglas: ${(V.vSiglas||[]).map(p=>mbSgCaixas(p)).join(' · ')||'nenhuma — escolha na lista 🔤 SIGLAS do lado direito'}</div>`:''}
+      <div class="ms-row2" style="${V.vModo==='sigla'?'display:none':''}">${V.vModo!=='win'?`<label class="ms-chk">X loss ${num('vX',1)}</label>`:''}${V.vModo!=='loss'?`<label class="ms-chk">Y win ${num('vY',1)}</label>`:''}</div>
       <label class="ms-chk">Voltar a esperar ${sel('vVolta',[['green','depois de GREEN real'],['red','depois de RED real'],['qualquer','depois de qualquer resultado'],['n','depois de N entradas']])}${V.vVolta==='n'?' N '+num('vN',1):''}</label>
       <div class="ms-nota">${mbVRegraTxt(w)}</div></div>`:''}</div>`;
 }
 // status do virtual (centro)
 function mbVStatusHtml(w){
   const V=mbV(w); if(!+V.vOn) return '';
-  const s=mbVEstado(w), seq=s.vSeq.slice(-12);
+  const s=mbVEstado(w), seq=(V.vModo==='sigla'?mbHistTail(w,12):s.vSeq.slice(-12));
   const bolas=seq.map(c=>`<span class="mb-vb ${c==='W'?'w':'l'}">${c==='W'?'W':'L'}</span>`).join('')||'<span class="mu">nenhum resultado virtual ainda</span>';
   const pend=s.vPend.length?` · ⏳ virtual ${hmsOf(s.vPend[0].T)}`:'';
-  return `<div class="mb-vst ${s.vEstado}"><b>${s.vEstado==='operando'?'🟢 OPERANDO DE VERDADE':'👻 ESPERANDO (virtual)'}</b>${pend}<div style="margin-top:4px">${bolas}</div><div class="ms-nota">${mbVRegraTxt(w)}</div></div>`;
+  return `<div class="mb-vst ${mbSt(w).pausa?'esperando':s.vEstado}"><b>${mbSt(w).pausa?'⏸ EM PAUSA (hora instável)':s.vEstado==='operando'?'🟢 OPERANDO DE VERDADE':'👻 ESPERANDO (virtual)'}</b>${pend}<div style="margin-top:4px">${bolas}</div><div class="ms-nota">${mbVRegraTxt(w)}</div></div>`;
 }
 // 📄 relatório completo para salvar em PDF
-function mbPdf(w){
-  const tudo=cfg.mb_histTudo, L=tudo?DM.log.filter(x=>x.src==='mbot'&&x.mw===w):mbSess(w).L, s=mbSt(w), C=mbCfg(w), V=mbV(w);
+function mbPdf(w,de,ate){
+  const tudo=!de&&cfg.mb_histTudo, L=de?DM.log.filter(x=>x.src==='mbot'&&x.mw===w&&x.t>=de&&x.t<=ate+60000):tudo?DM.log.filter(x=>x.src==='mbot'&&x.mw===w):mbSess(w).L, s=mbSt(w), C=mbCfg(w), V=mbV(w);
   const ac=L.filter(x=>x.res==='green').length, er=L.filter(x=>x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0))).length, pl=L.reduce((a,x)=>a+(+x.profit||0),0), E=mbExpo(w,L);
   const H=mbHist(w).slice().sort((a,b)=>a.T-b.T), Hv=H.filter(h=>h.tipo==='v');
   const tab=document.createElement('div'); tab.innerHTML=mbVTabela(w);
@@ -10268,7 +10453,7 @@ function mbPdf(w){
     .sub{color:#666;margin-bottom:10px}.cards{display:flex;gap:8px;flex-wrap:wrap}.c{border:1px solid #ddd;border-radius:8px;padding:8px 12px;min-width:110px}.c b{display:block;font-size:17px}.c span{color:#666;font-size:10px;text-transform:uppercase}
     table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #e5e5e5;padding:4px 6px;text-align:left}th{background:#f3f0ff}.g{color:#15803d;font-weight:700}.r{color:#b91c1c;font-weight:700}.mu{color:#777}
     .ms-hl{display:grid;grid-template-columns:1fr 70px 70px 80px;border-bottom:1px solid #eee;padding:3px 0}.okc{color:#15803d}.ruimc{color:#b91c1c}.ms-nota{color:#666;font-size:11px}@page{margin:12mm}</style></head><body>
-    <h1>🎮 Mesa Play — Robô ${w}s</h1><div class="sub">${tudo?'Histórico completo':'Sessão atual'} · ${symNome(mesaSym())} · gerado em ${new Date().toLocaleString('pt-BR')}</div>
+    <h1>🎮 Mesa Play — Robô ${w}s</h1><div class="sub">${de?`Sessão de ${new Date(de).toLocaleString('pt-BR')} até ${new Date(ate).toLocaleTimeString('pt-BR')}`:tudo?'Histórico completo':`Sessão iniciada ${new Date(s.ini||MESA.ini).toLocaleString('pt-BR')}`} · ${symNome(mesaSym())} · gerado em ${new Date().toLocaleString('pt-BR')}</div>
     <div class="cards"><div class="c"><span>Acertos</span><b class="g">${ac}</b></div><div class="c"><span>Erros</span><b class="r">${er}</b></div><div class="c"><span>Resultado</span><b class="${pl>=0?'g':'r'}">${pl>=0?'+':''}$ ${pl.toFixed(2)}</b></div>
       <div class="c"><span>Maior valor exposto</span><b>$ ${E.ex.toFixed(2)}</b><span>${E.exT?hmsOf(E.exT):''}</span></div><div class="c"><span>Maior queda do saldo</span><b>$ ${E.queda.toFixed(2)}</b></div><div class="c"><span>Maior aposta</span><b>$ ${E.maxA.toFixed(2)}</b></div></div>
     <h2>Configuração</h2><div>Fonte: <b>${fonte}</b>${C.fonte!=='padroes'?` · horário 100% em ${NIVEL[mbHfNivel(w)]} · mín. ${C.hfMin} dias`:''} · Entrada $ ${(+C.val).toFixed(2)} · Gales: ${C.gale<0?'seguir o robô':C.gale?'G'+C.gale:'sem gale'} (${C.galeModo==='sinal'?'no próximo sinal':'nos jogos seguintes'}, ${{fator:'× '+C.fat,zero:'só recuperar',lucro:'recuperar + lucro'}[C.galeCalc||'fator']}) · Recuperação: ${+C.rec?C.rec+' green(s)'+(+C.recLucro?' + lucro':' sem lucro'):'desligada'}${+C.recMax?' · aposta máx $ '+C.recMax:''} · Stop win ${+C.sw||'—'} · Stop loss ${+C.sl||'—'}<br>Virtual: ${+V.vOn?mbVRegraTxt(w):'desligado'}</div>
@@ -10276,7 +10461,7 @@ function mbPdf(w){
     ${(()=>{ let acc=0; return L.map(x=>{ acc+=(+x.profit||0); const d=new Date((x.planT||x.T)*1000); return `<tr><td>${d.toLocaleDateString('pt-BR')}</td><td>${hmsOf(x.planT||x.T)}</td><td>${x.mcor?'ÍMPAR':'PAR'}</td><td>${esc((x.nome||'').replace(/^🤖 \d+s · /,''))}</td><td>${x.gk!=null?(x.gk?'G'+x.gk+'·sinal':'TS'):(NIVEL[x.nivel]||'G'+x.nivel)}</td><td>$ ${(+x.stake||0).toFixed(2)}</td><td class="${x.res==='green'?'g':x.res==='red'?'r':'mu'}">${x.res==='green'?'GREEN +'+(+x.profit).toFixed(2):x.res==='red'?'RED '+(+x.profit).toFixed(2):x.res}</td><td>${acc>=0?'+':''}${acc.toFixed(2)}</td></tr>`; }).join(''); })()}</table>
     <h2>Sinais virtuais (${Hv.length})</h2>${Hv.length?`<table><tr><th>Data</th><th>Jogo</th><th>Cor</th><th>Sinal</th><th>Resultado</th></tr>${Hv.map(h=>`<tr><td>${new Date(h.T*1000).toLocaleDateString('pt-BR')}</td><td>${hmsOf(h.T)}</td><td>${h.alvo?'ÍMPAR':'PAR'}</td><td>${esc(h.nome||'')}</td><td class="${h.res==='W'?'g':'r'}">${h.res==='W'?'WIN virtual':'LOSS virtual'}</td></tr>`).join('')}</table>`:'<div class="mu">Nenhum.</div>'}
     <h2>Como cada regra virtual teria se saído</h2>${tab.innerHTML}
-    <h2>Eventos (${s.log.length})</h2><table>${s.log.map(e=>`<tr><td style="width:80px">${new Date(e.t).toLocaleTimeString('pt-BR')}</td><td>${esc(e.txt)}</td></tr>`).join('')}</table>
+    <h2>Eventos ${de?'(só da sessão atual ficam guardados)':'('+s.log.length+')'}</h2><table>${(de?[]:s.log).map(e=>`<tr><td style="width:80px">${new Date(e.t).toLocaleTimeString('pt-BR')}</td><td>${esc(e.txt)}</td></tr>`).join('')}</table>
     <script>setTimeout(()=>window.print(),500)<\/script></body></html>`;
   const win=window.open('','_blank','width=1000,height=800');
   if(win&&!win.closed){ win.document.write(html); win.document.close(); return; }
@@ -10284,10 +10469,95 @@ function mbPdf(w){
   alert('Pop-up bloqueado: baixei o relatório como .html — abra e use Imprimir → Salvar como PDF.');
 }
 
+// =====================================================================================
+// 📚 SESSÕES DO ROBÔ — cada INICIAR começa um relatório do zero; ao PARAR o resumo vai para a lista
+// =====================================================================================
+function mbSessList(w){ try{ return JSON.parse(localStorage.getItem('mb_sess_'+w)||'[]')||[]; }catch(e){ return []; } }
+function mbSessSalvar(w,motivo){
+  const s=mbSt(w); if(!s.ini) return;
+  const L=DM.log.filter(x=>x.src==='mbot'&&x.mw===w&&x.t>=s.ini), E=mbExpo(w,L);
+  const r={ini:s.ini,fim:Date.now(),n:L.length,ac:L.filter(x=>x.res==='green').length,er:L.filter(x=>x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0))).length,
+    pl:Math.round(L.reduce((a,x)=>a+(+x.profit||0),0)*100)/100,ex:E.ex,queda:E.queda,maxA:E.maxA,motivo:motivo||'',conf:s.conf||'',sym:mesaSym()};
+  const A=mbSessList(w).filter(x=>x.ini!==r.ini); A.unshift(r);
+  try{ localStorage.setItem('mb_sess_'+w,JSON.stringify(A.slice(0,60))); }catch(e){}
+}
+function mbSessHtml(w){
+  const A=mbSessList(w);
+  if(!A.length) return '<div class="mu" style="padding:8px">Nenhuma sessão encerrada ainda. Cada vez que você clicar em PARAR, o resumo da operação aparece aqui.</div>';
+  const dur=ms=>{ const m=Math.round(ms/60000); return m>=60?`${Math.floor(m/60)}h${p2d(m%60)}`:`${m} min`; };
+  return `<div class="ms-hl" style="grid-template-columns:118px 58px 60px 74px 78px 80px 1fr 64px;font-weight:700;color:#a49dbb"><span>Início</span><span>Duração</span><span>✅/❌</span><span>Resultado</span><span>Maior exposto</span><span>Maior queda</span><span>Configuração / motivo</span><span></span></div>`+
+    A.map(r=>`<div class="ms-hl" style="grid-template-columns:118px 58px 60px 74px 78px 80px 1fr 64px"><span>${new Date(r.ini).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span><span>${dur(r.fim-r.ini)}</span><span><span class="okc">${r.ac}</span>/<span class="ruimc">${r.er}</span></span>
+      <span class="${r.pl>=0?'okc':'ruimc'}">${r.pl>=0?'+':''}${r.pl.toFixed(2)}</span><span style="color:#fbbf24">$ ${(+r.ex).toFixed(2)}</span><span>$ ${(+r.queda).toFixed(2)}</span><span class="mu">${r.conf?'⭐ '+esc(r.conf)+' · ':''}${esc(r.motivo||'')}${r.sym&&r.sym!=='R_100'?' · '+symNome(r.sym):''}</span>
+      <span><button class="mb-mini pdf" onclick="mbPdf(${w},${r.ini},${r.fim})">📄 PDF</button></span></div>`).join('');
+}
+// =====================================================================================
+// 🌐 MERCADOS — qual volatilidade está mais viável agora, pelos horários fixos de cada uma
+// Teste honesto "fora da amostra": horários que deram 100% nos X dias anteriores → como foram no dia seguinte
+// (e hoje até agora). Se tudo fica perto de 50%, os horários 100% são acaso naquele mercado.
+// =====================================================================================
+let MK={open:false,busy:false,res:null};
+function mkAbrir(){ MK.open=true; const p=$('#mkPop'); p.style.display='flex'; mkRender(); if(!MK.res||Date.now()-MK.res.when>10*60e3||MK.res.w!==mkW()) mkAnalisar(); }
+function mkFechar(){ MK.open=false; $('#mkPop').style.display='none'; }
+function mkW(){ const w=+cfg.mk_w||20; return D5_STEPS.includes(w)?w:20; }
+function mkMin(){ return Math.max(3,+cfg.mk_min||5); }
+async function mkAnalisar(){
+  if(MK.busy) return; MK.busy=true; mkRender();
+  const w=mkW(), mn=mkMin(), spd=86400/w, agora=Date.now(), d0=new Date(); d0.setHours(0,0,0,0);
+  const hoje0=d0.getTime(), diasTeste=Math.max(1,+cfg.mk_teste||3), nd=mn+diasTeste, ini=hoje0-nd*86400e3, out=[];
+  const slotAgora=Math.floor((agora-hoje0)/1000/w), slotFim=Math.min(spd,slotAgora+Math.ceil(3600/w));
+  for(const [sym,nome] of SYMS_ALL){
+    const bank=d5BankName(w,sym); let rows=[];
+    try{ rows=await idbRange(bank,ini,agora+60000); }catch(e){}
+    const coletando=d5Syms().includes(sym);
+    if(rows.length<200){ out.push({sym,nome,coletando,vazio:true,n:rows.length}); continue; }
+    // P[dia][slot] = paridade (-1 sem dado); dia nd = hoje
+    const P=[...Array(nd+1)].map(()=>new Int8Array(spd).fill(-1)), diasCom=new Set();
+    for(const r of rows){ if(r.d==null) continue; const k=Math.floor((r.t-ini)/86400e3), j=Math.round((r.t-(ini+k*86400e3))/1000/w); if(k<0||k>nd||j<0||j>=spd) continue; P[k][j]=r.d%2; diasCom.add(k); }
+    const teste=(k,j0,j1)=>{ let n=0,ok=0; for(let j=j0;j<j1;j++){ const t=P[k][j]; if(t<0) continue; let c=-2; for(let q=k-mn;q<k;q++){ const v=P[q][j]; if(v<0||(c!==-2&&v!==c)){ c=-3; break; } c=v; } if(c<0) continue; n++; if(t===c) ok++; } return {n,ok}; };
+    let ant={n:0,ok:0}; for(let k=mn;k<nd;k++){ const r=teste(k,0,spd); ant.n+=r.n; ant.ok+=r.ok; }
+    const hoje=teste(nd,0,slotAgora);
+    // horários 100% (últimos mn dias) na próxima hora
+    let prox=0; for(let j=slotAgora+1;j<slotFim;j++){ let c=-2; for(let q=nd-mn;q<nd;q++){ const v=P[q][j]; if(v<0||(c!==-2&&v!==c)){ c=-3; break; } c=v; } if(c>=0) prox++; }
+    const esperado=(slotFim-slotAgora-1)*2*Math.pow(0.5,mn);
+    const tot={n:ant.n+hoje.n,ok:ant.ok+hoje.ok}, p=tot.n?tot.ok/tot.n:0;
+    const z=tot.n?(p-0.5)/Math.sqrt(0.25/tot.n):0;                 // distância do acaso em desvios
+    out.push({sym,nome,coletando,dias:diasCom.size,ant,hoje,prox,esperado,p,z,tot});
+    await new Promise(r=>setTimeout(r,0));
+  }
+  out.sort((a,b)=>(a.vazio?1:0)-(b.vazio?1:0)||(b.z||0)-(a.z||0));
+  MK.res={when:Date.now(),w,mn,out}; MK.busy=false; mkRender();
+}
+function mkUsar(sym){
+  const w=mkW();
+  if(!d5Syms().includes(sym)) d5SymToggle(sym,true);
+  cfg.bank=d5BankName(bankIntervalSec(cfg.bank)||w,sym); cfg.uo_sym=sym; cfg.mesa_sym=sym; saveCfg();
+  status(`🌐 Agora usando ${symNome(sym)} em todas as abas (banco ${cfg.bank})`,'ok');
+  mkFechar(); try{ setDerivInterval(bankIntervalSec(cfg.bank)); }catch(e){} renderTab(); if(MESA.open) mesaRender(true);
+}
+function mkRender(){
+  const p=$('#mkPop'); if(!p||!MK.open) return;
+  const R=MK.res, cur=curSym();
+  const linha=x=>x.vazio?`<tr><td><b>${x.nome}</b></td><td colspan="5" class="mu">${x.coletando?`coletando — só ${x.n} jogos de ${mkW()}s no banco (precisa de ${mkMin()+1}+ dias: baixe em 📥 Histórico R_100)`:'não está sendo coletado'}</td><td>${x.coletando?'':`<button onclick="d5SymToggle('${x.sym}',true);setTimeout(mkAnalisar,1500)">➕ coletar</button>`}</td></tr>`
+    :`<tr class="${x.sym===cur?'scativo':''}"><td><b>${x.nome}</b>${x.sym===cur?' <span class="ok">● em uso</span>':''}</td><td>${x.dias} dias</td>
+      <td class="${x.hoje.n&&x.hoje.ok/x.hoje.n>=0.53?'ok':x.hoje.n&&x.hoje.ok/x.hoje.n<0.48?'ruim':''}">${x.hoje.n?(x.hoje.ok/x.hoje.n*100).toFixed(1)+'%':'—'} <span class="mu">(${x.hoje.n})</span></td>
+      <td class="${x.ant.n&&x.ant.ok/x.ant.n>=0.52?'ok':x.ant.n&&x.ant.ok/x.ant.n<0.48?'ruim':''}">${x.ant.n?(x.ant.ok/x.ant.n*100).toFixed(1)+'%':'—'} <span class="mu">(${x.ant.n})</span></td>
+      <td>${x.prox} <span class="mu">acaso ~${x.esperado.toFixed(0)}</span></td>
+      <td><b class="${x.z>=2?'ok':x.z<=-2?'ruim':''}">${x.z>=2?'🟢 acima do acaso':x.z<=-2?'🔴 abaixo do acaso':'⚪ igual ao acaso'}</b> <span class="mu">${x.z>=0?'+':''}${x.z.toFixed(1)}σ</span></td>
+      <td><button class="pri" onclick="mkUsar('${x.sym}')" ${x.sym===cur?'disabled':''}>usar</button></td></tr>`;
+  p.innerHTML=`<div class="mk-box"><div class="mk-top"><h3 style="margin:0">🌐 Mercados — qual está mais viável agora <small>pelos horários fixos de tiro seco</small></h3><button class="ms-x" onclick="mkFechar()">✕</button></div>
+    <div class="ctl"><label>Janela <select onchange="cfg.mk_w=+this.value;saveCfg();mkAnalisar()">${D5_STEPS.map(v=>`<option value="${v}" ${mkW()===v?'selected':''}>${v}s</option>`).join('')}</select></label>
+      <label>Horário 100% em <select onchange="cfg.mk_min=+this.value;saveCfg();mkAnalisar()">${[3,4,5,6,7].map(v=>`<option value="${v}" ${mkMin()===v?'selected':''}>${v} dias</option>`).join('')}</select></label>
+      <label>Testar nos últimos <select onchange="cfg.mk_teste=+this.value;saveCfg();mkAnalisar()">${[1,2,3,5,7].map(v=>`<option value="${v}" ${(+cfg.mk_teste||3)===v?'selected':''}>${v} dia(s)</option>`).join('')}</select></label>
+      <button onclick="mkAnalisar()" ${MK.busy?'disabled':''}>${MK.busy?'⏳ analisando…':'🔄 analisar de novo'}</button></div>
+    ${R?`<div class="tw"><table><tr><th>Mercado</th><th>Banco</th><th>Acerto HOJE</th><th>Acerto dias anteriores</th><th>Horários 100% na próxima hora</th><th>Veredito</th><th></th></tr>${R.out.map(linha).join('')}</table></div>
+      <div class="nota"><b>Como ler:</b> para cada dia, pega os horários que deram a mesma cor nos ${R.mn} dias anteriores (100% tiro seco) e confere o que deu <b>naquele dia</b> — é o que o robô de horário fixo teria acertado de verdade. "Acerto HOJE" = desde 0h até agora. Perto de <b>50%</b> = os horários 100% daquele mercado são acaso. Só confie em 🟢 com centenas de casos e que se repita em dias diferentes. Ao clicar <b>usar</b>, o banco principal, o 📊 Under/Over e a 🎮 Mesa passam para esse mercado (robôs já criados continuam no banco deles).</div>`
+      :'<div class="nota">⏳ Analisando os mercados…</div>'}</div>`;
+}
+
 // ---------- tela ----------
 function mbEsqHtml(w){
   const C=mbCfg(w), s=mbSt(w), ss=mbSess(w), inpt=(k,v,st)=>`<input type="number" step="${st}" value="${v}" onchange="mbSetCfg(${w},'${k}',+this.value)">`;
-  return `${mbPresetsHtml(w)}<div class="ms-box"><span class="ms-lb">VALOR DA ENTRADA</span><div class="ms-val">$ ${inpt('val',C.val,0.01)}</div></div>
+  return `${mbPresetsHtml(w)}${mbLinkHtml()}<div class="ms-box"><span class="ms-lb">VALOR DA ENTRADA</span><div class="ms-val">$ ${inpt('val',C.val,0.01)}</div></div>
     <div class="ms-row2"><div class="ms-box"><span class="ms-lb">FATOR GALE</span><div class="ms-pm"><button onclick="mbSetCfg(${w},'fat',Math.max(1,Math.round((mbCfg(${w}).fat-0.1)*10)/10))">−</button><b>${(+C.fat).toFixed(1)}</b><button onclick="mbSetCfg(${w},'fat',Math.round((mbCfg(${w}).fat+0.1)*10)/10)">+</button></div></div>
       <div class="ms-box"><span class="ms-lb">GALES</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'gale',+this.value)">${[[-1,'seguir o robô'],[0,'sem gale'],[1,'G1'],[2,'G2'],[3,'G3'],[4,'G4'],[5,'G5'],[6,'G6']].map(([v,t])=>`<option value="${v}" ${+C.gale===v?'selected':''}>${t}</option>`).join('')}</select></div></div>
     <div class="ms-box"><span class="ms-lb">ONDE FAZ O GALE</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'galeModo',this.value)">
@@ -10309,11 +10579,12 @@ function mbEsqHtml(w){
     <label class="ms-chk"><input type="checkbox" ${C.soAuto?'checked':''} onchange="mbSetCfg(${w},'soAuto',this.checked?1:0)"> só robôs automáticos ♻</label>`}
     <div class="ms-nota">0 no stop = sem stop. Gale ${C.gale<0?'até G2':C.gale?'até G'+C.gale:'desligado'} · ×${(+C.fat).toFixed(1)} · ${C.galeModo==='sinal'?'cada sinal é 1 entrada; depois de red a próxima entrada sobe de nível':'gale nos jogos logo depois da entrada'}</div>
     ${mbVBoxHtml(w)}
+    ${mbPausaHtml(w)}
     <span class="ms-lb">SESSÃO DO ROBÔ ${w}s</span><div class="ms-sess" id="msSess"></div>
     ${s.on?`<button class="ms-go stop" onclick="mbParar(${w})">⏹ PARAR ROBÔ ${w}s</button>`:`<button class="ms-go" onclick="mbIniciar(${w})">▶ INICIAR ROBÔ ${w}s</button>`}
     ${s.parou&&!s.on?`<div class="ms-nota" style="color:#fca5a5">${s.parou}</div>`:''}`;
 }
-function mbCentroHtml(w){ return mbCentroBase(w)+mbVStatusHtml(w); }
+function mbCentroHtml(w){ const p=mbSt(w).pausa&&!+mbV(w).vOn?`<div class="mb-vst esperando"><b>⏸ EM PAUSA (hora instável)</b> · últimos ${mbHistTail(w,+mbCfg(w).pN||10).map(c=>mbSgCaixas(c)).join('')}</div>`:''; return mbCentroBase(w)+p+mbVStatusHtml(w)+mesaLatHtml(w); }
 function mbCentroBase(w){
   const s=mbSt(w), o=mbAberta(w), now=dmNow();
   if(!s.on) return `<div class="ms-faixa">${s.parou?'⏹ '+s.parou+' · ':''}Robô ${w}s parado — ajuste e clique em INICIAR</div>`;
@@ -10357,11 +10628,13 @@ function mbFilaPadroes(w){
 function mbHistHtml(w){
   const s=mbSt(w), tudo=cfg.mb_histTudo, Lall=tudo?DM.log.filter(x=>x.src==='mbot'&&x.mw===w):mbSess(w).L, E=Lall.slice().reverse(), ev=s.log.slice().reverse(), X=mbExpo(w), Xt=tudo?mbExpo(w,Lall):X;
   const acA=Lall.filter(x=>x.res==='green').length, erA=Lall.filter(x=>x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0))).length, plA=Lall.reduce((a,x)=>a+(+x.profit||0),0);
-  return `<div class="ms-lb" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">ENTRADAS DO ROBÔ <span class="mu">(${E.length} · ${acA}✅ ${erA}❌ · <span class="${plA>=0?'okc':'ruimc'}">${plA>=0?'+':''}$ ${plA.toFixed(2)}</span>)</span>
+  return `<div class="ms-nota" style="margin-bottom:4px">${s.ini?`Sessão ${s.on?'em andamento':'encerrada'} · iniciada às <b>${new Date(s.ini).toLocaleTimeString('pt-BR')}</b>${s.conf?' · ⭐ '+esc(s.conf):''}`:'Nenhuma sessão iniciada nesta página.'}</div><div class="ms-lb" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">ENTRADAS DO ROBÔ <span class="mu">(${E.length} · ${acA}✅ ${erA}❌ · <span class="${plA>=0?'okc':'ruimc'}">${plA>=0?'+':''}$ ${plA.toFixed(2)}</span>)</span>
       <span style="margin-left:auto;display:flex;gap:6px"><button class="mb-mini ${tudo?'':'on'}" onclick="cfg.mb_histTudo=0;saveCfg();mesaRender(true)">sessão</button><button class="mb-mini ${tudo?'on':''}" onclick="cfg.mb_histTudo=1;saveCfg();mesaRender(true)">histórico completo</button><button class="mb-mini pdf" onclick="mbPdf(${w})">📄 baixar PDF</button></span></div>
     <div class="ms-hist" style="max-height:${tudo?420:220}px">${E.length?E.map(x=>`<div class="ms-hl"><span>${hmsOf(x.planT||x.T)}</span><span>${(x.mcor?'ÍMPAR · ':'PAR · ')+x.nome.replace(/^🤖 \d+s · /,'')}</span><span>${x.gk!=null?(x.gk?'G'+x.gk+'·sinal':'TS'):(NIVEL[x.nivel]||'G'+x.nivel)}</span><span>${x.stake?'$ '+(+x.stake).toFixed(2):'—'}</span><span class="${x.res==='green'?'okc':x.res==='red'?'ruimc':'mu'}">${x.res==='green'?'✅ +'+(+x.profit).toFixed(2):x.res==='red'?'❌ '+(+x.profit).toFixed(2):x.res}</span></div>`).join(''):'<div class="mu" style="padding:8px">Nenhuma entrada ainda.</div>'}</div>
     <div class="ms-lb" style="margin-top:8px">EVENTOS</div><div class="ms-hist" style="max-height:200px">${ev.length?ev.map(e=>`<div class="ms-hl" style="grid-template-columns:70px 1fr"><span>${new Date(e.t).toLocaleTimeString('pt-BR')}</span><span class="${e.tipo==='g'?'okc':e.tipo==='r'?'ruimc':''}">${e.txt}</span></div>`).join(''):'<div class="mu" style="padding:8px">—</div>'}</div>
     <div class="mb-expo"><div><span>📉 MAIOR VALOR EXPOSTO</span><b>$ ${Xt.ex.toFixed(2)}</b><i>${Xt.exT?'às '+hmsOf(Xt.exT):'—'}</i></div><div><span>MAIOR QUEDA DO SALDO</span><b>$ ${Xt.queda.toFixed(2)}</b><i>do topo até o fundo</i></div><div><span>MAIOR APOSTA</span><b>$ ${Xt.maxA.toFixed(2)}</b><i>${tudo?'histórico completo':'nesta sessão'}</i></div></div>
+    <div class="ms-lb" style="margin-top:10px">📚 SESSÕES ANTERIORES · ${w}s <span class="mu">(cada INICIAR começa do zero; ao PARAR o resumo fica aqui)</span></div><div class="ms-hist" style="max-height:240px">${mbSessHtml(w)}</div>
+    <div class="ms-lb" style="margin-top:10px">🔤 SIGLAS W/L · ${w}s <span class="mu">(o que vem depois de cada sequência)</span></div><div class="ms-hist" style="max-height:380px;padding:4px 8px">${mbSgHtml(w)}</div>
     <div class="ms-lb" style="margin-top:10px">👻 COMO CADA REGRA VIRTUAL TERIA SE SAÍDO · ${w}s</div><div class="ms-hist" style="max-height:330px;padding:4px 0">${mbVTabela(w)}</div>`;
 }
 
@@ -11012,6 +11285,12 @@ function afterUpdate(novo) {
   srLoadStore();
   if (SRB.some(r => r.on)) { cfg.sr_sym = SRB.find(r => r.on).sym; setTimeout(() => srCarregar(true), 4000); }
   srobLoad(); setTimeout(srobBtn, 1800);
+  // 🔕 popups automáticos: desligados por padrão; abrir pelo botão (clique) continua funcionando
+  for (const f of ['cfPopup','ilPopup','rbPopup','srPopup','uoPopup','il2Abrir','cf2PopMostra']) {
+    const o = window[f]; if (typeof o !== 'function') continue;
+    window[f] = function (...a) { const ev = window.event; const manual = ev && ev.isTrusted && /click|key|touch|pointer/.test(ev.type); if (!+cfg.popups_on && !manual) return; return o.apply(this, a); };
+  }
+  popBtnUi();
   if (MESA_TAB) {
     document.title = '🎮 Mesa Play';
     for (const f of ['rbPopup','srPopup','uoPopup','cfPopup','ilPopup','il2Abrir','srobOpen']) if (typeof window[f] === 'function') window[f] = () => {};
