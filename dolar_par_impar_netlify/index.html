@@ -404,6 +404,8 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .mb-best{position:fixed;right:14px;bottom:14px;z-index:10003;width:400px;max-width:calc(100vw - 28px);background:#14111f;border:1px solid #f59e0b;border-radius:12px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.6);font-size:12px}
 .mb-bestbtn{position:fixed;right:14px;bottom:14px;z-index:10003;background:#14111f;border:1px solid #f59e0b;color:#fbbf24;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer}
 .mb-bl{display:grid;grid-template-columns:1fr 70px 46px 48px;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid #2a2638}.mb-bl i{font-style:normal;color:#8b84a3;font-size:10px}
+.mb-rlist{display:flex;flex-direction:column;gap:6px;margin-top:6px;max-height:330px;overflow:auto}.mb-rcard{background:#1d1a27;border:1px solid var(--mb);border-radius:10px;padding:8px 10px}.mb-rcard.on{border-color:#22c55e;background:rgba(34,197,94,.08)}.mb-rcard.sel{box-shadow:0 0 0 1px #a855f7}
+.mb-rw{font-size:10px;font-weight:800;background:#2e2a3b;border-radius:6px;padding:2px 6px;color:#cfc9e2}.mb-editando{margin-top:6px;font-size:12px;background:rgba(168,85,247,.12);border:1px dashed #a855f7;border-radius:8px;padding:6px 8px}
 .mb-pres{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.mb-chip{display:inline-flex;border:1px solid var(--mb);border-radius:9px;overflow:hidden;background:#26222f}.mb-chip button{background:transparent;border:0;color:#ece9f6;padding:6px 9px;cursor:pointer;font-weight:700;font-size:12px}.mb-chip button small{color:#a49dbb;font-weight:600}.mb-chip .x{color:#f87171;border-left:1px solid var(--mb);padding:6px 7px}.mb-chip.on{border-color:#22c55e;box-shadow:0 0 0 1px #22c55e}
 .mb-mini{background:var(--mg);border:1px solid var(--mb);color:#cfc9e2;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:0}.mb-mini.on{background:var(--mr);color:#fff;border-color:var(--mr)}.mb-mini.pdf{background:#1f2937;color:#fde68a}
 .mb-expo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.mb-expo>div{background:var(--mg);border:1px solid var(--mb);border-radius:11px;padding:10px;text-align:center}.mb-expo span{display:block;font-size:10px;color:#8b84a3;letter-spacing:.6px;font-weight:700}.mb-expo b{display:block;font-size:20px;color:#fbbf24;margin:3px 0}.mb-expo i{font-style:normal;font-size:11px;color:#8b84a3}
@@ -518,7 +520,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.76 · 06/10/2026 · 🔗 interligado desliga os tempos soltos · ⏹ parar todos · ⭐ configurações salvas não somem mais (guardadas à parte) · 🔀 interligado: depois de RED recupera no tempo mais quente (W virtual) · 🎮 Mesa: 🔗 robô interligado (vários tempos, 1 entrada por vez) · ⏸ pausa por instabilidade · 👀 observador silencioso · 🏆 melhores agora + 🧠 escolhe sozinho · 🔕 popups desligados (botão para ligar) · 🔤 siglas W/L no robô da Mesa · 🎮 Mesa: relatório zera a cada início + 📚 sessões anteriores · 🌐 MERCADOS (qual volatilidade está melhor) · ⏱ jogos de 2s · 📊 Under/Over: 🔢 Máximas por número + 💰 pagamento de cada mercado · virtual mostra só o campo usado · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
+const VERSAO='v3.78 · 07/10/2026 · interligado não sobrescreve tempos que têm robô · 🤖 MEUS ROBÔS (cada configuração salva vira robô, exportar/importar) · análise W/L removida · 🔗 interligado desliga os tempos soltos · ⏹ parar todos · ⭐ configurações salvas não somem mais (guardadas à parte) · 🔀 interligado: depois de RED recupera no tempo mais quente (W virtual) · 🎮 Mesa: 🔗 robô interligado (vários tempos, 1 entrada por vez) · ⏸ pausa por instabilidade · 👀 observador silencioso · 🏆 melhores agora + 🧠 escolhe sozinho · 🔕 popups desligados (botão para ligar) · 🔤 siglas W/L no robô da Mesa · 🎮 Mesa: relatório zera a cada início + 📚 sessões anteriores · 🌐 MERCADOS (qual volatilidade está melhor) · ⏱ jogos de 2s · 📊 Under/Over: 🔢 Máximas por número + 💰 pagamento de cada mercado · virtual mostra só o campo usado · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10031,8 +10033,8 @@ function mbStakeSinal(w){ const C=mbCfg(w), base=Math.max(0.35,+C.val||0.35), {k
   return Math.round(base*Math.pow(Math.max(1,+C.fat||2.2),k)*100)/100; }
 let MB={};   // estado por tempo: {on,ini,taken:Set,log:[],stats:Map}
 function mbSt(w){ return MB[w]||(MB[w]={on:false,ini:0,taken:new Set(),feitos:new Set(),log:[],stats:new Map(),parou:''}); }
-function mbCfg(w){ return {...MB_DEF,...((cfg.mbot||{})[w]||{})}; }
-function mbSetCfg(w,k,v){ cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w]={...mbCfg(w),[k]:v}; saveCfg(); mesaRender(true); }
+function mbCfg(w){ const r=(typeof mbRoboDe==='function')?mbRoboDe(w):null; if(r) return {...MB_DEF,...r.c}; return {...MB_DEF,...((cfg.mbot||{})[w]||{})}; }
+function mbSetCfg(w,k,v){ const r=mbRoboDe(w); if(r){ const L=mbPresets(), x=L.find(p=>p.id===r.id); x.c={...MB_DEF,...x.c,[k]:v}; x.editado=Date.now(); mbPresetsGravar(L); mesaRender(true); return; } cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w]={...mbCfg(w),[k]:v}; saveCfg(); mesaRender(true); }
 function mbLog(w,txt,tipo='evt'){ const s=mbSt(w); s.log.push({t:Date.now(),txt,tipo}); if(s.log.length>200) s.log.splice(0,s.log.length-200); }
 function mbBank(w){ return d5BankName(w,mesaSym()); }
 // taxa do robô no banco (com cache por jogo novo)
@@ -10110,7 +10112,7 @@ function mbLinkPl(){ const L=mbLink(); return L.ws.reduce((a,w)=>a+(mbSt(w).on?m
 function mbLinkIniciar(){
   const L=mbLink(), w0=mesaW(); if(!L.ws.length){ alert('Marque pelo menos um tempo nos quadradinhos.'); return; }
   if(!DM.ok||!DM.virt){ mbIniciar(w0); return; }
-  if(+L.copy){ cfg.mbot={...(cfg.mbot||{})}; for(const w of L.ws) if(w!==w0) cfg.mbot[w]={...mbCfg(w0)}; }
+  if(+L.copy){ const c0={...mbCfg(w0)}; cfg.mbot={...(cfg.mbot||{})}; for(const w of L.ws) if(w!==w0&&!mbRoboDe(w)) cfg.mbot[w]={...c0}; }        // tempo com 🤖 robô fica com a configuração do robô
   cfg.mb_link={...L,on:1}; saveCfg();
   for(const w of MESA_TEMPOS) if(!L.ws.includes(w)&&mbSt(w).on) mbParar(w,'desligado: não faz parte do interligado');
   for(const w of L.ws){ if(mbSt(w).on) mbParar(w,'reiniciado no interligado'); mbIniciar(w); mbLog(w,`🔗 Interligado com ${L.ws.map(x=>x+'s').join(' + ')} — 1 entrada por vez no total`,'evt'); }
@@ -10122,7 +10124,7 @@ function mbLinkHtml(){
   return `<div class="ms-box" style="border-color:${on?'#22c55e':'#38bdf8'}"><span class="ms-lb">🔗 ROBÔ INTERLIGADO ${on?'<b class="okc">● LIGADO</b>':''}</span>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">${MESA_TEMPOS.map(w=>`<label class="ms-chk" style="background:#26222f;border:1px solid var(--mb);border-radius:8px;padding:4px 8px"><input type="checkbox" ${L.ws.includes(w)?'checked':''} ${on?'disabled':''} onchange="mbLinkTog(${w},this.checked)"> ${w}s</label>`).join('')}
       <button class="mb-mini" ${on?'disabled':''} onclick="mbLinkSet('ws',[...MESA_TEMPOS])">todos</button></div>
-    <label class="ms-chk"><input type="checkbox" ${+L.copy?'checked':''} ${on?'disabled':''} onchange="mbLinkSet('copy',this.checked?1:0)"> copiar a configuração deste tempo (${mesaW()}s) para os marcados</label>
+    <label class="ms-chk"><input type="checkbox" ${+L.copy?'checked':''} ${on?'disabled':''} onchange="mbLinkSet('copy',this.checked?1:0)"> copiar a configuração deste tempo (${mesaW()}s) para os marcados <span class="mu">(menos os que têm 🤖 robô)</span></label>
     ${mbHotHtml()}
     <div class="ms-row2" style="margin-top:6px"><label class="ms-chk">stop win total $ <input type="number" min="0" value="${+L.sw||0}" style="width:60px" onchange="mbLinkSet('sw',+this.value)"></label><label class="ms-chk">stop loss total $ <input type="number" min="0" value="${+L.sl||0}" style="width:60px" onchange="mbLinkSet('sl',+this.value)"></label></div>
     ${on?`<div class="ms-nota" style="margin-top:4px">Somado: <b class="${mbLinkPl()>=0?'okc':'ruimc'}">${mbLinkPl()>=0?'+':''}$ ${mbLinkPl().toFixed(2)}</b> · ${L.ws.map(w=>`${w}s ${mbSt(w).on?'🟢':'⚫'}`).join(' · ')}</div>
@@ -10213,13 +10215,14 @@ function mbBestCalc(){
     const V=mbV(w), cands=[{vOn:0},...[1,2,3,4].map(x=>({vOn:1,vModo:'loss',vX:x})),...[1,2,3].map(y=>({vOn:1,vModo:'win',vY:y})),{vOn:1,vModo:'ou',vX:2,vY:2}];
     const corte=Math.floor(H.length*2/3), S1=H.slice(0,corte).map(h=>h.res).join(''), top=mbSiglasSeq(S1,5).slice(0,3).map(o=>o.p);
     for(const P of cands){ const R=mbVSimular(H,+P.vOn?{...V,...P}:null); if(R.n>=minN) out.push({w,P,nome:mbRegraNome(P),...R}); }
-    if(top.length){ const P={vOn:1,vModo:'sigla',vSiglas:top}; const R=mbVSimular(H.slice(corte),{...V,...P}); if(R.n>=Math.max(5,Math.floor(minN/2))) out.push({w,P,nome:mbRegraNome(P)+' (validada)',...R}); }
+    if(false&&top.length){ const P={vOn:1,vModo:'sigla',vSiglas:top}; const R=mbVSimular(H.slice(corte),{...V,...P}); if(R.n>=Math.max(5,Math.floor(minN/2))) out.push({w,P,nome:mbRegraNome(P)+' (validada)',...R}); }
   }
   out.sort((a,b)=>b.p-a.p||b.n-a.n);
   return {out,horas,minN};
 }
+function mbSetCfgQuieto(w,k,v){ const r=mbRoboDe(w); if(r){ const L=mbPresets(), x=L.find(p=>p.id===r.id); x.c={...MB_DEF,...x.c,[k]:v}; mbPresetsGravar(L); return; } cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w]={...mbCfg(w),[k]:v}; saveCfg(); }
 function mbBestUsar(w,P,iniciar){
-  cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w]={...mbCfg(w),...P}; saveCfg();
+  for(const [k,v] of Object.entries(P)) mbSetCfgQuieto(w,k,v);
   mbLog(w,`🏆 Estratégia em uso: ${mbRegraNome({...mbV(w),...P})}`,'g');
   if(iniciar&&!mbSt(w).on){ const L=mbLink(); if(+L.on&&!L.ws.includes(w)){ cfg.mb_link={...L,ws:[...L.ws,w].sort((a,b)=>a-b)}; saveCfg(); } mbIniciar(w); }
   cfg.mesa_w=w; saveCfg(); mesaRender(true);
@@ -10228,7 +10231,7 @@ function mbBestUsar(w,P,iniciar){
 setInterval(()=>{ try{ if(!+cfg.mb_auto) return; const B=mbBestCalc();
   for(const w of MESA_TEMPOS){ if(!mbSt(w).on) continue; const best=B.out.find(r=>r.w===w); if(!best) continue;
     const atual=mbRegraNome(mbV(w)); if(atual===best.nome.replace(' (validada)','')) continue;
-    cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w]={...mbCfg(w),...best.P}; saveCfg();
+    for(const [k,v] of Object.entries(best.P)) mbSetCfgQuieto(w,k,v);
     mbLog(w,`🧠 Robô trocou a estratégia sozinho → ${best.nome} (${(best.p*100).toFixed(0)}% em ${best.n} nas últimas ${B.horas}h)`,'g'); }
   if(MESA.open) mesaRender(true); }catch(e){ console.warn('auto estratégia',e); } },600000);
 function mbBestHtml(){
@@ -10405,31 +10408,73 @@ function mbExpo(w,L){
   const o=mbAberta(w); if(o){ const st=o.tent?.at(-1)?.stake||0, e=(pico-pl)+st; if(e>ex){ ex=e; exT=o.T+o.g*o.step; } }
   return {ex,exT,queda,maxA};
 }
-// ⭐ configurações salvas
-// guardadas numa chave própria do navegador: a aba principal e a aba da Mesa não apagam uma a outra
-function mbPresets(){ let L=[]; try{ L=JSON.parse(localStorage.getItem('mb_presets_v1')||'[]')||[]; }catch(e){}
-  if(Array.isArray(cfg.mbPresets)&&cfg.mbPresets.length){ const ids=new Set(L.map(p=>p.id)); for(const p of cfg.mbPresets) if(!ids.has(p.id)) L.push(p); mbPresetsGravar(L); delete cfg.mbPresets; saveCfg(); }
-  return L; }
-function mbPresetsGravar(L){ try{ localStorage.setItem('mb_presets_v1',JSON.stringify(L.slice(0,50))); }catch(e){ alert('Não consegui salvar a configuração no navegador.'); } }
+// 🤖 MEUS ROBÔS — cada configuração salva vira um robô com nome. Enquanto um robô está ligado a um tempo,
+// esse tempo usa a configuração GUARDADA NO ROBÔ (não a da tela), então ela não se perde nem é trocada pela outra aba.
+// Fica numa chave própria "dpi_mesa_robos_v1" (vai junto no ☁ nuvem) e dá para exportar/importar em arquivo.
+const MBR_KEY='dpi_mesa_robos_v1', MBR_SEL='dpi_mesa_robo_sel';
+let MBR=null;
+function mbPresets(){
+  if(MBR) return MBR;
+  let L=[]; try{ L=JSON.parse(localStorage.getItem(MBR_KEY)||'[]')||[]; }catch(e){}
+  // traz as configurações salvas das versões anteriores
+  const velhos=[]; try{ velhos.push(...(JSON.parse(localStorage.getItem('mb_presets_v1')||'[]')||[])); }catch(e){} if(Array.isArray(cfg.mbPresets)) velhos.push(...cfg.mbPresets);
+  if(velhos.length){ const ids=new Set(L.map(p=>p.id)); for(const p of velhos) if(p&&p.id&&!ids.has(p.id)){ L.push(p); ids.add(p.id); }
+    try{ localStorage.setItem(MBR_KEY,JSON.stringify(L)); localStorage.removeItem('mb_presets_v1'); }catch(e){} if(cfg.mbPresets){ delete cfg.mbPresets; saveCfg(); } }
+  MBR=L; return L;
+}
+function mbPresetsGravar(L){ MBR=L.slice(0,60); try{ localStorage.setItem(MBR_KEY,JSON.stringify(MBR)); }catch(e){ alert('⚠ O navegador não deixou salvar o robô. Use ⬇ exportar para guardar em arquivo.'); } }
+window.addEventListener('storage',e=>{ if(e.key===MBR_KEY){ MBR=null; if(typeof MESA!=='undefined'&&MESA.open) mesaRender(true); } });
+// robô ligado a cada tempo (lembra depois de recarregar a página)
+function mbSelLoad(){ try{ return JSON.parse(localStorage.getItem(MBR_SEL)||'{}')||{}; }catch(e){ return {}; } }
+function mbSelSet(w,id){ const o=mbSelLoad(); if(id) o[w]=id; else delete o[w]; try{ localStorage.setItem(MBR_SEL,JSON.stringify(o)); }catch(e){} }
+function mbRoboDe(w){ const s=mbSt(w); if(s.robo===undefined) s.robo=mbSelLoad()[w]||null; return s.robo?mbPresets().find(p=>p.id===s.robo)||null:null; }
+function mbRoboResumo(c){
+  const fonte={padroes:'padrões',hfix:'horário fixo'+(c.hfLvl>=0?' '+['TS','G1','G2'][c.hfLvl]:'')+' '+(c.hfMin||5)+'d',ambos:'padrões + horário fixo'}[c.fonte||'padroes'];
+  const gale=c.gale<0?'gale do robô':+c.gale?'G'+c.gale+(c.galeModo==='sinal'?' no próximo sinal':'')+(c.galeCalc==='zero'?' só recuperar':c.galeCalc==='lucro'?' recup.+lucro':' ×'+c.fat):'sem gale';
+  const L=[`$ ${(+c.val||0.35).toFixed(2)}`,fonte,gale];
+  if(+c.rec) L.push(`🔁 ${c.rec} green${c.rec>1?'s':''}${+c.recLucro?' +lucro':''}${+c.recMax?' máx $'+c.recMax:''}`);
+  if(+c.vOn) L.push('👻 '+(mbRegraNome?mbRegraNome(c):'virtual'));
+  if(+c.pOn) L.push(`⏸ pausa ${c.pLim||6}/${c.pN||10}`);
+  if(+c.sw||+c.sl) L.push(`stop ${+c.sw?'+'+c.sw:'—'} / ${+c.sl?'-'+c.sl:'—'}`);
+  return L.join(' · ');
+}
 function mbPresetSalvar(w){
   const el=$('#mbPresetNome'), nome=(el?.value||'').trim();
-  if(!nome){ alert('Dê um nome para a configuração (ex.: "Tiro seco horário fixo").'); el?.focus(); return; }
-  const L=mbPresets().filter(p=>!(p.nome===nome&&p.w===w));
-  L.unshift({id:'P'+Date.now(),nome,w,c:{...mbCfg(w)},sym:mesaSym(),criado:Date.now()});
-  mbPresetsGravar(L); mbLog(w,`⭐ Configuração "${nome}" salva`,'evt'); mesaRender(true);
+  if(!nome){ alert('Dê um nome para o robô (ex.: "Tiro seco HF 5s").'); el?.focus(); return; }
+  const r={id:'R'+Date.now(),nome,w,c:{...mbCfg(w)},sym:mesaSym(),criado:Date.now()};
+  mbPresetsGravar([r,...mbPresets()]); mbSt(w).robo=r.id; mbSelSet(w,r.id);
+  mbLog(w,`🤖 Robô "${nome}" criado com esta configuração`,'g'); mesaRender(true);
 }
 function mbPresetUsar(id){
   const p=mbPresets().find(x=>x.id===id); if(!p) return;
-  cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[p.w]={...p.c}; cfg.mesa_w=p.w; cfg.mesa_modo='robo'; if(p.sym) cfg.mesa_sym=p.sym; saveCfg();
-  const s=mbSt(p.w); if(s.on) mbParar(p.w,'trocou para a configuração "'+p.nome+'"');
-  mbIniciar(p.w); mbSt(p.w).conf=p.nome; mbLog(p.w,`⭐ Usando a configuração "${p.nome}"`,'g'); mesaRender(true);
+  if(!DM.ok||!DM.virt){ alert('Conecte a conta DEMO primeiro (aba 💼 Conta Demo).'); return; }
+  cfg.mesa_w=p.w; cfg.mesa_modo='robo'; if(p.sym) cfg.mesa_sym=p.sym; saveCfg();
+  const s=mbSt(p.w); if(s.on) mbParar(p.w,'trocou para o robô "'+p.nome+'"');
+  s.robo=p.id; mbSelSet(p.w,p.id);
+  const L=mbLink(); if(+L.on&&!L.ws.includes(p.w)){ cfg.mb_link={...L,ws:[...L.ws,p.w].sort((a,b)=>a-b)}; saveCfg(); }
+  mbIniciar(p.w); mbSt(p.w).conf=p.nome; mbLog(p.w,`🤖 Robô "${p.nome}" ativado: ${mbRoboResumo(p.c)}`,'g'); mesaRender(true);
 }
-function mbPresetApagar(id){ const p=mbPresets().find(x=>x.id===id); if(!p||!confirm(`Apagar a configuração "${p.nome}"?`)) return; mbPresetsGravar(mbPresets().filter(x=>x.id!==id)); mesaRender(true); }
+function mbRoboEditar(id){ const p=mbPresets().find(x=>x.id===id); if(!p) return; mbSt(p.w).robo=p.id; mbSelSet(p.w,p.id); cfg.mesa_w=p.w; cfg.mesa_modo='robo'; saveCfg(); mesaRender(true); }
+function mbRoboSoltar(w){ const s=mbSt(w); if(s.on&&!confirm('O robô está ligado. Trocar para a configuração livre da tela?')) return; s.robo=null; mbSelSet(w,null); mesaRender(true); }
+function mbRoboRenomear(id){ const L=mbPresets(), p=L.find(x=>x.id===id); if(!p) return; const n=prompt('Novo nome do robô:',p.nome); if(!n||!n.trim()) return; p.nome=n.trim(); mbPresetsGravar(L); mesaRender(true); }
+function mbPresetApagar(id){ const p=mbPresets().find(x=>x.id===id); if(!p||!confirm(`Apagar o robô "${p.nome}"?`)) return;
+  for(const w of MESA_TEMPOS){ const s=mbSt(w); if(s.robo===id){ if(s.on) mbParar(w,'robô apagado'); s.robo=null; mbSelSet(w,null); } }
+  mbPresetsGravar(mbPresets().filter(x=>x.id!==id)); mesaRender(true); }
+function mbRobosExportar(){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify({tipo:'mesa_robos',v:1,em:new Date().toISOString(),robos:mbPresets()},null,1)],{type:'application/json'})); a.download=`meus_robos_mesa_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
+function mbRobosImportar(inp){ const f=inp.files&&inp.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ try{ const j=JSON.parse(rd.result), R=Array.isArray(j)?j:j.robos; if(!Array.isArray(R)) throw 0;
+  const L=mbPresets(), ids=new Set(L.map(p=>p.id)); let n=0; for(const r of R) if(r&&r.id&&r.c&&!ids.has(r.id)){ L.push(r); n++; } mbPresetsGravar(L); alert(`✅ ${n} robô(s) importado(s).`); mesaRender(true); }catch(e){ alert('Arquivo inválido.'); } }; rd.readAsText(f); inp.value=''; }
 function mbPresetsHtml(w){
-  const L=mbPresets();
-  return `<div class="ms-box" style="border-color:#a855f7"><span class="ms-lb">⭐ CONFIGURAÇÕES SALVAS</span>
-    ${L.length?`<div class="mb-pres">${L.map(p=>`<span class="mb-chip ${p.w===w&&mbSt(p.w).on?'on':''}"><button onclick="mbPresetUsar('${p.id}')" title="carregar e iniciar">▶ ${esc(p.nome)} <small>${p.w}s</small></button><button class="x" onclick="mbPresetApagar('${p.id}')" title="apagar">✕</button></span>`).join('')}</div>`:'<div class="ms-nota" style="margin:4px 0">Nenhuma ainda. Ajuste tudo abaixo e salve com um nome.</div>'}
-    <div style="display:flex;gap:6px;margin-top:6px"><input id="mbPresetNome" class="ms-sel" style="flex:1;min-width:0" placeholder="nome (ex.: Tiro seco HF)"><button class="ms-x" style="padding:6px 10px" onclick="mbPresetSalvar(${w})">💾 salvar</button></div></div>`;
+  const L=mbPresets(), atual=mbRoboDe(w);
+  const card=p=>{ const s=mbSt(p.w), roda=s.on&&s.robo===p.id;
+    return `<div class="mb-rcard ${roda?'on':''} ${atual&&atual.id===p.id?'sel':''}"><div style="display:flex;gap:6px;align-items:center"><b>${roda?'🟢':'🤖'} ${esc(p.nome)}</b><span class="mb-rw">${p.w}s</span>${p.sym&&p.sym!=='R_100'?`<span class="mb-rw">${esc(symNome(p.sym))}</span>`:''}</div>
+      <div class="ms-nota" style="margin:3px 0 5px">${esc(mbRoboResumo({...MB_DEF,...p.c}))}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">${roda?`<button class="mb-mini" style="border-color:#ef4444;color:#fca5a5" onclick="mbParar(${p.w},'parado por você')">⏹ parar</button>`:`<button class="mb-mini on" onclick="mbPresetUsar('${p.id}')">▶ ATIVAR</button>`}
+        <button class="mb-mini" onclick="mbRoboEditar('${p.id}')" title="abrir a configuração dele na tela (o que mudar salva no robô)">✏️ editar</button><button class="mb-mini" onclick="mbRoboRenomear('${p.id}')">🏷</button><button class="mb-mini" style="color:#f87171" onclick="mbPresetApagar('${p.id}')">🗑</button></div></div>`; };
+  return `<div class="ms-box" style="border-color:#a855f7"><span class="ms-lb">🤖 MEUS ROBÔS</span>
+    ${atual?`<div class="mb-editando">✏️ A tela abaixo é do robô <b>${esc(atual.nome)}</b> — o que mudar <b>salva nele</b> sozinho. <button class="mb-mini" onclick="mbRoboSoltar(${w})">usar configuração livre</button></div>`:''}
+    ${L.length?`<div class="mb-rlist">${L.map(card).join('')}</div>`:'<div class="ms-nota" style="margin:4px 0">Nenhum robô ainda. Ajuste a configuração abaixo e salve como robô.</div>'}
+    <div style="display:flex;gap:6px;margin-top:6px"><input id="mbPresetNome" class="ms-sel" style="flex:1;min-width:0" placeholder="nome do novo robô (ex.: Tiro seco HF 5s)"><button class="ms-x" style="padding:6px 10px" onclick="mbPresetSalvar(${w})">💾 salvar como robô</button></div>
+    <div style="display:flex;gap:6px;margin-top:6px"><button class="mb-mini" onclick="mbRobosExportar()">⬇ exportar robôs (arquivo)</button><label class="mb-mini" style="cursor:pointer">⬆ importar<input type="file" accept=".json" style="display:none" onchange="mbRobosImportar(this)"></label></div></div>`;
 }
 function esc(t){ return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 // caixa do virtual (painel esquerdo)
@@ -10439,7 +10484,7 @@ function mbVBoxHtml(w){
   return `<div class="ms-box"><span class="ms-lb">👻 LOSS / WIN VIRTUAL</span>
     <label class="ms-chk" style="margin-top:4px"><input type="checkbox" ${+V.vOn?'checked':''} onchange="mbSetCfg(${w},'vOn',this.checked?1:0)"> ativar (espera sem apostar até a regra bater)</label>
     ${+V.vOn?`<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
-      <label class="ms-chk">Entrar ${sel('vModo',[['loss','após X LOSS virtual'],['win','após Y WIN virtual'],['ou','após X LOSS ou Y WIN'],['seq','após Y WIN e depois X LOSS'],['seq2','após X LOSS e depois Y WIN'],['sigla','🔤 por SIGLA (W/L)']])}</label>
+      <label class="ms-chk">Entrar ${sel('vModo',[['loss','após X LOSS virtual'],['win','após Y WIN virtual'],['ou','após X LOSS ou Y WIN'],['seq','após Y WIN e depois X LOSS'],['seq2','após X LOSS e depois Y WIN']])}</label>
       ${V.vModo==='sigla'?`<div class="ms-nota">Siglas: ${(V.vSiglas||[]).map(p=>mbSgCaixas(p)).join(' · ')||'nenhuma — escolha na lista 🔤 SIGLAS do lado direito'}</div>`:''}
       <div class="ms-row2" style="${V.vModo==='sigla'?'display:none':''}">${V.vModo!=='win'?`<label class="ms-chk">X loss ${num('vX',1)}</label>`:''}${V.vModo!=='loss'?`<label class="ms-chk">Y win ${num('vY',1)}</label>`:''}</div>
       <label class="ms-chk">Voltar a esperar ${sel('vVolta',[['green','depois de GREEN real'],['red','depois de RED real'],['qualquer','depois de qualquer resultado'],['n','depois de N entradas']])}${V.vVolta==='n'?' N '+num('vN',1):''}</label>
@@ -10646,7 +10691,6 @@ function mbHistHtml(w){
     <div class="ms-lb" style="margin-top:8px">EVENTOS</div><div class="ms-hist" style="max-height:200px">${ev.length?ev.map(e=>`<div class="ms-hl" style="grid-template-columns:70px 1fr"><span>${new Date(e.t).toLocaleTimeString('pt-BR')}</span><span class="${e.tipo==='g'?'okc':e.tipo==='r'?'ruimc':''}">${e.txt}</span></div>`).join(''):'<div class="mu" style="padding:8px">—</div>'}</div>
     <div class="mb-expo"><div><span>📉 MAIOR VALOR EXPOSTO</span><b>$ ${Xt.ex.toFixed(2)}</b><i>${Xt.exT?'às '+hmsOf(Xt.exT):'—'}</i></div><div><span>MAIOR QUEDA DO SALDO</span><b>$ ${Xt.queda.toFixed(2)}</b><i>do topo até o fundo</i></div><div><span>MAIOR APOSTA</span><b>$ ${Xt.maxA.toFixed(2)}</b><i>${tudo?'histórico completo':'nesta sessão'}</i></div></div>
     <div class="ms-lb" style="margin-top:10px">📚 SESSÕES ANTERIORES · ${w}s <span class="mu">(cada INICIAR começa do zero; ao PARAR o resumo fica aqui)</span></div><div class="ms-hist" style="max-height:240px">${mbSessHtml(w)}</div>
-    <div class="ms-lb" style="margin-top:10px">🔤 SIGLAS W/L · ${w}s <span class="mu">(o que vem depois de cada sequência)</span></div><div class="ms-hist" style="max-height:380px;padding:4px 8px">${mbSgHtml(w)}</div>
     <div class="ms-lb" style="margin-top:10px">👻 COMO CADA REGRA VIRTUAL TERIA SE SAÍDO · ${w}s</div><div class="ms-hist" style="max-height:330px;padding:4px 0">${mbVTabela(w)}</div>`;
 }
 
