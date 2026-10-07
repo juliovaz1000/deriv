@@ -417,6 +417,28 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .ms-go{height:64px;border-radius:12px;font-size:19px;font-weight:900;letter-spacing:.5px;color:#fff;border:0;cursor:pointer;background:linear-gradient(160deg,#22c55e,#15803d);margin-top:4px}.ms-go.stop{background:linear-gradient(160deg,#ef4444,#991b1b)}
 .ms-strip{justify-content:flex-start!important}
 </style>
+<style>
+.ps-head h3{background:linear-gradient(90deg,#f97316,#ef4444);-webkit-background-clip:text;color:transparent}
+.ps-grid{display:grid;grid-template-columns:1.1fr 1.2fr .8fr;gap:12px}@media(max-width:1100px){.ps-grid{grid-template-columns:1fr}}
+.ps-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ps-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:10px}@media(max-width:900px){.ps-grid2,.ps-grid3{grid-template-columns:1fr}}
+.ps-sig{border-width:2px}.ps-sig.par{border-color:#22c55e;box-shadow:0 0 22px rgba(34,197,94,.18)}.ps-sig.imp{border-color:#ef4444;box-shadow:0 0 22px rgba(239,68,68,.18)}.ps-sig.esp{border-color:#6b7280}
+.ps-h{font-weight:900;font-size:16px;letter-spacing:1px;text-align:center;margin-bottom:8px;color:#fb923c}
+.ps-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}.ps-kv span{color:var(--mu,#94a3b8);font-size:11px;letter-spacing:.6px;align-self:center}
+.ps-sinal{text-align:center;font-size:24px;font-weight:900;margin:12px 0 6px;animation:psPulse 2s infinite}
+@keyframes psPulse{0%,100%{opacity:1}50%{opacity:.75}}
+.ps-bar{display:flex;height:22px;border-radius:7px;overflow:hidden;margin:4px 0;font-size:11px;font-weight:800}.ps-bar i{font-style:normal;display:flex;align-items:center;justify-content:center;color:#fff;white-space:nowrap;overflow:hidden;transition:width .4s}.ps-bar .par{background:linear-gradient(90deg,#16a34a,#22c55e)}.ps-bar .imp{background:linear-gradient(90deg,#dc2626,#ef4444)}
+.ps-jans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}.ps-jans span{font-size:10px;color:var(--mu,#94a3b8);display:block}.ps-jans b{font-size:13px}
+.ps-conv{margin:8px 0;font-weight:900;font-size:15px}.ps-trigs div{font-size:12px;margin:2px 0;color:#fbbf24}
+.ps-ult{display:flex;gap:4px;margin-top:4px}.ps-ult span,.ps-dg{display:inline-flex;width:24px;height:24px;border-radius:6px;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:12px}
+.ps-ult .par,.ps-dg.par{background:#16a34a}.ps-ult .imp,.ps-dg.imp{background:#dc2626}
+.ps-tab{width:100%;border-collapse:collapse;font-size:12px}.ps-tab th,.ps-tab td{padding:4px 6px;border-bottom:1px solid var(--bd,#2a2f3a);text-align:center}.ps-tab tr.ps-peq{opacity:.55}
+.okc2{color:#4ade80;font-weight:700}.ruimc2{color:#f87171;font-weight:700}
+.ps-tag{display:inline-block;border-radius:6px;padding:1px 7px;font-weight:900;font-size:11px;color:#fff}.ps-tag.par{background:#16a34a}.ps-tag.imp{background:#dc2626}
+.ps-why{margin-top:8px;background:rgba(251,146,60,.08);border:1px dashed #fb923c;border-radius:10px;padding:8px 10px;font-size:12px;display:flex;flex-direction:column;gap:4px}.ps-why i{color:#94a3b8;font-style:normal}
+.ps-cfg summary{cursor:pointer}.ps-cfg .ctl{margin-top:8px;flex-wrap:wrap}
+#psPop{position:fixed;inset:0;z-index:10010;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.7)}.ps-popbox{background:#15121f;border:2px solid #fb923c;border-radius:16px;padding:20px 26px;text-align:center;min-width:280px}
+.ps-big{font-size:40px;font-weight:900;margin:6px 0;border-radius:12px;padding:6px 0;color:#fff}.ps-big.par{background:#16a34a}.ps-big.imp{background:#dc2626}
+</style>
 </head>
 <body>
 <header>
@@ -520,7 +542,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.78 · 07/10/2026 · interligado não sobrescreve tempos que têm robô · 🤖 MEUS ROBÔS (cada configuração salva vira robô, exportar/importar) · análise W/L removida · 🔗 interligado desliga os tempos soltos · ⏹ parar todos · ⭐ configurações salvas não somem mais (guardadas à parte) · 🔀 interligado: depois de RED recupera no tempo mais quente (W virtual) · 🎮 Mesa: 🔗 robô interligado (vários tempos, 1 entrada por vez) · ⏸ pausa por instabilidade · 👀 observador silencioso · 🏆 melhores agora + 🧠 escolhe sozinho · 🔕 popups desligados (botão para ligar) · 🔤 siglas W/L no robô da Mesa · 🎮 Mesa: relatório zera a cada início + 📚 sessões anteriores · 🌐 MERCADOS (qual volatilidade está melhor) · ⏱ jogos de 2s · 📊 Under/Over: 🔢 Máximas por número + 💰 pagamento de cada mercado · virtual mostra só o campo usado · 🎮 Mesa: 👻 loss/win virtual, ⭐ configurações salvas, 📉 maior valor exposto, 📄 histórico completo em PDF';
+const VERSAO='v3.80 · 07/10/2026 · 🔥 Pressure Strategy (pressão PAR/ÍMPAR, gatilho, confirmação, score, backtest, robôs)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10069,22 +10091,42 @@ function mbParar(w,motivo){ const s=mbSt(w); if(!s.on) return; s.on=false; s.par
 // horário fixo 100% da hora atual (e da próxima, para cobrir os próximos 60 min) no banco do tempo
 let MBHF={};
 function mbHfNivel(w){ const C=mbCfg(w); if(+C.hfLvl>=0) return Math.min(2,+C.hfLvl); if(C.galeModo==='sinal') return 0; return C.gale<0?2:Math.max(0,Math.min(2,+C.gale)); }
+// tipo de sinal do horário fixo: 'normal' (como antes) · 'g1ts' (tiro seco G1) · 'ambos' (tiro seco normal + tiro seco G1)
+function mbHfTipo(w){ const t=mbCfg(w).hfTipo; return ['g1ts','ambos'].includes(t)?t:'normal'; }
 async function mbHfLoad(w,forca){
-  const C=mbCfg(w), bank=mbBank(w), lvl=mbHfNivel(w), hr=new Date().getHours(), mn=Math.max(2,+C.hfMin||5), dias=Math.max(mn+1,+C.hfDias||7);
-  const key=[bank,lvl,hr,mn,dias].join('|'), c=MBHF[w];
+  const C=mbCfg(w), bank=mbBank(w), tipo=mbHfTipo(w), lvl=tipo==='normal'?mbHfNivel(w):0, hr=new Date().getHours(), mn=Math.max(2,+C.hfMin||5), dias=Math.max(mn+1,+C.hfDias||7);
+  const key=[bank,lvl,tipo,hr,mn,dias].join('|'), c=MBHF[w];
   if(c&&c.busy) return; if(!forca&&c&&c.key===key&&Date.now()-c.when<10*60e3) return;
   MBHF[w]={...(c||{}),busy:true};
   try{
-    const rows=await idbRange(bank,Date.now()-dias*86400e3-3600e3,Date.now()+60000), G=gridBuild(rows,w), out=[];
-    if(G) for(const h of [hr,(hr+1)%24]) for(const r of hfScan(G,String(h))){ const m=[r.ts,r.g1,r.g2][lvl]; if(m.n>=mn&&m.ok===m.n) out.push({off:r.off,alvo:r.alvo,n:m.n,slot:r.slotKey}); }
-    out.sort((a,b)=>b.n-a.n||a.off-b.off);
-    MBHF[w]={key,when:Date.now(),rows:out,dias:G?hfDayStarts(G).length:0,busy:false};
-  }catch(e){ console.warn('horário fixo mesa',e); MBHF[w]={key,when:Date.now(),rows:[],dias:0,busy:false}; }
+    const rows=await idbRange(bank,Date.now()-dias*86400e3-3600e3,Date.now()+60000), G=gridBuild(rows,w), out=[], outG1=[];
+    if(G) for(const h of [hr,(hr+1)%24]) for(const r of hfScan(G,String(h))){
+      const m=[r.ts,r.g1,r.g2][lvl]; if(tipo!=='g1ts'&&m.n>=mn&&m.ok===m.n) out.push({off:r.off,alvo:r.alvo,n:m.n,slot:r.slotKey});
+      if(tipo!=='normal'&&r.g1.n>=mn&&r.g1.ok===r.g1.n) outG1.push({off:r.off,alvo:r.alvo,n:r.g1.n,slot:r.slotKey,ts:r.ts.n?r.ts.ok/r.ts.n:0});
+    }
+    out.sort((a,b)=>b.n-a.n||a.off-b.off); outG1.sort((a,b)=>b.n-a.n||a.off-b.off);
+    MBHF[w]={key,when:Date.now(),rows:out,rowsG1:outG1,dias:G?hfDayStarts(G).length:0,busy:false};
+  }catch(e){ console.warn('horário fixo mesa',e); MBHF[w]={key,when:Date.now(),rows:[],rowsG1:[],dias:0,busy:false}; }
 }
 function mbHfSinais(w){
-  const now=Date.now()/1000, H=MBHF[w]; if(!H||!H.rows) return [];
-  return H.rows.map((r,i)=>({r,i,T:hfNext(r.off)})).filter(x=>x.T-now<=3600)
-    .map(x=>({key:`hf|${w}|${x.T}|${x.r.alvo}`,entryT:x.T*1000,alvo:x.r.alvo,ord:100000+x.i,ok:true,gale:mbHfNivel(w),nome:`🕒 Horário fixo ${x.r.slot} · ${x.r.n} dias 100%`,curto:`HF ${x.r.slot}`}));
+  const now=Date.now()/1000, H=MBHF[w]; if(!H) return [];
+  const tipo=mbHfTipo(w), out=[];
+  if(tipo!=='g1ts') for(const [i,r] of (H.rows||[]).entries()){ const T=hfNext(r.off); if(T-now>3600) continue;
+    out.push({key:`hf|${w}|${T}|${r.alvo}`,entryT:T*1000,alvo:r.alvo,ord:100000+i,ok:true,gale:tipo==='normal'?mbHfNivel(w):0,nome:`🕒 Horário fixo ${r.slot} · ${r.n} dias 100%${tipo==='ambos'?' TS':''}`,curto:`HF ${r.slot}`}); }
+  if(tipo!=='normal'){
+    const tsT=new Set(out.map(x=>x.entryT/1000));
+    for(const [i,r] of (H.rowsG1||[]).entries()){ let T=hfNext(r.off); if(T-86400>now-w) T-=86400;      // o 1º jogo acabou de passar: o G1 ainda vale
+      if(T-now>3600) continue;
+      if(tsT.has(T)||tsT.has(T+w)) continue;                       // os dois juntos: tiro seco normal tem prioridade em qualquer jogo do G1
+      out.push({key:`g1|${w}|${T}|${r.alvo}`,entryT:(T+w)*1000,alvo:r.alvo,ord:200000+i,ok:true,gale:0,cond:{T,alvo:r.alvo},nome:`🕒 Tiro seco G1 ${r.slot} → ${hmsOf(T+w)} · ${r.n} dias 100% G1`,curto:`G1 ${r.slot}`}); }
+  }
+  return out;
+}
+// tiro seco G1: só vale se o 1º jogo (cond.T) deu RED. Devolve 'entra' | 'green' (não entra) | 'espera' (resultado ainda não chegou) | 'sem' (faltou o jogo)
+function mbCondChk(w,g){
+  const W=LIVE[mbBank(w)]||[]; let r=null; for(let i=W.length-1;i>=0&&i>=W.length-60;i--){ const t=Math.round(W[i].t/1000); if(t===g.cond.T){ r=W[i]; break; } if(t<g.cond.T) break; }
+  if(!r) return dmNow()>g.cond.T+w+1?'sem':'espera';
+  return r.p===g.cond.alvo?'green':'entra';
 }
 // 🔗 robô interligado: vários tempos ao mesmo tempo, mas 1 entrada por vez no total
 // 🔀 recuperação no tempo mais quente (interligado): depois de um RED, a próxima entrada real só sai
@@ -10173,6 +10215,10 @@ function mbTick(){
     }
     if(fonte!=='padroes'){ mbHfLoad(w); sigs=sigs.concat(mbHfSinais(w)); }
     sigs=sigs.filter(g=>!s.taken.has(g.key)&&g.entryT/1000-now>(w<=2?1.2:1.6));
+    sigs=sigs.filter(g=>{ if(!g.cond) return true; if(g.entryT/1000-now>(w<=2?2.4:3.4)) return true;
+      const c=mbCondChk(w,g); if(c==='espera') return false;
+      if(c!=='entra'){ s.taken.add(g.key); if(!obs) mbLog(w,c==='green'?`✅ ${hmsOf(g.cond.T)}: tiro seco G1 — o 1º jogo deu GREEN, sem entrada (espera o próximo sinal)`:`⚠ ${hmsOf(g.cond.T)}: tiro seco G1 — faltou o resultado do 1º jogo, sem entrada`,'evt'); return false; }
+      if(!obs&&!(s.condLog||(s.condLog=new Set())).has(g.key)){ s.condLog.add(g.key); mbLog(w,`🔴 ${hmsOf(g.cond.T)}: 1º jogo deu RED → tiro seco G1 entra em ${hmsOf(g.entryT/1000)}`,'evt'); } g.cond=null; return true; });
     if(!sigs.length) continue;
     const T=Math.min(...sigs.map(g=>g.entryT));
     if(T/1000-now>(w<=2?2.4:3.4)) continue;                       // decide ~3s antes, com todos os sinais do jogo já conhecidos
@@ -10631,7 +10677,9 @@ function mbEsqHtml(w){
       <div class="ms-box"><span class="ms-lb">STOP LOSS $</span><div class="ms-val" style="font-size:18px">${inpt('sl',C.sl,1)}</div></div></div>
     <div class="ms-box"><span class="ms-lb">FONTE DOS SINAIS</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'fonte',this.value)">${[['padroes','🤖 robôs de padrão (aba '+w+'s)'],['hfix','🕒 horário fixo 100% da hora atual'],['ambos','os dois juntos']].map(([v,t])=>`<option value="${v}" ${C.fonte===v?'selected':''}>${t}</option>`).join('')}</select>
       ${C.fonte!=='padroes'?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">mín. dias 100% <input type="number" min="2" value="${C.hfMin}" style="width:52px" onchange="mbSetCfg(${w},'hfMin',+this.value)"></label><label class="ms-chk">olhar <input type="number" min="5" value="${C.hfDias}" style="width:52px" onchange="mbSetCfg(${w},'hfDias',+this.value)"> dias</label></div>
-      <label class="ms-chk" style="margin-top:6px">horário 100% em <select class="ms-sel" onchange="mbSetCfg(${w},'hfLvl',+this.value)">${[[-1,'igual ao gale'],[0,'tiro seco'],[1,'até G1'],[2,'até G2']].map(([v,t])=>`<option value="${v}" ${+C.hfLvl===v?'selected':''}>${t}</option>`).join('')}</select> <span class="mu">(agora: ${NIVEL[mbHfNivel(w)]})</span></label>`:''}</div>
+      <label class="ms-chk" style="margin-top:6px">tipo de sinal <select class="ms-sel" onchange="mbSetCfg(${w},'hfTipo',this.value)">${[['normal','horário fixo normal'],['g1ts','🎯 tiro seco G1'],['ambos','tiro seco normal + tiro seco G1']].map(([v,t])=>`<option value="${v}" ${mbHfTipo(w)===v?'selected':''}>${t}</option>`).join('')}</select></label>
+      ${mbHfTipo(w)!=='normal'?`<div class="ms-nota">🎯 <b>Tiro seco G1</b>: usa os horários 100% até G1. No 1º jogo não aposta; se der <b>RED</b> entra no 2º jogo (o do G1) como tiro seco; se der GREEN não entra.${mbHfTipo(w)==='ambos'?' Com os dois juntos, o tiro seco normal é 100% em TS e tem prioridade: se cair em um dos 2 jogos de um sinal G1, o G1 é descartado.':''}</div>`:''}
+      <label class="ms-chk" style="margin-top:6px;${mbHfTipo(w)!=='normal'?'display:none':''}">horário 100% em <select class="ms-sel" onchange="mbSetCfg(${w},'hfLvl',+this.value)">${[[-1,'igual ao gale'],[0,'tiro seco'],[1,'até G1'],[2,'até G2']].map(([v,t])=>`<option value="${v}" ${+C.hfLvl===v?'selected':''}>${t}</option>`).join('')}</select> <span class="mu">(agora: ${NIVEL[mbHfNivel(w)]})</span></label>`:''}</div>
     ${C.fonte==='hfix'?'':`<label class="ms-chk"><input type="checkbox" ${C.so100?'checked':''} onchange="mbSetCfg(${w},'so100',this.checked?1:0)"> só robôs 100% (nenhum red no banco)</label>
     <label class="ms-chk"><input type="checkbox" ${C.soAuto?'checked':''} onchange="mbSetCfg(${w},'soAuto',this.checked?1:0)"> só robôs automáticos ♻</label>`}
     <div class="ms-nota">0 no stop = sem stop. Gale ${C.gale<0?'até G2':C.gale?'até G'+C.gale:'desligado'} · ×${(+C.fat).toFixed(1)} · ${C.galeModo==='sinal'?'cada sinal é 1 entrada; depois de red a próxima entrada sobe de nível':'gale nos jogos logo depois da entrada'}</div>
@@ -10669,8 +10717,8 @@ function mbRecTxt(w){
 function mbFilaHtml(w){
   const C=mbCfg(w); let hf='';
   if(C.fonte!=='padroes'){ mbHfLoad(w); const H=MBHF[w], L=mbHfSinais(w).sort((a,b)=>a.entryT-b.entryT);
-    hf=`<div class="ms-hl" style="grid-template-columns:1fr;color:#c4b5fd;font-weight:700">🕒 Horário fixo ${w}s · 100% até ${NIVEL[mbHfNivel(w)]} · mín. ${C.hfMin} dias${H&&H.dias!=null?` · banco com ${H.dias} dia(s)`:''}${H&&H.busy?' · calculando…':''} · ${L.length} horário(s) nos próximos 60 min</div>`+
-      (L.length?L.slice(0,40).map(x=>`<div class="ms-hl" style="grid-template-columns:90px 70px 1fr 110px"><span><b>${hmsOf(x.entryT/1000)}</b></span><span class="${x.alvo?'ruimc':'okc'}"><b>${x.alvo?'ÍMPAR':'PAR'}</b></span><span>${x.nome.replace('🕒 Horário fixo ','')}</span><span>${mbSt(w).taken.has(x.key)?'<span class="mu">passou</span>':`faltam ${uoTempo(x.entryT/1000-dmNow())}`}</span></div>`).join('')
+    hf=`<div class="ms-hl" style="grid-template-columns:1fr;color:#c4b5fd;font-weight:700">🕒 Horário fixo ${w}s · ${{normal:'100% até '+NIVEL[mbHfNivel(w)],g1ts:'🎯 tiro seco G1',ambos:'tiro seco normal + 🎯 tiro seco G1'}[mbHfTipo(w)]} · mín. ${C.hfMin} dias${H&&H.dias!=null?` · banco com ${H.dias} dia(s)`:''}${H&&H.busy?' · calculando…':''} · ${L.length} horário(s) nos próximos 60 min</div>`+
+      (L.length?L.slice(0,40).map(x=>`<div class="ms-hl" style="grid-template-columns:90px 70px 1fr 110px"><span><b>${hmsOf(x.entryT/1000)}</b></span><span class="${x.alvo?'ruimc':'okc'}"><b>${x.alvo?'ÍMPAR':'PAR'}</b></span><span>${x.cond?'🎯 ':''}${x.nome.replace('🕒 Horário fixo ','').replace('🕒 Tiro seco G1 ','se o 1º der red: ')}</span><span>${mbSt(w).taken.has(x.key)?'<span class="mu">passou</span>':`faltam ${uoTempo(x.entryT/1000-dmNow())}`}</span></div>`).join('')
         :`<div class="mu" style="padding:8px">${H&&H.dias!=null&&H.dias<C.hfMin?`O banco de ${w}s só tem ${H.dias} dia(s) — baixe mais dias em 📥 Histórico R_100.`:'Nenhum horário fixo 100% nesta hora.'}</div>`); }
   if(C.fonte==='hfix') return hf;
   return hf+mbFilaPadroes(w);
@@ -10695,8 +10743,325 @@ function mbHistHtml(w){
 }
 
 
+// =====================================================================================
+// 🔥 PRESSURE STRATEGY — ESTRUTURA → PRESSÃO → GATILHO → CONFIRMAÇÃO → SINAL (PAR/ÍMPAR)
+// Usa só o histórico que já está no HTML (IndexedDB "dolar_par_impar" + LIVE), um banco por intervalo
+// (DERIV <mercado> · 5s/10s/20s/30s) — nunca mistura intervalos. Tudo é estatística do passado, não previsão.
+// Backtest sem look-ahead: o sinal do jogo i+1 é calculado só com os jogos até i.
+// =====================================================================================
+const PS_WS=[5,10,20,30];
+const PS_DEF={w:20,nDig:200,nc:20,nm:50,nl:200,dir:'favor',t1:1,revN:4,t2:1,qN:2,t3:1,ext:70,t4:1,mrN:15,
+  k1:1,k2:1,k3:1,k4:1,k5:1,k6:1,needAll:1,pMax:30,forcaMin:10,scoreMin:65,f1:50,f2:65,f3:80,f4:90,gale:0,
+  segMin:100,segAgr:'seg',segOrd:'dif',horaPer:'7',btPer:'7',alerta:0,alertMin:80};
+let PS={data:{},bt:null,btAll:null,btCmp:null,why:false,busy:false,msg:'',live:null,liveKey:''};
+function psP(){ return {...PS_DEF,...(cfg.ps||{})}; }
+function psSet(k,v,re=true){ cfg.ps={...psP(),[k]:v}; saveCfg(); if(re&&S.tab==='press') fillRes(); }
+function psW(){ const w=+psP().w; return PS_WS.includes(w)?w:20; }
+function psSym(){ return cfg.ps_sym||curSym(); }
+function psBank(w=psW()){ return d5BankName(w,psSym()); }
+const psLado=p=>p?'ÍMPAR':'PAR';
+const psTag=p=>`<span class="ps-tag ${p?'imp':'par'}">${psLado(p)}</span>`;
+// ---------- dados (sem duplicar: um jogo por horário) ----------
+function psArr(rows){
+  const M=new Map(); for(const r of rows){ if(r&&r.d!=null&&r.t) M.set(Math.round(r.t/1000),r.d); }
+  const ks=[...M.keys()].sort((a,b)=>a-b), n=ks.length, D=new Int8Array(n), T=new Float64Array(n);
+  ks.forEach((t,i)=>{ T[i]=t; D[i]=M.get(t); }); return {D,T,n};
+}
+function psPerMs(per){ const now=Date.now(), d0=new Date(); d0.setHours(0,0,0,0);
+  if(per==='hoje') return [d0.getTime(),now+60e3]; if(per==='ontem') return [d0.getTime()-86400e3,d0.getTime()];
+  if(per==='0'||per==='tudo') return [0,now+60e3]; return [now-(+per)*86400e3,now+60e3]; }
+async function psDados(w,per){
+  const bank=psBank(w), L=LIVE[bank]||[], key=`${bank}|${per}`, c=PS.data[key], lastT=L.length?L.at(-1).t:0;
+  if(c&&c.lastT===lastT&&Date.now()-c.when<120e3) return c;
+  const [a,b]=psPerMs(per); let rows=[];
+  try{ rows=await idbRange(bank,a,b); }catch(e){ console.warn('pressure idb',e); }
+  rows=rows.concat(L.filter(x=>x.t>=a&&x.t<b));
+  const o={...psArr(rows),bank,w,per,lastT,when:Date.now()}; PS.data[key]=o; return o;
+}
+function psLiveArr(w){ const L=(LIVE[psBank(w)]||[]).slice(-3000); return psArr(L); }
+// ---------- contexto: prefixo de pares, sequências e continuidade (O(n)) ----------
+function psCtx(A,w){
+  const {D,T,n}=A, PP=new Int32Array(n+1), run=new Int32Array(n), cont=new Int32Array(n);
+  for(let i=0;i<n;i++){ PP[i+1]=PP[i]+(D[i]%2===0?1:0); const ok=i>0&&Math.round(T[i]-T[i-1])===w;
+    cont[i]=ok?cont[i-1]+1:1; run[i]=ok&&D[i]%2===D[i-1]%2?run[i-1]+1:1; }
+  return {D,T,n,w,PP,run,cont};
+}
+function psJan(c,N,end){ const par=c.PP[end+1]-c.PP[end+1-N]; const pp=100*par/N; return {N,par,imp:N-par,pPar:pp,pImp:100-pp,p:pp-(100-pp)}; }   // p = PAR% − ÍMPAR% (pontos)
+// ---------- análise de um ponto i (usa SÓ D[0..i]) ----------
+function psAt(c,i,P,st){
+  const need=Math.max(+P.nl,+P.nm,2*(+P.nc),10)+1;
+  if(i<need||c.cont[i]<need) return null;
+  const D=c.D, pc=psJan(c,+P.nc,i), pm=psJan(c,+P.nm,i), pl=psJan(c,+P.nl,i), pp=psJan(c,+P.nc,i-(+P.nc));
+  const sgn=x=>x>0?0:x<0?1:-1;                       // 0=PAR 1=ÍMPAR -1=empate
+  let dom=sgn(pm.p); if(dom<0) dom=sgn(pl.p); if(dom<0) dom=sgn(pc.p);
+  const L0=D[i]%2, fraco=dom<0?-1:1-dom;
+  // estrutura (últimos 10)
+  let par10=0; for(let k=i-9;k<=i;k++) if(D[k]%2===0) par10++;
+  const est={par:par10,imp:10-par10,seq:c.run[i],seqLado:L0,dom:par10>5?0:par10<5?1:-1,ult:[...Array(10)].map((_,j)=>D[i-9+j])};
+  // gatilhos
+  const trig=[];
+  if(dom>=0&&L0!==dom&&c.run[i]===1&&D[i-1]%2===dom){
+    const r=c.run[i-1];
+    if(+P.t1&&r>=+P.revN) trig.push({k:'rev',dir:dom,txt:`GATILHO DE REVERSÃO DETECTADO — ${r}× ${psLado(dom)} e saiu ${psLado(L0)}`});
+    else if(+P.t2&&r>=+P.qN) trig.push({k:'quebra',dir:dom,txt:`QUEBRA DE SEQUÊNCIA — ${r}× ${psLado(dom)} → ${psLado(L0)}`});
+  }
+  if(+P.t3&&dom>=0){ const s=dom===0?pm.pPar:pm.pImp; if(s>=+P.ext) trig.push({k:'ext',dir:dom,txt:`PRESSÃO EXTREMA — ${psLado(dom)} ${s.toFixed(0)}% na média`}); }
+  if(+P.t4){ const pv=sgn(pp.p); if(pv>=0){ const perda=pv===0?pp.p-pc.p:pc.p-pp.p; if(perda>=+P.mrN) trig.push({k:'mud',dir:1-pv,txt:`PRESSÃO ${psLado(pv)} PERDENDO FORÇA — ${(pv===0?pp.pPar:pp.pImp).toFixed(0)}% → ${(pv===0?pc.pPar:pc.pImp).toFixed(0)}%`}); } }
+  const tDom=trig.filter(t=>t.dir===dom), d=tDom.length?dom:trig.length?trig[0].dir:dom;
+  // convergência das 3 janelas na direção d
+  const conv=d<0?0:[pc,pm,pl].filter(j=>sgn(j.p)===d).length;
+  const convTxt=conv===3?`🟢 CONVERGÊNCIA FORTE — ${psLado(d)}`:conv===2?'🟡 CONVERGÊNCIA PARCIAL':'🔴 SEM CONVERGÊNCIA';
+  // confirmação
+  const chk=[];
+  if(d>=0){
+    if(+P.k1) chk.push({t:'pressão atual (curta) na direção',ok:sgn(pc.p)===d,v:`${pc.p>=0?'PAR':'ÍMPAR'} ${Math.abs(pc.p).toFixed(0)} pts`});
+    if(+P.k2) chk.push({t:'convergência ≥ 2/3 janelas',ok:conv>=2,v:`${conv}/3`});
+    if(+P.k3) chk.push({t:'sequência contra ≤ 1',ok:!(L0!==d&&c.run[i]>1),v:`${c.run[i]}× ${psLado(L0)}`});
+    if(+P.k4) chk.push({t:'últimos 2 com ao menos 1 na direção',ok:D[i-1]%2===d||D[i]%2===d,v:`${psLado(D[i-1]%2)} ${psLado(D[i]%2)}`});
+    if(+P.k5){ const l3=(st&&st.last3)||[]; const losses=l3.filter(x=>!x).length; chk.push({t:'últimas 3 entradas com ≤ 1 loss',ok:losses<=1,v:l3.length?l3.map(x=>x?'W':'L').join(''):'sem entradas'}); }
+    if(+P.k6){ const s=d===0?pm.p:-pm.p; chk.push({t:`força da pressão média ≥ ${P.forcaMin} pts`,ok:s>=+P.forcaMin,v:`${s.toFixed(0)} pts`}); }
+  }
+  const passed=chk.filter(x=>x.ok).length, tot=chk.length;
+  const aprov=d>=0&&tot>0&&(+P.needAll?passed===tot:passed>=tot-1);
+  // score 0–100
+  const sp=d<0?0:Math.max(0,(d===0?pm.p:-pm.p));
+  const parts={pressao:Math.round(25*Math.min(1,sp/Math.max(1,+P.pMax))),conv:conv===3?20:conv===2?10:0,
+    estrutura:d<0?0:Math.round(15*Math.max(0,Math.min(1,((d===0?par10:10-par10)-5)/5))),gatilho:tDom.length||(trig.length&&d===trig[0].dir)?20:0,conf:tot?Math.round(20*passed/tot):0};
+  const score=parts.pressao+parts.conv+parts.estrutura+parts.gatilho+parts.conf;
+  const classe=score>=+P.f4?'MUITO FORTE':score>=+P.f3?'FORTE':score>=+P.f2?'MODERADO':score>=+P.f1?'FRACO':'SEM SINAL';
+  const temTrig=trig.some(t=>t.dir===d);
+  let sinal=null; if(d>=0&&temTrig&&aprov&&score>=+P.scoreMin) sinal=P.dir==='contra'?1-d:d;
+  return {i,t:c.T[i],pc,pm,pl,dom,fraco,est,trig,d,conv,convTxt,chk,passed,tot,aprov,parts,score,classe,sinal,temTrig};
+}
+// ---------- backtest (sem look-ahead, 1 entrada por vez) ----------
+async function psBacktest(A,w,P,deSec){
+  const c=psCtx(A,w), G=+P.gale, st={last3:[]}, R={n:0,s:[0,0,0],nl:[0,0,0],scoreSoma:0,seqW:0,seqL:0,maxW:0,maxL:0,dia:{},hora:{},seg:{},min:{},porDir:[[0,0],[0,0]],ini:null,fim:null};
+  let t0=performance.now();
+  for(let i=0;i<c.n-1;i++){
+    if(c.T[i+1]<deSec) continue;
+    const a=psAt(c,i,P,st); if(!a||a.sinal==null) continue;
+    if(Math.round(c.T[i+1]-c.T[i])!==w) continue;                  // jogo seguinte precisa existir (sem buracos)
+    const x=a.sinal, res=[]; for(let k=1;k<=3;k++){ const j=i+k; if(j>=c.n||Math.round(c.T[j]-c.T[j-1])!==w){ res.push(null); continue; } res.push(c.D[j]%2===x); }
+    // níveis separados: TS · até G1 · até G2 (cada um só conta quando os jogos existem)
+    for(let L=0;L<3;L++){ const seg=res.slice(0,L+1); if(seg.some(v=>v===null)&&!seg.some(v=>v===true)) continue; R.nl[L]++; if(seg.slice(0,L+1).some(v=>v===true)) R.s[L]++; }
+    const okG=res.slice(0,G+1).some(v=>v===true), conhecido=res.slice(0,G+1).every(v=>v!==null)||okG;
+    if(!conhecido) continue;
+    R.n++; R.scoreSoma+=a.score; R.porDir[x][0]++; if(okG) R.porDir[x][1]++;
+    const T1=c.T[i+1], dt=new Date(T1*1000), dk=dt.toLocaleDateString('pt-BR'), hk=dt.getHours(), sk=dt.getSeconds(), mk=dt.getMinutes();
+    for(const [M,k] of [[R.dia,dk],[R.hora,hk],[R.seg,sk],[R.min,mk]]){ const o=M[k]||(M[k]={n:0,ok:0}); o.n++; if(okG) o.ok++; }
+    if(okG){ R.seqW++; R.seqL=0; if(R.seqW>R.maxW) R.maxW=R.seqW; } else { R.seqL++; R.seqW=0; if(R.seqL>R.maxL) R.maxL=R.seqL; }
+    if(!R.ini) R.ini=T1; R.fim=T1;
+    st.last3.push(okG); if(st.last3.length>3) st.last3.shift();
+    let usados=G+1; if(okG){ usados=res.findIndex(v=>v===true)+1; } i+=usados-1;             // pula os jogos da entrada (e dos gales)
+    if(performance.now()-t0>60){ await new Promise(r=>setTimeout(r,0)); t0=performance.now(); }
+  }
+  R.ok=R.porDir[0][1]+R.porDir[1][1]; R.err=R.n-R.ok; R.p=R.n?R.ok/R.n:0; R.scoreMed=R.n?R.scoreSoma/R.n:0;
+  return R;
+}
+async function psRodarBT(){
+  if(PS.busy) return; PS.busy=true; PS.msg='⏳ Rodando backtest…'; fillRes();
+  try{ const P=psP(), w=psW(), A=await psDados(w,P.btPer), [a]=psPerMs(P.btPer);
+    PS.bt={...(await psBacktest(A,w,P,a/1000)),w,per:P.btPer,jogos:A.n,gale:+P.gale,when:Date.now()}; PS.msg=''; }
+  catch(e){ PS.msg='⚠ '+e.message; console.warn(e); }
+  PS.busy=false; fillRes();
+}
+async function psRodarPeriodos(){
+  if(PS.busy) return; PS.busy=true; const P=psP(), w=psW(), out=[];
+  try{ for(const per of ['3','7','15','30','60','90','0']){ PS.msg=`⏳ Testando ${per==='0'?'todo histórico':per+' dias'}…`; fillRes();
+      const A=await psDados(w,per), [a]=psPerMs(per), R=await psBacktest(A,w,P,a/1000); out.push({per,jogos:A.n,...R}); }
+    PS.btAll={w,out,when:Date.now()}; PS.msg=''; }catch(e){ PS.msg='⚠ '+e.message; }
+  PS.busy=false; fillRes();
+}
+async function psRodarComparar(){
+  if(PS.busy) return; PS.busy=true; const P=psP(), out=[];
+  try{ for(const w of PS_WS){ PS.msg=`⏳ Comparando ${w}s…`; fillRes(); const A=await psDados(w,P.btPer), [a]=psPerMs(P.btPer), R=await psBacktest(A,w,P,a/1000); out.push({w,jogos:A.n,...R}); }
+    PS.btCmp={per:P.btPer,out,when:Date.now()}; PS.msg=''; }catch(e){ PS.msg='⚠ '+e.message; }
+  PS.busy=false; fillRes();
+}
+// ---------- tabelas de segundo/minuto e hora (par × ímpar bruto do histórico) ----------
+async function psAgrupar(tipo){
+  const P=psP(), w=psW(), per=tipo==='hora'?P.horaPer:P.horaPer, A=await psDados(w,per), G={};
+  for(let i=0;i<A.n;i++){ const dt=new Date(A.T[i]*1000), k=tipo==='hora'?dt.getHours():P.segAgr==='min'?dt.getMinutes():dt.getSeconds(); const o=G[k]||(G[k]={n:0,par:0}); o.n++; if(A.D[i]%2===0) o.par++; }
+  return {G,n:A.n};
+}
+function psScoreAmostra(par,n,min){ if(!n) return 0; const p=par/n, z=Math.abs(p-0.5)*2*Math.sqrt(n); return n<min?0:Math.min(100,Math.round(z*20)); }
+// ---------- robôs pressure ----------
+const PSR_KEY='dpi_press_robos_v1';
+let PSR=null, PS_LOG=[];
+function psRobos(){ if(PSR) return PSR; try{ PSR=JSON.parse(localStorage.getItem(PSR_KEY)||'[]')||[]; }catch(e){ PSR=[]; } return PSR; }
+function psRobosSave(){ try{ localStorage.setItem(PSR_KEY,JSON.stringify(psRobos().map(r=>{ const {_lt,_pend,...o}=r; return o; }))); }catch(e){} }
+window.addEventListener('storage',e=>{ if(e.key===PSR_KEY){ PSR=null; } });
+function psCriarRobo(){
+  const P=psP(), w=psW(), nome=($('#psRNome')?.value||'').trim()||`PRESSURE ${w}S`;
+  const r={id:'PS'+Date.now(),nome,w,sym:psSym(),P:{...P},hora:$('#psRHora')?.value??'any',seg:$('#psRSeg')?.value??'any',dirF:$('#psRDir')?.value??'any',gale:+P.gale,demo:0,on:1,g:0,r:0,criado:Date.now()};
+  psRobos().unshift(r); psRobosSave(); status(`🔥 Robô ${nome} criado`,'ok'); fillRes();
+}
+function psRoboTog(id,k){ const r=psRobos().find(x=>x.id===id); if(!r) return; r[k]=r[k]?0:1; psRobosSave(); fillRes(); }
+function psRoboDel(id){ if(!confirm('Apagar este robô Pressure?')) return; PSR=psRobos().filter(x=>x.id!==id); psRobosSave(); fillRes(); }
+function psLog(o){ PS_LOG.unshift({...o,t:Date.now()}); if(PS_LOG.length>300) PS_LOG.length=300; }
+function psRobosTick(){
+  for(const r of psRobos()){
+    if(!r.on) continue;
+    const bank=d5BankName(r.w,r.sym||psSym()), L=LIVE[bank]; if(!L||!L.length) continue;
+    const last=L.at(-1); if(r._lt===last.t) continue; r._lt=last.t;
+    const A=psArr(L.slice(-3000)), c=psCtx(A,r.w);
+    // resolve a entrada pendente (TS → G1 → G2)
+    if(r._pend){ const p=r._pend; let fim=null;
+      for(let k=0;k<=r.gale;k++){ const T=p.T+k*r.w, j=A.T.indexOf(T); if(j<0){ if(last.t/1000>T+r.w*2) { fim='?'; } break; } if(A.D[j]%2===p.dir){ fim='G'+k; break; } if(k===r.gale) fim='red'; }
+      if(fim===null) continue;
+      if(fim!=='?'){ if(fim==='red') r.r++; else r.g++; (r.last3||(r.last3=[])).push(fim!=='red'); if(r.last3.length>3) r.last3.shift(); psRobosSave();
+        psLog({rid:r.id,nome:r.nome,T:p.T,dir:p.dir,score:p.score,res:fim==='red'?'red':'green',nivel:fim}); }
+      r._pend=null;
+    }
+    const a=psAt(c,A.n-1,r.P,{last3:r.last3||[]}); if(!a||a.sinal==null) continue;
+    const Tn=A.T[A.n-1]+r.w, dt=new Date(Tn*1000);
+    if(r.hora!=='any'&&dt.getHours()!==+r.hora) continue; if(r.seg!=='any'&&dt.getSeconds()!==+r.seg) continue; if(r.dirF!=='any'&&+r.dirF!==a.sinal) continue;
+    r._pend={T:Tn,dir:a.sinal,score:a.score};
+    psLog({rid:r.id,nome:r.nome,T:Tn,dir:a.sinal,score:a.score,res:'sinal'});
+    if(r.demo&&typeof dmRegistrar==='function'&&DM.ok) dmRegistrar({key:'ps|'+r.id+'|'+Tn,src:'press',nome:'🔥 '+r.nome,sym:r.sym||psSym(),T:Tn,step:r.w,maxN:r.gale,ct:a.sinal?'DIGITODD':'DIGITEVEN'});
+    if(+psP().alerta&&a.score>=+psP().alertMin&&a.temTrig&&a.aprov) psPopup(r,a,Tn);
+  }
+}
+setInterval(()=>{ try{ psRobosTick(); }catch(e){ console.warn('pressure robôs',e); } },1000);
+function psPopup(r,a,Tn){
+  let p=$('#psPop'); if(!p){ p=document.createElement('div'); p.id='psPop'; document.body.appendChild(p); }
+  p.innerHTML=`<div class="ps-popbox"><div style="font-size:22px;font-weight:900">🔥 PRESSURE SIGNAL</div><div style="font-size:15px;margin:4px 0">${r.w}S · ${esc(r.nome)}</div>
+    <div class="ps-big ${a.sinal?'imp':'par'}">${psLado(a.sinal)}</div><div>Score: <b>${a.score}</b> · entrada no jogo <b>${hmsOf(Tn)}</b></div><div class="nota">Gatilho confirmado. Sinal estatístico — não é garantia.</div>
+    <div class="rbactions"><button onclick="$('#psPop').style.display='none'">fechar</button><button onclick="psSet('alerta',0,false);$('#psPop').style.display='none'">DESATIVAR POPUP</button></div></div>`;
+  p.style.display='flex'; try{ beep(); }catch(e){}
+}
+// ---------- tela ----------
+function psExplica(a){
+  if(!a) return '<div class="nota">Sem análise.</div>';
+  const t=a.trig.filter(x=>x.dir===a.d);
+  return `<div class="ps-why"><div><b>PRESSÃO:</b> ${a.dom<0?'equilibrada':`${psLado(a.dom)} +${Math.abs(a.pm.p).toFixed(0)} pts (média ${a.pm.N})`}</div>
+    <div><b>ESTRUTURA:</b> ${a.d<0?'—':`${a.d===0?a.est.par:a.est.imp} ${psLado(a.d)} nos últimos 10 · sequência atual ${a.est.seq}× ${psLado(a.est.seqLado)}`}</div>
+    <div><b>CONVERGÊNCIA:</b> ${a.conv}/3 janelas apontam ${a.d<0?'—':psLado(a.d)}</div>
+    <div><b>GATILHO:</b> ${t.length?t.map(x=>x.txt).join(' · '):a.trig.length?'só contra a direção ('+a.trig.map(x=>x.txt).join(' · ')+')':'nenhum'}</div>
+    <div><b>CONFIRMAÇÃO:</b> ${a.aprov?'aprovada':'não aprovada'} (${a.passed}/${a.tot}) — ${a.chk.map(x=>`${x.ok?'✔':'✘'} ${x.t} <i>(${x.v})</i>`).join(' · ')}</div>
+    <div><b>SCORE:</b> ${a.score} = pressão ${a.parts.pressao} + convergência ${a.parts.conv} + estrutura ${a.parts.estrutura} + gatilho ${a.parts.gatilho} + confirmação ${a.parts.conf} (mínimo ${psP().scoreMin})</div>
+    <div><b>DECISÃO:</b> ${a.sinal!=null?`sinal estatístico ${psLado(a.sinal)}${psP().dir==='contra'?' (modo contra a pressão)':''}`:'AGUARDAR — '+(!a.temTrig?'sem gatilho na direção':!a.aprov?'confirmação não aprovada':'score abaixo do mínimo')}</div></div>`;
+}
+function psBarra(pPar){ return `<div class="ps-bar"><i class="par" style="width:${pPar.toFixed(1)}%">PAR ${pPar.toFixed(0)}%</i><i class="imp" style="width:${(100-pPar).toFixed(1)}%">ÍMPAR ${(100-pPar).toFixed(0)}%</i></div>`; }
+function psJanTxt(j){ return j.p===0?'equilíbrio':`${j.p>0?'PAR':'ÍMPAR'} +${Math.abs(j.p).toFixed(0)}%`; }
+function psLiveHtml(){
+  const P=psP(), w=psW(), A=psLiveArr(w), c=psCtx(A,w), a=A.n?psAt(c,A.n-1,P,{last3:PS.liveL3||[]}):null; PS.live=a;
+  if(!a) return `<div class="panel"><div class="nota">Poucos jogos contínuos no banco <b>${psBank(w)}</b> (${A.n}). A análise precisa de pelo menos ${Math.max(P.nl,P.nm,2*P.nc)+12} jogos seguidos sem buraco — deixe a coleta rodando ou baixe histórico em 📥 Histórico.</div></div>`;
+  const Tn=A.T[A.n-1]+w, dn=new Date(Tn*1000), N=Math.min(+P.nDig,A.n), cnt=Array(10).fill(0); for(let i=A.n-N;i<A.n;i++) cnt[A.D[i]]++;
+  const media=N/10, cls=x=>x>=media*1.25?'FORTE':x<=media*0.75?'FRACO':'NORMAL';
+  const bt=PS.bt&&PS.bt.w===w?PS.bt:null;
+  let melhorSeg='—', maiorSeg='—';
+  if(bt){ const E=Object.entries(bt.seg).filter(([,o])=>o.n>=+P.segMin/10); const b=E.sort((x,y)=>y[1].ok/y[1].n-x[1].ok/x[1].n)[0]; if(b) melhorSeg=`:${p2d(b[0])} (${(b[1].ok/b[1].n*100).toFixed(0)}% em ${b[1].n})`;
+    const m=Object.entries(bt.seg).sort((x,y)=>y[1].n-x[1].n)[0]; if(m) maiorSeg=`:${p2d(m[0])} (${m[1].n} sinais)`; }
+  return `<div class="ps-grid">
+    <div class="panel ps-sig ${a.sinal==null?'esp':a.sinal?'imp':'par'}"><div class="ps-h">🔥 PRESSURE STRATEGY</div>
+      <div class="ps-kv"><span>INTERVALO</span><b>${w} segundos</b><span>ANÁLISE</span><b>últimos ${P.nl} resultados</b><span>PRESSÃO</span><b>${psJanTxt(a.pm)}</b><span>ESTRUTURA</span><b>${a.est.dom<0?'equilibrada':psLado(a.est.dom)}</b>
+        <span>GATILHO</span><b>${a.temTrig?'DETECTADO':a.trig.length?'só contra a direção':'—'}</b><span>CONFIRMAÇÃO</span><b>${a.aprov?'APROVADA':'NÃO APROVADA'} (${a.passed}/${a.tot})</b><span>SCORE</span><b>${a.score}/100 · ${a.classe}</b></div>
+      <div class="ps-sinal">${a.sinal==null?'⚪ AGUARDAR':a.sinal?'🔴 SINAL ESTATÍSTICO ÍMPAR':'🟢 SINAL ESTATÍSTICO PAR'}</div>
+      <div class="nota" style="text-align:center">próximo jogo <b>${hmsOf(Tn)}</b> · minuto ${p2d(dn.getMinutes())} · segundo :${p2d(dn.getSeconds())}</div>
+      <div class="nota" style="text-align:center">segundo mais favorável (backtest): <b>${melhorSeg}</b> · segundo com maior histórico: <b>${maiorSeg}</b>${bt?'':' — rode o backtest'}</div>
+      <div style="text-align:center;margin-top:6px"><button onclick="PS.why=!PS.why;psLiveFill(true)">${PS.why?'esconder':'🔎 VER POR QUE DEU O SINAL'}</button></div>${PS.why?psExplica(a):''}</div>
+    <div class="panel"><h3>Pressão PAR / ÍMPAR <small>últimos ${N}</small></h3>${psBarra(100*cnt.filter((_,d)=>d%2===0).reduce((s,x)=>s+x,0)/N)}
+      <div class="ps-jans">${[['CURTA',a.pc],['MÉDIA',a.pm],['LONGA',a.pl]].map(([t,j])=>`<div><span>${t} (${j.N})</span><b class="${j.p>0?'okc2':j.p<0?'ruimc2':''}">${psJanTxt(j)}</b>${psBarra(j.pPar)}</div>`).join('')}</div>
+      <div class="ps-conv">${a.convTxt}</div>
+      <div class="nota">Dominante: <b>${a.dom<0?'—':psLado(a.dom)}</b> · fraco: <b>${a.fraco<0?'—':psLado(a.fraco)}</b>${a.trig.length?' · <b>possível gatilho identificado</b>':''}</div>
+      <div class="ps-trigs">${a.trig.map(t=>`<div>⚡ ${t.txt} <span class="mu">→ aponta ${psLado(t.dir)}</span></div>`).join('')||'<div class="mu">nenhum gatilho agora</div>'}</div>
+      <div style="margin-top:8px"><b>Estrutura (últimos 10)</b> · PAR ${a.est.par} · ÍMPAR ${a.est.imp} · sequência atual ${a.est.seq}× ${psLado(a.est.seqLado)}<div class="ps-ult">${a.est.ult.map(x=>`<span class="${x%2?'imp':'par'}">${x}</span>`).join('')}</div></div></div>
+    <div class="panel"><h3>Dígitos <small>últimos ${N}</small></h3><table class="ps-tab"><tr><th>Dígito</th><th>Qtd</th><th>%</th><th>Classificação</th></tr>${cnt.map((x,d)=>`<tr><td><span class="ps-dg ${d%2?'imp':'par'}">${d}</span></td><td>${x}</td><td>${(100*x/N).toFixed(1)}%</td><td class="${cls(x)==='FORTE'?'okc2':cls(x)==='FRACO'?'ruimc2':''}">${cls(x)}</td></tr>`).join('')}</table></div>
+  </div>`;
+}
+function psLiveFill(force){ const el=$('#psLive'); if(!el) return; const L=LIVE[psBank()]||[], k=psBank()+'|'+(L.at(-1)?.t||0)+'|'+JSON.stringify(cfg.ps||{})+PS.why; if(!force&&k===PS.liveKey) return; PS.liveKey=k; el.innerHTML=psLiveHtml(); const cz=$('#psCruz'); if(cz) cz.innerHTML=psCruzHtml(); }
+function psCruzHtml(){
+  const a=PS.live, bt=PS.bt&&PS.bt.w===psW()?PS.bt:null, P=psP(); if(!a) return '<div class="nota">—</div>';
+  const Tn=a.t+psW(), dt=new Date(Tn*1000), h=dt.getHours(), s=dt.getSeconds();
+  if(!bt) return `<div class="nota">Rode o <b>backtest</b> para cruzar o sinal atual com o histórico da hora ${p2d(h)}h e do segundo :${p2d(s)}.</div>`;
+  const oh=bt.hora[h], os=bt.seg[s], ph=oh&&oh.n?oh.ok/oh.n:null, pss=os&&os.n?os.ok/os.n:null, nmin=Math.max(10,Math.round(+P.segMin/10));
+  const sc=Math.round(((ph??0.5)+(pss??0.5))/2*100);
+  const oport=a.sinal!=null&&ph!=null&&pss!=null&&oh.n>=nmin&&os.n>=nmin&&ph>=0.55&&pss>=0.55;
+  return `<div class="ps-kv"><span>INTERVALO</span><b>${psW()}s</b><span>JOGO</span><b>${hmsOf(Tn)} · ${p2d(h)}:${p2d(dt.getMinutes())} · segundo ${p2d(s)}</b>
+    <span>SINAL AGORA</span><b>${a.sinal==null?'aguardar':psLado(a.sinal)+' · score '+a.score}</b>
+    <span>HISTÓRICO ${p2d(h)}h</span><b>${ph==null?'sem dados':(ph*100).toFixed(1)+'% em '+oh.n+' sinais'}</b><span>HISTÓRICO :${p2d(s)}</span><b>${pss==null?'sem dados':(pss*100).toFixed(1)+'% em '+os.n+' sinais'}</b>
+    <span>SCORE HISTÓRICO</span><b>${sc}</b></div>
+    <div class="ps-sinal" style="font-size:18px">${oport?'🟢 OPORTUNIDADE ESTATÍSTICA':a.sinal==null?'⚪ sem sinal agora':'🟡 sinal sem confirmação histórica suficiente'}</div>
+    <div class="nota">Oportunidade = sinal agora + hora e segundo com ≥ 55% no backtest (mín. ${nmin} sinais cada). Histórico não garante o próximo jogo.</div>`;
+}
+function psCfgHtml(){
+  const P=psP(), n=(k,wd=56,st=1)=>`<input type="number" step="${st}" value="${P[k]}" style="width:${wd}px" onchange="psSet('${k}',+this.value)">`, ck=(k,t)=>`<label><input type="checkbox" ${+P[k]?'checked':''} onchange="psSet('${k}',this.checked?1:0)"> ${t}</label>`;
+  return `<details class="panel ps-cfg" ${cfg.ps_cfgOpen?'open':''} ontoggle="cfg.ps_cfgOpen=this.open;saveCfg()"><summary><b>⚙ Configuração da estratégia</b></summary>
+    <div class="ctl"><label>Janela dos dígitos <select onchange="psSet('nDig',+this.value)">${[20,30,50,100,200,500,1000].map(v=>`<option ${+P.nDig===v?'selected':''}>${v}</option>`).join('')}</select></label>
+      <label>Curta ${n('nc')}</label><label>Média ${n('nm')}</label><label>Longa ${n('nl',64)}</label>
+      <label>Direção do sinal <select onchange="psSet('dir',this.value)"><option value="favor" ${P.dir==='favor'?'selected':''}>a favor da pressão (dominante)</option><option value="contra" ${P.dir==='contra'?'selected':''}>contra a pressão (lado fraco)</option></select></label></div>
+    <div class="ctl"><b>Gatilhos:</b> ${ck('t1','1 reversão — após')} ${n('revN',44)} iguais · ${ck('t2','2 quebra de sequência — após')} ${n('qN',44)} · ${ck('t3','3 pressão extrema ≥')} ${n('ext',50)}% · ${ck('t4','4 mudança rápida ≥')} ${n('mrN',50)} pts</div>
+    <div class="ctl"><b>Confirmação:</b> ${ck('k1','pressão atual')} ${ck('k2','convergência')} ${ck('k3','sequência')} ${ck('k4','últimos 2')} ${ck('k5','últimas 3 entradas')} ${ck('k6','força ≥')} ${n('forcaMin',50)} pts
+      <label><select onchange="psSet('needAll',+this.value)"><option value="1" ${+P.needAll?'selected':''}>exigir todas</option><option value="0" ${!+P.needAll?'selected':''}>aceitar 1 falha</option></select></label></div>
+    <div class="ctl"><b>Score:</b> <label>mínimo p/ sinal ${n('scoreMin',50)}</label><label>pressão cheia em ${n('pMax',50)} pts</label>
+      <label>faixas: fraco ≥ ${n('f1',46)} moderado ≥ ${n('f2',46)} forte ≥ ${n('f3',46)} muito forte ≥ ${n('f4',46)}</label></div>
+    <div class="ctl"><b>Alerta:</b> ${ck('alerta','☑ ativar popup dos robôs')} <label>score ≥ ${n('alertMin',50)}</label></div></details>`;
+}
+async function psTabsHtml(){
+  const P=psP(), w=psW();
+  // segundo/minuto
+  const S1=await psAgrupar('seg'), H1=await psAgrupar('hora'), min=+P.segMin;
+  const linhas=(G,keys,fmt)=>keys.map(k=>{ const o=G[k]||{n:0,par:0}, pp=o.n?100*o.par/o.n:0, dif=o.n?Math.abs(pp-(100-pp)):0, sc=psScoreAmostra(o.par,o.n,min); return {k,o,pp,dif,sc,fmt:fmt(k)}; });
+  let LS=linhas(S1.G,[...Array(60).keys()],k=>P.segAgr==='min'?`${p2d(k)}min`:`:${p2d(k)}`);
+  const ord={par:(a,b)=>b.pp-a.pp,imp:(a,b)=>a.pp-b.pp,dif:(a,b)=>b.dif-a.dif,n:(a,b)=>b.o.n-a.o.n}[P.segOrd]||null; if(ord) LS=LS.filter(x=>x.o.n).sort(ord);
+  const LH=linhas(H1.G,[...Array(24).keys()],k=>`${p2d(k)}:00`);
+  const row=x=>`<tr class="${x.o.n<min?'ps-peq':''}"><td><b>${x.fmt}</b></td><td>${x.o.n?x.pp.toFixed(1)+'%':'—'}</td><td>${x.o.n?(100-x.pp).toFixed(1)+'%':'—'}</td><td>${x.o.n?x.dif.toFixed(1):'—'}</td><td>${num(x.o.n)}${x.o.n&&x.o.n<min?' <span class="mu">pequena</span>':''}</td><td>${x.sc||'—'}</td></tr>`;
+  const perSel=`<select onchange="psSet('horaPer',this.value)">${[['hoje','hoje'],['ontem','ontem'],['7','7 dias'],['15','15 dias'],['30','30 dias'],['0','todo histórico']].map(([v,t])=>`<option value="${v}" ${P.horaPer===v?'selected':''}>${t}</option>`).join('')}</select>`;
+  return `<div class="ps-grid2"><div class="panel"><h3>Por ${P.segAgr==='min'?'minuto da hora':'segundo do minuto'} <small>${psBank()} · ${num(S1.n)} jogos</small></h3>
+      <div class="ctl"><label>Período ${perSel}</label><label>Agrupar <select onchange="psSet('segAgr',this.value)"><option value="seg" ${P.segAgr!=='min'?'selected':''}>segundo</option><option value="min" ${P.segAgr==='min'?'selected':''}>minuto</option></select></label>
+        <label>Ordenar <select onchange="psSet('segOrd',this.value)">${[['tempo','por tempo'],['par','maior PAR'],['imp','maior ÍMPAR'],['dif','maior diferença'],['n','mais amostras']].map(([v,t])=>`<option value="${v}" ${P.segOrd===v?'selected':''}>${t}</option>`).join('')}</select></label><label>Amostra mínima <input type="number" value="${min}" style="width:64px" onchange="psSet('segMin',+this.value)"></label></div>
+      <div class="tw" style="max-height:420px"><table class="ps-tab"><tr><th>${P.segAgr==='min'?'Minuto':'Segundo'}</th><th>Par %</th><th>Ímpar %</th><th>Diferença</th><th>Amostra</th><th>Score</th></tr>${LS.map(row).join('')}</table></div>
+      <div class="nota">Score = distância do 50/50 considerando o tamanho da amostra; amostra abaixo do mínimo fica com score 0 (não é estatisticamente forte).</div></div>
+    <div class="panel"><h3>Por hora <small>${perSel}</small></h3><div class="tw" style="max-height:470px"><table class="ps-tab"><tr><th>Hora</th><th>PAR</th><th>ÍMPAR</th><th>Diferença</th><th>Amostras</th><th>Score</th></tr>${LH.map(row).join('')}</table></div></div></div>`;
+}
+function psBtHtml(){
+  const P=psP(), B=PS.bt&&PS.bt.w===psW()?PS.bt:null;
+  const perSel=`<select onchange="psSet('btPer',this.value)">${[['3','3 dias'],['7','7 dias'],['15','15 dias'],['30','30 dias'],['60','60 dias'],['90','90 dias'],['0','todo histórico']].map(([v,t])=>`<option value="${v}" ${P.btPer===v?'selected':''}>${t}</option>`).join('')}</select>`;
+  const tb=(M,lab,fmt,lim)=>{ const E=Object.entries(M).sort((a,b)=>isNaN(a[0])?0:a[0]-b[0]); return `<div><b>${lab}</b><div class="tw" style="max-height:260px"><table class="ps-tab"><tr><th>${lab}</th><th>Sinais</th><th>Acerto</th></tr>${E.map(([k,o])=>`<tr><td>${fmt(k)}</td><td>${o.n}</td><td class="${o.n>=lim&&o.ok/o.n>=0.55?'okc2':o.n>=lim&&o.ok/o.n<0.48?'ruimc2':''}">${(o.ok/o.n*100).toFixed(1)}%</td></tr>`).join('')}</table></div></div>`; };
+  const lv=(L,t)=>B.nl[L]?`<div class="card"><div class="t">${t}</div><div class="v">${(B.s[L]/B.nl[L]*100).toFixed(2)}%</div><div class="s">${B.s[L]} de ${B.nl[L]}</div></div>`:'';
+  return `<div class="panel"><h3>🧪 Backtest <small>sem look-ahead · 1 entrada por vez · ${psBank()}</small></h3>
+    <div class="ctl"><label>Período ${perSel}</label><label>Entrada <select onchange="psSet('gale',+this.value)">${[[0,'SEM GALE'],[1,'G1'],[2,'G2']].map(([v,t])=>`<option value="${v}" ${+P.gale===v?'selected':''}>${t}</option>`).join('')}</select></label>
+      <button class="pri" onclick="psRodarBT()" ${PS.busy?'disabled':''}>▶ EXECUTAR BACKTEST</button><button onclick="psRodarPeriodos()" ${PS.busy?'disabled':''}>📅 testar todos os períodos</button><button onclick="psRodarComparar()" ${PS.busy?'disabled':''}>⚖ comparar 5s/10s/20s/30s</button></div>
+    ${PS.msg?`<div class="nota">${PS.msg}</div>`:''}
+    ${B?`<div class="cards">${card('Sinais',num(B.n),`${num(B.jogos)} jogos analisados`)}${card('Acertos',num(B.ok),'com '+['tiro seco','até G1','até G2'][B.gale])}${card('Erros',num(B.err),'')}${card('Taxa',(B.p*100).toFixed(2)+'%',`acaso ~${[50,75,87.5][B.gale]}%`)}${card('Seq. máx. acertos',B.maxW,'')}${card('Seq. máx. erros',B.maxL,'')}${card('Score médio',B.scoreMed.toFixed(0),'')}${card('Por direção',`PAR ${B.porDir[0][0]?(B.porDir[0][1]/B.porDir[0][0]*100).toFixed(0)+'%':'—'} · ÍMPAR ${B.porDir[1][0]?(B.porDir[1][1]/B.porDir[1][0]*100).toFixed(0)+'%':'—'}`,`${B.porDir[0][0]} / ${B.porDir[1][0]} sinais`)}</div>
+      <div class="cards">${lv(0,'Tiro seco')}${lv(1,'Até G1')}${lv(2,'Até G2')}</div>
+      <div class="nota">Tiro seco, G1 e G2 calculados separadamente nos mesmos sinais. Acaso: 50% · 75% · 87,5%. Período ${B.per==='0'?'todo histórico':B.per+' dias'} · ${B.ini?new Date(B.ini*1000).toLocaleString('pt-BR')+' → '+new Date(B.fim*1000).toLocaleString('pt-BR'):''}</div>
+      <div class="ps-grid3">${tb(B.dia,'Dia',k=>k,5)}${tb(B.hora,'Hora',k=>p2d(k)+'h',10)}${tb(B.seg,'Segundo',k=>':'+p2d(k),10)}</div>`:'<div class="nota">Clique em ▶ EXECUTAR BACKTEST. Para cada jogo o sistema usa só os resultados anteriores, gera (ou não) o sinal e só depois olha o resultado seguinte.</div>'}
+    ${PS.btAll&&PS.btAll.w===psW()?(()=>{ const O=PS.btAll.out, best=O.filter(x=>x.n>=30).sort((a,b)=>b.p-a.p)[0]; return `<h3 style="margin-top:12px">📅 Teste por período</h3><table class="ps-tab"><tr><th>Período</th><th>Jogos</th><th>Sinais</th><th>Acerto</th><th>TS</th><th>G1</th><th>G2</th><th>Red máx</th></tr>${O.map(x=>`<tr class="${best&&x===best?'scativo':''}"><td>${x.per==='0'?'todo histórico':x.per+' dias'}${best&&x===best?' ⭐':''}</td><td>${num(x.jogos)}</td><td>${x.n}</td><td>${x.n?(x.p*100).toFixed(2)+'%':'—'}</td>${[0,1,2].map(L=>`<td>${x.nl[L]?(x.s[L]/x.nl[L]*100).toFixed(1)+'%':'—'}</td>`).join('')}<td>${x.maxL}</td></tr>`).join('')}</table><div class="nota">⭐ melhor período (mín. 30 sinais). Períodos curtos com taxa alta costumam ser sorte.</div>`; })():''}
+    ${PS.btCmp?`<h3 style="margin-top:12px">⚖ Comparativo de intervalos <small>${PS.btCmp.per==='0'?'todo histórico':PS.btCmp.per+' dias'}</small></h3><table class="ps-tab"><tr><th>Intervalo</th><th>Jogos</th><th>Sinais</th><th>Acerto</th><th>TS</th><th>G1</th><th>G2</th><th>Red máximo</th><th>Score médio</th></tr>${PS.btCmp.out.map(x=>`<tr><td><b>${x.w}s</b></td><td>${num(x.jogos)}</td><td>${x.n}</td><td>${x.n?(x.p*100).toFixed(2)+'%':'—'}</td>${[0,1,2].map(L=>`<td>${x.nl[L]?(x.s[L]/x.nl[L]*100).toFixed(1)+'%':'—'}</td>`).join('')}<td>${x.maxL}</td><td>${x.scoreMed.toFixed(0)}</td></tr>`).join('')}</table>`:''}</div>`;
+}
+function psRobosHtml(){
+  const L=psRobos(), P=psP();
+  return `<div class="panel"><h3>🤖 Robôs Pressure <small>guardam intervalo, janelas, gatilhos, confirmação, score mínimo, horário, segundo, direção e G0/G1/G2</small></h3>
+    <div class="ctl"><label>Nome <input id="psRNome" placeholder="PRESSURE ${psW()}S" style="width:150px"></label>
+      <label>Hora <select id="psRHora"><option value="any">qualquer</option>${[...Array(24).keys()].map(h=>`<option value="${h}">${p2d(h)}h</option>`).join('')}</select></label>
+      <label>Segundo <select id="psRSeg"><option value="any">qualquer</option>${[...Array(60).keys()].filter(s=>s%psW()===0).map(s=>`<option value="${s}">:${p2d(s)}</option>`).join('')}</select></label>
+      <label>Direção <select id="psRDir"><option value="any">PAR e ÍMPAR</option><option value="0">só PAR</option><option value="1">só ÍMPAR</option></select></label>
+      <button class="pri" onclick="psCriarRobo()">➕ CRIAR ROBÔ PRESSURE</button><span class="nota">usa a configuração atual (${psW()}s · janela ${P.nl} · score ≥ ${P.scoreMin} · ${['sem gale','G1','G2'][+P.gale]})</span></div>
+    ${L.length?`<table class="ps-tab"><tr><th>Robô</th><th>Config</th><th>Filtros</th><th>Placar</th><th>Pendente</th><th></th></tr>${L.map(r=>`<tr><td><b>${esc(r.nome)}</b><div class="mu">${r.w}s · ${esc(symNome(r.sym||psSym()))}</div></td>
+      <td class="mu">janelas ${r.P.nc}/${r.P.nm}/${r.P.nl} · score ≥ ${r.P.scoreMin} · ${['sem gale','G1','G2'][r.gale]} · ${r.P.dir==='contra'?'contra':'a favor'} · conf. ${+r.P.needAll?'todas':'−1'}</td>
+      <td class="mu">${r.hora==='any'?'toda hora':p2d(r.hora)+'h'} · ${r.seg==='any'?'todo segundo':':'+p2d(r.seg)} · ${r.dirF==='any'?'PAR/ÍMPAR':psLado(+r.dirF)}</td>
+      <td><b class="okc2">${r.g}</b> / <b class="ruimc2">${r.r}</b>${r.g+r.r?` · ${(r.g/(r.g+r.r)*100).toFixed(0)}%`:''}</td><td>${r._pend?`${psTag(r._pend.dir)} ${hmsOf(r._pend.T)}`:'—'}</td>
+      <td><button onclick="psRoboTog('${r.id}','on')">${r.on?'🟢 ligado':'⚫ desligado'}</button><button onclick="psRoboTog('${r.id}','demo')" title="enviar as entradas para a conta DEMO">${r.demo?'💼 DEMO ligado':'💼 DEMO'}</button><button class="dan" onclick="psRoboDel('${r.id}')">🗑</button></td></tr>`).join('')}</table>`:'<div class="nota">Nenhum robô ainda.</div>'}
+    ${PS_LOG.length?`<div class="tw" style="max-height:220px;margin-top:8px"><table class="ps-tab"><tr><th>Hora</th><th>Robô</th><th>Jogo</th><th>Direção</th><th>Score</th><th>Resultado</th></tr>${PS_LOG.slice(0,80).map(x=>`<tr><td>${new Date(x.t).toLocaleTimeString('pt-BR')}</td><td>${esc(x.nome)}</td><td>${hmsOf(x.T)}</td><td>${psTag(x.dir)}</td><td>${x.score}</td><td class="${x.res==='green'?'okc2':x.res==='red'?'ruimc2':''}">${x.res==='sinal'?'⏳ sinal':x.res==='green'?'✅ GREEN '+x.nivel:'❌ RED'}</td></tr>`).join('')}</table></div>`:''}</div>`;
+}
+VIEWS.press={nome:'🔥 Pressure Strategy',live(){ psLiveFill(false); },html(){
+  const w=psW();
+  return `<div class="panel ps-head"><h3>🔥 PRESSURE STRATEGY <small>estrutura → pressão → gatilho → confirmação → sinal · ferramenta estatística, não garantia</small></h3>
+    <div class="ctl"><span class="uowins">${PS_WS.map(v=>`<button class="${w===v?'on':''}" onclick="psSet('w',${v},false);PS.liveKey='';renderTab()">${v}s</button>`).join('')}</span>
+      <label>Mercado <select onchange="cfg.ps_sym=this.value;saveCfg();PS.data={};PS.liveKey='';renderTab()">${d5Syms().map(s=>`<option value="${s}" ${psSym()===s?'selected':''}>${symNome(s)}</option>`).join('')}</select></label>
+      <span class="nota">banco: <b>${psBank()}</b> · nunca mistura intervalos</span></div></div>
+    <div id="psLive"></div><div id="res"></div>`;
+},res(){
+  setTimeout(()=>psLiveFill(true),0);
+  const id='psTabs'+Date.now(); setTimeout(async()=>{ const el=document.getElementById(id); if(!el) return; try{ el.innerHTML=await psTabsHtml(); }catch(e){ el.innerHTML='<div class="nota">⚠ '+e.message+'</div>'; } },0);
+  return `${psCfgHtml()}<div class="panel"><h3>🎯 Cruzamento Pressure <small>intervalo + hora + minuto + segundo + pressão + estrutura + gatilho + confirmação</small></h3><div id="psCruz">${psCruzHtml()}</div></div>
+    ${psBtHtml()}<div id="${id}"><div class="panel"><div class="nota">⏳ Calculando tabelas por segundo e por hora…</div></div></div>${psRobosHtml()}`;
+}};
+
 // ---------- render ----------
-const TAB_ORDER = ['hist', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
+const TAB_ORDER = ['hist', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
 let LAST_HEAVY = 0;
 function fillRes() {
