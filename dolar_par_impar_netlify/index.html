@@ -542,7 +542,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.80 · 07/10/2026 · 🔥 Pressure Strategy (pressão PAR/ÍMPAR, gatilho, confirmação, score, backtest, robôs)';
+const VERSAO='v3.81 · 07/10/2026 · horário fixo da Mesa volta ao normal (tiro seco G1 retirado) · 🔥 Pressure Strategy';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10092,7 +10092,7 @@ function mbParar(w,motivo){ const s=mbSt(w); if(!s.on) return; s.on=false; s.par
 let MBHF={};
 function mbHfNivel(w){ const C=mbCfg(w); if(+C.hfLvl>=0) return Math.min(2,+C.hfLvl); if(C.galeModo==='sinal') return 0; return C.gale<0?2:Math.max(0,Math.min(2,+C.gale)); }
 // tipo de sinal do horário fixo: 'normal' (como antes) · 'g1ts' (tiro seco G1) · 'ambos' (tiro seco normal + tiro seco G1)
-function mbHfTipo(w){ const t=mbCfg(w).hfTipo; return ['g1ts','ambos'].includes(t)?t:'normal'; }
+function mbHfTipo(w){ return 'normal'; }        // "tiro seco G1" retirado a pedido — horário fixo volta a ser só o normal
 async function mbHfLoad(w,forca){
   const C=mbCfg(w), bank=mbBank(w), tipo=mbHfTipo(w), lvl=tipo==='normal'?mbHfNivel(w):0, hr=new Date().getHours(), mn=Math.max(2,+C.hfMin||5), dias=Math.max(mn+1,+C.hfDias||7);
   const key=[bank,lvl,tipo,hr,mn,dias].join('|'), c=MBHF[w];
@@ -10677,9 +10677,7 @@ function mbEsqHtml(w){
       <div class="ms-box"><span class="ms-lb">STOP LOSS $</span><div class="ms-val" style="font-size:18px">${inpt('sl',C.sl,1)}</div></div></div>
     <div class="ms-box"><span class="ms-lb">FONTE DOS SINAIS</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'fonte',this.value)">${[['padroes','🤖 robôs de padrão (aba '+w+'s)'],['hfix','🕒 horário fixo 100% da hora atual'],['ambos','os dois juntos']].map(([v,t])=>`<option value="${v}" ${C.fonte===v?'selected':''}>${t}</option>`).join('')}</select>
       ${C.fonte!=='padroes'?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">mín. dias 100% <input type="number" min="2" value="${C.hfMin}" style="width:52px" onchange="mbSetCfg(${w},'hfMin',+this.value)"></label><label class="ms-chk">olhar <input type="number" min="5" value="${C.hfDias}" style="width:52px" onchange="mbSetCfg(${w},'hfDias',+this.value)"> dias</label></div>
-      <label class="ms-chk" style="margin-top:6px">tipo de sinal <select class="ms-sel" onchange="mbSetCfg(${w},'hfTipo',this.value)">${[['normal','horário fixo normal'],['g1ts','🎯 tiro seco G1'],['ambos','tiro seco normal + tiro seco G1']].map(([v,t])=>`<option value="${v}" ${mbHfTipo(w)===v?'selected':''}>${t}</option>`).join('')}</select></label>
-      ${mbHfTipo(w)!=='normal'?`<div class="ms-nota">🎯 <b>Tiro seco G1</b>: usa os horários 100% até G1. No 1º jogo não aposta; se der <b>RED</b> entra no 2º jogo (o do G1) como tiro seco; se der GREEN não entra.${mbHfTipo(w)==='ambos'?' Com os dois juntos, o tiro seco normal é 100% em TS e tem prioridade: se cair em um dos 2 jogos de um sinal G1, o G1 é descartado.':''}</div>`:''}
-      <label class="ms-chk" style="margin-top:6px;${mbHfTipo(w)!=='normal'?'display:none':''}">horário 100% em <select class="ms-sel" onchange="mbSetCfg(${w},'hfLvl',+this.value)">${[[-1,'igual ao gale'],[0,'tiro seco'],[1,'até G1'],[2,'até G2']].map(([v,t])=>`<option value="${v}" ${+C.hfLvl===v?'selected':''}>${t}</option>`).join('')}</select> <span class="mu">(agora: ${NIVEL[mbHfNivel(w)]})</span></label>`:''}</div>
+      <label class="ms-chk" style="margin-top:6px">horário 100% em <select class="ms-sel" onchange="mbSetCfg(${w},'hfLvl',+this.value)">${[[-1,'igual ao gale'],[0,'tiro seco'],[1,'até G1'],[2,'até G2']].map(([v,t])=>`<option value="${v}" ${+C.hfLvl===v?'selected':''}>${t}</option>`).join('')}</select> <span class="mu">(agora: ${NIVEL[mbHfNivel(w)]})</span></label>`:''}</div>
     ${C.fonte==='hfix'?'':`<label class="ms-chk"><input type="checkbox" ${C.so100?'checked':''} onchange="mbSetCfg(${w},'so100',this.checked?1:0)"> só robôs 100% (nenhum red no banco)</label>
     <label class="ms-chk"><input type="checkbox" ${C.soAuto?'checked':''} onchange="mbSetCfg(${w},'soAuto',this.checked?1:0)"> só robôs automáticos ♻</label>`}
     <div class="ms-nota">0 no stop = sem stop. Gale ${C.gale<0?'até G2':C.gale?'até G'+C.gale:'desligado'} · ×${(+C.fat).toFixed(1)} · ${C.galeModo==='sinal'?'cada sinal é 1 entrada; depois de red a próxima entrada sobe de nível':'gale nos jogos logo depois da entrada'}</div>
