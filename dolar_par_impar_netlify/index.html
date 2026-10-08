@@ -398,6 +398,47 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .ms-strip{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;background:var(--mg);border-radius:11px;padding:8px}
 .ms-hist{max-height:260px;overflow:auto;background:var(--mg);border-radius:11px}.ms-hl{display:grid;grid-template-columns:80px 1fr 60px 80px 90px;gap:6px;padding:7px 10px;border-bottom:1px solid var(--mb);font-size:13px}
 .okc{color:#4ade80}.ruimc{color:#f87171}
+/* 🔢 Mesa · Over/Under */
+.ou-con{font-size:12px;background:var(--mg);border:1px solid var(--mb);border-radius:9px;padding:6px 10px}
+.ou-syms{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.ou-sym{background:var(--mg);border:1px solid var(--mb);border-radius:12px;padding:8px 10px;color:#ece9f6;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;min-width:0}
+.ou-sym>b{font-size:13px}.ou-sym.on{border-color:var(--mr2);background:linear-gradient(135deg,rgba(124,58,237,.35),var(--mg));box-shadow:0 0 18px rgba(168,85,247,.25)}
+.ou-sp{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;font-size:12px;color:#c9c3dc}
+.ou-sl{font-size:11px;color:#a49dbb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ou-dg{font-style:normal;display:inline-flex;width:22px;height:22px;border-radius:6px;align-items:center;justify-content:center;font-weight:900;color:#fff;background:#3a3648}
+.ou-preco{text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.ou-q{font-size:34px;font-weight:900;font-variant-numeric:tabular-nums;color:#f87171;letter-spacing:.5px}.ou-q em{font-style:normal;color:#fff;background:var(--mr);border-radius:8px;padding:0 6px;margin-left:2px}
+.ou-circs{display:grid;grid-template-columns:repeat(5,1fr);gap:34px 8px;padding:22px 4px 14px;justify-items:center}
+.ou-c{--cor:#4b4560;position:relative;width:78px;height:78px;border-radius:50%;background:conic-gradient(var(--cor) calc(var(--p)*1%),#2a2638 0);display:flex;align-items:center;justify-content:center}
+.ou-c.v{--cor:#22c55e}.ou-c.a{--cor:#3b82f6}.ou-c.y{--cor:#eab308}.ou-c.r{--cor:#ef4444}
+.ou-ci{width:62px;height:62px;border-radius:50%;background:#15121f;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.ou-ci b{font-size:20px}.ou-ci span{font-size:11px;color:#c9c3dc;font-variant-numeric:tabular-nums}
+.ou-c>i{position:absolute;bottom:-15px;font-style:normal;font-size:10px;color:#8b84a3;white-space:nowrap}
+.ou-c>u{position:absolute;top:-16px;text-decoration:none;color:#ef4444;font-size:14px;transform:rotate(180deg)}
+.ou-c.ult{box-shadow:0 0 0 2px #fff,0 0 22px rgba(168,85,247,.55)}
+.ou-leg{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;font-size:11px;color:#8b84a3;margin-top:10px}.ou-leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.ou-leg i.v{background:#22c55e}.ou-leg i.a{background:#3b82f6}.ou-leg i.y{background:#eab308}.ou-leg i.r{background:#ef4444}
+.ou-ou{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.ou-o,.ou-u{border-radius:11px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;text-align:center}
+.ou-o{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35)}.ou-u{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35)}
+.ou-o span{color:#86efac;font-weight:800}.ou-u span{color:#fca5a5;font-weight:800}.ou-o b,.ou-u b{font-size:24px}.ou-o small,.ou-u small{font-size:10.5px;color:#a49dbb}
+.ou-bar{height:7px;background:#2a2638;border-radius:9px;overflow:hidden}.ou-bar i{display:block;height:100%;max-width:100%}.ou-o .ou-bar i{background:#22c55e}.ou-u .ou-bar i{background:#ef4444}
+.ou-linha{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:#c9c3dc;margin:8px 2px}
+.ou-box{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.ou-box em{font-style:normal;width:24px;height:24px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#fff}
+.ou-box .bo{background:#16a34a}.ou-box .bu{background:#dc2626}.ou-box .bi{background:#d97706}
+.ou-bars{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}.ou-bars button{background:var(--mg);border:1px solid var(--mb);color:#ece9f6;border-radius:8px;padding:8px 0;font-weight:900;cursor:pointer}.ou-bars button.on{background:linear-gradient(160deg,#a855f7,#6d28d9);border-color:var(--mr2)}
+.ou-mat{background:var(--mg);border:1px solid var(--mb);border-radius:11px;padding:7px 10px;display:flex;flex-wrap:wrap;gap:2px 10px;font-size:11.5px;color:#c9c3dc;margin-bottom:6px}.ou-mat>b{width:100%;color:#fff;font-size:12px}
+.ou-bot{margin-top:14px;background:#100d1a;border:1px solid var(--mb);border-radius:14px;padding:14px}
+.ou-bh{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.ou-bh>b{font-size:14px;margin-right:6px}.ou-bh .ms-x{padding:5px 9px;font-size:12px}
+.ou-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;margin-top:10px}
+.ou-grid label{background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:7px 10px;color:#c9c3dc;font-size:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.ou-grid input,.ou-grid select{background:#15121f;border:1px solid var(--mb);color:#fff;border-radius:7px;padding:4px 6px}
+.ou-bst{display:flex;flex-direction:column;gap:3px;margin-top:10px;background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:8px 10px;font-size:12.5px}
+.ou-bt{margin-top:8px;background:var(--mg);border-radius:11px;overflow:auto}
+.ou-btl{display:grid;grid-template-columns:120px 60px 70px minmax(90px,1.4fr) 50px 64px 64px 84px 92px;gap:6px;padding:6px 10px;border-bottom:1px solid var(--mb);font-size:12px;min-width:720px}.ou-bth{color:#8b84a3;font-weight:700}
+.ou-hl{grid-template-columns:70px 1fr 34px 70px 60px 110px}
+@media(max-width:900px){.ou-circs{gap:30px 4px}.ou-c{width:58px;height:58px}.ou-ci{width:46px;height:46px}.ou-ci b{font-size:15px}.ou-ci span{font-size:9px}.ou-q{font-size:26px}.ou-syms{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}.ou-hl{grid-template-columns:56px 1fr 28px 58px 46px 80px;font-size:11px}.ou-grid{grid-template-columns:minmax(0,1fr)}}
+
 #mesaBtn{border-color:#a855f7;color:#d8b4fe;font-weight:800}#mkBtn{border-color:#38bdf8;color:#7dd3fc;font-weight:800}
 #mkPop{position:fixed;inset:0;z-index:10005;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.75);overflow:auto;padding:24px 12px}
 .mk-box{background:var(--bg2,#12141c);border:1px solid #38bdf8;border-radius:14px;padding:16px;max-width:1150px;width:100%}.mk-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
@@ -542,7 +583,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.83 · 08/10/2026 · 🧠 Mesa: usar sistema inteligente (corta red longo, dívida oculta, pausa, tendência, migra de tempo) · 🔥 Pressure Strategy';
+const VERSAO='v3.84 · 08/10/2026 · 🔢 Mesa: nova aba OVER/UNDER tick a tick (13 volatilidades, círculos, robô com preset do vídeo Over 2, simulação e teste no histórico)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8589,7 +8630,7 @@ function dmAbrir(url){
     ws.onmessage=ev=>{
       let j; try{ j=JSON.parse(ev.data); }catch(e){ return; }
       if(j.msg_type==='balance' && j.balance){ DM.bal=+j.balance.balance; dmHeader(); }
-      if(j.msg_type==='proposal_open_contract' && j.proposal_open_contract) dmPoc(j.proposal_open_contract);
+      if(j.msg_type==='proposal_open_contract' && j.proposal_open_contract){ dmPoc(j.proposal_open_contract); try{ if(typeof ouPoc==='function') ouPoc(j.proposal_open_contract); }catch(e){ console.warn('ouPoc',e); } }
       const p=DM.pend.get(j.req_id);
       if(p){ DM.pend.delete(j.req_id); if(j.error) p.rej(new Error(j.error.message||j.error.code)); else p.res(j); }
     };
@@ -8628,7 +8669,7 @@ function dmRegistrar(o){
   DM.orders.push({...o,g:0,tent:[],perda:0,estado:'aguardando',criado:Date.now()});
   dmSet(`📌 Entrada agendada: ${o.nome} · ${hmsOf(o.T)}`);
 }
-function dmCtLabel(o){ return {DIGITEVEN:'PAR',DIGITODD:'ÍMPAR',DIGITUNDER:'UNDER '+o.barrier,DIGITOVER:'OVER '+o.barrier,DIGITMATCH:'DÍGITO '+o.barrier}[o.ct]||o.ct; }
+function dmCtLabel(o){ return {DIGITEVEN:'PAR',DIGITODD:'ÍMPAR',DIGITUNDER:'UNDER '+o.barrier,DIGITOVER:'OVER '+o.barrier,DIGITMATCH:'DÍGITO '+o.barrier,DIGITDIFF:'DIFERENTE '+o.barrier}[o.ct]||o.ct; }
 async function dmComprar(o){
   const g=o.g, r0=o.ratio||(o.ct==='DIGITEVEN'||o.ct==='DIGITODD'?0.95:null);
   const st0=o.stakeBase||dmStake0();
@@ -9983,12 +10024,13 @@ function mesaEsqManual(qv){ return `
 `; }
 function mesaRender(full){
   const p=$('#mesaPop'); if(!p||!MESA.open) return;
+  if(cfg.mesa_modo==='ou') return ouRender(full);
   if(full||!$('#msCentro')||(cfg.mesa_modo==='robo')!==!!$('#msFila')){
     const qv=[0.35,1,2,5,10,25,50,100];
     p.innerHTML=`<div class="ms">
       <div class="ms-top"><div style="font-size:22px">💵</div><div class="ms-logo">MESA PLAY <small>Deriv · DEMO</small></div>
         <select class="ms-sel" onchange="mesaSet('mesa_sym',this.value)">${d5Syms().map(s=>`<option value="${s}" ${mesaSym()===s?'selected':''}>${symNome(s)}</option>`).join('')}</select>
-        <div class="ms-modos"><button class="${cfg.mesa_modo!=='robo'?'on':''}" onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button class="${cfg.mesa_modo==='robo'?'on':''}" onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS${MESA_TEMPOS.some(w=>mbSt(w).on)?' ●':''}</button></div>
+        <div class="ms-modos"><button class="${cfg.mesa_modo!=='robo'?'on':''}" onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button class="${cfg.mesa_modo==='robo'?'on':''}" onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS${MESA_TEMPOS.some(w=>mbSt(w).on)?' ●':''}</button><button onclick="mesaSet('mesa_modo','ou')" title="Over/Under tick a tick em várias volatilidades">🔢 OVER/UNDER${typeof OU!=='undefined'&&OU.bot.on?' ●':''}</button></div>
         <button class="ms-x" onclick="mkAbrir()" title="qual volatilidade está melhor agora">🌐 MERCADOS</button>
         ${MESA_TEMPOS.some(w=>mbSt(w).on)?`<button class="ms-x" style="border-color:#ef4444;color:#fca5a5" onclick="mbPararTodos()" title="desliga todos os robôs da Mesa">⏹ PARAR TODOS</button>`:''}
         <div class="ms-relogio" id="msClock"></div>
@@ -10017,7 +10059,507 @@ function mesaRender(full){
   if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); const ss=mbSess(w); $('#msSess').innerHTML=`<div><b>${ss.ac}</b><span>ACERTOS</span></div><div><b>${ss.er}</b><span>ERROS</span></div><div><b class="${ss.pl>=0?'okc':'ruimc'}">${ss.pl>=0?'+':''}$ ${ss.pl.toFixed(2)}</b><span>RESULTADO</span></div>`; $('#msFila').innerHTML=mbFilaHtml(w); $('#msHist').innerHTML=mbHistHtml(w); }
   else { $('#msSess').innerHTML=mesaSessHtml(); $('#msHist').innerHTML=mesaHistHtml(); }
 }
-document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if(e.key==='p'||e.key==='P') mesaEntrar(0); if(e.key==='i'||e.key==='I') mesaEntrar(1); if(e.key==='Escape') mesaFechar(); if(['1','2','3','4','5'].includes(e.key)) mesaSet('mesa_w',MESA_TEMPOS[+e.key-1]); });
+document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if(cfg.mesa_modo==='ou'){ if(e.key==='o'||e.key==='O') ouManual('A'); if(e.key==='u'||e.key==='U') ouManual('B'); if(e.key==='Escape') mesaFechar(); return; } if(e.key==='p'||e.key==='P') mesaEntrar(0); if(e.key==='i'||e.key==='I') mesaEntrar(1); if(e.key==='Escape') mesaFechar(); if(['1','2','3','4','5'].includes(e.key)) mesaSet('mesa_w',MESA_TEMPOS[+e.key-1]); });
+// =====================================================================================
+// 🔢 MESA · OVER / UNDER (tick a tick) — aba própria dentro da Mesa Play
+// Contratos de dígito da Deriv (OVER / UNDER / IGUAL / DIFERENTE) com duração em ticks, em várias volatilidades.
+// Uma conexão pública assina os ticks de TODAS as volatilidades (até 5000 ticks de histórico cada) para:
+//   círculos de frequência (verde = mais sai, azul = 2º, amarelo = 2º menos, vermelho = menos sai),
+//   análise Over/Under da barreira, sequências, tendência do %, payout real, varredura de mercados,
+//   robô com filtros (inclui o preset do vídeo "Over 2"), simulação sem dinheiro e teste no histórico.
+// As ordens só vão para a conta DEMO (mesma trava do resto do HTML).
+// Leitura estatística: cada dígito é sorteado de forma independente — o histórico NÃO muda a chance do próximo tick.
+// =====================================================================================
+const OU_SYMS=[['R_10','Vol 10'],['R_25','Vol 25'],['R_50','Vol 50'],['R_75','Vol 75'],['R_100','Vol 100'],
+  ['1HZ10V','Vol 10 (1s)'],['1HZ15V','Vol 15 (1s)'],['1HZ25V','Vol 25 (1s)'],['1HZ30V','Vol 30 (1s)'],['1HZ50V','Vol 50 (1s)'],
+  ['1HZ75V','Vol 75 (1s)'],['1HZ90V','Vol 90 (1s)'],['1HZ100V','Vol 100 (1s)']];
+const OU_CAP=5000;                       // ticks guardados por volatilidade
+const OU_JANELAS=[25,50,100,200,500,1000,2000,5000];
+const OU_CT={O:'DIGITOVER',U:'DIGITUNDER',D:'DIGITDIFF',M:'DIGITMATCH'};
+const OU_NOME={O:'OVER',U:'UNDER',D:'DIFERENTE',M:'IGUAL'};
+const OU_BOT_DEF={ct:'O',b:2,dur:1,escopo:'atual',fDig:1,fDigMax:10.5,fVerde:1,fVerdeDist:3,fPct:1,fPctMin:70,
+  gat:'seq',seq:'0,1;2,1',sub:0.2,subK:10,perdasN:3,val:0.35,gale:0,galeModo:'auto',fat:3.5,sw:0,sl:0,pausa:0,modo:'sim',maxSeg:0};
+let OU={ws:null,url:'',novo:false,on:false,rc:null,req:300000,pend:new Map(),sub:{},t:{},pip:{},err:{},n:0,
+  pay:{},payBusy:{},op:null,ini:Date.now(),lastFull:'',lastPart:'',bot:{on:false,lastE:{},pausaAte:0,msg:'',ini:0,sim:[]},bt:null,btBusy:false};
+
+// ---------- configurações (prefixo mesa_ para andar junto com a aba principal) ----------
+function ouCfg(k,d){ const v=cfg['mesa_ou_'+k]; return v===undefined||v===null||v===''?d:v; }
+function ouSym(){ const s=ouCfg('sym','1HZ25V'); return OU_SYMS.some(x=>x[0]===s)?s:'1HZ25V'; }
+function ouFam(){ return ouCfg('fam','OU'); }                       // 'OU' = Over/Under · 'DM' = Igual/Diferente
+function ouB(){ return Math.max(0,Math.min(9,+ouCfg('b',2))); }
+function ouN(){ const n=+ouCfg('n',1000); return OU_JANELAS.includes(n)?n:1000; }
+function ouDur(){ return Math.max(1,Math.min(10,+ouCfg('dur',1))); }
+function ouVal(){ return Math.max(0.35,Math.round(+ouCfg('val',0.35)*100)/100); }
+function ouGale(){ return Math.max(0,Math.min(6,+ouCfg('gale',0))); }
+function ouGaleModo(){ return ouCfg('galeModo','auto'); }
+function ouFat(){ return Math.max(1,Math.round(+ouCfg('fat',3.5)*10)/10); }
+function ouSet(k,v){ cfg['mesa_ou_'+k]=v; saveCfg(); ouRender(true); }
+function ouBotCfg(){ return Object.assign({},OU_BOT_DEF,cfg.mesa_ou_bot||{}); }
+function ouBotSet(k,v){ const c=ouBotCfg(); c[k]=v; cfg.mesa_ou_bot=c; saveCfg(); ouRender(true); }
+function ouSymNome(s){ return (OU_SYMS.find(x=>x[0]===s)||[s,s])[1]; }
+function ouCtNome(ct,b){ return `${OU_NOME[ct]} ${b}`; }
+function ouBarreiraOk(ct,b){ return ct==='O'?b<=8:ct==='U'?b>=1:true; }
+// ganha com o dígito d?
+function ouWin(ct,b,d){ return ct==='O'?d>b:ct==='U'?d<b:ct==='D'?d!==b:d===b; }
+function ouChance(ct,b){ let n=0; for(let d=0;d<10;d++) if(ouWin(ct,b,d)) n++; return n/10; }
+
+// ---------- conexão pública de ticks (todas as volatilidades numa só conexão) ----------
+function ouConnect(){
+  if(OU.ws&&OU.ws.readyState<=1) return;
+  clearTimeout(OU.rc);
+  const urls=[...new Set([DV_ENDPOINT_OK,'wss://ws.derivws.com/websockets/v3?app_id=1089','wss://ws.binaryws.com/websockets/v3?app_id=1089',...DV_ENDPOINTS].filter(Boolean))];
+  let pos=0;
+  const abrir=()=>{
+    if(pos>=urls.length){ OU.on=false; OU.rc=setTimeout(ouConnect,5000); return; }
+    const url=urls[pos++]; let ws; try{ ws=new WebSocket(url); }catch(e){ abrir(); return; }
+    let ok=false; const to=setTimeout(()=>{ if(!ok){ try{ws.close();}catch(e){} abrir(); } },8000);
+    ws.onopen=()=>{
+      ok=true; clearTimeout(to); OU.ws=ws; OU.url=url; OU.novo=/api\.derivws\.com/.test(url); OU.on=true; OU.sub={}; OU.err={};
+      OU_SYMS.forEach(([s],i)=>setTimeout(()=>{ try{ ws.send(JSON.stringify({ticks_history:s,count:OU_CAP,end:'latest',style:'ticks',subscribe:1,req_id:310000+i})); }catch(e){} },i*180));
+    };
+    ws.onmessage=ev=>{ let j; try{ j=JSON.parse(ev.data); }catch(e){ return; } ouMsg(j); };
+    ws.onerror=()=>{ if(!ok){ clearTimeout(to); abrir(); } };
+    ws.onclose=()=>{ if(OU.ws===ws){ OU.ws=null; OU.on=false; for(const p of OU.pend.values()) p.rej(new Error('conexão caiu')); OU.pend.clear(); OU.rc=setTimeout(ouConnect,3000); } };
+  };
+  abrir();
+}
+setInterval(()=>{ if(OU.ws&&OU.ws.readyState===1) ouSendPub({ping:1},8000).catch(()=>{}); },25000);
+function ouSendPub(o,timeout=12000){
+  return new Promise((res,rej)=>{
+    if(!OU.ws||OU.ws.readyState!==1) return rej(new Error('sem conexão'));
+    const id=++OU.req; const to=setTimeout(()=>{ OU.pend.delete(id); rej(new Error('sem resposta')); },timeout);
+    OU.pend.set(id,{res:j=>{clearTimeout(to);res(j);},rej:e=>{clearTimeout(to);rej(e);}});
+    OU.ws.send(JSON.stringify({...o,req_id:id}));
+  });
+}
+function ouPipOf(sym,p){ if(typeof p==='number'&&p>=0){ const ss=String(p); return p>=1&&Number.isInteger(p)?p:(/e-(\d+)/i.test(ss)?+ss.match(/e-(\d+)/i)[1]:(ss.includes('.')?ss.split('.')[1].length:p)); } return OU.pip[sym]??(cfg.symPip&&cfg.symPip[sym])??SYM_PIP_DEF[sym]??2; }
+function ouDig(q,sym){ const n=Number(q); if(!Number.isFinite(n)) return null; return +n.toFixed(OU.pip[sym]??ouPipOf(sym)).slice(-1); }
+function ouMsg(j){
+  const p=OU.pend.get(j.req_id);
+  if(p){ OU.pend.delete(j.req_id); if(j.error) p.rej(new Error(j.error.message||j.error.code)); else p.res(j); return; }
+  const echoSym=j.echo_req&&(j.echo_req.ticks_history||j.echo_req.ticks);
+  if(j.error){ if(echoSym) OU.err[echoSym]=j.error.message||j.error.code; return; }
+  if(j.msg_type==='history'&&j.history){
+    const sym=echoSym; if(!sym) return;
+    if(j.pip_size!=null) OU.pip[sym]=ouPipOf(sym,+j.pip_size);
+    if(j.subscription&&j.subscription.id) OU.sub[j.subscription.id]=sym;
+    const T=(j.history.times||[]).map(Number), P=j.history.prices||[];
+    const A=[]; for(let i=0;i<T.length;i++){ const d=ouDig(P[i],sym); if(d!=null) A.push({e:T[i],q:+P[i],d}); }
+    const old=OU.t[sym]||[], lastE=A.length?A.at(-1).e:0;
+    OU.t[sym]=A.concat(old.filter(x=>x.e>lastE)).slice(-OU_CAP);
+    delete OU.err[sym]; OU.n++; return;
+  }
+  if(j.msg_type==='tick'&&j.tick){
+    const t=j.tick, sym=t.symbol||t.underlying_symbol||(j.subscription&&OU.sub[j.subscription.id]); if(!sym) return;
+    if(j.subscription&&j.subscription.id&&!OU.sub[j.subscription.id]) OU.sub[j.subscription.id]=sym;
+    if(t.pip_size!=null&&OU.pip[sym]==null) OU.pip[sym]=ouPipOf(sym,+t.pip_size);
+    const e=+t.epoch, q=+t.quote, d=ouDig(q,sym); if(!Number.isFinite(e)||d==null) return;
+    const A=OU.t[sym]||(OU.t[sym]=[]);
+    if(A.length&&e<=A.at(-1).e) return;
+    A.push({e,q,d}); if(A.length>OU_CAP+500) A.splice(0,A.length-OU_CAP);
+    OU.n++;
+    try{ ouOnTick(sym); }catch(err){ console.warn('ou tick',err); }
+  }
+}
+
+// ---------- estatística ----------
+function ouDigs(sym,N){ const A=OU.t[sym]||[]; return A.slice(-N).map(x=>x.d); }
+function ouStats(sym,N=ouN(),ct=null,b=ouB()){
+  const D=ouDigs(sym,N), n=D.length, cnt=Array(10).fill(0); for(const d of D) cnt[d]++;
+  const pct=cnt.map(c=>n?100*c/n:0);
+  const ord=[...Array(10).keys()].sort((a,c)=>cnt[c]-cnt[a]||a-c);
+  const atraso=Array(10).fill(null); for(let i=n-1,f=0;i>=0&&f<10;i--){ const d=D[i]; if(atraso[d]===null){ atraso[d]=n-1-i; f++; } }
+  const over=D.filter(d=>d>b).length, under=D.filter(d=>d<b).length, igual=n-over-under;
+  const par=D.filter(d=>d%2===0).length;
+  return {n,cnt,pct,ord,verde:ord[0],azul:ord[1],amarelo:ord[8],vermelho:ord[9],atraso,
+    over:n?100*over/n:0,under:n?100*under/n:0,igual:n?100*igual/n:0,par:n?100*par/n:0,ult:D.at(-1)};
+}
+function ouClasse(d,b){ return d>b?'O':d<b?'U':'='; }
+function ouStreak(D,b){ if(!D.length) return {k:'',n:0}; const k=ouClasse(D.at(-1),b); let n=0; for(let i=D.length-1;i>=0&&ouClasse(D[i],b)===k;i--) n++; return {k,n}; }
+function ouMaxPerdas(D,ct,b){ let m=0,c=0,atual=0; for(const d of D){ if(ouWin(ct,b,d)) c=0; else { c++; if(c>m) m=c; } } atual=c; return {max:m,atual}; }
+// % de acerto do contrato numa janela que termina k ticks atrás
+function ouPctAt(sym,N,ct,b,k){ const A=OU.t[sym]||[]; const fim=A.length-k, ini=Math.max(0,fim-N); if(fim<=ini) return null; let w=0; for(let i=ini;i<fim;i++) if(ouWin(ct,b,A[i].d)) w++; return 100*w/(fim-ini); }
+function ouTendencia(sym,N,ct,b,K){ const agora=ouPctAt(sym,N,ct,b,0); if(agora==null) return null; let min=agora; for(let k=1;k<=K;k++){ const v=ouPctAt(sym,N,ct,b,k); if(v!=null&&v<min) min=v; } return {agora,min,sub:agora-min}; }
+
+// ---------- payout real (proposta pela conexão pública) ----------
+function ouPayKey(sym,ct,b,dur){ return `${sym}|${ct}|${b}|${dur}`; }
+async function ouPayBuscar(sym,ct,b,dur){
+  if(!ouBarreiraOk(ct,b)) return null;
+  const k=ouPayKey(sym,ct,b,dur), c=OU.pay[k]; if(c&&Date.now()-c.t<120000) return c; if(OU.payBusy[k]) return c||null;
+  OU.payBusy[k]=1;
+  try{
+    const prm={proposal:1,amount:10,basis:'stake',contract_type:OU_CT[ct],currency:(DM&&DM.cur)||'USD',duration:dur,duration_unit:'t',barrier:String(b)};
+    prm[OU.novo?'underlying_symbol':'symbol']=sym;
+    const j=await ouSendPub(prm,10000); const pay=+(j.proposal&&j.proposal.payout);
+    if(pay>0){ OU.pay[k]={r:(pay-10)/10,t:Date.now()}; }
+  }catch(e){ OU.pay[k]={r:null,erro:e.message,t:Date.now()}; }
+  finally{ delete OU.payBusy[k]; }
+  return OU.pay[k];
+}
+function ouPayR(sym,ct,b,dur){ const c=OU.pay[ouPayKey(sym,ct,b,dur)]; if(c&&c.r!=null) return {r:c.r,real:1}; return {r:0.95/ouChance(ct,b)-1,real:0}; }
+
+// ---------- operação (entrada + gales) na conta DEMO ou simulada ----------
+function ouOpAberta(){ return OU.op&&!['fim'].includes(OU.op.estado); }
+function ouManual(lado){
+  const fam=ouFam(), b=ouB(), ct=fam==='OU'?(lado==='A'?'O':'U'):(lado==='A'?'D':'M');
+  if(!ouBarreiraOk(ct,b)){ alert(`${OU_NOME[ct]} ${b} não existe na Deriv (OVER vai de 0 a 8 e UNDER de 1 a 9).`); return; }
+  if(!DM.ok||!DM.virt){ if(confirm('A conta DEMO da Deriv não está conectada. Abrir a aba 💼 Conta Demo para conectar?')){ mesaFechar(); S.tab='demo'; renderTab(); } return; }
+  if(ouOpAberta()){ alert('Já tem uma entrada Over/Under em andamento — espere terminar.'); return; }
+  ouAbrirOp({src:'ou',sym:ouSym(),ct,b,dur:ouDur(),val:ouVal(),gale:ouGale(),galeModo:ouGaleModo(),fat:ouFat(),sim:false});
+  try{ beep(); }catch(e){}
+}
+function ouAbrirOp(o){
+  OU.op={...o,g:0,perda:0,estado:'comprando',tent:[],criado:Date.now(),nome:`🔢 ${o.src==='oubot'?'Robô':'Mesa'} ${ouCtNome(o.ct,o.b)} · ${ouSymNome(o.sym)}`};
+  ouTentar();
+}
+function ouStakeGale(op){
+  if(op.g===0) return op.val;
+  const r=op.ratio||ouPayR(op.sym,op.ct,op.b,op.dur).r;
+  if(op.galeModo==='auto') return (op.perda+op.val*r)/r;                         // recupera as perdas + o lucro da entrada
+  return op.val*Math.pow(op.fat,op.g);
+}
+async function ouTentar(){
+  const op=OU.op; if(!op) return;
+  const stake=Math.max(0.35,Math.round(ouStakeGale(op)*100)/100);
+  const t={g:op.g,stake,ini:Date.now()}; op.tent.push(t); op.estado='comprando';
+  if(op.sim){                                                                    // simulação: resolve com o(s) próximo(s) tick(s) daquele mercado
+    const A=OU.t[op.sym]||[]; t.eIni=A.length?A.at(-1).e:0; t.alvoN=op.dur; op.estado='em jogo'; return;
+  }
+  if(!DM.ok||!DM.virt||!DM.ws||DM.ws.readyState!==1){ ouFimTent(op,t,{erro:'conta DEMO desconectada'}); return; }
+  const params={amount:stake,basis:'stake',contract_type:OU_CT[op.ct],currency:DM.cur||'USD',duration:op.dur,duration_unit:'t',barrier:String(op.b)};
+  params[DM.novo?'underlying_symbol':'symbol']=op.sym;
+  try{
+    let j;
+    if(DM.novo&&DM.buyProp){ const p=await dmSend({proposal:1,...params}); j=await dmSend({buy:p.proposal.id,price:stake}); }
+    else try{ j=await dmSend({buy:1,price:stake,parameters:params}); }
+    catch(e){ if(!DM.novo) throw e; DM.buyProp=true; const p=await dmSend({proposal:1,...params}); j=await dmSend({buy:p.proposal.id,price:stake}); }
+    const b=j.buy||{}; t.cid=b.contract_id; t.pago=+b.buy_price; t.payout=+b.payout;
+    if(t.payout&&t.pago){ op.ratio=(t.payout-t.pago)/t.pago; OU.pay[ouPayKey(op.sym,op.ct,op.b,op.dur)]={r:op.ratio,t:Date.now()}; }
+    op.estado='em jogo';
+    dmSend({proposal_open_contract:1,contract_id:t.cid,subscribe:1}).catch(()=>{});
+  }catch(e){ ouFimTent(op,t,{erro:e.message||String(e)}); }
+}
+// resultado vindo da Deriv (gancho no WebSocket da conta demo)
+function ouPoc(c){
+  const op=OU.op; if(!op||op.sim||!c) return;
+  if(!c.is_sold&&c.status!=='won'&&c.status!=='lost') return;
+  const t=op.tent.find(x=>x.cid&&x.cid===c.contract_id); if(!t||t.fim) return;
+  const q=c.exit_tick??c.exit_tick_display_value; const d=q!=null&&q!==''?ouDig(q,op.sym):null;
+  ouFimTent(op,t,{profit:+c.profit,exitQ:q,dig:d});
+}
+// vigia: se a Deriv não mandou o resultado (conexão caiu), pergunta de novo; depois de 90s desiste
+setInterval(async()=>{
+  const op=OU.op; if(!op||op.sim||op.estado!=='em jogo') return;
+  const t=op.tent.at(-1); if(!t||t.fim||!t.cid) return; const idade=Date.now()-t.ini;
+  if(idade<15000) return;
+  try{ const j=await dmSend({proposal_open_contract:1,contract_id:t.cid},8000); if(j&&j.proposal_open_contract) ouPoc(j.proposal_open_contract); }catch(e){}
+  if(!t.fim&&idade>90000) ouFimTent(op,t,{erro:'resultado não chegou da Deriv (contrato '+t.cid+') — confira no extrato'});
+},5000);
+// simulação: confere a cada tick
+function ouSimCheck(sym){
+  const op=OU.op; if(!op||!op.sim||op.sym!==sym||op.estado!=='em jogo') return;
+  const t=op.tent.at(-1); if(!t||t.fim) return;
+  const A=OU.t[sym]||[]; const novos=A.filter(x=>x.e>t.eIni); if(novos.length<t.alvoN) return;
+  const x=novos[t.alvoN-1], win=ouWin(op.ct,op.b,x.d), r=op.ratio||ouPayR(op.sym,op.ct,op.b,op.dur).r;
+  ouFimTent(op,t,{profit:win?+(t.stake*r).toFixed(2):-t.stake,exitQ:x.q,dig:x.d});
+}
+function ouFimTent(op,t,res){
+  t.fim=true;
+  if(res.erro){
+    dmAddLog({src:op.src,nome:op.nome,sym:op.sym,ct:OU_CT[op.ct],barrier:op.b,T:Math.floor(Date.now()/1000),nivel:op.g,stake:t.stake,profit:0,res:'erro',obs:res.erro,maxN:op.gale});
+    op.estado='fim'; OU.op=null; OU.bot.msg='⚠ '+res.erro; return;
+  }
+  const won=res.profit>0;
+  const reg={src:op.src,nome:op.nome+(op.sim?' · 🧪 simulado':''),sym:op.sym,ct:OU_CT[op.ct],barrier:op.b,T:Math.floor(Date.now()/1000),nivel:op.g,stake:t.stake,profit:res.profit,res:won?'green':'red',cid:t.cid||'',exitQ:res.exitQ??'',dSaida:res.dig,maxN:op.gale,mmax:op.gale};
+  if(op.sim){ reg.t=Date.now(); OU.bot.sim.push(reg); if(OU.bot.sim.length>500) OU.bot.sim.shift(); } else dmAddLog(reg);
+  if(won){ op.estado='fim'; OU.op=null; }
+  else { op.perda+=t.stake; if(op.g<op.gale){ op.g++; ouTentar(); } else { op.estado='fim'; OU.op=null; if(op.src==='oubot'){ const c=ouBotCfg(); if(+c.pausa>0) OU.bot.pausaAte=Date.now()+c.pausa*1000; } } }
+  ouBotStops();
+}
+function ouLog(src){ return src==='sim'?OU.bot.sim:DM.log.filter(x=>(x.src==='ou'||x.src==='oubot')&&x.t>=OU.ini); }
+function ouSess(L){ const ac=L.filter(x=>x.res==='green').length, er=L.filter(x=>x.res==='red'&&x.nivel>=(x.mmax??0)).length; return {ac,er,pl:L.reduce((s,x)=>s+(+x.profit||0),0),n:L.filter(x=>x.res==='green'||x.res==='red').length}; }
+
+// ---------- robô ----------
+function ouBotLigar(){
+  const c=ouBotCfg();
+  if(!ouBarreiraOk(c.ct,c.b)){ alert('Barreira inválida para esse contrato.'); return; }
+  if(c.modo==='demo'&&(!DM.ok||!DM.virt)){ alert('Para o robô operar na conta DEMO, conecte a conta demo primeiro (ou use o modo 🧪 simulação).'); return; }
+  OU.bot.on=true; OU.bot.ini=Date.now(); OU.bot.lastE={}; OU.bot.msg='ligado — esperando o setup'; OU.bot.pausaAte=0;
+  if(c.modo==='sim') OU.bot.sim=[];
+  ouRender(true);
+}
+function ouBotDesligar(msg){ OU.bot.on=false; OU.bot.msg=msg||'desligado'; ouRender(true); }
+function ouBotSess(){ const c=ouBotCfg(); const L=c.modo==='sim'?OU.bot.sim:DM.log.filter(x=>x.src==='oubot'&&x.t>=OU.bot.ini); return ouSess(L); }
+function ouBotStops(){
+  if(!OU.bot.on) return; const c=ouBotCfg(), s=ouBotSess();
+  if(+c.sw>0&&s.pl>=+c.sw) ouBotDesligar(`🏁 stop win atingido (+${s.pl.toFixed(2)})`);
+  else if(+c.sl>0&&s.pl<=-c.sl) ouBotDesligar(`⛔ stop loss atingido (${s.pl.toFixed(2)})`);
+  else if(+c.maxSeg>0&&s.n>=+c.maxSeg) ouBotDesligar(`✋ limite de ${c.maxSeg} entradas`);
+}
+// lista de dígitos que fazem o contrato perder
+function ouPerdedores(ct,b){ return [...Array(10).keys()].filter(d=>!ouWin(ct,b,d)); }
+// avalia filtros + gatilho num mercado; devolve {ok, motivos[]}
+function ouBotAvalia(sym,c=ouBotCfg(),N=ouN()){
+  const A=OU.t[sym]||[]; if(A.length<Math.min(N,100)) return {ok:false,setup:false,mot:['poucos ticks']};
+  const st=ouStats(sym,N,c.ct,c.b), mot=[]; let setup=true;
+  if(+c.fDig){ const P=ouPerdedores(c.ct,c.b).filter(d=>c.ct==='M'?false:true); const alto=P.filter(d=>st.pct[d]>=+c.fDigMax); if(alto.length){ setup=false; mot.push(`dígito(s) ${alto.join(',')} ≥ ${c.fDigMax}%`); } }
+  if(+c.fVerde&&(c.ct==='O'||c.ct==='U')){ const v=st.verde, dist=+c.fVerdeDist; const ok=c.ct==='O'?v>=c.b+dist:v<=c.b-dist; if(!ok){ setup=false; mot.push(`verde no ${v} (perto da barreira)`); } }
+  const pctW=ouPctAt(sym,N,c.ct,c.b,0);
+  if(+c.fPct&&!(pctW>=+c.fPctMin)){ setup=false; mot.push(`acerto ${pctW!=null?pctW.toFixed(1):'—'}% < ${c.fPctMin}%`); }
+  let gat=false, gtxt='';
+  const D=A.slice(-12).map(x=>x.d);
+  if(c.gat==='seq'){
+    const seqs=String(c.seq||'').split(';').map(s=>s.split(',').map(x=>x.trim()).filter(x=>x!=='').map(Number)).filter(s=>s.length&&s.every(x=>x>=0&&x<=9));
+    for(const s of seqs){ if(D.length>=s.length&&s.every((x,i)=>D[D.length-s.length+i]===x)){ gat=true; gtxt=`sequência ${s.join('→')}`; break; } }
+    if(!gat) gtxt='esperando '+seqs.map(s=>s.join('→')).join(' ou ');
+  } else if(c.gat==='sub'){
+    const tr=ouTendencia(sym,N,c.ct,c.b,+c.subK||10); gat=!!tr&&tr.sub>=+c.sub-1e-9; gtxt=tr?`subiu ${tr.sub.toFixed(2)} pts em ${c.subK} ticks`:'';
+  } else if(c.gat==='perdas'){
+    let k=0; for(let i=D.length-1;i>=0&&!ouWin(c.ct,c.b,D[i]);i--) k++; gat=k>=+c.perdasN; gtxt=`${k} perdedor(es) seguido(s)`;
+  } else { gat=true; gtxt='sem gatilho (todo tick)'; }
+  return {ok:setup&&gat,setup,gat,gtxt,mot,pct:pctW,st};
+}
+function ouBotSyms(c=ouBotCfg()){ return c.escopo==='todas'?OU_SYMS.map(x=>x[0]).filter(s=>(OU.t[s]||[]).length):[ouSym()]; }
+function ouOnTick(sym){
+  ouSimCheck(sym);
+  if(!OU.bot.on||ouOpAberta()) return;
+  if(Date.now()<OU.bot.pausaAte){ OU.bot.msg=`⏸ pausa depois do red · volta em ${Math.ceil((OU.bot.pausaAte-Date.now())/1000)}s`; return; }
+  const c=ouBotCfg(); if(!ouBotSyms(c).includes(sym)) return;
+  const A=OU.t[sym]; const e=A.at(-1).e; if(OU.bot.lastE[sym]===e) return; OU.bot.lastE[sym]=e;
+  const av=ouBotAvalia(sym,c);
+  if(!av.ok) return;
+  if(c.modo==='demo'&&(!DM.ok||!DM.virt)){ OU.bot.msg='⚠ conta DEMO caiu — aguardando reconectar'; return; }
+  OU.bot.msg=`🎯 entrou: ${ouCtNome(c.ct,c.b)} em ${ouSymNome(sym)} · ${av.gtxt}`;
+  ouAbrirOp({src:'oubot',sym,ct:c.ct,b:+c.b,dur:+c.dur||1,val:Math.max(0.35,+c.val||0.35),gale:Math.max(0,Math.min(6,+c.gale||0)),galeModo:c.galeModo,fat:+c.fat||2,sim:c.modo==='sim'});
+  try{ beep(); }catch(e){}
+}
+const OU_PRESETS={
+  video:{nome:'📺 Vídeo · Over 2',d:{ct:'O',b:2,dur:1,fDig:1,fDigMax:10.5,fVerde:1,fVerdeDist:3,fPct:1,fPctMin:70,gat:'seq',seq:'0,1;2,1'}},
+  videoSub:{nome:'📺 Vídeo · Over 2 (subida do %)',d:{ct:'O',b:2,dur:1,fDig:1,fDigMax:10.5,fVerde:1,fVerdeDist:3,fPct:1,fPctMin:70,gat:'sub',sub:0.2,subK:10}},
+  under7:{nome:'🔁 Espelho · Under 7',d:{ct:'U',b:7,dur:1,fDig:1,fDigMax:10.5,fVerde:1,fVerdeDist:3,fPct:1,fPctMin:70,gat:'seq',seq:'9,8;7,8'}},
+  over1:{nome:'Over 1 · após 2 perdedores',d:{ct:'O',b:1,dur:1,fDig:1,fDigMax:10.5,fVerde:0,fPct:0,gat:'perdas',perdasN:2}}
+};
+function ouPreset(k){ const p=OU_PRESETS[k]; if(!p) return; cfg.mesa_ou_bot=Object.assign(ouBotCfg(),p.d); saveCfg(); ouRender(true); }
+
+// ---------- teste no histórico (os ticks já carregados, até 5000 por mercado) ----------
+function ouBacktestSym(sym,c,N){
+  const A=OU.t[sym]||[]; const n=A.length; if(n<N+20) return null;
+  const D=A.map(x=>x.d), win=D.map(d=>ouWin(c.ct,c.b,d));
+  const r=ouPayR(sym,c.ct,c.b,+c.dur||1).r, dur=+c.dur||1, gmax=Math.max(0,Math.min(6,+c.gale||0)), val=Math.max(0.35,+c.val||0.35);
+  const cnt=Array(10).fill(0); let w=0; for(let i=0;i<N;i++){ cnt[D[i]]++; if(win[i]) w++; }
+  const pctHist=[];                                                     // % da janela terminando em cada tick
+  const seqs=String(c.seq||'').split(';').map(s=>s.split(',').map(x=>x.trim()).filter(x=>x!=='').map(Number)).filter(s=>s.length);
+  const P=ouPerdedores(c.ct,c.b);
+  let ent=0,g=0,red=0,pl=0,pico=0,dd=0,i=N-1; const porNivel=Array(gmax+1).fill(0);
+  const avancar=k=>{ cnt[D[k]]++; if(win[k]) w++; cnt[D[k-N]]--; if(win[k-N]) w--; };
+  // i = índice do último tick dentro da janela [i-N+1..i]
+  let pausaAte=-1;
+  while(i<n-1-dur*(gmax+1)){
+    const pct=100*w/N; pctHist.push(pct);
+    let setup=true;
+    if(+c.fDig&&P.some(d=>100*cnt[d]/N>=+c.fDigMax)) setup=false;
+    if(setup&&+c.fVerde&&(c.ct==='O'||c.ct==='U')){ let v=0; for(let d=1;d<10;d++) if(cnt[d]>cnt[v]) v=d; if(!(c.ct==='O'?v>=c.b+(+c.fVerdeDist):v<=c.b-(+c.fVerdeDist))) setup=false; }
+    if(setup&&+c.fPct&&pct<+c.fPctMin) setup=false;
+    let gat=false;
+    if(setup&&i>=pausaAte){
+      if(c.gat==='seq') gat=seqs.some(s=>s.every((x,k)=>D[i-s.length+1+k]===x));
+      else if(c.gat==='sub'){ const K=+c.subK||10; const L=pctHist.slice(-K-1); gat=L.length>1&&pct-Math.min(...L)>=+c.sub-1e-9; }
+      else if(c.gat==='perdas'){ let k=0; for(let j=i;j>=0&&!win[j];j--) k++; gat=k>=+c.perdasN; }
+      else gat=true;
+    }
+    if(gat){
+      ent++; let perda=0, j=i, ganhou=false, nivel=0;
+      for(nivel=0;nivel<=gmax;nivel++){
+        const st=nivel===0?val:(c.galeModo==='auto'?(perda+val*r)/r:val*Math.pow(+c.fat||2,nivel));
+        const s=Math.max(0.35,Math.round(st*100)/100); j+=dur;
+        if(win[j]){ pl+=s*r; ganhou=true; break; } perda+=s; pl-=s;
+      }
+      if(ganhou){ g++; porNivel[nivel]++; } else { red++; if(+c.pausa>0) pausaAte=j+Math.round(+c.pausa/ (sym.startsWith('1HZ')?1:2)); }
+      pico=Math.max(pico,pl); dd=Math.max(dd,pico-pl);
+      while(i<j){ i++; avancar(i); pctHist.push(100*w/N); }
+      continue;
+    }
+    i++; avancar(i);
+  }
+  return {sym,ticks:n-N,ent,g,red,pl,dd,porNivel,r,taxa:ent?100*g/ent:0};
+}
+async function ouBacktest(){
+  if(OU.btBusy) return; OU.btBusy=true; const c=ouBotCfg(), N=ouN();
+  const L=c.escopo==='todas'?OU_SYMS.map(x=>x[0]):[ouSym()];
+  for(const s of L) try{ await ouPayBuscar(s,c.ct,+c.b,+c.dur||1); }catch(e){}
+  OU.bt={c:{...c},N,R:L.map(s=>ouBacktestSym(s,c,N)).filter(Boolean),t:Date.now()};
+  OU.btBusy=false; ouRender(true);
+}
+
+// ---------- tela ----------
+function ouTopHtml(){
+  const ab=ouOpAberta();
+  return `<div class="ms-top"><div style="font-size:22px">🔢</div><div class="ms-logo">MESA · OVER/UNDER <small>Deriv · DEMO · tick a tick</small></div>
+    <div class="ms-modos"><button onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS</button><button class="on">🔢 OVER/UNDER${OU.bot.on?' ●':''}</button></div>
+    <span class="ou-con" id="ouCon"></span>
+    ${OU.bot.on?`<button class="ms-x" style="border-color:#ef4444;color:#fca5a5" onclick="ouBotDesligar('⏹ parado por você')">⏹ PARAR ROBÔ</button>`:''}
+    <div class="ms-relogio" id="msClock"></div>
+    <div class="ms-saldo" id="msSaldo"></div><button class="ms-x" onclick="mesaSair()">${MESA_TAB?'↩ voltar ao início':'✕ sair'}</button></div>`;
+}
+function ouSymsHtml(){
+  const fam=ouFam(), b=ouB(), N=ouN(), cur=ouSym(), c=ouBotCfg();
+  const ctA=fam==='OU'?'O':'D';
+  return OU_SYMS.map(([s,nm])=>{
+    const A=OU.t[s]||[], u=A.at(-1), err=OU.err[s];
+    if(!A.length) return `<button class="ou-sym ${cur===s?'on':''}" onclick="ouSet('sym','${s}')"><b>${nm}</b><span class="mu">${err?'⛔ '+err:'carregando…'}</span></button>`;
+    const p=ouPctAt(s,N,ctA,b,0), st=ouStats(s,N,c.ct,c.b), av=OU.bot.on||c.escopo==='todas'?ouBotAvalia(s,c,N):null;
+    return `<button class="ou-sym ${cur===s?'on':''}" onclick="ouSet('sym','${s}')">
+      <b>${nm}</b><span class="ou-sp"><em class="ou-dg d${u.d}">${u.d}</em>${u.q.toFixed(OU.pip[s]??2)}</span>
+      <span class="ou-sl">${OU_NOME[ctA]} ${b}: <b>${p!=null?p.toFixed(1):'—'}%</b> · verde ${st.verde}</span>
+      ${av?`<span class="ou-sl ${av.setup?'okc':'mu'}">${av.setup?'✅ setup do robô':'· '+(av.mot[0]||'')}</span>`:''}</button>`;
+  }).join('');
+}
+function ouCircHtml(st){
+  const ult=st.ult;
+  return [...Array(10).keys()].map(d=>{
+    const cor=d===st.verde?'v':d===st.azul?'a':d===st.amarelo?'y':d===st.vermelho?'r':'';
+    const p=st.pct[d], ang=Math.max(4,Math.min(100,p*4.5));          // anel proporcional (10% ≈ 45%)
+    return `<div class="ou-c ${cor} ${ult===d?'ult':''}" style="--p:${ang}"><div class="ou-ci"><b>${d}</b><span>${p.toFixed(1)}%</span></div><i>há ${st.atraso[d]??'—'}</i>${ult===d?'<u>▲</u>':''}</div>`;
+  }).join('');
+}
+function ouAnaHtml(sym,st){
+  const b=ouB(), fam=ouFam(), N=ouN(), D=ouDigs(sym,N);
+  const lista=D.slice(-40);
+  if(fam==='OU'){
+    const sk=ouStreak(D,b), tO=ouTendencia(sym,N,'O',b,10), mpO=ouMaxPerdas(D,'O',b), mpU=ouMaxPerdas(D,'U',b);
+    return `<div class="ou-ou"><div class="ou-o"><span>OVER ${b}</span><b>${st.over.toFixed(1)}%</b><div class="ou-bar"><i style="width:${st.over}%"></i></div><small>justo ${(ouChance('O',b)*100).toFixed(0)}% · máx. ${mpO.max} perdas seguidas · agora ${mpO.atual}</small></div>
+      <div class="ou-u"><span>UNDER ${b}</span><b>${st.under.toFixed(1)}%</b><div class="ou-bar"><i style="width:${st.under}%"></i></div><small>justo ${(ouChance('U',b)*100).toFixed(0)}% · máx. ${mpU.max} perdas seguidas · agora ${mpU.atual}</small></div></div>
+      <div class="ou-linha"><span>Igual a ${b}: <b>${st.igual.toFixed(1)}%</b> (perde nos dois)</span><span>Sequência atual: <b>${sk.n}x ${sk.k==='O'?'OVER':sk.k==='U'?'UNDER':'IGUAL'}</b></span><span>Tendência OVER ${b} (10 ticks): <b class="${tO&&tO.sub>=0.2?'okc':''}">${tO?'+'+tO.sub.toFixed(2)+' pts':'—'}</b></span><span>Par ${st.par.toFixed(1)}% · Ímpar ${(100-st.par).toFixed(1)}%</span></div>
+      <div class="ou-box">${lista.map(d=>{ const k=ouClasse(d,b); return `<em class="${k==='O'?'bo':k==='U'?'bu':'bi'}" title="dígito ${d}">${k==='='?'=':k}</em>`; }).join('')}</div>`;
+  }
+  const mpD=ouMaxPerdas(D,'D',b), igual=st.pct[b];
+  return `<div class="ou-ou"><div class="ou-o"><span>DIFERENTE de ${b}</span><b>${(100-igual).toFixed(1)}%</b><div class="ou-bar"><i style="width:${100-igual}%"></i></div><small>justo 90% · máx. ${mpD.max} perdas seguidas</small></div>
+    <div class="ou-u"><span>IGUAL a ${b}</span><b>${igual.toFixed(1)}%</b><div class="ou-bar"><i style="width:${igual*5}%"></i></div><small>justo 10% · último ${b} há ${st.atraso[b]??'—'} ticks</small></div></div>
+    <div class="ou-box">${lista.map(d=>`<em class="${d===b?'bu':'bo'}">${d}</em>`).join('')}</div>`;
+}
+function ouMatHtml(){
+  const sym=ouSym(), fam=ouFam(), b=ouB(), dur=ouDur();
+  const L=fam==='OU'?['O','U']:['D','M'];
+  return L.map(ct=>{ if(!ouBarreiraOk(ct,b)) return `<div class="ou-mat"><b>${ouCtNome(ct,b)}</b><span class="mu">não existe na Deriv</span></div>`;
+    const p=ouChance(ct,b), {r,real}=ouPayR(sym,ct,b,dur), be=1/(1+r), casa=1-p*(1+r);
+    return `<div class="ou-mat"><b>${ouCtNome(ct,b)}</b><span>chance justa <b>${(p*100).toFixed(0)}%</b></span><span>paga <b>+${(r*100).toFixed(1)}%</b>${real?'':' <i class="mu">(estimado)</i>'}</span><span>precisa acertar <b>${(be*100).toFixed(1)}%</b> p/ empatar</span><span class="mu">margem da casa ≈ ${(casa*100).toFixed(1)}%</span></div>`; }).join('');
+}
+function ouEsqHtml(){
+  const fam=ouFam(), b=ouB(), qv=[0.35,1,2,5,10,25,50,100];
+  const btA=fam==='OU'?`OVER ${b}`:`DIFERENTE ${b}`, btB=fam==='OU'?`UNDER ${b}`:`IGUAL ${b}`;
+  const okA=ouBarreiraOk(fam==='OU'?'O':'D',b), okB=ouBarreiraOk(fam==='OU'?'U':'M',b);
+  return `<div class="ms-lb">CONTRATO</div>
+    <div class="ms-modos" style="justify-content:stretch"><button style="flex:1" class="${fam==='OU'?'on':''}" onclick="ouSet('fam','OU')">OVER / UNDER</button><button style="flex:1" class="${fam==='DM'?'on':''}" onclick="ouSet('fam','DM')">IGUAL / DIFERENTE</button></div>
+    <div class="ms-lb">BARREIRA (DÍGITO)</div>
+    <div class="ou-bars">${[...Array(10).keys()].map(d=>`<button class="${b===d?'on':''}" onclick="ouSet('b',${d})">${d}</button>`).join('')}</div>
+    <div class="ms-row2"><div class="ms-box"><span class="ms-lb">DURAÇÃO</span><div class="ms-pm"><button onclick="ouSet('dur',Math.max(1,ouDur()-1))">−</button><b>${ouDur()} tick${ouDur()>1?'s':''}</b><button onclick="ouSet('dur',Math.min(10,ouDur()+1))">+</button></div></div>
+      <div class="ms-box"><span class="ms-lb">JANELA DA ANÁLISE</span><select class="ms-sel" style="width:100%;margin-top:3px" onchange="ouSet('n',+this.value)">${OU_JANELAS.map(n=>`<option value="${n}" ${ouN()===n?'selected':''}>${n} ticks</option>`).join('')}</select></div></div>
+    <div class="ms-box"><span class="ms-lb">VALOR</span><div class="ms-val">$ <input type="number" step="0.01" min="0.35" value="${ouVal()}" onchange="ouSet('val',+this.value)"></div></div>
+    <div class="ms-qv">${qv.map(v=>`<button class="${ouVal()===v?'on':''}" onclick="ouSet('val',${v})">$ ${String(v).replace('.',',')}</button>`).join('')}</div>
+    <div class="ms-row2"><div class="ms-box"><span class="ms-lb">GALES</span><div class="ms-pm"><button onclick="ouSet('gale',Math.max(0,ouGale()-1))">−</button><b>${ouGale()?'G'+ouGale():'sem'}</b><button onclick="ouSet('gale',Math.min(6,ouGale()+1))">+</button></div></div>
+      <div class="ms-box"><span class="ms-lb">CÁLCULO DO GALE</span><select class="ms-sel" style="width:100%;margin-top:3px" onchange="ouSet('galeModo',this.value)"><option value="auto" ${ouGaleModo()==='auto'?'selected':''}>recupera + lucro</option><option value="fator" ${ouGaleModo()==='fator'?'selected':''}>fator × ${ouFat()}</option></select></div></div>
+    ${ouGaleModo()==='fator'?`<div class="ms-box"><span class="ms-lb">FATOR</span><div class="ms-pm"><button onclick="ouSet('fat',Math.max(1,ouFat()-0.1))">−</button><b>${ouFat().toFixed(1)}</b><button onclick="ouSet('fat',ouFat()+0.1)">+</button></div></div>`:''}
+    <div class="ms-nota" id="ouGaleNota"></div>
+    <div id="ouMat"></div>
+    <span class="ms-lb">SUA SESSÃO · OVER/UNDER</span><div class="ms-sess" id="ouSess"></div>
+    <div class="ms-bt"><button class="par" ${okA?'':'disabled style="opacity:.35"'} onclick="ouManual('A')">${btA}</button><button class="imp" ${okB?'':'disabled style="opacity:.35"'} onclick="ouManual('B')">${btB}</button></div>
+    <div class="ms-nota">Atalhos: <b>O</b> = ${btA} · <b>U</b> = ${btB}. A compra vai na hora, no próximo tick.</div>`;
+}
+function ouBotHtml(){
+  const c=ouBotCfg(), on=OU.bot.on, s=ouBotSess();
+  const sel=(k,ops)=>`<select class="ms-sel" onchange="ouBotSet('${k}',this.value)" ${on?'disabled':''}>${ops.map(([v,t])=>`<option value="${v}" ${String(c[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
+  const num=(k,st,w=70)=>`<input type="number" step="${st}" value="${c[k]}" style="width:${w}px" onchange="ouBotSet('${k}',+this.value)" ${on?'disabled':''}>`;
+  const chk=k=>`<input type="checkbox" ${+c[k]?'checked':''} onchange="ouBotSet('${k}',this.checked?1:0)" ${on?'disabled':''}>`;
+  const bt=OU.bt;
+  return `<div class="ou-bot">
+    <div class="ou-bh"><b>🤖 ROBÔ OVER/UNDER</b>
+      <span class="mu">presets:</span>${Object.entries(OU_PRESETS).map(([k,p])=>`<button class="ms-x" ${on?'disabled':''} onclick="ouPreset('${k}')">${p.nome}</button>`).join('')}
+      <span style="margin-left:auto"></span>
+      ${on?`<button class="ms-x" style="border-color:#ef4444;color:#fca5a5" onclick="ouBotDesligar('⏹ parado por você')">⏹ DESLIGAR</button>`:`<button class="ms-con" onclick="ouBotLigar()">▶ LIGAR ${c.modo==='sim'?'(SIMULAÇÃO)':'(CONTA DEMO)'}</button>`}</div>
+    <div class="ou-grid">
+      <label>Contrato ${sel('ct',[['O','OVER'],['U','UNDER'],['D','DIFERENTE'],['M','IGUAL']])} ${sel('b',[...Array(10).keys()].map(d=>[d,String(d)]))}</label>
+      <label>Duração ${num('dur',1,50)} ticks</label>
+      <label>Mercados ${sel('escopo',[['atual','só '+ouSymNome(ouSym())],['todas','todas as volatilidades (entra na 1ª que der setup)']])}</label>
+      <label>Modo ${sel('modo',[['sim','🧪 simulação (sem dinheiro)'],['demo','💼 conta DEMO']])}</label>
+      <label>${chk('fDig')} dígitos que perdem abaixo de ${num('fDigMax',0.1,60)}%</label>
+      <label>${chk('fVerde')} verde (mais sai) a pelo menos ${num('fVerdeDist',1,45)} da barreira</label>
+      <label>${chk('fPct')} acerto da janela ≥ ${num('fPctMin',0.5,60)}%</label>
+      <label>Gatilho ${sel('gat',[['seq','sequência de dígitos'],['sub','% subiu'],['perdas','após N perdedores'],['livre','sem gatilho']])}
+        ${c.gat==='seq'?`<input type="text" value="${c.seq}" style="width:110px" title="sequências separadas por ; — ex.: 0,1;2,1" onchange="ouBotSet('seq',this.value)" ${on?'disabled':''}>`:c.gat==='sub'?`${num('sub',0.1,55)} pts em ${num('subK',1,45)} ticks`:c.gat==='perdas'?`N = ${num('perdasN',1,45)}`:''}</label>
+      <label>Valor $ ${num('val',0.01)}</label>
+      <label>Gales ${num('gale',1,45)} ${sel('galeModo',[['auto','recupera + lucro'],['fator','fator']])} ${c.galeModo==='fator'?num('fat',0.1,55):''}</label>
+      <label>Stop win $ ${num('sw',1)} · Stop loss $ ${num('sl',1)}</label>
+      <label>Pausa após red ${num('pausa',5,55)} s · máx. entradas ${num('maxSeg',1,55)}</label>
+    </div>
+    <div class="ou-bst" id="ouBotSt"></div>
+    <div class="ou-bh" style="margin-top:8px"><b>🧪 TESTE NO HISTÓRICO</b><span class="mu">roda essas regras nos ticks já carregados (até ${OU_CAP} por mercado, janela ${ouN()})</span><button class="ms-x" style="margin-left:auto" onclick="ouBacktest()">${OU.btBusy?'testando…':'▶ TESTAR AGORA'}</button></div>
+    ${bt?`<div class="ou-bt"><div class="ou-btl ou-bth"><span>Mercado</span><span>Ticks</span><span>Entradas</span><span>Green</span><span>Red</span><span>Acerto</span><span>Paga</span><span>Resultado</span><span>Maior queda</span></div>
+      ${bt.R.map(x=>`<div class="ou-btl"><span>${ouSymNome(x.sym)}</span><span>${x.ticks}</span><span>${x.ent}</span><span>${x.g}${x.porNivel.length>1?` <i class="mu">(${x.porNivel.map((v,i)=>(i?'G'+i:'TS')+':'+v).join(' ')})</i>`:''}</span><span>${x.red}</span><span>${x.taxa.toFixed(1)}%</span><span>+${(x.r*100).toFixed(1)}%</span><span class="${x.pl>=0?'okc':'ruimc'}">${x.pl>=0?'+':''}${x.pl.toFixed(2)}</span><span class="ruimc">-${x.dd.toFixed(2)}</span></div>`).join('')||'<div class="mu" style="padding:8px">Sem ticks suficientes.</div>'}
+      <div class="ms-nota" style="padding:6px 10px">${ouCtNome(bt.c.ct,bt.c.b)} · valor $${bt.c.val} · gales ${bt.c.gale} · janela ${bt.N}. Compare o <b>Acerto</b> com a chance justa ${+bt.c.gale?'com '+bt.c.gale+' gale(s)':''} (${((1-Math.pow(1-ouChance(bt.c.ct,+bt.c.b),(+bt.c.gale||0)+1))*100).toFixed(1)}%): se ficar perto dela, o filtro não está prevendo nada — é sorte. Com poucas entradas o resultado varia muito.</div></div>`:''}
+  </div>`;
+}
+function ouHistHtml(){
+  const c=ouBotCfg(); const L=[...ouLog(),...(c.modo==='sim'?OU.bot.sim:[])].sort((a,b)=>a.t-b.t).slice(-40).reverse();
+  if(!L.length) return '<div class="mu" style="padding:8px">Nenhuma entrada Over/Under ainda.</div>';
+  return L.map(x=>`<div class="ms-hl ou-hl"><span>${hmsOf(x.t/1000)}</span><span>${(x.nome||'').replace(/^🔢 /,'')}</span><span>${x.nivel?'G'+x.nivel:'TS'}</span><span>${x.stake?'$ '+(+x.stake).toFixed(2):'—'}</span><span>${x.dSaida!=null?'saiu '+x.dSaida:''}</span><span class="${x.res==='green'?'okc':x.res==='red'?'ruimc':'mu'}">${x.res==='green'?'✅ +'+(+x.profit).toFixed(2):x.res==='red'?'❌ '+(+x.profit).toFixed(2):x.res+(x.obs?' · '+x.obs:'')}</span></div>`).join('');
+}
+function ouRender(full){
+  const p=$('#mesaPop'); if(!p||!MESA.open) return;
+  ouConnect();
+  if(full||!$('#ouRoot')){
+    MESA.lastFull=''; OU.lastPart='';
+    p.innerHTML=`<div class="ms" id="ouRoot">${ouTopHtml()}
+      <div class="ou-syms" id="ouSyms"></div>
+      <div class="ms-corpo">
+        <div class="ms-esq">${ouEsqHtml()}</div>
+        <div class="ms-dir">
+          <div id="ouFaixa"></div>
+          <div class="ou-preco" id="ouPreco"></div>
+          <div class="ou-circs" id="ouCirc"></div>
+          <div class="ou-leg"><span><i class="v"></i>mais sai</span><span><i class="a"></i>2º mais</span><span><i class="y"></i>2º menos</span><span><i class="r"></i>menos sai</span><span>▲ último tick · "há N" = ticks desde a última vez</span></div>
+          <div id="ouAna"></div>
+          <div class="ms-strip" id="ouStrip" style="justify-content:flex-start"></div>
+          <div class="ms-lb" style="margin-top:10px">ENTRADAS OVER/UNDER</div><div class="ms-hist" id="ouHist"></div>
+        </div>
+      </div>
+      ${ouBotHtml()}
+      <div class="uoaviso" style="margin-top:12px">📌 Os dígitos da Deriv saem de forma independente a cada tick. As porcentagens dos círculos oscilam ±1 ponto por puro acaso numa janela de 1000 ticks, e nenhuma sequência muda a chance do próximo tick. Use o <b>🧪 teste no histórico</b> e a <b>simulação</b> antes de pôr valor alto, e repare no quadro "precisa acertar p/ empatar".</div>
+    </div>`;
+  }
+  const sym=ouSym(), N=ouN(), A=OU.t[sym]||[];
+  const con=$('#ouCon'); if(con) con.innerHTML=OU.on?`<span class="okc">● ticks ao vivo</span> <span class="mu">${Object.keys(OU.t).length}/${OU_SYMS.length} mercados</span>`:'<span class="ruimc">● conectando ticks…</span>';
+  $('#msSaldo').innerHTML=DM.ok&&DM.virt?`<span>SALDO DEMO</span><b>$ ${DM.bal!=null?DM.bal.toFixed(2):'—'}</b>`:`<button class="ms-con" onclick="mesaFechar();S.tab='demo';renderTab()">CONECTAR DEMO</button>`;
+  const ck=$('#msClock'); if(ck){ const d=new Date(); ck.innerHTML=`<span>🕒</span>${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
+  const op=OU.op;
+  const k=[OU.n,op?op.estado+op.g+op.tent.length:'',DM.log.length,OU.bot.sim.length,OU.bot.on,OU.bot.msg,DM.bal].join('|');
+  if(k===OU.lastPart) return; OU.lastPart=k;
+  // payout real do contrato escolhido (em segundo plano)
+  const fam=ouFam(), b=ouB(), dur=ouDur();
+  for(const ct of fam==='OU'?['O','U']:['D','M']) if(OU.on&&!OU.pay[ouPayKey(sym,ct,b,dur)]) ouPayBuscar(sym,ct,b,dur).then(()=>{ OU.lastPart=''; });
+  $('#ouSyms').innerHTML=ouSymsHtml();
+  const st=ouStats(sym,N);
+  const u=A.at(-1);
+  $('#ouPreco').innerHTML=u?`<span class="mu">${ouSymNome(sym)} · ${A.length} ticks carregados · janela ${Math.min(N,A.length)}</span><div class="ou-q">${u.q.toFixed(OU.pip[sym]??2).slice(0,-1)}<em class="d${u.d}">${u.d}</em></div><span class="mu">${hmsOf(u.e)}</span>`:`<div class="mu">${OU.err[sym]?'⛔ '+OU.err[sym]:'carregando ticks de '+ouSymNome(sym)+'…'}</div>`;
+  $('#ouCirc').innerHTML=A.length?ouCircHtml(st):'';
+  $('#ouAna').innerHTML=A.length?ouAnaHtml(sym,st):'';
+  $('#ouStrip').innerHTML=A.slice(-60).map(x=>{ const kk=fam==='OU'?ouClasse(x.d,b):(x.d===b?'U':'O'); return `<div class="ms-b ${kk==='O'?'par':kk==='U'?'imp':''}" style="${kk==='='?'background:#f59e0b':''}"><span>${x.d}</span></div>`; }).join('');
+  const s=ouSess(ouLog());
+  $('#ouSess').innerHTML=`<div><b>${s.ac}</b><span>ACERTOS</span></div><div><b>${s.er}</b><span>ERROS</span></div><div><b class="${s.pl>=0?'okc':'ruimc'}">${s.pl>=0?'+':''}$ ${s.pl.toFixed(2)}</b><span>RESULTADO</span></div>`;
+  $('#ouMat').innerHTML=ouMatHtml();
+  const gm=ouGale(); { const ctA=fam==='OU'?'O':'D'; const r=ouPayR(sym,ctA,b,dur).r; let perda=0; const v=[]; for(let g=0;g<=gm;g++){ const stv=g===0?ouVal():(ouGaleModo()==='auto'?(perda+ouVal()*r)/r:ouVal()*Math.pow(ouFat(),g)); v.push(`${g?'G'+g:'entrada'} $ ${stv.toFixed(2)}`); perda+=stv; } const gn=$('#ouGaleNota'); if(gn) gn.innerHTML=(gm?'Gale: ':'')+v.join(' · ')+(gm?` · risco total $ ${perda.toFixed(2)}`:''); }
+  let faixa;
+  if(op){ const t=op.tent.at(-1); faixa=`<div class="ms-faixa on">🎯 ${ouCtNome(op.ct,op.b)} · ${ouSymNome(op.sym)} · ${op.g?'GALE '+op.g:'ENTRADA'} · $ ${t?t.stake.toFixed(2):''} · ${op.estado}${op.sim?' · 🧪 simulado':''}</div>`; }
+  else { const ult=[...ouLog(),...OU.bot.sim].sort((a,b)=>a.t-b.t).at(-1);
+    if(ult&&Date.now()-ult.t<6000) faixa=`<div class="ms-faixa ${ult.res==='green'?'g':'r'}">${ult.res==='green'?`✅ GREEN ${ult.nivel?'G'+ult.nivel:''} · +${(+ult.profit).toFixed(2)} · saiu ${ult.dSaida??''}`:ult.res==='red'?`❌ RED · ${(+ult.profit).toFixed(2)} · saiu ${ult.dSaida??''}`:ult.res+' · '+(ult.obs||'')}</div>`;
+    else faixa=`<div class="ms-faixa">${DM.ok&&DM.virt?`Escolha o contrato e clique · a compra entra no próximo tick de <b>${ouSymNome(sym)}</b>`:'⚠ Conecte a conta DEMO para operar (a análise e a simulação funcionam sem conta)'}</div>`; }
+  $('#ouFaixa').innerHTML=faixa;
+  $('#ouHist').innerHTML=ouHistHtml();
+  const bs=$('#ouBotSt'); if(bs){ const c=ouBotCfg(), sb=ouBotSess(); const av=ouBotAvalia(ouSym(),c);
+    bs.innerHTML=`<span>${OU.bot.on?'<b class="okc">● LIGADO</b>':'<b class="mu">○ desligado</b>'} · ${OU.bot.msg||''}</span>
+      <span>Sessão do robô: ${sb.ac}✅ ${sb.er}❌ · <b class="${sb.pl>=0?'okc':'ruimc'}">${sb.pl>=0?'+':''}${sb.pl.toFixed(2)}</b></span>
+      <span>Agora em ${ouSymNome(ouSym())}: ${av.setup?'<b class="okc">setup OK</b>':'<span class="mu">sem setup — '+(av.mot.join(' · ')||'')+'</span>'} · gatilho: ${av.gat?'<b class="okc">'+av.gtxt+'</b>':'<span class="mu">'+(av.gtxt||'')+'</span>'}</span>`; }
+}
+
 // =====================================================================================
 // 🤖 ROBÔS DA MESA PLAY — entra sozinho na conta DEMO seguindo os robôs 100% de cada tempo (5s/10s/20s/30s)
 // Regras: 1 entrada por vez (enquanto a entrada e os gales não terminam, ignora novos sinais);
