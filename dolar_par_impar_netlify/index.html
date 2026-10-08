@@ -542,7 +542,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.81 · 07/10/2026 · horário fixo da Mesa volta ao normal (tiro seco G1 retirado) · 🔥 Pressure Strategy';
+const VERSAO='v3.82 · 08/10/2026 · 📉 maior valor exposto = soma dos REDs seguidos até o GREEN · 🔥 Pressure Strategy';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10448,11 +10448,19 @@ function mbVTabela(w){
     <div class="ms-nota" style="margin-top:4px">Poucos sinais = conclusão fraca: com menos de ~100 entradas a diferença entre as regras pode ser só sorte.</div>`;
 }
 // 📉 maior valor exposto: o quanto o saldo ficou abaixo do topo somado à aposta que estava em jogo naquele momento
+// 📉 maior valor exposto = maior SOMA das apostas perdidas (RED) seguidas, até o GREEN que encerra a sequência.
+// O GREEN não entra na soma; depois dele a sequência recomeça. REDs seguidos ainda sem GREEN contam como exposição atual.
+// "Maior aposta" continua sendo a maior aposta individual (não mudou).
 function mbExpo(w,L){
-  L=L||mbSess(w).L; let pl=0,pico=0,ex=0,exT=0,queda=0,maxA=0;
-  for(const x of L){ const st=+x.stake||0; if(!st&&!x.profit) continue; const e=(pico-pl)+st; if(e>ex){ ex=e; exT=x.planT||x.T; } if(st>maxA) maxA=st; pl+=(+x.profit||0); if(pl>pico) pico=pl; if(pico-pl>queda) queda=pico-pl; }
-  const o=mbAberta(w); if(o){ const st=o.tent?.at(-1)?.stake||0, e=(pico-pl)+st; if(e>ex){ ex=e; exT=o.T+o.g*o.step; } }
-  return {ex,exT,queda,maxA};
+  L=L||mbSess(w).L; let pl=0,pico=0,ex=0,exT=0,queda=0,maxA=0,seq=0;
+  for(const x of L){
+    const st=+x.stake||0;
+    if(x.res==='red'){ seq+=st; if(seq>ex+1e-9){ ex=seq; exT=x.planT||x.T; } }
+    else if(x.res==='green') seq=0;
+    if(!st&&!x.profit) continue;
+    if(st>maxA) maxA=st; pl+=(+x.profit||0); if(pl>pico) pico=pl; if(pico-pl>queda) queda=pico-pl;
+  }
+  return {ex:Math.round(ex*100)/100,exT,queda,maxA,atual:Math.round(seq*100)/100};
 }
 // 🤖 MEUS ROBÔS — cada configuração salva vira um robô com nome. Enquanto um robô está ligado a um tempo,
 // esse tempo usa a configuração GUARDADA NO ROBÔ (não a da tela), então ela não se perde nem é trocada pela outra aba.
