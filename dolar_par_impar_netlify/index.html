@@ -542,7 +542,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.82 · 08/10/2026 · 📉 maior valor exposto = soma dos REDs seguidos até o GREEN · 🔥 Pressure Strategy';
+const VERSAO='v3.83 · 08/10/2026 · 🧠 Mesa: usar sistema inteligente (corta red longo, dívida oculta, pausa, tendência, migra de tempo) · 🔥 Pressure Strategy';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8716,7 +8716,7 @@ async function dmCalibrar(){
   dmSet(`🎯 Contrato de teste agendado para o tick das ${hmsOf(T)} (${sym}, 0,35). Veja o resultado na tabela.`);
 }
 function dmAddLog(x){
-  DM.log.push({t:Date.now(),nome:x.nome,src:x.src,sym:x.sym,ct:dmCtLabel(x),T:x.T,nivel:x.nivel??0,stake:x.stake,profit:x.profit,res:x.res,obs:x.obs||'',cid:x.cid||'',exitT:x.exitT||0,exitQ:x.exitQ??'',entryT:x.entryT||0,planT:x.planT||x.T,alvo:x.alvo||0,pt:x.pt||0,certo:x.certo,bateu:x.bateu,dJogo:x.dJogo,dSaida:x.dSaida,bal:DM.bal,mw:(x.src==='mesa'||x.src==='mbot')?x.step:undefined,mmax:x.maxN,mcor:x.mcor,gk:x.gk,gmax:x.gmax});
+  DM.log.push({t:Date.now(),nome:x.nome,src:x.src,sym:x.sym,ct:dmCtLabel(x),T:x.T,nivel:x.nivel??0,stake:x.stake,profit:x.profit,res:x.res,obs:x.obs||'',cid:x.cid||'',exitT:x.exitT||0,exitQ:x.exitQ??'',entryT:x.entryT||0,planT:x.planT||x.T,alvo:x.alvo||0,pt:x.pt||0,certo:x.certo,bateu:x.bateu,dJogo:x.dJogo,dSaida:x.dSaida,bal:DM.bal,mw:(x.src==='mesa'||x.src==='mbot')?x.step:undefined,mmax:x.maxN,mcor:x.mcor,gk:x.gk,gmax:x.gmax,siExtra:x.siExtra||0});
   dmSaveLog(); if(S.tab==='demo') dmLive();
 }
 // ganchos chamados pelos robôs quando um sinal nasce
@@ -10030,7 +10030,7 @@ function mbRatio(w){ const G=DM.log.filter(x=>(x.src==='mbot'||x.src==='mesa')&&
 // 🔁 recuperação: refaz a sessão do início e diz quanto falta recuperar e em quantos greens
 // falta = maior saldo que a sessão já teve − saldo agora. Começa a recuperar depois de um RED final (perdeu no último gale).
 function mbRec(w){
-  const C=mbCfg(w), N=+C.rec||0, L=(mbLinkAtivo(w)&&+mbLink().quente)?mbLinkL():mbSess(w).L; let pl=0,pico=0,k=null;
+  const C=mbCfg(w), N=+C.rec||0, corte=siCorte(w), L=((mbLinkAtivo(w)&&+mbLink().quente)?mbLinkL():mbSess(w).L).filter(x=>!corte||x.t>=corte); let pl=0,pico=0,k=null;
   for(const x of L){
     pl+=(+x.profit||0);
     if(pl>=pico-0.005){ pico=Math.max(pico,pl); k=null; continue; }
@@ -10048,6 +10048,98 @@ function mbRec(w){
 function mbGaleK(w){ return mbGaleCiclo(w).k; }
 function mbGaleCiclo(w){ const C=mbCfg(w), G=C.gale<0?2:+C.gale; let k=0,perda=0; for(const x of mbSess(w).L){ if(x.gk==null) continue; if(x.res==='green'){ k=0; perda=0; } else if(x.res==='red'){ k++; perda+=+x.stake||0; if(k>G){ k=0; perda=0; } } } return {k,perda}; }
 // valor da entrada no gale "no próximo sinal" conforme o modo escolhido
+// =====================================================================================
+// 🧠 SISTEMA INTELIGENTE (robô da Mesa) — um quadrinho que liga tudo isto:
+//  1) corta o red longo: com N REDs seguidos (padrão 7) assume o prejuízo e guarda numa DÍVIDA OCULTA (para de dobrar)
+//  2) saldo da sessão ≥ 0 → aceita o loss e segue na entrada normal; saldo ≤ −X → paga a dívida aos poucos (stake um pouco maior, com teto)
+//  3) resultados recentes ruins → volta para a entrada mínima (cauteloso); muito ruins → PAUSA (só virtual)
+//     e volta com 3 WIN virtuais seguidos, com stake um pouco maior por algumas entradas
+//  4) tendência: se os últimos jogos puxam forte para o lado contrário do sinal, não entra (anota virtual)
+//  5) observa os outros tempos em oculto (virtual + horários fixos); pausado e outro tempo bem melhor → migra para lá
+// =====================================================================================
+const SI_DEF={si:0,siRedMax:7,siNeg:5,siK:10,siCap:2,siPausaR:3,siVoltaG:3,siTend:1,siTendN:30,siTendPct:63,siMigrar:1};
+const SI_KEY='dpi_mesa_si_v1';
+let SI=(()=>{ try{ return JSON.parse(localStorage.getItem(SI_KEY)||'{}')||{}; }catch(e){ return {}; } })();
+SI={divida:0,boost:0,...SI};
+function siSave(){ try{ localStorage.setItem(SI_KEY,JSON.stringify(SI)); }catch(e){} }
+function siC(w){ return {...SI_DEF,...mbCfg(w)}; }
+function siOn(w){ return +siC(w).si===1; }
+function siAlgum(){ return MESA_TEMPOS.some(w=>mbSt(w).on&&siOn(w)); }
+// tendência de paridade nos últimos N jogos do tempo
+function siTend(w,alvo){ const C=siC(w), L=(LIVE[mbBank(w)]||[]).slice(-Math.max(10,+C.siTendN||30)); if(L.length<10) return null;
+  const a=L.filter(x=>x.p===alvo).length, pct=100*a/L.length; return {pct,contra:100-pct>=+C.siTendPct,n:L.length}; }
+// nota de um tempo: WIN recentes (virtual + real) + horários fixos 100% nos próximos 10 min
+function siNota(w){ const t=mbHistTail(w,8); if(t.length<6) return null; const W=t.filter(c=>c==='W').length, t6=t.slice(-6).filter(c=>c==='W').length;
+  let hf=0; const H=MBHF[w]; if(H&&H.rows){ const now=Date.now()/1000; hf=H.rows.filter(r=>{ const T=hfNext(r.off); return T-now<=600; }).length; }
+  return {w,W,t6,hf,nota:W/8+Math.min(0.25,hf*0.03),t:t.join('')}; }
+// corte da recuperação comum (depois de assumir o red)
+function siCorte(w){ return siOn(w)?(mbSt(w).siCorte||0):0; }
+// lê resultados novos: paga a dívida com os greens que tinham parcela extra e assume o red longo
+function siTick(w){
+  const s=mbSt(w); if(!s.on||!siOn(w)) return;
+  const C=siC(w), L=mbSess(w).L.filter(x=>x.res==='green'||x.res==='red');
+  if(s.siLast==null||s.siLast>L.length) s.siLast=L.length;
+  for(const x of L.slice(s.siLast)){ if(x.res==='green'&&+x.siExtra>0&&SI.divida>0){ SI.divida=Math.max(0,Math.round((SI.divida-x.siExtra)*100)/100); siSave(); mbLog(w,`🧠 dívida oculta paga em $ ${(+x.siExtra).toFixed(2)} → falta $ ${SI.divida.toFixed(2)}`,'g'); }
+    if(x.res==='green'&&SI.boost>0) SI.boost--; if(x.res==='red') SI.boost=0; }
+  s.siLast=L.length;
+  // REDs seguidos (depois do último corte)
+  const corte=s.siCorte||0; let reds=0; for(let i=L.length-1;i>=0;i--){ if(L[i].t<corte) break; if(L[i].res==='red') reds++; else break; }
+  if(reds>=Math.max(2,+C.siRedMax)){
+    const R=mbRec(w), falta=R.falta||0, pl=mbSess(w).pl; s.siCorte=Math.max(Date.now(),(L.at(-1)?.t||0)+1);
+    if(pl>=0){ mbLog(w,`🧠 ${reds} REDs seguidos — assumi o red. Saldo ainda positivo (+$ ${pl.toFixed(2)}): aceito o loss e sigo na entrada normal.`,'r'); }
+    else { SI.divida=Math.round((SI.divida+falta)*100)/100; siSave(); mbLog(w,`🧠 ${reds} REDs seguidos — assumi o red ($ ${falta.toFixed(2)}) e guardei na dívida oculta (total $ ${SI.divida.toFixed(2)}). Recupero aos poucos.`,'r'); }
+  }
+}
+// decide antes da entrada real: pausa / tendência / migração. Devolve {skip} ou {extra}
+function siDecide(w,g,T,gv,hh){
+  const C=siC(w), s=mbSt(w), vs=mbVEstado(w), t4=mbHistTail(w,4), tv=mbHistTail(w,Math.max(2,+C.siVoltaG));
+  // pausa
+  if(!s.siPausa&&t4.length>=4&&t4.filter(c=>c==='L').length>=+C.siPausaR){ s.siPausa=true; mbLog(w,`🧠 ⏸ PAUSA: ${t4.join('')} nos últimos 4 — mercado ruim, só virtual até ${C.siVoltaG} WIN seguidos`,'r'); }
+  if(s.siPausa&&tv.length>=+C.siVoltaG&&tv.every(c=>c==='W')){ s.siPausa=false; SI.boost=3; siSave(); mbLog(w,`🧠 ▶ Voltando: ${tv.join('')} — ${C.siVoltaG} WIN virtuais seguidos. Próximas entradas com stake um pouco maior.`,'g'); }
+  if(s.siPausa){
+    if(+C.siMigrar&&!mbLinkAtivo(w)){ const atual=siNota(w), alt=MESA_TEMPOS.filter(x=>x!==w&&!mbSt(x).on).map(siNota).filter(x=>x&&x.t6>=4).sort((a,b)=>b.nota-a.nota)[0];
+      if(alt&&(!atual||alt.nota>atual.nota+0.2)){ siMigrar(w,alt); return {skip:true}; } }
+    if(!vs.vPend.length) mbVAnotar(w,g,T,gv,true); return {skip:true};
+  }
+  // tendência
+  if(+C.siTend){ const td=siTend(w,g.alvo); if(td&&td.contra){ mbLog(w,`🧠 ${hh}: sinal ${g.alvo?'ÍMPAR':'PAR'} contra a tendência (só ${td.pct.toFixed(0)}% de ${g.alvo?'ímpar':'par'} nos últimos ${td.n}) — não entrei`,'evt'); if(!vs.vPend.length) mbVAnotar(w,g,T,gv,true); return {skip:true}; } }
+  // stake: paga a dívida aos poucos quando o saldo está bem negativo
+  const pl=mbSess(w).pl, t6=mbHistTail(w,6), ruim=t6.length>=6&&t6.filter(c=>c==='L').length>=4;
+  let extra=0, modo='normal';
+  if(SI.divida>0&&(pl<=-(+C.siNeg)||SI.boost>0)){
+    if(ruim){ modo='cauteloso'; }
+    else { const K=Math.max(2,SI.boost>0?Math.ceil(+C.siK/2):+C.siK), r=mbRatio(w), base=Math.max(0.35,+C.val||0.35);
+      extra=Math.min(SI.divida,SI.divida/K); const capLucro=Math.max(0,(+C.siCap-base)*r); extra=Math.min(extra,capLucro); extra=Math.round(extra*100)/100; modo=SI.boost>0?'retomada':'recuperando aos poucos'; }
+  } else if(ruim) modo='cauteloso';
+  s.siModo=modo;
+  return {extra};
+}
+function siMigrar(w,alt){
+  const s=mbSt(w), r=mbRoboDe(w), w2=alt.w;
+  if(r){ mbSt(w2).robo=r.id; mbSelSet(w2,r.id); } else { cfg.mbot={...(cfg.mbot||{})}; cfg.mbot[w2]={...mbCfg(w)}; saveCfg(); }
+  mbLog(w,`🧠 🔀 ${w}s pausado e ${w2}s está melhor (${alt.t} · ${alt.hf} horário(s) fixo(s) nos próximos 10 min) — migrando a operação para ${w2}s (a dívida oculta vai junto)`,'evt');
+  mbParar(w,`🧠 migrou para ${w2}s`); mbIniciar(w2); mbSt(w2).conf=s.conf; mbLog(w2,`🧠 Operação migrada do ${w}s (${alt.t}). Dívida oculta: $ ${SI.divida.toFixed(2)}`,'g');
+  cfg.mesa_w=w2; saveCfg(); if(MESA.open) mesaRender(true);
+}
+function siBoxHtml(w){
+  const C=siC(w), on=+C.si, s=mbSt(w), n=(k,wd=46,st=1)=>`<input type="number" step="${st}" value="${C[k]}" style="width:${wd}px" onchange="mbSetCfg(${w},'${k}',+this.value)">`;
+  const alt=MESA_TEMPOS.filter(x=>x!==w).map(siNota).filter(Boolean).sort((a,b)=>b.nota-a.nota)[0], td=siTend(w,0);
+  return `<div class="ms-box" style="border-color:${on?'#f59e0b':'var(--mb)'};${on?'background:rgba(245,158,11,.06)':''}">
+    <label class="ms-chk" style="font-size:14px;font-weight:900"><input type="checkbox" ${on?'checked':''} onchange="mbSetCfg(${w},'si',this.checked?1:0);if(this.checked){cfg.mb_obs=1;saveCfg();}" style="width:18px;height:18px"> 🧠 USAR SISTEMA INTELIGENTE</label>
+    ${on?`<div class="ms-nota" style="margin-top:6px;line-height:1.6">
+        Dívida oculta: <b style="color:#fbbf24">$ ${(+SI.divida).toFixed(2)}</b> · modo: <b>${s.siPausa?'⏸ pausado (virtual)':s.siModo||'normal'}</b>${SI.boost>0?` · retomada (${SI.boost})`:''}<br>
+        Tendência ${w}s: ${td?`PAR ${td.pct.toFixed(0)}% · ÍMPAR ${(100-td.pct).toFixed(0)}% (últimos ${td.n})`:'—'}<br>
+        Melhor outro tempo: ${alt?`<b>${alt.w}s</b> ${alt.t} · ${alt.hf} HF em 10 min`:'juntando dados (observador)'}</div>
+      <details style="margin-top:4px"><summary class="ms-nota" style="cursor:pointer">ajustes</summary><div style="display:flex;flex-direction:column;gap:5px;margin-top:6px">
+        <label class="ms-chk">assumir o red com ${n('siRedMax')} REDs seguidos</label>
+        <label class="ms-chk">recuperar aos poucos se o saldo ≤ −$ ${n('siNeg')} · em ${n('siK')} greens · aposta máx $ ${n('siCap',50,0.1)}</label>
+        <label class="ms-chk">pausa com ${n('siPausaR')} LOSS nos últimos 4 · volta com ${n('siVoltaG')} WIN seguidos</label>
+        <label class="ms-chk"><input type="checkbox" ${+C.siTend?'checked':''} onchange="mbSetCfg(${w},'siTend',this.checked?1:0)"> tendência: não entrar se o lado do sinal tiver ≤ ${100-(+C.siTendPct)}% nos últimos ${n('siTendN')} (contra ≥ ${n('siTendPct')}%)</label>
+        <label class="ms-chk"><input type="checkbox" ${+C.siMigrar?'checked':''} onchange="mbSetCfg(${w},'siMigrar',this.checked?1:0)"> migrar para outro tempo quando estiver pausado e outro estiver melhor</label>
+        <button class="mb-mini" onclick="if(confirm('Zerar a dívida oculta?')){SI.divida=0;SI.boost=0;siSave();mesaRender(true);}">zerar dívida oculta</button></div></details>`
+      :`<div class="ms-nota">Corta o red longo (guarda numa dívida oculta), paga aos poucos conforme o saldo, pausa quando o mercado fica ruim, filtra por tendência e muda de tempo se outro estiver melhor.</div>`}</div>`;
+}
+
 function mbStakeSinal(w){ const C=mbCfg(w), base=Math.max(0.35,+C.val||0.35), {k,perda}=mbGaleCiclo(w), r=mbRatio(w);
   if(!k) return base;
   if(C.galeCalc==='zero') return Math.max(0.35,Math.ceil(perda/r*100)/100);
@@ -10198,7 +10290,8 @@ function mbTick(){
   if(+L.on){ const pl=mbLinkPl(); if(+L.sw>0&&pl>=+L.sw) mbLinkParar(`🏁 stop win do interligado (+${pl.toFixed(2)})`); else if(+L.sl>0&&pl<=-L.sl) mbLinkParar(`🛑 stop loss do interligado (${pl.toFixed(2)})`); }
   for(const w of MESA_TEMPOS){
     const s=mbSt(w), obs=!s.on;                 // obs = observador silencioso (robô parado): só anota virtual
-    if(obs&&!+(cfg.mb_obs??1)) continue;
+    if(obs&&!+(cfg.mb_obs??1)&&!siAlgum()) continue;
+    if(!obs) try{ siTick(w); }catch(e){ console.warn('sistema inteligente',e); }
     const C=mbCfg(w), fonte=C.fonte||'padroes';
     if(!obs){
       const ss=mbSess(w);
@@ -10237,10 +10330,12 @@ function mbTick(){
     if(mbLinkAtivo(w)&&+L.quente){ const falta=mbLinkFalta(); if(falta>0){ const q=mbLinkQuente();
         if(!q||q.w!==w){ mbLog(w,`🔀 ${hh}: sinal virou virtual — recuperando $ ${falta.toFixed(2)} ${q?`no ${q.w}s (mais quente: ${q.W}/${q.N} W)`:'só quando algum tempo esquentar'}`,'evt'); if(!vs.vPend.length) mbVAnotar(w,g,T,gv,true); continue; }
         mbLog(w,`🔥 ${hh}: recuperação no ${w}s — o mais quente agora (${q.W}/${q.N} W · ${q.t})`,'g'); } }
-    const R=mbRec(w), rec=R.on?{recAlvo:R.alvo,recMax:+C.recMax||0,ratio:R.r}:{}, rtxt=R.on?` · 🔁 recuperando $ ${R.falta.toFixed(2)} (${R.k} green${R.k>1?'s':''}) → aposta $ ${Math.min(R.stake,+C.recMax||Infinity).toFixed(2)}`:'';
+    let siE=0; if(siOn(w)){ const d=siDecide(w,g,T,gv,hh); if(d.skip) continue; siE=d.extra||0; }
+    const R=mbRec(w), rec=R.on?{recAlvo:R.alvo+siE,recMax:+C.recMax||0,ratio:R.r}:{}, rtxt=R.on?` · 🔁 recuperando $ ${R.falta.toFixed(2)} (${R.k} green${R.k>1?'s':''}) → aposta $ ${Math.min(R.stake,+C.recMax||Infinity).toFixed(2)}`:'';
     if(C.galeModo==='sinal'){ const k=mbGaleK(w), G=C.gale<0?2:+C.gale;
-      dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:0,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:mbStakeSinal(w),fator:fat,mcor:g.alvo,gk:k,gmax:G,...rec}); }
-    else dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:base,fator:fat,galeCalc:C.galeCalc,mcor:g.alvo,...rec});
+      dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:0,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.round((mbStakeSinal(w)+(R.on?0:siE/mbRatio(w)))*100)/100,fator:fat,mcor:g.alvo,gk:k,gmax:G,siExtra:siE,...rec}); }
+    else dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.round((base+(R.on?0:siE/mbRatio(w)))*100)/100,fator:fat,galeCalc:C.galeCalc,mcor:g.alvo,siExtra:siE,...rec});
+    if(siE>0) mbLog(w,`🧠 ${hh}: +$ ${siE.toFixed(2)} de lucro extra na entrada para pagar a dívida oculta ($ ${SI.divida.toFixed(2)})`,'evt');
     if(R.on) mbLog(w,`🔁 ${hmsOf(T/1000)}: modo recuperação${rtxt}`,'evt');
     s.feitos.add(g.key);
     mbLog(w,`🎯 ${hh}: ENTRADA ${g.alvo?'ÍMPAR':'PAR'} · ${g.nome}${ok.length>1?` (outros ${ok.length-1} da mesma cor ficaram de fora)`:''}`,'g');
@@ -10691,6 +10786,7 @@ function mbEsqHtml(w){
     <div class="ms-nota">0 no stop = sem stop. Gale ${C.gale<0?'até G2':C.gale?'até G'+C.gale:'desligado'} · ×${(+C.fat).toFixed(1)} · ${C.galeModo==='sinal'?'cada sinal é 1 entrada; depois de red a próxima entrada sobe de nível':'gale nos jogos logo depois da entrada'}</div>
     ${mbVBoxHtml(w)}
     ${mbPausaHtml(w)}
+    ${siBoxHtml(w)}
     <span class="ms-lb">SESSÃO DO ROBÔ ${w}s</span><div class="ms-sess" id="msSess"></div>
     ${s.on?`<button class="ms-go stop" onclick="mbParar(${w})">⏹ PARAR ROBÔ ${w}s</button>`:`<button class="ms-go" onclick="mbIniciarBtn(${w})">▶ ${+mbLink().on?'COLOCAR NO INTERLIGADO '+w+'s':'INICIAR ROBÔ '+w+'s'}</button>`}
     ${s.parou&&!s.on?`<div class="ms-nota" style="color:#fca5a5">${s.parou}</div>`:''}`;
