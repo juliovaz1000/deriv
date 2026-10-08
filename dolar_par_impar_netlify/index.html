@@ -439,6 +439,29 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .ou-hl{grid-template-columns:70px 1fr 34px 70px 60px 110px}
 @media(max-width:900px){.ou-circs{gap:30px 4px}.ou-c{width:58px;height:58px}.ou-ci{width:46px;height:46px}.ou-ci b{font-size:15px}.ou-ci span{font-size:9px}.ou-q{font-size:26px}.ou-syms{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}.ou-hl{grid-template-columns:56px 1fr 28px 58px 46px 80px;font-size:11px}.ou-grid{grid-template-columns:minmax(0,1fr)}}
 
+/* 🎮 Mesa par/ímpar · barras de sinais + análise por número */
+.ms-bars{background:#100d1a;border:1px solid var(--mb);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.ms-barh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:12px}.ms-barh>b{font-size:12px;letter-spacing:.6px;color:#c4b5fd}
+.ms-barh input[type=number]{background:#15121f;border:1px solid var(--mb);color:#fff;border-radius:6px;padding:2px 4px}
+.ms-hpq{border:1px solid var(--mb);border-radius:8px;padding:3px 8px;background:#1b1a24}.ms-hpq.on{border-color:#22c55e;background:rgba(34,197,94,.12);color:#bbf7d0}
+.ms-barra{position:relative;background:#1b1a24;border:1px solid var(--mb);border-radius:9px;overflow:hidden;min-height:34px}
+.ms-bfill{position:absolute;inset:0 auto 0 0;transition:width .9s linear;opacity:.35}
+.ms-barra.par .ms-bfill{background:linear-gradient(90deg,#6d28d9,#a855f7)}.ms-barra.imp .ms-bfill{background:linear-gradient(90deg,#334155,#64748b)}
+.ms-barra.cz{border-color:#facc15;box-shadow:0 0 14px rgba(250,204,21,.25)}.ms-barra.cz .ms-bfill{background:linear-gradient(90deg,#a16207,#facc15);opacity:.4}
+.ms-barra.cf{border-color:#ef4444}.ms-barra.cf .ms-bfill{background:linear-gradient(90deg,#7f1d1d,#ef4444);opacity:.3}
+.ms-btx{position:relative;display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:12px;flex-wrap:wrap}
+.ms-bcor{font-weight:900;font-size:11px;border-radius:6px;padding:2px 7px;background:#3a3648}.ms-bcor.par{background:var(--mr)}.ms-bcor.imp{background:#475569}
+.ms-btag{font-size:10.5px;border-radius:6px;padding:1px 6px}.ms-btag.cz{background:#facc15;color:#1a1300}.ms-btag.cf{background:#ef4444;color:#fff}
+.ms-bits{color:#c9c3dc;flex:1;min-width:140px}.ms-bfal{font-weight:800;font-variant-numeric:tabular-nums}
+.ms-bag{background:linear-gradient(90deg,var(--mr2),var(--mr));border:0;color:#fff;border-radius:7px;padding:4px 9px;font-weight:800;cursor:pointer;font-size:11.5px}
+.ms-pi{background:#100d1a;border:1px solid var(--mb);border-radius:12px;padding:10px;margin-top:4px}
+.ms-pih{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:12px}.ms-pih>b{color:#c4b5fd;letter-spacing:.6px}.ms-pih .ms-modos button{padding:5px 9px;font-size:11.5px}
+.pi-p{color:#c084fc}.pi-i{color:#f1f5f9}.ou-ci span b{font-size:13px;color:#fff}
+.pi-par.ou-o{background:rgba(124,58,237,.14);border-color:rgba(168,85,247,.45)}.pi-par.ou-o span{color:#d8b4fe}.pi-par .ou-bar i{background:#a855f7!important}
+.pi-imp.ou-u{background:rgba(100,116,139,.14);border-color:rgba(148,163,184,.45)}.pi-imp.ou-u span{color:#e2e8f0}.pi-imp .ou-bar i{background:#94a3b8!important}
+.ou-box .pi-bp{background:#7c3aed}
+@media(max-width:900px){.ms-pi .ou-c>i{font-size:8px;letter-spacing:-.2px}.ms-pi .ou-ci span b{font-size:11px}.ms-btx{font-size:11px;gap:5px}}.ou-box .pi-bi{background:#475569}
+
 #mesaBtn{border-color:#a855f7;color:#d8b4fe;font-weight:800}#mkBtn{border-color:#38bdf8;color:#7dd3fc;font-weight:800}
 #mkPop{position:fixed;inset:0;z-index:10005;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.75);overflow:auto;padding:24px 12px}
 .mk-box{background:var(--bg2,#12141c);border:1px solid #38bdf8;border-radius:14px;padding:16px;max-width:1150px;width:100%}.mk-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
@@ -583,7 +606,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.84 · 08/10/2026 · 🔢 Mesa: nova aba OVER/UNDER tick a tick (13 volatilidades, círculos, robô com preset do vídeo Over 2, simulação e teste no histórico)';
+const VERSAO='v3.85 · 08/10/2026 · 🎮 Mesa par/ímpar: círculos com quantidade por número, PAR×ÍMPAR TS/G1/G2, barras de sinais (horas pagantes × horário fixo · cruzamentos) e 🕐 horas pagantes ≥5h nos robôs';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10038,7 +10061,8 @@ function mesaRender(full){
       <div class="ms-tabs" id="msTabs">${mesaTabsHtml()}</div><div id="msBest"></div>
       <div class="ms-corpo">
         <div class="ms-esq">${cfg.mesa_modo==='robo'?mbEsqHtml(mesaW()):mesaEsqManual(qv)}</div>
-        <div class="ms-dir"><div id="msCentro"></div>
+        <div class="ms-dir"><div class="ms-bars">${mesaBarrasCtlHtml()}<div id="msBarras"></div></div><div id="msCentro"></div>
+          <div class="ms-pi">${piCtlHtml()}<div id="msPi"></div></div>
           <div class="ms-strip" id="msStrip"></div>
           ${cfg.mesa_modo==='robo'?`<div class="ms-lb" style="margin-top:10px">ROBÔS DE ${mesaW()}s NA ORDEM <span class="mu">(se 2 pedem o mesmo jogo, vale o de cima)</span></div><div class="ms-hist" id="msFila" style="max-height:230px"></div><div id="msHist"></div>`
             :`<div class="ms-lb" style="margin-top:10px">MINHAS ENTRADAS · ${mesaW()}s</div><div class="ms-hist" id="msHist"></div>`}</div>
@@ -10056,6 +10080,8 @@ function mesaRender(full){
   $('#msTabs').innerHTML=mesaTabsHtml();
   $('#msCentro').innerHTML=rob?mbCentroHtml(w):mesaCentroHtml();
   $('#msStrip').innerHTML=mesaBalls(W,40,false);
+  try{ $('#msBarras').innerHTML=mesaBarrasHtml(); }catch(e){ console.warn('barras',e); }
+  try{ $('#msPi').innerHTML=mesaPiHtml(); }catch(e){ console.warn('par/ímpar',e); }
   if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); const ss=mbSess(w); $('#msSess').innerHTML=`<div><b>${ss.ac}</b><span>ACERTOS</span></div><div><b>${ss.er}</b><span>ERROS</span></div><div><b class="${ss.pl>=0?'okc':'ruimc'}">${ss.pl>=0?'+':''}$ ${ss.pl.toFixed(2)}</b><span>RESULTADO</span></div>`; $('#msFila').innerHTML=mbFilaHtml(w); $('#msHist').innerHTML=mbHistHtml(w); }
   else { $('#msSess').innerHTML=mesaSessHtml(); $('#msHist').innerHTML=mesaHistHtml(); }
 }
@@ -10559,6 +10585,158 @@ function ouRender(full){
       <span>Sessão do robô: ${sb.ac}✅ ${sb.er}❌ · <b class="${sb.pl>=0?'okc':'ruimc'}">${sb.pl>=0?'+':''}${sb.pl.toFixed(2)}</b></span>
       <span>Agora em ${ouSymNome(ouSym())}: ${av.setup?'<b class="okc">setup OK</b>':'<span class="mu">sem setup — '+(av.mot.join(' · ')||'')+'</span>'} · gatilho: ${av.gat?'<b class="okc">'+av.gtxt+'</b>':'<span class="mu">'+(av.gtxt||'')+'</span>'}</span>`; }
 }
+// =====================================================================================
+// 🎮 MESA PAR/ÍMPAR · análise por número + barras de sinais (horas pagantes × horário fixo)
+//  • Círculos 0–9: quantas vezes cada número saiu no período escolhido (jogos ou horas), % e há quantos jogos não sai.
+//  • PAR × ÍMPAR com filtro TS / G1 / G2: % de acerto, chance justa, maior sequência de red e a atual.
+//  • Barras de progresso no topo: próximos sinais de 🕐 horas pagantes (≥ N h pagando) e 🕒 horário fixo 100%,
+//    marcando 🔗 CRUZAMENTO quando os dois apontam o mesmo jogo e cor, e ⚠ CONFLITO quando apontam cores opostas.
+//  • 🕐 Horas pagantes como fonte dos robôs da Mesa (quadradinho, mínimo 5h pagando por padrão).
+// Leitura estatística do histórico — não muda a chance do próximo jogo.
+// =====================================================================================
+const PI_PER=[[50,'50 jogos'],[100,'100 jogos'],[200,'200 jogos'],[500,'500 jogos'],[1000,'1000 jogos'],['h1','1 hora'],['h3','3 horas'],['h6','6 horas'],['h12','12 horas'],['h24','24 horas']];
+let PI_CACHE={};
+function piPer(){ const v=cfg.mesa_piPer??200; return PI_PER.some(x=>String(x[0])===String(v))?v:200; }
+function piLvl(){ return Math.max(0,Math.min(2,+(cfg.mesa_piLvl??0))); }
+// jogos do período (contagem pelo banco ao vivo; horas: banco ao vivo e, se faltar, o histórico salvo)
+function piDados(w,sym){
+  const bank=d5BankName(w,sym), W=LIVE[bank]||[], per=piPer();
+  if(typeof per==='number') return {L:W.slice(-per),fonte:'ao vivo',pedido:per};
+  const h=+String(per).slice(1), from=Date.now()-h*3600e3;
+  if(W.length&&W[0].t<=from) return {L:W.filter(x=>x.t>=from),fonte:'ao vivo',pedido:h+'h'};
+  const k=bank+'|'+h, c=PI_CACHE[k];
+  if(!c||(!c.busy&&Date.now()-c.when>60000)){
+    PI_CACHE[k]={...(c||{}),busy:true};
+    idbRange(bank,from,Date.now()+60000).then(rows=>{ PI_CACHE[k]={rows:rows||[],when:Date.now(),busy:false}; MESA.lastFull=''; })
+      .catch(()=>{ PI_CACHE[k]={rows:[],when:Date.now(),busy:false}; });
+  }
+  const base=(PI_CACHE[k]&&PI_CACHE[k].rows)||[], ult=base.length?base.at(-1).t:0;
+  const L=base.filter(x=>x.t>=from).concat(W.filter(x=>x.t>ult&&x.t>=from));
+  return {L:L.length?L:W.filter(x=>x.t>=from),fonte:base.length?'histórico + ao vivo':(PI_CACHE[k]&&PI_CACHE[k].busy?'carregando histórico…':'ao vivo'),pedido:h+'h'};
+}
+function piStats(L,lvl){
+  const n=L.length, cnt=Array(10).fill(0); let par=0;
+  for(const x of L){ if(x.d!=null&&x.d>=0&&x.d<=9) cnt[x.d]++; if(!x.p) par++; }
+  const ord=[...Array(10).keys()].sort((a,b)=>cnt[b]-cnt[a]||a-b);
+  const atraso=Array(10).fill(null); for(let i=n-1,f=0;i>=0&&f<10;i--){ const d=L[i].d; if(d!=null&&atraso[d]===null){ atraso[d]=n-1-i; f++; } }
+  const P=L.map(x=>x.p?1:0), cor={};
+  for(const alvo of [0,1]){
+    let ok=0,tot=0,run=0,max=0;
+    for(let i=0;i+lvl<n;i++){ let g=false; for(let k=0;k<=lvl;k++) if(P[i+k]===alvo){ g=true; break; } tot++; if(g){ ok++; run=0; } else { run++; if(run>max) max=run; } }
+    let seq=0,mseq=0; for(const v of P){ if(v===alvo){ seq++; if(seq>mseq) mseq=seq; } else seq=0; }
+    cor[alvo]={ok,tot,rate:tot?100*ok/tot:0,maxRed:max,red:run,maxSeq:mseq};
+  }
+  let sk=0; const ultP=P.at(-1); for(let i=n-1;i>=0&&P[i]===ultP;i--) sk++;
+  return {n,cnt,ord,atraso,verde:ord[0],azul:ord[1],amarelo:ord[8],vermelho:ord[9],par:n?100*par/n:0,cor,sk,ultP,ultD:L.at(-1)?.d,P};
+}
+function piCtlHtml(){
+  return `<div class="ms-pih"><b>🔢 ANÁLISE PAR / ÍMPAR · ${mesaW()}s</b>
+    <label class="ms-chk">período <select class="ms-sel" onchange="mesaSet('mesa_piPer',/^h/.test(this.value)?this.value:+this.value)">${PI_PER.map(([v,t])=>`<option value="${v}" ${String(piPer())===String(v)?'selected':''}>${t}</option>`).join('')}</select></label>
+    <div class="ms-modos">${['TIRO SECO','ATÉ G1','ATÉ G2'].map((t,i)=>`<button class="${piLvl()===i?'on':''}" onclick="mesaSet('mesa_piLvl',${i})">${t}</button>`).join('')}</div></div>`;
+}
+function mesaPiHtml(){
+  const w=mesaW(), sym=mesaSym(), D=piDados(w,sym), L=D.L, lvl=piLvl();
+  if(L.length<10) return `<div class="mu" style="padding:10px">${D.fonte==='carregando histórico…'?'Carregando o histórico do período…':'Poucos jogos neste período ainda.'}</div>`;
+  const st=piStats(L,lvl), justo=100*(1-Math.pow(0.5,lvl+1)), nv=['tiro seco','até G1','até G2'][lvl];
+  const circ=[...Array(10).keys()].map(d=>{
+    const c=st.cnt[d], p=st.n?100*c/st.n:0, cor=d===st.verde?'v':d===st.azul?'a':d===st.amarelo?'y':d===st.vermelho?'r':'', ang=Math.max(4,Math.min(100,p*4.5));
+    return `<div class="ou-c ${cor} ${st.ultD===d?'ult':''}" style="--p:${ang}" title="${d}: ${c} vez(es) · ${p.toFixed(1)}% · ${d%2?'ÍMPAR':'PAR'}"><div class="ou-ci"><b class="${d%2?'pi-i':'pi-p'}">${d}</b><span><b>${c}</b>x</span></div><i>${p.toFixed(1)}% · há ${st.atraso[d]??'—'}</i>${st.ultD===d?'<u>▲</u>':''}</div>`;
+  }).join('');
+  const box=(alvo)=>{ const o=st.cor[alvo]; return `<div class="${alvo?'ou-u':'ou-o'} pi-${alvo?'imp':'par'}"><span>${alvo?'ÍMPAR':'PAR'} · ${nv}</span><b>${o.rate.toFixed(1)}%</b><div class="ou-bar"><i style="width:${o.rate}%"></i></div>
+    <small>${o.ok}/${o.tot} · justo ${justo.toFixed(1)}% · máx. ${o.maxRed} red seguidos · agora ${o.red} · maior sequência ${o.maxSeq}x</small></div>`; };
+  return `<div class="ms-nota" style="text-align:center">${L.length} jogos · ${D.pedido} · ${D.fonte} · ${symNome(sym)}</div>
+    <div class="ou-circs">${circ}</div>
+    <div class="ou-leg"><span><i class="v"></i>mais sai</span><span><i class="a"></i>2º mais</span><span><i class="y"></i>2º menos</span><span><i class="r"></i>menos sai</span><span>número roxo = PAR · branco = ÍMPAR · ▲ último jogo</span></div>
+    <div class="ou-ou">${box(0)}${box(1)}</div>
+    <div class="ou-linha"><span>Par ${st.par.toFixed(1)}% · Ímpar ${(100-st.par).toFixed(1)}% (tiro seco)</span><span>Sequência atual: <b>${st.sk}x ${st.ultP?'ÍMPAR':'PAR'}</b></span></div>
+    <div class="ou-box">${st.P.slice(-40).map(v=>`<em class="${v?'pi-bi':'pi-bp'}">${v?'I':'P'}</em>`).join('')}</div>`;
+}
+
+// ---------- 🕐 horas pagantes da Mesa (por tempo): minuto+segundo que vem pagando há ≥ N horas seguidas ----------
+let MBHP={};
+function mbHpNivel(w){ const C=mbCfg(w); if(C.hpLvl===undefined||C.hpLvl===null||C.hpLvl==='') return 0; if(+C.hpLvl>=0) return Math.min(2,+C.hpLvl); if(C.galeModo==='sinal') return 0; return C.gale<0?2:Math.max(0,Math.min(2,+C.gale)); }
+function mbHpMin(w){ return Math.max(2,+(mbCfg(w).hpMin??5)||5); }
+async function mbHpLoad(w,forca){
+  const C=mbCfg(w), bank=mbBank(w), lvl=mbHpNivel(w), mn=mbHpMin(w), per=Math.max(mn+3,+C.hpPer||24), hr=new Date().getHours();
+  const key=[bank,lvl,mn,per,hr].join('|'), c=MBHP[w];
+  if(c&&c.busy) return; if(!forca&&c&&c.key===key&&Date.now()-c.when<5*60e3) return;
+  MBHP[w]={...(c||{}),busy:true};
+  try{
+    const rows=await idbRange(bank,Date.now()-per*3600e3,Date.now()+60000), G=rows&&rows.length?gridBuild(rows,w):null, out=[];
+    if(G) for(const r of hpScan(G,'all')){ const o=r.L[lvl]; if(o.cur>=mn) out.push({off:r.off,alvo:r.alvo,cur:o.cur,max:o.max,rate:o.rate,n:o.n}); }
+    out.sort((a,b)=>b.cur-a.cur||a.off-b.off);
+    MBHP[w]={key,when:Date.now(),rows:out,horas:G?Math.round((G.last-G.first)/3600):0,busy:false};
+    if(MESA.open) MESA.lastFull='';
+  }catch(e){ console.warn('horas pagantes mesa',e); MBHP[w]={key,when:Date.now(),rows:[],horas:0,busy:false}; }
+}
+function mbHpSinais(w){
+  const H=MBHP[w]; if(!H||!H.rows) return [];
+  return H.rows.map((r,i)=>{ const T=hpNext(r.off);
+    return {key:`hp|${w}|${T}|${r.alvo}`,entryT:T*1000,alvo:r.alvo,ord:150000+i,ok:true,gale:mbHpNivel(w),nome:`🕐 Horas pagantes :${msOf(r.off)} · ${r.cur}h pagando (${NIVEL[mbHpNivel(w)]})`,curto:`HP :${msOf(r.off)}`,cur:r.cur}; });
+}
+function mbHpBoxHtml(w){
+  const C=mbCfg(w), on=+C.hpOn;
+  return `<div class="ms-box" style="${on?'border-color:#22c55e':''}"><label class="ms-chk"><input type="checkbox" ${on?'checked':''} onchange="mbSetCfg(${w},'hpOn',this.checked?1:0)"> <b>🕐 HORAS PAGANTES</b> mín. <input type="number" min="2" value="${mbHpMin(w)}" style="width:46px" onchange="mbSetCfg(${w},'hpMin',+this.value)"> h pagando</label>
+    ${on?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">olhar <input type="number" min="6" value="${+C.hpPer||24}" style="width:46px" onchange="mbSetCfg(${w},'hpPer',+this.value)"> h</label>
+      <label class="ms-chk">pagando em <select class="ms-sel" onchange="mbSetCfg(${w},'hpLvl',+this.value)">${[[-1,'igual ao gale'],[0,'tiro seco'],[1,'até G1'],[2,'até G2']].map(([v,t])=>`<option value="${v}" ${+(C.hpLvl??0)===v?'selected':''}>${t}</option>`).join('')}</select></label></div>
+      <div class="ms-nota">O robô ${w}s também entra nos minutos:segundos que vêm pagando há ${mbHpMin(w)}h ou mais seguidas (${NIVEL[mbHpNivel(w)]})${MBHP[w]&&MBHP[w].rows?` · agora ${MBHP[w].rows.length} horário(s)`:''}.</div>`:''}</div>`;
+}
+function mbHpFilaHtml(w){
+  if(!+mbCfg(w).hpOn) return ''; mbHpLoad(w);
+  const H=MBHP[w], L=mbHpSinais(w).sort((a,b)=>a.entryT-b.entryT);
+  return `<div class="ms-hl" style="grid-template-columns:1fr;color:#86efac;font-weight:700">🕐 Horas pagantes ${w}s · ≥ ${mbHpMin(w)}h pagando em ${NIVEL[mbHpNivel(w)]}${H&&H.busy?' · calculando…':''} · ${L.length} horário(s) na próxima hora</div>`+
+    (L.length?L.slice(0,40).map(x=>`<div class="ms-hl" style="grid-template-columns:90px 70px 1fr 110px"><span><b>${hmsOf(x.entryT/1000)}</b></span><span class="${x.alvo?'ruimc':'okc'}"><b>${x.alvo?'ÍMPAR':'PAR'}</b></span><span>${x.nome.replace('🕐 Horas pagantes ','')}</span><span>${mbSt(w).taken.has(x.key)?'<span class="mu">passou</span>':`faltam ${uoTempo(x.entryT/1000-dmNow())}`}</span></div>`).join('')
+      :`<div class="mu" style="padding:8px">${H&&H.horas!=null&&H.horas<mbHpMin(w)?`O banco de ${w}s só tem ${H.horas}h — deixe capturando ou baixe o histórico.`:'Nenhum horário pagando há '+mbHpMin(w)+'h ou mais agora.'}</div>`);
+}
+
+// ---------- ⏳ barras de progresso dos próximos sinais (topo da Mesa) ----------
+function mesaBarJan(){ return Math.max(60,+(cfg.mesa_barJan??300)); }
+function mesaBarrasCtlHtml(){
+  const w=mesaW(), C=mbCfg(w);
+  return `<div class="ms-barh"><b>⏳ PRÓXIMOS SINAIS · ${w}s</b>
+    <label class="ms-chk ms-hpq ${+C.hpOn?'on':''}"><input type="checkbox" ${+C.hpOn?'checked':''} onchange="mbSetCfg(${w},'hpOn',this.checked?1:0)"> 🕐 horas pagantes ≥ <input type="number" min="2" value="${mbHpMin(w)}" style="width:42px" onchange="mbSetCfg(${w},'hpMin',+this.value)"> h</label>
+    <label class="ms-chk"><input type="checkbox" ${+(cfg.mesa_barHf??1)?'checked':''} onchange="mesaSet('mesa_barHf',this.checked?1:0)"> 🕒 horário fixo 100%</label>
+    <label class="ms-chk"><input type="checkbox" ${+(cfg.mesa_barCruz??0)?'checked':''} onchange="mesaSet('mesa_barCruz',this.checked?1:0)"> só 🔗 cruzamentos</label>
+    <label class="ms-chk">barra de <select class="ms-sel" onchange="mesaSet('mesa_barJan',+this.value)">${[[60,'1 min'],[180,'3 min'],[300,'5 min'],[600,'10 min'],[1800,'30 min'],[3600,'1 hora']].map(([v,t])=>`<option value="${v}" ${mesaBarJan()===v?'selected':''}>${t}</option>`).join('')}</select></label></div>`;
+}
+function mesaSinaisBarras(w){
+  const C=mbCfg(w), now=dmNow(), M=new Map();
+  const put=(T,alvo,tipo,txt)=>{ if(T<=now+0.5) return; const g=M.get(T)||{T,itens:[]}; g.itens.push({alvo,tipo,txt}); M.set(T,g); };
+  if(+C.hpOn){ mbHpLoad(w); for(const s of mbHpSinais(w)) put(s.entryT/1000,s.alvo,'hp',`🕐 HP :${msOf(Math.round(s.entryT/1000)%3600)} · ${s.cur}h pagando`); }
+  if(+(cfg.mesa_barHf??1)){ mbHfLoad(w); for(const s of mbHfSinais(w)) put(s.entryT/1000,s.alvo,'hf',s.nome.replace('🕒 Horário fixo ','🕒 HF ').replace(/ · (\d+) dias 100%.*/,' · $1 dias 100%')); }
+  const L=[...M.values()].map(g=>{ const tipos=new Set(g.itens.map(x=>x.tipo)), cores=new Set(g.itens.map(x=>x.alvo));
+    g.conflito=cores.size>1; g.cruz=!g.conflito&&tipos.has('hp')&&tipos.has('hf'); g.alvo=g.itens[0].alvo; return g; })
+    .filter(g=>!+(cfg.mesa_barCruz??0)||g.cruz).sort((a,b)=>a.T-b.T);
+  return L;
+}
+function mesaBarrasHtml(){
+  const w=mesaW(), C=mbCfg(w), now=dmNow(), jan=mesaBarJan();
+  if(!+C.hpOn&&!+(cfg.mesa_barHf??1)) return '<div class="mu" style="padding:6px 2px;font-size:12px">Marque 🕐 horas pagantes ou 🕒 horário fixo para ver os próximos sinais.</div>';
+  const L=mesaSinaisBarras(w), prox=L.slice(0,6), manual=cfg.mesa_modo!=='robo';
+  const H=MBHP[w], HF=MBHF[w];
+  const carregando=(+C.hpOn&&(!H||H.busy&&!H.rows))||(+(cfg.mesa_barHf??1)&&(!HF||HF.busy&&!HF.rows));
+  if(!prox.length) return `<div class="mu" style="padding:6px 2px;font-size:12px">${carregando?'Calculando horas pagantes / horário fixo…':`Nenhum sinal ${+(cfg.mesa_barCruz??0)?'com cruzamento ':''}na próxima hora.`}</div>`;
+  const nCruz=L.filter(g=>g.cruz).length;
+  return prox.map(g=>{
+    const falta=g.T-now, pct=Math.max(0,Math.min(100,100*(1-falta/jan))), cor=g.conflito?'cf':g.cruz?'cz':g.alvo?'imp':'par';
+    const tag=g.conflito?'<b class="ms-btag cf">⚠ CONFLITO</b>':g.cruz?'<b class="ms-btag cz">🔗 CRUZAMENTO</b>':'';
+    const ag=manual&&!g.conflito&&falta>3?`<button class="ms-bag" onclick="mesaAgendar(${g.T},${g.alvo},'${g.cruz?'🔗 cruzamento':g.itens[0].tipo==='hp'?'🕐 HP':'🕒 HF'}')">▶ entrar</button>`:'';
+    return `<div class="ms-barra ${cor}"><div class="ms-bfill" style="width:${pct}%"></div>
+      <div class="ms-btx"><span class="ms-bcor ${g.conflito?'':g.alvo?'imp':'par'}">${g.conflito?'P × I':g.alvo?'ÍMPAR':'PAR'}</span><b>${hmsOf(g.T)}</b>${tag}<span class="ms-bits">${g.itens.map(x=>x.txt+(g.conflito?` (${x.alvo?'Í':'P'})`:'')).join(' · ')}</span>
+      <span class="ms-bfal">${falta>=60?Math.floor(falta/60)+'m '+p2d(Math.floor(falta%60))+'s':Math.ceil(falta)+'s'}</span>${ag}</div></div>`;
+  }).join('')+(L.length>prox.length?`<div class="ms-nota">+${L.length-prox.length} sinal(is) na próxima hora${nCruz?` · ${nCruz} cruzamento(s)`:''}</div>`:'');
+}
+// entrada manual num jogo específico (vinda das barras)
+function mesaAgendar(T,alvo,origem){
+  const w=mesaW(), sym=mesaSym();
+  if(!DM.ok||!DM.virt){ if(confirm('A conta DEMO da Deriv não está conectada. Abrir a aba 💼 Conta Demo para conectar?')){ mesaFechar(); S.tab='demo'; renderTab(); } return; }
+  if(T-dmNow()<2.6){ alert('Esse jogo já está em cima da hora — não dá mais tempo de entrar.'); return; }
+  if(DM.orders.some(o=>o.src==='mesa'&&o.step===w&&['aguardando','comprando','em jogo'].includes(o.estado)&&o.mcor!==alvo)){ alert('Já tem uma entrada da outra cor aberta neste tempo.'); return; }
+  dmRegistrar({key:`mesa|${w}|${T}|${alvo}`,src:'mesa',man:1,nome:`🎮 Mesa ${w}s ${alvo?'ÍMPAR':'PAR'} · ${origem}`,sym,T,step:w,maxN:mesaGale(),ct:alvo?'DIGITODD':'DIGITEVEN',stakeBase:mesaStake(),fator:mesaFator(),mcor:alvo});
+  try{ beep(); }catch(e){}
+  mesaRender(false);
+}
+
 
 // =====================================================================================
 // 🤖 ROBÔS DA MESA PLAY — entra sozinho na conta DEMO seguindo os robôs 100% de cada tempo (5s/10s/20s/30s)
@@ -10566,7 +10744,7 @@ function ouRender(full){
 // se dois robôs pedem o mesmo jogo, entra só no primeiro da lista; se pedem PAR e ÍMPAR no mesmo jogo, aborta.
 // A decisão é tomada ~3s antes do jogo, quando todos os sinais daquele jogo já apareceram.
 // =====================================================================================
-const MB_DEF={val:0.35,fat:2.2,gale:-1,sw:0,sl:0,so100:1,soAuto:0,fonte:'padroes',hfMin:5,hfDias:7,hfLvl:-1,galeModo:'seguido',rec:2,recMax:0,galeCalc:'fator',recLucro:1};
+const MB_DEF={val:0.35,fat:2.2,gale:-1,sw:0,sl:0,so100:1,soAuto:0,fonte:'padroes',hfMin:5,hfDias:7,hfLvl:-1,hpOn:0,hpMin:5,hpPer:24,hpLvl:0,galeModo:'seguido',rec:2,recMax:0,galeCalc:'fator',recLucro:1};
 // pagamento do PAR/ÍMPAR (lucro ÷ aposta) medido nos greens da sessão; sem histórico usa 0,95
 function mbRatio(w){ const G=DM.log.filter(x=>(x.src==='mbot'||x.src==='mesa')&&x.res==='green'&&+x.stake>0&&+x.profit>0).slice(-20); if(!G.length) return 0.95; return G.reduce((a,x)=>a+x.profit/x.stake,0)/G.length; }
 // 🔁 recuperação: refaz a sessão do início e diz quanto falta recuperar e em quantos greens
@@ -10849,6 +11027,7 @@ function mbTick(){
         sigs.push({key:g.key,entryT:g.entryT,alvo:g.alvo,ord:elig.get(g.rbId)??1e9,ok:elig.has(g.rbId),gale:rbNivel(rb),nome:rbName(rb),curto:rbGat(rb)}); }
     }
     if(fonte!=='padroes'){ mbHfLoad(w); sigs=sigs.concat(mbHfSinais(w)); }
+    if(+C.hpOn){ mbHpLoad(w); sigs=sigs.concat(mbHpSinais(w)); }
     sigs=sigs.filter(g=>!s.taken.has(g.key)&&g.entryT/1000-now>(w<=2?1.2:1.6));
     sigs=sigs.filter(g=>{ if(!g.cond) return true; if(g.entryT/1000-now>(w<=2?2.4:3.4)) return true;
       const c=mbCondChk(w,g); if(c==='espera') return false;
@@ -11323,6 +11502,7 @@ function mbEsqHtml(w){
     <div class="ms-box"><span class="ms-lb">FONTE DOS SINAIS</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'fonte',this.value)">${[['padroes','🤖 robôs de padrão (aba '+w+'s)'],['hfix','🕒 horário fixo 100% da hora atual'],['ambos','os dois juntos']].map(([v,t])=>`<option value="${v}" ${C.fonte===v?'selected':''}>${t}</option>`).join('')}</select>
       ${C.fonte!=='padroes'?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">mín. dias 100% <input type="number" min="2" value="${C.hfMin}" style="width:52px" onchange="mbSetCfg(${w},'hfMin',+this.value)"></label><label class="ms-chk">olhar <input type="number" min="5" value="${C.hfDias}" style="width:52px" onchange="mbSetCfg(${w},'hfDias',+this.value)"> dias</label></div>
       <label class="ms-chk" style="margin-top:6px">horário 100% em <select class="ms-sel" onchange="mbSetCfg(${w},'hfLvl',+this.value)">${[[-1,'igual ao gale'],[0,'tiro seco'],[1,'até G1'],[2,'até G2']].map(([v,t])=>`<option value="${v}" ${+C.hfLvl===v?'selected':''}>${t}</option>`).join('')}</select> <span class="mu">(agora: ${NIVEL[mbHfNivel(w)]})</span></label>`:''}</div>
+    ${mbHpBoxHtml(w)}
     ${C.fonte==='hfix'?'':`<label class="ms-chk"><input type="checkbox" ${C.so100?'checked':''} onchange="mbSetCfg(${w},'so100',this.checked?1:0)"> só robôs 100% (nenhum red no banco)</label>
     <label class="ms-chk"><input type="checkbox" ${C.soAuto?'checked':''} onchange="mbSetCfg(${w},'soAuto',this.checked?1:0)"> só robôs automáticos ♻</label>`}
     <div class="ms-nota">0 no stop = sem stop. Gale ${C.gale<0?'até G2':C.gale?'até G'+C.gale:'desligado'} · ×${(+C.fat).toFixed(1)} · ${C.galeModo==='sinal'?'cada sinal é 1 entrada; depois de red a próxima entrada sobe de nível':'gale nos jogos logo depois da entrada'}</div>
@@ -11364,6 +11544,7 @@ function mbFilaHtml(w){
     hf=`<div class="ms-hl" style="grid-template-columns:1fr;color:#c4b5fd;font-weight:700">🕒 Horário fixo ${w}s · ${{normal:'100% até '+NIVEL[mbHfNivel(w)],g1ts:'🎯 tiro seco G1',ambos:'tiro seco normal + 🎯 tiro seco G1'}[mbHfTipo(w)]} · mín. ${C.hfMin} dias${H&&H.dias!=null?` · banco com ${H.dias} dia(s)`:''}${H&&H.busy?' · calculando…':''} · ${L.length} horário(s) nos próximos 60 min</div>`+
       (L.length?L.slice(0,40).map(x=>`<div class="ms-hl" style="grid-template-columns:90px 70px 1fr 110px"><span><b>${hmsOf(x.entryT/1000)}</b></span><span class="${x.alvo?'ruimc':'okc'}"><b>${x.alvo?'ÍMPAR':'PAR'}</b></span><span>${x.cond?'🎯 ':''}${x.nome.replace('🕒 Horário fixo ','').replace('🕒 Tiro seco G1 ','se o 1º der red: ')}</span><span>${mbSt(w).taken.has(x.key)?'<span class="mu">passou</span>':`faltam ${uoTempo(x.entryT/1000-dmNow())}`}</span></div>`).join('')
         :`<div class="mu" style="padding:8px">${H&&H.dias!=null&&H.dias<C.hfMin?`O banco de ${w}s só tem ${H.dias} dia(s) — baixe mais dias em 📥 Histórico R_100.`:'Nenhum horário fixo 100% nesta hora.'}</div>`); }
+  hf+=mbHpFilaHtml(w);
   if(C.fonte==='hfix') return hf;
   return hf+mbFilaPadroes(w);
 }
