@@ -481,6 +481,18 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .cf-ao{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.cf-ao select,.cf-ao input[type=text]{background:#15121f;border:1px solid var(--mb);color:#fff;border-radius:7px;padding:3px 5px}
 .cf-ast{margin-top:8px;background:var(--mg);border:1px solid var(--mb);border-radius:10px;padding:7px 10px;font-size:12.5px;line-height:1.5}
 .cf-pior td{background:rgba(239,68,68,.08)}
+.cf-big.g.on{background:linear-gradient(135deg,#06b6d4,#0e7490);color:#fff;border-color:#22d3ee}
+.cf-ab{grid-template-columns:repeat(3,1fr)!important}
+.cf-rsg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.cf-rs{border-radius:11px;padding:8px 11px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;align-items:center;background:var(--mg);border:1px solid var(--mb)}
+.cf-rs>b{width:100%;font-size:12.5px}.cf-rs.f{border-color:rgba(234,179,8,.55);background:rgba(234,179,8,.08)}.cf-rs.f>b{color:#facc15}
+.cf-fb{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:12px;color:#a49dbb}.cf-fb .mb-mini.on{background:var(--mr);border-color:var(--mr2);color:#fff}
+.cf-gr td{background:rgba(6,182,212,.1)}
+.cf-min{margin-top:10px;background:var(--mg);border:1px solid var(--mb);border-radius:12px;padding:9px 11px}.cf-min select{background:#15121f;border:1px solid var(--mb);color:#fff;border-radius:7px;padding:3px 5px}.cf-best td{background:rgba(34,197,94,.1)}
+.cf-sc{text-align:left;align-items:stretch!important}.cf-sc .cf-r{justify-content:flex-start!important;width:100%}.cf-sc .cf-r b{margin-left:0}
+.cf-sel{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}.cf-sc{background:var(--mg);border:1px solid rgba(34,211,238,.4);border-radius:12px;padding:9px 11px;display:flex;flex-direction:column;gap:4px}
+.cf-seq{display:flex;flex-wrap:wrap;gap:2px}.cf-seq i{font-style:normal;width:17px;height:17px;border-radius:4px;font-size:10px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;color:#fff}.cf-seq i.g{background:#16a34a}.cf-seq i.r{background:#dc2626}
+@media(max-width:900px){.cf-rsg{grid-template-columns:1fr}.cf-ab{grid-template-columns:1fr!important}}
+
 @media(max-width:900px){.cf-ab{grid-template-columns:1fr}}
 
 #mcfToast{position:fixed;top:12px;right:12px;z-index:10020;display:flex;flex-direction:column;gap:6px;max-width:min(420px,calc(100vw - 24px))}
@@ -630,7 +642,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.97 · 09/10/2026 · ⭐ Confirmações: tabela por índice (qual erra mais), entrada automática nos sinais fortes ou em todos, gatilho após red/green';
+const VERSAO='v3.99 · 10/10/2026 · 🧪 Confirmações: o sistema testa qual mínimo de círculos acerta mais (TS/G1/G2) e pode ajustar sozinho';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10776,7 +10788,7 @@ function piStats(L,lvl){
 // mesmo jogo → ⭐ SINAL FORTE (som + notificação + barra com "entrar" naquele índice).
 // Cada círculo e cada combinação (ex.: 1+3+7) guarda o placar TS/G1/G2/red, por tempo de jogo.
 // =====================================================================================
-const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[]};
+const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20};
 const MCF_CIRC=[[1,'🕒','Horário fixo 100%'],[2,'🕐','Horas pagantes'],[3,'🖼','Figura gráfica'],[4,'🟨','Linha amarela'],[5,'🤖','Robôs ligados'],[6,'🧭','Tendência'],[7,'🔢','Número chama']];
 const MCF_2S=['R_10','R_25','R_50','R_75','R_100','RDBEAR','RDBULL'];
 function mcfC(){ return {...MCF_DEF,...(cfg.mesa_cf||{})}; }
@@ -10858,7 +10870,7 @@ function mcfAlerta(w,sym,T,f){
   try{ beep(); setTimeout(()=>{ try{ beep(); }catch(e){} },260); }catch(e){}
   try{ if(typeof Notification!=='undefined'&&Notification.permission==='granted') new Notification(`⭐ SINAL FORTE · ${symNome(sym)}`,{body:`${f.n} confirmações (${f.ids.join('+')}) → ${f.alvo?'ÍMPAR':'PAR'} no jogo ${hmsOf(T)} (${w}s)`,tag:'mcf-'+sym}); }catch(e){}
   let el=document.getElementById('mcfToast'); if(!el){ el=document.createElement('div'); el.id='mcfToast'; document.body.appendChild(el); }
-  const id='t'+T+sym; el.insertAdjacentHTML('afterbegin',`<div class="mcf-t" id="${id}">⭐ <b>SINAL FORTE · ${symNome(sym)}</b><br>${f.n} confirmações (${f.ids.join(' + ')}) → <b>${f.alvo?'ÍMPAR':'PAR'}</b> no jogo ${hmsOf(T)}
+  const id='t'+T+sym; el.insertAdjacentHTML('afterbegin',`<div class="mcf-t" id="${id}">${mcfSelTem(w,f)?'🎯 <b>COMBINAÇÃO GRAVADA':'⭐ <b>SINAL FORTE'} · ${symNome(sym)}</b><br>${f.n} confirmações (${f.ids.join(' + ')}) → <b>${f.alvo?'ÍMPAR':'PAR'}</b> no jogo ${hmsOf(T)}
     <div><button onclick="mesaAgendar(${T},${f.alvo},'⭐ ${f.n} confirmações','${sym}');this.closest('.mcf-t').remove()">▶ entrar</button> <button onclick="this.closest('.mcf-t').remove()">fechar</button></div></div>`);
   while(el.children.length>3) el.lastElementChild.remove();
   setTimeout(()=>{ const x=document.getElementById(id); if(x) x.remove(); },Math.max(4000,(T-dmNow())*1000));
@@ -10874,28 +10886,28 @@ function mcfTick(){
       for(const [id] of MCF_CIRC){ const vt=p.v[id]; if(!vt||vt.alvo==null) continue; const nv=mcfNivel(W,Tk,w,vt.alvo); if(nv==null) continue; const o=st.circ[id]||(st.circ[id]={n:0,lv:[0,0,0,0]}); o.n++; o.lv[nv]++; }
       const f=mcfForca(p.v);
       if(f.n>=2){ const nv=mcfNivel(W,Tk,w,f.alvo); if(nv!=null){ const key=f.ids.join('+'), o=st.combo[key]||(st.combo[key]={n:0,lv:[0,0,0,0]}); o.n++; o.lv[nv]++;
-        const os=(o.s||(o.s={}))[sym]||(o.s[sym]={n:0,lv:[0,0,0,0]}); os.n++; os.lv[nv]++;
+        const os=(o.s||(o.s={}))[sym]||(o.s[sym]={n:0,lv:[0,0,0,0]}); os.n++; os.lv[nv]++; mcfSelReg(w,key,sym,nv,Tk);
         const forte=f.n>=c.min, ss=(st.sym||(st.sym={}))[sym]||(st.sym[sym]={n:0,lv:[0,0,0,0],fn:0,flv:[0,0,0,0]}); ss.n++; ss.lv[nv]++; if(forte){ ss.fn++; ss.flv[nv]++; }
         st.hist.push({T:Tk,s:sym,ids:f.ids,alvo:f.alvo,contra:f.contra,nv,f:forte?1:0,a:MCF.autoFeito[sym+'|'+Tk]?1:0}); if(st.hist.length>300) st.hist.splice(0,st.hist.length-300); } }
       delete P[k]; mud=true;
     }
     if(MCF.ultT[kk]!==T&&dmNow()<T-0.5){ MCF.ultT[kk]=T; const v=mcfVotar(w,T,sym); P[T]={v}; MCF.votos[kk]={T,v,sym};
-      const f=mcfForca(v); if(f.n>=c.min&&MCF.alertado[kk]!==T){ MCF.alertado[kk]=T; mcfAlerta(w,sym,T,f); }
+      const f=mcfForca(v); if((f.n>=c.min||mcfSelTem(w,f))&&MCF.alertado[kk]!==T){ MCF.alertado[kk]=T; mcfAlerta(w,sym,T,f); }
       try{ mcfAuto(w,sym,T,f); }catch(e){ console.warn('auto',e); } }
   }
-  if(mud) mcfSave(w);
+  if(mud){ mcfSave(w); try{ mcfMinAuto(w); }catch(e){} }
 }
 setInterval(()=>{ try{ mcfTick(); }catch(e){ console.warn('confirmações',e); } },500);
 
 // 🤖 entrada automática: 1 = só sinais fortes · 2 = todos os sinais (2+ círculos). Entra na cor da MAIORIA dos círculos.
 const MCF_GAT=[['','sempre'],['R','após 1 red'],['RR','após 2 reds seguidos'],['RG','após 1 red e 1 green'],['G','após 1 green'],['GG','após 2 greens'],['GR','após 1 green e 1 red'],['RRG','após 2 reds e 1 green']];
 function mcfGmax(){ return Math.min(mesaGale(),2); }
-function mcfSeq(w,c,sym){ const st=mcfLoad(w), G=mcfGmax(); return st.hist.filter(h=>(c.auto!==1||h.f)&&(!c.gatIdx||h.s===sym)).map(h=>h.nv<=G?'G':'R').join(''); }
+function mcfSeq(w,c,sym){ const st=mcfLoad(w), G=mcfGmax(), SL=mcfSel(w); return st.hist.filter(h=>(c.auto!==1||h.f)&&(c.auto!==3||SL[h.ids.join('+')])&&(!c.gatIdx||h.s===sym)).map(h=>h.nv<=G?'G':'R').join(''); }
 function mcfGatOk(w,c,sym){ const g=String(c.gat||'').toUpperCase().replace(/[^RG]/g,''); if(!g) return true; return mcfSeq(w,c,sym).endsWith(g); }
 function mcfAutoLog(txt){ MCF.autoMsg=txt; }
 function mcfAuto(w,sym,T,f){
   const c=mcfC(); if(!c.auto||f.alvo==null) return;
-  const need=c.auto===1?Math.max(2,c.min):2; if(f.n<need) return;
+  if(c.auto===3){ if(!mcfSelTem(w,f)) return; } else { const need=c.auto===1?Math.max(2,c.min):2; if(f.n<need) return; }
   const k=sym+'|'+T; if(MCF.autoFeito[k]) return;
   const nm=symNome(sym);
   if((c.excl||[]).includes(sym)) return mcfAutoLog(`${hmsOf(T)} · ${nm}: pulado (índice desligado da entrada automática)`);
@@ -10907,7 +10919,7 @@ function mcfAuto(w,sym,T,f){
   if(c.umPor&&abertas.length) return mcfAutoLog(`${hmsOf(T)} · ${nm}: pulado (já tem uma entrada em andamento)`);
   if(abertas.some(o=>o.step===w&&o.mcor!==f.alvo&&o.sym===sym)) return;
   MCF.autoFeito[k]=1;
-  dmRegistrar({key:`mesa|${w}|${T}|${f.alvo}|${sym}`,src:'mesa',man:1,nome:`🤖 Mesa ${w}s ${f.alvo?'ÍMPAR':'PAR'} · ⭐ ${f.n} conf.${f.contra?' (-'+f.contra+')':''} · ${nm}`,sym,T,step:w,maxN:mesaGale(),ct:f.alvo?'DIGITODD':'DIGITEVEN',stakeBase:mesaStake(),fator:mesaFator(),mcor:f.alvo});
+  dmRegistrar({key:`mesa|${w}|${T}|${f.alvo}|${sym}`,src:'mesa',man:1,nome:`🤖 Mesa ${w}s ${f.alvo?'ÍMPAR':'PAR'} · ${c.auto===3?'🎯 '+f.ids.join('+'):'⭐ '+f.n+' conf.'}${f.contra?' (-'+f.contra+')':''} · ${nm}`,sym,T,step:w,maxN:mesaGale(),ct:f.alvo?'DIGITODD':'DIGITEVEN',stakeBase:mesaStake(),fator:mesaFator(),mcor:f.alvo});
   MCF.autoLog.unshift({T,sym,alvo:f.alvo,n:f.n,contra:f.contra}); MCF.autoLog.length=Math.min(MCF.autoLog.length,30);
   mcfAutoLog(`✅ ${hmsOf(T)} · entrou ${f.alvo?'ÍMPAR':'PAR'} em ${nm} (${f.n} confirmações${f.contra?', '+f.contra+' contra':''})`);
   try{ beep(); }catch(e){}
@@ -10915,7 +10927,7 @@ function mcfAuto(w,sym,T,f){
 function mcfExcl(sym){ const c=mcfC(), L=new Set(c.excl||[]); L.has(sym)?L.delete(sym):L.add(sym); mcfSet('excl',[...L]); }
 function mcfAutoSt(){ const c=mcfC(), w=mesaW(); if(!c.auto) return '<span class="mu">desligado — o sistema só avisa (bip, notificação e ▶ entrar)</span>';
   const seq=mcfSeq(w,c,mesaSym()).slice(-12);
-  return `<b class="okc">LIGADO</b> · ${c.auto===1?`só sinais fortes (≥ ${c.min} círculos)`:'todos os sinais (2+ círculos)'} · valor $ ${mesaStake().toFixed(2)} · até G${mesaGale()} · fator ${mesaFator()}
+  return `<b class="okc">LIGADO</b> · ${c.auto===1?`só sinais fortes (≥ ${c.min} círculos)`:c.auto===3?`só as combinações gravadas (${Object.keys(mcfSel(w)).join(', ')||'nenhuma gravada ainda!'})`:'todos os sinais (2+ círculos)'} · valor $ ${mesaStake().toFixed(2)} · até G${mesaGale()} · fator ${mesaFator()}
     ${c.gat?` · gatilho: <b>${(MCF_GAT.find(x=>x[0]===c.gat)||[0,c.gat])[1]}</b> · últimos: ${seq?seq.split('').map(x=>`<b class="${x==='G'?'okc':'ruimc'}">${x}</b>`).join(''):'—'}`:''}
     <br>${MCF.autoMsg||'aguardando sinal…'}${MCF.autoLog.length?` · <span class="mu">${MCF.autoLog.length} entrada(s) automática(s) nesta sessão</span>`:''}`; }
 function mcfAutoHtml(){
@@ -10923,27 +10935,72 @@ function mcfAutoHtml(){
   const opts=MCF_GAT.map(([v,t])=>`<option value="${v}" ${c.gat===v?'selected':''}>${t}</option>`).join('')+(MCF_GAT.some(x=>x[0]===c.gat)?'':`<option value="${c.gat}" selected>personalizado: ${c.gat}</option>`);
   return `<div class="cf-auto">
     <div class="cf-ab"><button class="cf-big ${c.auto===1?'on':''}" onclick="mcfSet('auto',${c.auto===1?0:1})">🤖 ${c.auto===1?'■ PARAR':'ENTRAR AUTOMÁTICO'} NOS SINAIS FORTES</button>
-      <button class="cf-big t ${c.auto===2?'on':''}" onclick="mcfSet('auto',${c.auto===2?0:2})">⚡ ${c.auto===2?'■ PARAR':'ENTRAR EM TODOS OS SINAIS'}</button></div>
+      <button class="cf-big t ${c.auto===2?'on':''}" onclick="mcfSet('auto',${c.auto===2?0:2})">⚡ ${c.auto===2?'■ PARAR':'ENTRAR EM TODOS OS SINAIS'}</button>
+      <button class="cf-big g ${c.auto===3?'on':''}" onclick="mcfSet('auto',${c.auto===3?0:3})">🎯 ${c.auto===3?'■ PARAR':'ENTRAR SÓ NAS COMBINAÇÕES GRAVADAS'}</button></div>
     <div class="cf-ao"><label class="ms-chk">🎯 entrar <select onchange="mcfSet('gat',this.value)">${opts}</select></label>
       <label class="ms-chk">outro gatilho <input type="text" value="${c.gat||''}" placeholder="ex: RRG" style="width:60px;text-transform:uppercase" onchange="mcfSet('gat',this.value.toUpperCase().replace(/[^RG]/g,''))"></label>
       ${ck('gatIdx','gatilho contado no mesmo índice')}${ck('umPor','1 entrada por vez')}${ck('semContra','pular sinal com círculo contra')}</div>
     <div class="cf-ast" id="mcfAutoSt">${mcfAutoSt()}</div>
     <div class="ms-nota">Com círculos contra, entra na cor da <b>maioria</b> (ex.: 3 PAR × 1 ÍMPAR → PAR). O gatilho olha os últimos sinais do mesmo tipo (fortes ou todos), green = pagou até G${mcfGmax()} — R = red, G = green, ex.: "RG" entra depois de um red seguido de um green. Usa o valor, gale e fator da Mesa, só na conta DEMO e só com a Mesa aberta.</div></div>`;
 }
-function mcfPorIndice(st){
-  const E=Object.entries(st.sym||{}).filter(([,o])=>o.n); if(!E.length) return '<div class="mu" style="font-size:12px">Junta-se sozinho a cada sinal confirmado (2+ círculos) em cada índice.</div>';
+function mcfPorIndice(st,c){
+  c=c||mcfC(); const E=Object.entries(st.sym||{}).map(([s,o])=>[s,c.filt==='forte'?{...o,n:o.fn,lv:o.flv}:c.filt==='normal'?{...o,n:o.n-o.fn,lv:o.lv.map((x,i)=>x-o.flv[i]),fn:0}:o]).filter(([,o])=>o.n); if(!E.length) return '<div class="mu" style="font-size:12px">Junta-se sozinho a cada sinal confirmado (2+ círculos) em cada índice.</div>';
   const rp=o=>100*o.lv[3]/o.n, ok=E.filter(([,o])=>o.n>=5), pior=ok.length?ok.reduce((a,b)=>rp(b[1])>rp(a[1])?b:a)[0]:null, melhor=ok.length>1?ok.reduce((a,b)=>mcfTaxa(b[1],1)>mcfTaxa(a[1],1)?b:a)[0]:null, ex=mcfC().excl||[];
   return `<table class="cf-t2"><tr><th>Índice</th><th>Sinais</th><th>TS</th><th>até G1</th><th>até G2</th><th>Red</th><th>% red</th><th>Fortes</th><th>Auto</th></tr>${E.sort((a,b)=>rp(b[1])-rp(a[1])||b[1].lv[3]-a[1].lv[3]).map(([sym,o])=>`<tr class="${sym===pior?'cf-pior':''}"><td><b>${symNome(sym).replace('Volatility','Vol')}</b>${sym===pior?' <span class="ruimc">🔻 mais erra</span>':sym===melhor?' <span class="okc">🏆</span>':''}</td><td>${o.n}</td><td>${mcfTaxa(o,0).toFixed(0)}%</td><td>${mcfTaxa(o,1).toFixed(0)}%</td><td>${mcfTaxa(o,2).toFixed(0)}%</td><td class="${o.lv[3]?'ruimc':''}">${o.lv[3]}</td><td class="${rp(o)>12.5?'ruimc':''}">${rp(o).toFixed(0)}%</td><td>${o.fn?`${o.fn} · ${(100*(o.fn-o.flv[3])/o.fn).toFixed(0)}% <span class="${o.flv[3]?'ruimc':'mu'}">(${o.flv[3]} red)</span>`:'<span class="mu">—</span>'}</td><td><button class="mb-mini" title="liga/desliga este índice na entrada automática" onclick="mcfExcl('${sym}')">${ex.includes(sym)?'✖ fora':'✔ entra'}</button></td></tr>`).join('')}</table>
     <div class="mu" style="font-size:11px;margin-top:3px">Red = perdeu até G2. Acaso: red 12,5%. Um índice só "erra mais" de verdade com dezenas de sinais.</div>`;
 }
+
+// 🎯 combinações gravadas: o usuário escolhe na tabela; ficam salvas (por tempo) com o comportamento desde que foram gravadas
+let MCFSEL=null;
+function mcfSelAll(){ if(MCFSEL) return MCFSEL; try{ MCFSEL=JSON.parse(localStorage.getItem('mesa_cf_sel_v1')||'{}')||{}; }catch(e){ MCFSEL={}; } return MCFSEL; }
+function mcfSelSave(){ try{ localStorage.setItem('mesa_cf_sel_v1',JSON.stringify(mcfSelAll())); }catch(e){} }
+function mcfSel(w){ const A=mcfSelAll(); return A[w]||(A[w]={}); }
+function mcfSelTem(w,f){ return !!(f&&f.ids&&f.ids.length>=2&&mcfSel(w)[f.ids.join('+')]); }
+function mcfSelToggle(w,key){ const S=mcfSel(w); if(S[key]){ if(!confirm(`Tirar a combinação ${key} das gravadas? O comportamento registrado dela será apagado.`)) return; delete S[key]; }
+  else { const o=mcfLoad(w).combo[key]||{n:0,lv:[0,0,0,0]}; S[key]={desde:Date.now(),base:{n:o.n,lv:[...o.lv]},pos:{n:0,lv:[0,0,0,0]},seq:'',s:{},ult:[]}; }
+  mcfSelSave(); mesaRender(true); }
+function mcfSelReg(w,key,sym,nv,T){ const g=mcfSel(w)[key]; if(!g) return; g.pos.n++; g.pos.lv[nv]++; g.seq=(g.seq+(nv<=mcfGmax()?'G':'R')).slice(-40);
+  const x=g.s[sym]||(g.s[sym]={n:0,lv:[0,0,0,0]}); x.n++; x.lv[nv]++; g.ult.unshift({T,s:sym,nv}); g.ult.length=Math.min(g.ult.length,12); mcfSelSave(); }
+function mcfSelHtml(w){
+  const S=mcfSel(w), E=Object.entries(S); if(!E.length) return `<div class="mu" style="font-size:12px">Marque ☐ nas combinações da tabela acima para gravá-las. Elas ficam salvas aqui com o comportamento delas daqui pra frente, e o botão 🎯 entra só nelas.</div>`;
+  const tx=o=>o.n?`TS ${mcfTaxa(o,0).toFixed(0)}% · G1 ${mcfTaxa(o,1).toFixed(0)}% · G2 ${mcfTaxa(o,2).toFixed(0)}% · <span class="${o.lv[3]?'ruimc':''}">${o.lv[3]} red</span> <span class="mu">(${o.n})</span>`:'<span class="mu">sem sinais ainda</span>';
+  return `<div class="cf-sel">${E.map(([k,g])=>{ const pior=Object.entries(g.s).filter(([,x])=>x.lv[3]).sort((a,b)=>b[1].lv[3]-a[1].lv[3])[0];
+    return `<div class="cf-sc"><div class="cf-r"><b style="font-size:15px">🎯 ${k}</b><span class="mu" style="font-size:11px">${k.split('+').length>=mcfC().min?'⭐ forte':'normal'} · gravada ${new Date(g.desde).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span><button class="mb-mini" style="margin-left:auto" onclick="mcfSelToggle(${w},'${k}')">✖ tirar</button></div>
+      <div style="font-size:12px"><span class="mu">quando gravou:</span> ${tx(g.base)}</div>
+      <div style="font-size:12.5px"><b>desde que gravou:</b> ${tx(g.pos)}</div>
+      <div class="cf-seq">${g.seq?g.seq.slice(-24).split('').map(x=>`<i class="${x==='G'?'g':'r'}">${x}</i>`).join(''):'<span class="mu" style="font-size:11px">a sequência de green/red aparece aqui</span>'}</div>
+      <div style="font-size:11.5px" class="mu">${Object.entries(g.s).map(([s,x])=>`${symNome(s).replace('Volatility','Vol')}: ${x.n} (${x.lv[3]} red)`).join(' · ')||''}${pior?` · <span class="ruimc">mais red em ${symNome(pior[0]).replace('Volatility','Vol')}</span>`:''}</div></div>`; }).join('')}</div>`;
+}
+function mcfFilt(o,key,c){ const forte=key.split('+').length>=c.min; return c.filt==='forte'?forte:c.filt==='normal'?!forte:true; }
+function mcfResumo(st,c){ const A={f:{n:0,lv:[0,0,0,0]},n:{n:0,lv:[0,0,0,0]}}; for(const [k,o] of Object.entries(st.combo)){ const t=A[k.split('+').length>=c.min?'f':'n']; t.n+=o.n; for(let i=0;i<4;i++) t.lv[i]+=o.lv[i]; }
+  const card=(o,t,cls)=>`<div class="cf-rs ${cls}"><b>${t}</b>${o.n?`<span>${o.n} sinais</span><span>TS <b>${mcfTaxa(o,0).toFixed(0)}%</b></span><span>até G1 <b>${mcfTaxa(o,1).toFixed(0)}%</b></span><span>até G2 <b>${mcfTaxa(o,2).toFixed(0)}%</b></span><span class="${o.lv[3]?'ruimc':''}">${o.lv[3]} red (${(100*o.lv[3]/o.n).toFixed(1)}%)</span>`:'<span class="mu">sem sinais ainda</span>'}</div>`;
+  return `<div class="cf-rsg">${card(A.f,`⭐ SINAIS FORTES (${c.min}+ círculos)`,'f')}${card(A.n,`SINAIS NORMAIS (${c.min>2?'2'+(c.min>3?'–'+(c.min-1):''):'—'} círculos)`,'n')}</div>`;
+}
+
+// 🧪 qual mínimo de círculos acerta mais: junta as combinações com ≥ k círculos e compara (limite inferior de Wilson, para amostra pequena não ganhar por sorte)
+function mcfWilson(h,n,z=1.645){ if(!n) return 0; const p=h/n, z2=z*z; return (p+z2/(2*n)-z*Math.sqrt(p*(1-p)/n+z2/(4*n*n)))/(1+z2/n); }
+function mcfMinTab(st,c){ const R=[]; for(let k=2;k<=7;k++){ const o={n:0,lv:[0,0,0,0]}, e={n:0,lv:[0,0,0,0]};
+    for(const [key,x] of Object.entries(st.combo)){ const m=key.split('+').length; if(m>=k){ o.n+=x.n; for(let i=0;i<4;i++) o.lv[i]+=x.lv[i]; } if(m===k){ e.n+=x.n; for(let i=0;i<4;i++) e.lv[i]+=x.lv[i]; } }
+    if(!o.n) continue; let h=0; for(let i=0;i<=c.minCrit;i++) h+=o.lv[i]; R.push({k,o,e,sc:mcfWilson(h,o.n)}); }
+  const ok=R.filter(r=>r.o.n>=c.minN), best=ok.length?ok.reduce((a,b)=>b.sc>a.sc?b:a):null; return {R,best}; }
+function mcfMinHtml(st,c){
+  const {R,best}=mcfMinTab(st,c), crit=['TS','até G1','até G2'][c.minCrit], acaso=[50,75,87.5][c.minCrit];
+  const sel=`<select onchange="mcfSet('minCrit',+this.value)">${['TS','até G1','até G2'].map((t,i)=>`<option value="${i}" ${c.minCrit===i?'selected':''}>${t}</option>`).join('')}</select>`;
+  return `<div class="cf-min"><div class="cf-r" style="flex-wrap:wrap"><b style="margin-left:0;font-size:13px">🧪 QUANTAS CONFIRMAÇÕES PRECISA?</b>
+      <label class="ms-chk">melhor por ${sel}</label><label class="ms-chk">mín. <input type="number" value="${c.minN}" step="5" style="width:50px" onchange="mcfSet('minN',+this.value)"> sinais</label>
+      <label class="ms-chk"><input type="checkbox" ${c.minAuto?'checked':''} onchange="mcfSet('minAuto',this.checked?1:0)"> 🤖 ajustar o mínimo sozinho</label></div>
+    ${R.length?`<table class="cf-t2"><tr><th>Mínimo</th><th>Sinais</th><th>TS</th><th>até G1</th><th>até G2</th><th>Red</th><th>só com exatamente</th><th></th></tr>${R.map(r=>`<tr class="${best&&r.k===best.k?'cf-best':''}"><td><b>≥ ${r.k} círculos</b>${r.k===c.min?' <span class="mu">(atual)</span>':''}${best&&r.k===best.k?' <span class="okc">🏆 melhor</span>':''}</td><td>${r.o.n}${r.o.n<c.minN?' <span class="mu">poucos</span>':''}</td><td>${mcfTaxa(r.o,0).toFixed(0)}%</td><td>${mcfTaxa(r.o,1).toFixed(0)}%</td><td>${mcfTaxa(r.o,2).toFixed(0)}%</td><td class="${r.o.lv[3]?'ruimc':''}">${r.o.lv[3]} (${(100*r.o.lv[3]/r.o.n).toFixed(1)}%)</td><td class="mu">${r.e.n?`${r.k}: ${r.e.n} · G1 ${mcfTaxa(r.e,1).toFixed(0)}%`:'—'}</td><td>${r.k!==c.min?`<button class="mb-mini" onclick="mcfSet('min',${r.k})">usar</button>`:''}</td></tr>`).join('')}</table>`:'<div class="mu" style="font-size:12px">Junta-se sozinho conforme os sinais confirmados forem fechando.</div>'}
+    <div class="mu" style="font-size:11px;margin-top:3px">${best?`Pelo <b>${crit}</b>, o melhor agora é <b>≥ ${best.k} círculos</b> (${(100*[0,1,2].slice(0,c.minCrit+1).reduce((a,i)=>a+best.o.lv[i],0)/best.o.n).toFixed(0)}% em ${best.o.n} sinais; acaso ${acaso}%). `:`Ainda nenhum mínimo com ${c.minN}+ sinais. `}A escolha desconta a sorte de amostra pequena: um mínimo com poucos sinais e 100% não ganha de um com muitos sinais e acerto alto.${c.minAuto?' O 🤖 troca o mínimo sozinho quando o melhor mudar (o "sinal forte", os avisos e a entrada automática passam a usar o novo).':''}</div></div>`;
+}
+function mcfMinAuto(w){ const c=mcfC(); if(!c.minAuto) return; const {best}=mcfMinTab(mcfLoad(w),c); if(best&&best.k!==c.min){ MCF.autoMsg=`🧪 mínimo de círculos ajustado sozinho: ${c.min} → ${best.k}`; mcfSet('min',best.k); } }
 function mcfTaxa(o,g){ if(!o||!o.n) return null; let s=0; for(let k=0;k<=g;k++) s+=o.lv[k]; return 100*s/o.n; }
 function mcfCapturar2s(){ const L=[...new Set([...d5Syms(),...MCF_2S])]; d5SetSyms(L); setTimeout(()=>mesaRender(true),1500); }
 // barras dos índices com sinal forte (vão no topo de "PRÓXIMOS SINAIS")
 function mcfBarras(){
   const w=mesaW(), c=mcfC(), now=dmNow(), jan=mesaBarJan(), manual=cfg.mesa_modo!=='robo', out=[];
-  for(const sym of mcfSyms()){ const V=MCF.votos[w+'|'+sym]; if(!V||V.T<=now+0.5) continue; const f=mcfForca(V.v); if(f.n<Math.max(2,c.min-1)) continue; out.push({sym,T:V.T,f}); }
+  for(const sym of mcfSyms()){ const V=MCF.votos[w+'|'+sym]; if(!V||V.T<=now+0.5) continue; const f=mcfForca(V.v); if(f.n<Math.max(2,c.min-1)&&!mcfSelTem(w,f)) continue; out.push({sym,T:V.T,f}); }
   return out.sort((a,b)=>b.f.n-a.f.n||a.T-b.T).map(({sym,T,f})=>{ const falta=T-now, pct=Math.max(0,Math.min(100,100*(1-falta/Math.max(w,jan/10)))), forte=f.n>=c.min;
-    return `<div class="ms-barra ${forte?'cz':f.alvo?'imp':'par'}"><div class="ms-bfill" style="width:${pct}%"></div><div class="ms-btx"><span class="ms-bcor ${f.alvo?'imp':'par'}">${f.alvo?'ÍMPAR':'PAR'}</span><b>${hmsOf(T)}</b>${forte?'<b class="ms-btag cz">⭐ SINAL FORTE</b>':'<b class="ms-btag" style="background:#3a3648">quase</b>'}
+    return `<div class="ms-barra ${forte?'cz':f.alvo?'imp':'par'}"><div class="ms-bfill" style="width:${pct}%"></div><div class="ms-btx"><span class="ms-bcor ${f.alvo?'imp':'par'}">${f.alvo?'ÍMPAR':'PAR'}</span><b>${hmsOf(T)}</b>${mcfSelTem(w,f)?'<b class="ms-btag" style="background:#0e7490">🎯 GRAVADA</b>':''}${forte?'<b class="ms-btag cz">⭐ SINAL FORTE</b>':mcfSelTem(w,f)?'':'<b class="ms-btag" style="background:#3a3648">quase</b>'}
       <span class="ms-bits"><b>${symNome(sym)}</b> · ${f.n} confirmações (${f.ids.map(i=>MCF_CIRC.find(x=>x[0]===i)[1]+i).join(' ')})${f.contra?` · <span class="ruimc">${f.contra} contra</span>`:''}</span><span class="ms-bfal">${Math.ceil(falta)}s</span>
       ${manual&&falta>2.6?`<button class="ms-bag" onclick="mesaAgendar(${T},${f.alvo},'⭐ ${f.n} confirmações','${sym}')">▶ entrar</button>`:''}</div></div>`; }).join('');
 }
@@ -10971,12 +11028,15 @@ function mcfHtml(){
       ${cs&&cs.n?`<div style="font-size:12px;font-weight:600;opacity:.9">essa combinação: ${cs.n} sinais · TS ${mcfTaxa(cs,0).toFixed(0)}% · até G1 ${mcfTaxa(cs,1).toFixed(0)}% · até G2 ${mcfTaxa(cs,2).toFixed(0)}% · red ${cs.lv[3]}</div>`:'<div style="font-size:12px;font-weight:600;opacity:.8">combinação nova — ainda sem histórico</div>'}
       ${cfg.mesa_modo!=='robo'&&falta>3?`<button class="ms-bag" onclick="mesaAgendar(${V.T},${f.alvo},'⭐ ${f.n} confirmações')">▶ entrar</button>`:''}</div>`
     :`<div class="cf-prox">${symNome(mesaSym())} · próximo jogo <b>${hmsOf(V.T)}</b> · ${f.n?`${f.n} confirmação(ões) para <b>${f.alvo?'ÍMPAR':'PAR'}</b>${f.contra?' · '+f.contra+' contra':''} (sinal forte com ${c.min})`:'nenhuma confirmação'}</div>`;
-  const combos=Object.entries(st.combo).filter(([,o])=>o.n>=3).sort((a,b)=>mcfTaxa(b[1],1)-mcfTaxa(a[1],1)||b[1].n-a[1].n).slice(0,8);
-  const hist=st.hist.slice(-14).reverse();
+  const SL=mcfSel(w), combos=Object.entries(st.combo).filter(([k,o])=>(o.n>=3||SL[k])&&mcfFilt(o,k,c)).sort((a,b)=>mcfTaxa(b[1],1)-mcfTaxa(a[1],1)||b[1].n-a[1].n).slice(0,16);
+  const hist=st.hist.filter(h=>c.filt==='forte'?h.ids.length>=c.min:c.filt==='normal'?h.ids.length<c.min:true).slice(-14).reverse();
+  const fb=(v,t)=>`<button class="mb-mini ${c.filt===v?'on':''}" onclick="mcfSet('filt','${v}')">${t}</button>`;
   return `${ban}<div class="cf-g">${circ}</div>
-    <div class="cf-tb"><div><div class="ms-lb">🏆 COMBINAÇÕES MAIS CERTEIRAS · ${w}s · todos os índices</div>${combos.length?`<table class="cf-t2"><tr><th>Círculos</th><th>Sinais</th><th>TS</th><th>até G1</th><th>até G2</th><th>Red</th><th>mais red em</th></tr>${combos.map(([k,o])=>{ const pr=Object.entries(o.s||{}).filter(([,x])=>x.lv[3]).sort((a,b)=>b[1].lv[3]-a[1].lv[3])[0]; return `<tr><td><b>${k}</b></td><td>${o.n}</td><td>${mcfTaxa(o,0).toFixed(0)}%</td><td>${mcfTaxa(o,1).toFixed(0)}%</td><td>${mcfTaxa(o,2).toFixed(0)}%</td><td class="${o.lv[3]?'ruimc':''}">${o.lv[3]}</td><td title="${Object.entries(o.s||{}).map(([s,x])=>symNome(s)+': '+x.n+' sinais, '+x.lv[3]+' red').join(' · ')}">${pr?`<span class="ruimc">${symNome(pr[0]).replace('Volatility','Vol')} (${pr[1].lv[3]})</span>`:'<span class="mu">—</span>'}</td></tr>`; }).join('')}</table>`:'<div class="mu" style="font-size:12px">Junta-se sozinho: cada vez que 2+ círculos concordam, o resultado entra aqui (mín. 3 vezes para aparecer).</div>'}</div>
+    ${mcfResumo(st,c)}${mcfMinHtml(st,c)}<div class="cf-fb">mostrar: ${fb('todos','todos')}${fb('forte','⭐ só fortes')}${fb('normal','só normais')}</div>
+    <div class="cf-tb"><div><div class="ms-lb">🏆 COMBINAÇÕES MAIS CERTEIRAS · ${w}s · todos os índices${c.filt==='forte'?' · ⭐ fortes':c.filt==='normal'?' · normais':''}</div>${combos.length?`<table class="cf-t2"><tr><th title="gravar para as próximas entradas">🎯</th><th>Círculos</th><th>Sinais</th><th>TS</th><th>até G1</th><th>até G2</th><th>Red</th><th>mais red em</th></tr>${combos.map(([k,o])=>{ const pr=Object.entries(o.s||{}).filter(([,x])=>x.lv[3]).sort((a,b)=>b[1].lv[3]-a[1].lv[3])[0]; return `<tr class="${SL[k]?'cf-gr':''}"><td><input type="checkbox" title="gravar esta combinação para as próximas entradas" ${SL[k]?'checked':''} onclick="event.preventDefault();mcfSelToggle(${w},'${k}')"></td><td><b>${k}</b>${k.split('+').length>=c.min?' <span title="forte">⭐</span>':''}</td><td>${o.n}</td><td>${mcfTaxa(o,0).toFixed(0)}%</td><td>${mcfTaxa(o,1).toFixed(0)}%</td><td>${mcfTaxa(o,2).toFixed(0)}%</td><td class="${o.lv[3]?'ruimc':''}">${o.lv[3]}</td><td title="${Object.entries(o.s||{}).map(([s,x])=>symNome(s)+': '+x.n+' sinais, '+x.lv[3]+' red').join(' · ')}">${pr?`<span class="ruimc">${symNome(pr[0]).replace('Volatility','Vol')} (${pr[1].lv[3]})</span>`:'<span class="mu">—</span>'}</td></tr>`; }).join('')}</table>`:'<div class="mu" style="font-size:12px">Junta-se sozinho: cada vez que 2+ círculos concordam, o resultado entra aqui (mín. 3 vezes para aparecer).</div>'}</div>
       <div><div class="ms-lb">📜 HISTÓRICO DOS SINAIS CONFIRMADOS</div>${hist.length?hist.map(h=>`<div class="cf-hl"><span>${hmsOf(h.T)}</span><span>${h.s?symNome(h.s).replace('Volatility','Vol')+' · ':''}${h.ids.join('+')}${h.contra?' <span class="ruimc">(-'+h.contra+')</span>':''}${h.f?' ⭐':''}${h.a?' 🤖':''}</span><b class="${h.alvo?'':'okc'}">${h.alvo?'ÍMPAR':'PAR'}</b><span class="${h.nv<3?'okc':'ruimc'}">${h.nv<3?'✅ '+(h.nv?'G'+h.nv:'TS'):'❌ red'}</span></div>`).join(''):'<div class="mu" style="font-size:12px">Ainda nenhum sinal com 2+ confirmações neste tempo.</div>'}</div></div>
-    <div style="margin-top:10px"><div class="ms-lb">📉 POR ÍNDICE · qual volatilidade erra mais · ${w}s</div>${mcfPorIndice(st)}</div>
+    <div style="margin-top:10px"><div class="ms-lb">🎯 COMBINAÇÕES GRAVADAS · ${w}s · comportamento salvo no sistema</div>${mcfSelHtml(w)}</div>
+    <div style="margin-top:10px"><div class="ms-lb">📉 POR ÍNDICE · qual volatilidade erra mais · ${w}s</div>${mcfPorIndice(st,c)}</div>
     <div class="ms-nota" style="margin-top:6px">Acaso: TS 50% · até G1 75% · até G2 87,5%. Uma combinação só merece confiança com muitos sinais e acerto acima desses números.</div>`;
 }
 
