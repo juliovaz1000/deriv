@@ -657,7 +657,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.04 · 10/10/2026 · 📦 Levar dados: pacote compactado aos poucos (aguenta bancos enormes) — corrige "Failed to fetch"';
+const VERSAO='v4.05 · 10/10/2026 · 🔴 Simulação: reds seguidos (maior sequência, 2/3/4+ seguidos, red após red, por índice e por combinação)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -11029,7 +11029,7 @@ function mcfAdd(o,nv){ o.n++; o.lv[nv]++; }
 async function mcfSimular(){
   if(MCFSIM.run) return; const w=mesaW(), c=mcfC(), H=Math.max(2,+c.simH||24), syms=mcfSyms(), fim=Date.now(), ini=fim-H*3600e3, meio=ini+(fim-ini)/2;
   const R={v:2,quando:Date.now(),horas:H,w,syms,params:mcfSimParams(c),jogos:0,sinais:0,circ:{},combo:{},vivo:{},vivoDesde:Date.now()};
-  const run=MCFSIM.run={w,feito:0,total:0,sym:'',parar:false}; mesaRender(false);
+  const run=MCFSIM.run={w,feito:0,total:0,sym:'',parar:false}, EV=[]; mesaRender(false);
   const dados=[]; for(const sym of syms){ const bank=mcfBank(w,sym); let G=await idbRange(bank,ini-3000*w*1000,fim); if(!G||G.length<300) G=(LIVE[bank]||[]).filter(x=>x.t>=ini-3000*w*1000); G=G.filter(x=>x&&x.t&&x.p!=null&&x.p>=0).map(x=>({t:x.t,d:x.d,p:x.p})); const u=[]; let lt=0; for(const x of G){ if(x.t!==lt) u.push(x); lt=x.t; } dados.push({sym,G:u}); run.total+=u.filter(x=>x.t>=ini).length; }
   for(const {sym,G} of dados){ run.sym=sym; const ws=w*1000;
     for(let i=200;i<G.length-5;i++){
@@ -11039,10 +11039,13 @@ async function mcfSimular(){
       v[3]=mcfFigura(W,c,'sim|'+sym)||{alvo:null}; v[4]=mcfLinha(W,c)||{alvo:null}; v[6]=mcfTend(W,c)||{alvo:null}; v[7]=mcfNumero(W,c)||{alvo:null};
       const nvOf=alvo=>{ for(let k=1;k<=5;k++) if(G[i+k].p===alvo) return k-1; return 5; }, parte=G[i].t<meio?'a':'b';
       for(const id of MCF_SIMC){ const x=v[id]; if(!x||x.alvo==null) continue; const o=R.circ[id]||(R.circ[id]={a:mcfZ6(),b:mcfZ6()}); mcfAdd(o[parte],nvOf(x.alvo)); }
-      const f=mcfForca(v); if(f.n>=2){ const nv=nvOf(f.alvo), key=f.ids.join('+'), o=R.combo[key]||(R.combo[key]={a:mcfZ6(),b:mcfZ6(),s:{}}); mcfAdd(o[parte],nv); mcfAdd(o.s[sym]||(o.s[sym]=mcfZ6()),nv); R.sinais++; }
+      const f=mcfForca(v); if(f.n>=2){ const nv=nvOf(f.alvo), key=f.ids.join('+'), o=R.combo[key]||(R.combo[key]={a:mcfZ6(),b:mcfZ6(),s:{}}); mcfAdd(o[parte],nv); mcfAdd(o.s[sym]||(o.s[sym]=mcfZ6()),nv); R.sinais++; EV.push([G[i].t,key,sym,nv]); }
       if(run.feito%150===0) await new Promise(r=>setTimeout(r,0));
     }
   }
+  // sequência na ordem do tempo (todos os índices juntos) → reds seguidos
+  EV.sort((a,b)=>a[0]-b[0]); R.keys=[...new Set(EV.map(e=>e[1]))]; R.symL=[...new Set(EV.map(e=>e[2]))];
+  R.q=EV.map(e=>e[3]).join(''); R.qk=EV.map(e=>String.fromCharCode(65+R.keys.indexOf(e[1]))).join(''); R.qs=EV.map(e=>String.fromCharCode(65+R.symL.indexOf(e[2]))).join('');
   const velho=mcfSimLoad(w); if(velho&&velho.v===2&&velho.params===R.params&&!run.parar){ R.vivo=velho.vivo||{}; R.vivoDesde=velho.vivoDesde||R.quando; }
   if(!run.parar){ MCFSIM.st[w]=R; mcfSimSave(w); }
   MCFSIM.run=null; mesaRender(true);
@@ -11056,6 +11059,28 @@ setInterval(()=>{ try{ mcfSimFila(); }catch(e){} },1000);
 function mcfHits(o,g){ let h=0; for(let k=0;k<=g;k++) h+=o.lv[k]; return h; }
 function mcfVer(o,g,acaso,nMin){ if(!o||o.n<nMin) return {t:'poucos',c:'mu'}; return mcfWilson(mcfHits(o,g),o.n)*100>acaso?{t:'✔',c:'okc'}:{t:'✖',c:'ruimc'}; }
 
+
+// 🔴 reds seguidos: a partir de uma sequência de níveis (0..5) no nível de gale g
+function mcfStreak(q,g){ let cur=0,max=0,red=0,rr=0,rAnt=0; const L={}; for(let i=0;i<q.length;i++){ const r=+q[i]>g; if(r){ red++; cur++; if(cur>max) max=cur; if(i&&+q[i-1]>g) rr++; } else { if(cur) L[cur]=(L[cur]||0)+1; cur=0; } if(i<q.length-1&&r) rAnt++; }
+  if(cur) L[cur]=(L[cur]||0)+1; return {n:q.length,red,max,L,rr,rAnt,pRR:rAnt?100*rr/rAnt:null,pR:q.length?100*red/q.length:0}; }
+function mcfSimReds(S,g,crit){
+  if(!S.q) return '<div class="mu" style="font-size:12px">Clique em ▶ simular agora de novo para ver os reds seguidos.</div>';
+  const A=mcfStreak(S.q,g), Lk=Object.keys(A.L).map(Number).sort((a,b)=>a-b), cnt=k=>Lk.filter(x=>k==='5+'?x>=5:x===k).reduce((a,x)=>a+A.L[x],0);
+  const esperado=A.n&&A.pR>0&&A.pR<100?Math.log(A.n*(1-A.pR/100))/Math.log(100/A.pR):0;   // maior sequência esperada só pelo acaso
+  const filtro=(ch,str,c)=>{ let o=''; for(let i=0;i<S.q.length;i++) if(str[i]===c) o+=S.q[i]; return o; };
+  const porSym=(S.symL||[]).map((sym,i)=>({sym,st:mcfStreak(filtro(0,S.qs,String.fromCharCode(65+i)),g)})).sort((a,b)=>b.st.max-a.st.max||b.st.red-a.st.red);
+  const porK=(S.keys||[]).map((k,i)=>({k,st:mcfStreak(filtro(0,S.qk,String.fromCharCode(65+i)),g)})).filter(x=>x.st.n>=5).sort((a,b)=>b.st.max-a.st.max);
+  const qMin3=(()=>{ let o=''; for(let i=0;i<S.q.length;i++) if((S.keys[S.qk.charCodeAt(i)-65]||'').split('+').length>=3) o+=S.q[i]; return o; })(), M3=mcfStreak(qMin3,g);
+  const rr=st=>st.pRR==null?'—':`<span class="${st.pRR>st.pR*1.5&&st.rAnt>=10?'ruimc':''}">${st.pRR.toFixed(0)}%</span> <span class="mu">(${st.rAnt})</span>`;
+  return `<div class="cf-niv"><div><b>maior sequência</b><span class="${A.max>=3?'ruimc':''}">${A.max} red${A.max===1?'':'s'}</span><small>seguidos (${crit}) · acaso ≈ ${esperado.toFixed(1)}</small></div>
+      <div><b>1 red sozinho</b><span>${cnt(1)}×</span><small>vez(es)</small></div><div><b>2 seguidos</b><span class="${cnt(2)?'ruimc':''}">${cnt(2)}×</span><small>vez(es)</small></div>
+      <div><b>3 seguidos</b><span class="${cnt(3)?'ruimc':''}">${cnt(3)}×</span><small>vez(es)</small></div><div><b>4 ou mais</b><span class="${cnt(4)+cnt('5+')?'ruimc':''}">${cnt(4)+cnt('5+')}×</span><small>${Lk.filter(x=>x>=4).map(x=>x+'×'+A.L[x]).join(' · ')||'nenhuma'}</small></div></div>
+    <div style="font-size:12.5px;margin:4px 0">Depois de um red, o sinal seguinte também deu red em <b>${A.pRR==null?'—':A.pRR.toFixed(1)+'%'}</b> das vezes (${A.rAnt} casos) · red normal: <b>${A.pR.toFixed(1)}%</b>${A.pRR!=null&&A.rAnt>=20?(A.pRR>A.pR*1.5?' → <span class="ruimc">os reds vêm grudados</span>':A.pRR<A.pR*0.5?' → <span class="okc">depois de red costuma vir green</span>':' → <span class="mu">parecido: um red não muda a chance do próximo</span>'):''}
+      · só sinais com ≥ 3 círculos: maior sequência <b>${M3.max}</b>, ${M3.red} red em ${M3.n}</div>
+    <div class="cf-tb" style="margin-top:4px"><div><table class="cf-t2"><tr><th>Índice</th><th>Sinais</th><th>Red</th><th>Maior seq.</th><th>Red após red</th></tr>${porSym.map(({sym,st})=>`<tr><td><b>${symNome(sym).replace('Volatility','Vol')}</b></td><td>${st.n}</td><td class="${st.red?'ruimc':''}">${st.red}</td><td class="${st.max>=3?'ruimc':''}"><b>${st.max}</b></td><td>${rr(st)}</td></tr>`).join('')}</table></div>
+      <div><table class="cf-t2"><tr><th>Combinação</th><th>Sinais</th><th>Red</th><th>Maior seq.</th><th>Red após red</th></tr>${porK.map(({k,st})=>`<tr><td><b>${k}</b></td><td>${st.n}</td><td class="${st.red?'ruimc':''}">${st.red}</td><td class="${st.max>=3?'ruimc':''}"><b>${st.max}</b></td><td>${rr(st)}</td></tr>`).join('')}</table></div></div>
+    <div class="mu" style="font-size:11px">Seguidos = na ordem em que os sinais aconteceram. A primeira linha junta todos os índices (como se entrasse em todos os sinais); as tabelas olham cada índice e cada combinação sozinhos. "acaso ≈" é a maior sequência que costuma aparecer só por sorte com esse número de sinais. Atenção: sinais em jogos vizinhos (mesmo índice) dependem dos mesmos resultados, então quando um dá red o vizinho costuma dar também — com "1 entrada por vez" você não entra nos dois.</div>`;
+}
 // resumo da simulação por nível de gale (TS..G4), todos os sinais 2+ círculos, com o acaso de cada nível
 function mcfSimNiveis(S){ const T=mcfZ6(); for(const o of Object.values(S.combo)) for(const X of [o.a,o.b]){ T.n+=X.n; X.lv.forEach((x,i)=>T.lv[i]+=x); } if(!T.n) return '';
   return `<div class="cf-niv">${[0,1,2,3,4].map(g=>{ const h=mcfHits(T,g), ac=100*(1-Math.pow(0.5,g+1)), r=T.n-h; return `<div><b>${g?'até G'+g:'TS'}</b><span>${(100*h/T.n).toFixed(1)}%</span><small>acaso ${ac.toFixed(ac%1?ac>99?2:1:0)}% · ${r} red</small></div>`; }).join('')}</div><div class="mu" style="font-size:11px">Todos os sinais simulados (2+ círculos, ${T.n}). Cada gale a mais aumenta o acerto, mas o red fica bem mais caro — confira o fator de gale.</div>`; }
@@ -11075,6 +11100,7 @@ function mcfSimHtml(){
   return `<div class="mu" style="font-size:11.5px;margin:4px 0 6px">Simulado em ${new Date(S.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · últimas ${S.horas}h · ${S.syms.length} índice(s) · ${S.jogos} jogos · ${S.sinais} sinais (2+ círculos) · critério <b>${crit}</b> (acaso ${acaso}%)${S.params!==mcfSimParams(c)?' · <span class="ruimc">⚠ os ajustes dos círculos mudaram desde a simulação — simule de novo</span>':''}</div>
     <table class="cf-t2"><tr><th>Mínimo</th><th>Descoberta</th><th>red</th><th></th><th>Conferência</th><th>red</th><th></th><th>Ao vivo</th><th>red</th><th></th></tr>${mins.map(m=>`<tr><td><b>≥ ${m.k} círculos</b></td><td>${tx(m.A)}</td><td>${red(m.A)}</td><td>${ver(m.A)}</td><td>${tx(m.B)}</td><td>${red(m.B)}</td><td>${ver(m.B)}</td><td>${tx(m.V)}</td><td>${red(m.V)}</td><td>${ver(m.V)}</td></tr>`).join('')}</table>
     ${mcfSimNiveis(S)}
+    <div class="ms-lb" style="margin-top:8px">🔴 REDS SEGUIDOS · ${crit}</div>${mcfSimReds(S,g,crit)}
     <table class="cf-t2" style="margin-top:8px"><tr><th>Combinação</th><th>Descoberta (${crit})</th><th>red</th><th>Conferência</th><th>red</th><th>Passou nas 2?</th><th>Ao vivo desde ${new Date(S.vivoDesde).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</th><th>red</th><th>Confirmando?</th></tr>
     ${rows.length?rows.slice(0,14).map(r=>`<tr class="${pass(r)?'cf-best':''}"><td><b>${r.k}</b></td><td>${tx(r.o.a)}</td><td>${red(r.o.a)}</td><td>${tx(r.o.b)}</td><td>${red(r.o.b)}</td><td>${pass(r)?'<b class="okc">✔ passou</b>':'<span class="mu">não</span>'}</td><td>${tx(r.vi)}</td><td>${red(r.vi)}</td><td>${ver(r.vi)}</td></tr>`).join(''):'<tr><td colspan="9" class="mu">Nenhuma combinação com 5+ sinais.</td></tr>'}</table>
     <div class="mu" style="font-size:11px;margin-top:3px">Red = não pagou até o nível escolhido (${crit}). ✔ = mesmo descontando a sorte da amostra, acertou acima do acaso (mín. 20 sinais). Só merece confiança o que passa na descoberta, na conferência <b>e</b> continua ✔ ao vivo. O ao vivo conta só com os mesmos 4 círculos, separado das tabelas de cima.</div>`;
