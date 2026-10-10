@@ -658,7 +658,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.10 · 10/10/2026 · 🔴 Robôs: sinal forte após X reds e Y greens (todos os índices) + robô pronto 2 reds + 1 green';
+const VERSAO='v4.12 · 10/10/2026 · 🔴 Robôs: modo ciclo — após X reds entra até pegar Z greens e espera de novo (todos os índices) + robô pronto 1 red → 3 greens';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -681,6 +681,25 @@ const DEF = {
   dvVerifyN: 5000, dvScope: 'synthetic', dvVerifiedSymbol: '', dvVerifiedName: '',
   dvVerifiedPip: 2, dvVerifiedOffset: 0, dvVerifiedPct: 0, dvVerifiedCount: 0, dvNumTestN: 100, dvR100N: 1000, dvR100Offset: -1, dvR100Pct: 0, dvR100Count: 0, dvR100Rule: '', hfDays: 7, hfMinRate: 70, hfMinOc: 5, hfOnly100: 0, hfSort: 'g2', hfHour: 'all', deriv5sOn: 1, deriv5sSymbol: 'R_100', derivInterval: 20
 };
+// =================== 📏 LIMITE DOS LOGS (cada log guarda só os registros mais novos, até ~300 KB) ===================
+// Os logs deste HTML iam crescendo para sempre (alguns passavam de 2 MB) e enchiam o espaço do navegador.
+const LS_LOG_RX=/^(dpi_[a-z0-9_]*(log|hist)[a-z0-9_]*|ud_log|ud_mlog|udo_log|srob_res_v1|srob_res_rec|mb_sess_\d+|mb_seq_\d+)$/i, LS_LOG_MAX=300000;
+function lsCortar(v,max){
+  if(typeof v!=='string'||v.length<=max) return v; let j; try{ j=JSON.parse(v); }catch(e){ return v; }
+  const corta=a=>{ let L=a; while(L.length>1&&JSON.stringify(L).length>max*0.8) L=L.slice(Math.ceil(L.length/4)); return L; };   // tira os mais antigos (começo)
+  if(Array.isArray(j)) return JSON.stringify(corta(j));
+  if(j&&typeof j==='object'){ for(let i=0;i<6&&JSON.stringify(j).length>max;i++){ let k=null,t=0; for(const [kk,x] of Object.entries(j)) if(Array.isArray(x)){ const z=JSON.stringify(x).length; if(z>t){ t=z; k=kk; } } if(!k) break; j[k]=j[k].slice(Math.ceil(j[k].length/4)); } return JSON.stringify(j); }
+  return v;
+}
+(function(){ try{ const orig=Storage.prototype.setItem;
+  Storage.prototype.setItem=function(k,v){ if(this===window.localStorage&&LS_LOG_RX.test(k)) v=lsCortar(String(v),LS_LOG_MAX);
+    try{ return orig.call(this,k,v); }catch(e){ if(this!==window.localStorage) throw e;
+      try{ lsAparar(); if(typeof lsLiberar==='function') lsLiberar(); }catch(e2){} return orig.call(this,k,v); } };
+}catch(e){} })();
+// apara os logs que já estão grandes (na abertura e a cada 10 min — pega também os logs das ferramentas DÍGITOS/OVER-UNDER)
+function lsAparar(){ let b=0; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(!k||!LS_LOG_RX.test(k)) continue; const v=localStorage.getItem(k)||''; if(v.length<=LS_LOG_MAX) continue; const n=lsCortar(v,LS_LOG_MAX); if(n.length<v.length){ try{ localStorage.removeItem(k); localStorage.setItem(k,n); b+=(v.length-n.length)*2; }catch(e){} } } return b; }
+try{ const b=lsAparar(); if(b) console.info('📏 logs aparados: '+(b/1048576).toFixed(2)+' MB liberados'); }catch(e){}
+setInterval(()=>{ try{ lsAparar(); }catch(e){} },600000);
 let cfg = Object.assign({}, DEF);
 // hospedado (Netlify): aparelho novo já começa no banco da Deriv, que funciona direto do navegador
 if (/^https?:$/.test(location.protocol) && !localStorage.getItem('dpi_cfg')) cfg.bank = 'DERIV R_100 · 20s';
@@ -10928,13 +10947,17 @@ function mcfPrOkG(w,sym,m,G){ const q=mcfPrGR(mcfPrBoot(mcfLoad(w))[sym]||'',G);
 // sequência dos sinais fortes de TODOS os índices (na ordem em que fecharam), G/R no gale do robô
 function mbCfSeqG(w,G){ return mcfLoad(w).hist.filter(h=>h.f&&h.nv!=null).map(h=>h.nv<=G?'G':'R').join(''); }
 function mbCfPadrao(C){ const N=Math.max(1,+C.cfN||3), Y=Math.max(0,+C.cfY||0); return {N,Y,txt:`${N} red${N>1?'s':''}${Y?` e ${Y} green${Y>1?'s':''}`:''}`,pat:'R'.repeat(N)+'G'.repeat(Y)}; }
-function mbCfGlobOk(w,C,G){ const {pat}=mbCfPadrao(C), q=mbCfSeqG(w,G); if(!q.endsWith(pat)) return false; if(!+(C.cfSo1??1)) return true; return q.length===pat.length||q[q.length-pat.length-1]==='G'; }
+// modo ciclo: espera X reds seguidos → entra em todos os sinais fortes até juntar Z greens → volta a esperar X reds
+function mbCfCiclo(w,C,G){ const X=Math.max(1,+C.cfN||1), Z=Math.max(1,+C.cfZ||3), q=mbCfSeqG(w,G); let st='espera', run=0, win=0;
+  for(const r of q){ if(st==='espera'){ run=r==='R'?run+1:0; if(run>=X){ st='opera'; win=0; } } else { if(r==='G'){ win++; if(win>=Z){ st='espera'; run=0; } } } }
+  return {st,run,win,X,Z}; }
+function mbCfGlobOk(w,C,G){ if(C.cfModo==='ciclo') return mbCfCiclo(w,C,G).st==='opera'; const {pat}=mbCfPadrao(C), q=mbCfSeqG(w,G); if(!q.endsWith(pat)) return false; if(!+(C.cfSo1??1)) return true; return q.length===pat.length||q[q.length-pat.length-1]==='G'; }
 function mbCfSinais(w,C){
   const c=mcfC(), out=[], now=dmNow(), G=C.gale<0?2:Math.min(2,+C.gale);
   if(C.fonte==='cposredg'&&!mbCfGlobOk(w,C,G)) return out;
   for(const sym of mcfSyms()){ const V=MCF.votos[w+'|'+sym]; if(!V||V.T<=now) continue; const f=mcfForca(V.v); if(f.n<c.min||f.alvo==null) continue;
     let pr=''; if(C.fonte==='cposred'){ if(!mcfPrOkG(w,sym,C.cfPr||'R',G)) continue; pr=' · pós-'+mcfPrGR((mcfPrBoot(mcfLoad(w))[sym]||'').slice(-3),G); }
-    if(C.fonte==='cposredg') pr=` · após ${mbCfPadrao(C).txt} (todos os índices)`;
+    if(C.fonte==='cposredg'){ if(C.cfModo==='ciclo'){ const k=mbCfCiclo(w,C,G); pr=` · ciclo ${k.win}/${k.Z} greens (após ${k.X} red${k.X>1?'s':''})`; } else pr=` · após ${mbCfPadrao(C).txt} (todos os índices)`; }
     out.push({key:'cf|'+w+'|'+sym+'|'+V.T,entryT:V.T*1000,alvo:f.alvo,ord:-f.n*10+(f.contra||0),ok:true,gale:2,sym,nome:`⭐ ${f.n} conf.${f.contra?' (-'+f.contra+')':''}${pr} · ${symNome(sym).replace('Volatility','Vol')}`,curto:`${f.n}⭐ ${symNome(sym).replace('Volatility','Vol')}`}); }
   return out;
 }
@@ -11898,7 +11921,7 @@ function mbSelLoad(){ try{ return JSON.parse(localStorage.getItem(MBR_SEL)||'{}'
 function mbSelSet(w,id){ const o=mbSelLoad(); if(id) o[w]=id; else delete o[w]; try{ localStorage.setItem(MBR_SEL,JSON.stringify(o)); }catch(e){} }
 function mbRoboDe(w){ const s=mbSt(w); if(s.robo===undefined) s.robo=mbSelLoad()[w]||null; return s.robo?mbPresets().find(p=>p.id===s.robo)||null:null; }
 function mbRoboResumo(c){
-  const fonte={padroes:'padrões',hfix:'horário fixo'+(c.hfLvl>=0?' '+['TS','G1','G2'][c.hfLvl]:'')+' '+(c.hfMin||5)+'d',ambos:'padrões + horário fixo',cforte:'⭐ sinais fortes',cposred:'🔁 sinal forte pós-red ('+((MB_CFPR.find(x=>x[0]===(c.cfPr||'R'))||[])[1]||'')+')',cposredg:'🔴 sinal forte após '+mbCfPadrao(c).txt+' (todos os índices)'+(+(c.cfSo1??1)?'':' · sem limite')}[c.fonte||'padroes'];
+  const fonte={padroes:'padrões',hfix:'horário fixo'+(c.hfLvl>=0?' '+['TS','G1','G2'][c.hfLvl]:'')+' '+(c.hfMin||5)+'d',ambos:'padrões + horário fixo',cforte:'⭐ sinais fortes',cposred:'🔁 sinal forte pós-red ('+((MB_CFPR.find(x=>x[0]===(c.cfPr||'R'))||[])[1]||'')+')',cposredg:c.cfModo==='ciclo'?'🔴 após '+Math.max(1,+c.cfN||1)+' red(s) entra até '+Math.max(1,+c.cfZ||3)+' greens (todos os índices)':'🔴 sinal forte após '+mbCfPadrao(c).txt+' (todos os índices)'+(+(c.cfSo1??1)?'':' · sem limite')}[c.fonte||'padroes'];
   const gale=c.gale<0?'gale do robô':+c.gale?'G'+c.gale+(c.galeModo==='sinal'?' no próximo sinal':'')+(c.galeCalc==='zero'?' só recuperar':c.galeCalc==='lucro'?' recup.+lucro':' ×'+c.fat):'sem gale';
   const L=[`$ ${(+c.val||0.35).toFixed(2)}`,fonte,gale];
   if(+c.rec) L.push(`🔁 ${c.rec} green${c.rec>1?'s':''}${+c.recLucro?' +lucro':''}${+c.recMax?' máx $'+c.recMax:''}`);
@@ -11937,6 +11960,9 @@ function mbRobosImportar(inp){ const f=inp.files&&inp.files[0]; if(!f) return; c
   const novos=[{id:'R_cf_pos2',nome:'🔁 Forte pós-2 reds (mesmo índice) · G2 · rec 3',w:10,c:{...base,fonte:'cposred',cfPr:'RR'},sym:'R_100',criado:Date.now()},
                {id:'R_cf_pos3g',nome:'🔴 Forte após 3 reds (todos os índices) · G2 · rec 3',w:10,c:{...base,fonte:'cposredg',cfN:3,cfSo1:1},sym:'R_100',criado:Date.now()}];
   const ids=new Set(L.map(p=>p.id)); mbPresetsGravar([...novos.filter(r=>!ids.has(r.id)),...L]); if(mbPresets().some(p=>p.id==='R_cf_pos3g')) localStorage.setItem('dpi_seed_cf_v2','1'); }catch(e){ console.warn('robôs prontos 2',e); } })();
+(function mbSeedCf4(){ try{ if(localStorage.getItem('dpi_seed_cf_v4')) return; const L=mbPresets(), base={...MB_DEF,val:0.35,gale:2,galeModo:'seguido',galeCalc:'zero',rec:3,recLucro:0,recMax:0,fat:2.2};
+  const novos=[{id:'R_cf_ciclo1r3g',nome:'🔴 Após 1 red entra até 3 greens (todos os índices) · G2 · rec 3',w:10,c:{...base,fonte:'cposredg',cfModo:'ciclo',cfN:1,cfZ:3},sym:'R_100',criado:Date.now()}];
+  const ids=new Set(L.map(p=>p.id)); mbPresetsGravar([...novos.filter(r=>!ids.has(r.id)),...L]); if(mbPresets().some(p=>p.id==='R_cf_ciclo1r3g')) localStorage.setItem('dpi_seed_cf_v4','1'); }catch(e){} })();
 (function mbSeedCf3(){ try{ if(localStorage.getItem('dpi_seed_cf_v3')) return; const L=mbPresets(), base={...MB_DEF,val:0.35,gale:2,galeModo:'seguido',galeCalc:'zero',rec:3,recLucro:0,recMax:0,fat:2.2};
   const novos=[{id:'R_cf_pos2r1g',nome:'🔴 Forte após 2 reds e 1 green (todos os índices) · G2 · rec 3',w:10,c:{...base,fonte:'cposredg',cfN:2,cfY:1,cfSo1:1},sym:'R_100',criado:Date.now()}];
   const ids=new Set(L.map(p=>p.id)); mbPresetsGravar([...novos.filter(r=>!ids.has(r.id)),...L]); if(mbPresets().some(p=>p.id==='R_cf_pos2r1g')) localStorage.setItem('dpi_seed_cf_v3','1'); }catch(e){} })();
@@ -12114,7 +12140,10 @@ function mbEsqHtml(w){
     <div class="ms-box"><span class="ms-lb">FONTE DOS SINAIS</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'fonte',this.value)">${[['padroes','🤖 robôs de padrão (aba '+w+'s)'],['hfix','🕒 horário fixo 100% da hora atual'],['ambos','os dois juntos'],['cforte','⭐ sinais fortes (todos os índices)'],['cposred','🔁 sinal forte pós-red (mesma volatilidade)'],['cposredg','🔴 sinal forte após X reds / X reds + Y greens (todos os índices)']].map(([v,t])=>`<option value="${v}" ${C.fonte===v?'selected':''}>${t}</option>`).join('')}</select>
       ${MB_CF.includes(C.fonte)?`<div class="ms-nota" style="margin-top:6px">Usa os sinais fortes da aba ⭐ CONFIRMAÇÕES (≥ ${mcfC().min} círculos, em todos os índices escaneados: ${mcfSyms().map(x=>symNome(x).replace('Volatility','Vol')).join(', ')}). Entra no índice do sinal; se 2 índices pedirem o mesmo jogo, fica com o mais forte.</div>
       ${C.fonte==='cposred'?`<label class="ms-chk" style="margin-top:6px">entrar <select class="ms-sel" onchange="mbSetCfg(${w},'cfPr',this.value)">${MB_CFPR.map(([v,t])=>`<option value="${v}" ${(C.cfPr||'R')===v?'selected':''}>${t}</option>`).join('')}</select></label><div class="ms-nota">Red/green da vol contado até G${C.gale<0?2:Math.min(2,+C.gale)} (o gale deste robô).</div>`:''}
-      ${C.fonte==='cposredg'?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">após <input type="number" min="1" max="8" value="${Math.max(1,+C.cfN||3)}" style="width:44px" onchange="mbSetCfg(${w},'cfN',+this.value)"> reds</label><label class="ms-chk">e depois <input type="number" min="0" max="5" value="${Math.max(0,+C.cfY||0)}" style="width:44px" onchange="mbSetCfg(${w},'cfY',+this.value)"> green(s)</label></div>
+      ${C.fonte==='cposredg'?`<label class="ms-chk" style="margin-top:6px">modo <select class="ms-sel" onchange="mbSetCfg(${w},'cfModo',this.value)">${[['pos','entrar 1 vez após X reds (+ Y greens)'],['ciclo','após X reds, entrar até pegar Z greens e esperar de novo']].map(([v,t])=>`<option value="${v}" ${(C.cfModo||'pos')===v?'selected':''}>${t}</option>`).join('')}</select></label>`:''}
+      ${C.fonte==='cposredg'&&C.cfModo==='ciclo'?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">após <input type="number" min="1" max="8" value="${Math.max(1,+C.cfN||1)}" style="width:44px" onchange="mbSetCfg(${w},'cfN',+this.value)"> red(s) seguidos</label><label class="ms-chk">entra até <input type="number" min="1" max="20" value="${Math.max(1,+C.cfZ||3)}" style="width:44px" onchange="mbSetCfg(${w},'cfZ',+this.value)"> greens</label></div>
+        <div class="ms-nota">Espera ${Math.max(1,+C.cfN||1)} red(s) seguidos nos sinais fortes (todos os índices) → entra em todos os sinais fortes até juntar ${Math.max(1,+C.cfZ||3)} greens (reds no meio não param) → volta a esperar. Agora: ${(()=>{ const k=mbCfCiclo(w,C,C.gale<0?2:Math.min(2,+C.gale)); return k.st==='opera'?`<b class="okc">🟢 operando · ${k.win}/${k.Z} greens</b>`:`<b>⏳ esperando · ${k.run}/${k.X} red(s)</b>`; })()} · sequência <b>${mbCfSeqG(w,C.gale<0?2:Math.min(2,+C.gale)).slice(-12)||'—'}</b></div>`:''}
+      ${C.fonte==='cposredg'&&C.cfModo!=='ciclo'?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">após <input type="number" min="1" max="8" value="${Math.max(1,+C.cfN||3)}" style="width:44px" onchange="mbSetCfg(${w},'cfN',+this.value)"> reds</label><label class="ms-chk">e depois <input type="number" min="0" max="5" value="${Math.max(0,+C.cfY||0)}" style="width:44px" onchange="mbSetCfg(${w},'cfY',+this.value)"> green(s)</label></div>
         <div class="ms-nota">Entra quando os últimos sinais fortes forem <b>${mbCfPadrao(C).pat.split('').join(' ')}</b> (0 green = logo depois dos reds).</div>
         <label class="ms-chk"><input type="checkbox" ${+(C.cfSo1??1)?'checked':''} onchange="mbSetCfg(${w},'cfSo1',this.checked?1:0)"> exatamente ${mbCfPadrao(C).N} reds e só no 1º sinal depois (se vier mais red, espera outra sequência)</label>
         <div class="ms-nota">Conta os sinais fortes de todos os índices juntos, na ordem em que fecharam (red = perdeu até G${C.gale<0?2:Math.min(2,+C.gale)}). Agora: <b>${mbCfSeqG(w,C.gale<0?2:Math.min(2,+C.gale)).slice(-12)||'—'}</b></div>`:''}`:''}
@@ -12170,7 +12199,7 @@ function mbFilaHtml(w){
 
 function mbCfFilaHtml(w,C){ const L=mbCfSinais(w,C).sort((a,b)=>a.entryT-b.entryT), s=mbSt(w), now=dmNow();
   const todos=mcfSyms().map(sym=>{ const V=MCF.votos[w+'|'+sym]; const f=V&&V.T>now?mcfForca(V.v):null; return {sym,V,f}; });
-  const Gx=C.gale<0?2:Math.min(2,+C.gale), gl=C.fonte==='cposredg'?`<div class="ms-hl" style="grid-template-columns:1fr">🔴 sequência dos sinais fortes (todos os índices): <b>${mbCfSeqG(w,Gx).slice(-16).split('').map(x=>`<span class="${x==='G'?'okc':'ruimc'}">${x}</span>`).join('')||'—'}</b> · ${mbCfGlobOk(w,C,Gx)?'<b class="okc">✅ bateu '+mbCfPadrao(C).txt+' — entra no próximo sinal forte</b>':'esperando '+mbCfPadrao(C).pat.split('').join(' ')}</div>`:'';
+  const Gx=C.gale<0?2:Math.min(2,+C.gale), gl=C.fonte==='cposredg'?`<div class="ms-hl" style="grid-template-columns:1fr">🔴 sequência dos sinais fortes (todos os índices): <b>${mbCfSeqG(w,Gx).slice(-16).split('').map(x=>`<span class="${x==='G'?'okc':'ruimc'}">${x}</span>`).join('')||'—'}</b> · ${C.cfModo==='ciclo'?(()=>{ const k=mbCfCiclo(w,C,Gx); return k.st==='opera'?'<b class="okc">🟢 operando · '+k.win+'/'+k.Z+' greens</b>':'⏳ esperando '+k.run+'/'+k.X+' red(s)'; })():mbCfGlobOk(w,C,Gx)?'<b class="okc">✅ bateu '+mbCfPadrao(C).txt+' — entra no próximo sinal forte</b>':'esperando '+mbCfPadrao(C).pat.split('').join(' ')}</div>`:'';
   return gl+`<div class="ms-hl" style="grid-template-columns:1fr;color:#facc15;font-weight:700">${C.fonte==='cposred'?'🔁 Sinal forte pós-red':C.fonte==='cposredg'?'🔴 Sinal forte após reds (todos)':'⭐ Sinais fortes'} · ${w}s · ${mcfSyms().length} índice(s) · mín. ${mcfC().min} círculos</div>
     ${L.length?L.map(x=>`<div class="ms-hl" style="grid-template-columns:90px 70px 1fr 110px"><span><b>${hmsOf(x.entryT/1000)}</b></span><span class="${x.alvo?'ruimc':'okc'}"><b>${x.alvo?'ÍMPAR':'PAR'}</b></span><span>${x.nome}</span><span>${s.taken.has(x.key)?'<span class="mu">decidido</span>':Math.ceil(x.entryT/1000-now)+'s'}</span></div>`).join('')
       :'<div class="mu" style="padding:8px">Nenhum sinal forte agora — esperando.</div>'}
@@ -13193,7 +13222,7 @@ function lsAbrir(){
   p.style.display='flex'; p.innerHTML=`<div class="rbpc" style="max-width:640px;width:100%;max-height:90vh;overflow:auto"><div class="rbpt">🧹 Espaço do navegador</div>
     <div class="mu" style="font-size:12.5px">Usado: <b>${(tot/1048576).toFixed(2)} MB</b> de ~5 MB que o navegador dá para este site. Os jogos ficam em outro lugar (banco) e <b>não</b> entram nessa conta.</div>
     <div class="cf-prog"><i style="width:${Math.min(100,100*tot/5242880)}%;${tot>4.5*1048576?'background:#ef4444':''}"></i></div>
-    <button class="mb-mini" onclick="const b=lsLiberar();alert('Liberado '+(b/1024).toFixed(0)+' KB de caches.');lsAbrir()">🧹 apagar só os caches (seguro)</button>
+    <button class="mb-mini" onclick="const b=lsLiberar();alert('Liberado '+(b/1024).toFixed(0)+' KB de caches.');lsAbrir()">🧹 apagar só os caches (seguro)</button> <button class="mb-mini" onclick="const b=lsAparar();alert('Logs aparados: '+(b/1024).toFixed(0)+' KB liberados (ficaram os registros mais novos).');lsAbrir()">📏 aparar logs grandes</button><div class="mu" style="font-size:11px;margin-top:4px">Os logs deste HTML agora têm limite de ~300 KB cada: quando passam, os registros mais antigos saem sozinhos.</div>
     <table class="cf-t2" style="margin-top:8px"><tr><th>O que é</th><th>Tamanho</th><th></th></tr>${L.slice(0,40).map(x=>`<tr><td>${lsNome(x.k)||'<span class="mu">'+esc(x.k)+'</span>'}<div class="mu" style="font-size:10.5px">${esc(x.k)}</div></td><td>${x.b>=1048576?(x.b/1048576).toFixed(2)+' MB':(x.b/1024).toFixed(0)+' KB'}</td><td>${PAC_SEGREDO.test(x.k)||x.k===MBR_KEY||x.k==='dpi_cfg'?'<span class="mu">manter</span>':`<button class="mb-mini" onclick="if(confirm('Apagar ${esc(x.k)}?')){localStorage.removeItem('${x.k.replace(/'/g,"\\'")}');lsAbrir()}">🗑</button>`}</td></tr>`).join('')}</table>
     <div class="rbactions" style="margin-top:10px"><button onclick="document.getElementById('lsPop').style.display='none'">Fechar</button></div></div>`;
 }
