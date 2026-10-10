@@ -658,7 +658,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.08 · 10/10/2026 · 🧹 Espaço do navegador: libera caches quando a memória enche (robôs voltam a salvar) + lista do que ocupa espaço';
+const VERSAO='v4.09 · 10/10/2026 · 🤖 Robôs: sinal forte após 2 reds (mesmo índice) e após X reds (todos os índices) + 2 robôs prontos';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10922,13 +10922,18 @@ setInterval(()=>{ try{ mcfTick(); }catch(e){ console.warn('confirmações',e); }
 
 
 // ⭐ sinais fortes como FONTE dos robôs da Mesa (todos os índices escaneados)
-const MB_CF=['cforte','cposred'];
+const MB_CF=['cforte','cposred','cposredg'];
 const MB_CFPR=[['R','após 1 red da vol'],['RG','após 1 red e 1 green da vol'],['R|RG','após 1 red ou red + green'],['RR','após 2 reds seguidos da vol']];
 function mcfPrOkG(w,sym,m,G){ const q=mcfPrGR(mcfPrBoot(mcfLoad(w))[sym]||'',G); return m==='R'?q.endsWith('R'):m==='RG'?q.endsWith('RG'):m==='RR'?q.endsWith('RR'):(q.endsWith('R')||q.endsWith('RG')); }
+// sequência dos sinais fortes de TODOS os índices (na ordem em que fecharam), G/R no gale do robô
+function mbCfSeqG(w,G){ return mcfLoad(w).hist.filter(h=>h.f&&h.nv!=null).map(h=>h.nv<=G?'G':'R').join(''); }
+function mbCfGlobOk(w,C,G){ const N=Math.max(1,+C.cfN||3), q=mbCfSeqG(w,G), R='R'.repeat(N); if(!q.endsWith(R)) return false; if(!+(C.cfSo1??1)) return true; return q.length===N||q[q.length-N-1]==='G'; }
 function mbCfSinais(w,C){
   const c=mcfC(), out=[], now=dmNow(), G=C.gale<0?2:Math.min(2,+C.gale);
+  if(C.fonte==='cposredg'&&!mbCfGlobOk(w,C,G)) return out;
   for(const sym of mcfSyms()){ const V=MCF.votos[w+'|'+sym]; if(!V||V.T<=now) continue; const f=mcfForca(V.v); if(f.n<c.min||f.alvo==null) continue;
     let pr=''; if(C.fonte==='cposred'){ if(!mcfPrOkG(w,sym,C.cfPr||'R',G)) continue; pr=' · pós-'+mcfPrGR((mcfPrBoot(mcfLoad(w))[sym]||'').slice(-3),G); }
+    if(C.fonte==='cposredg') pr=` · após ${Math.max(1,+C.cfN||3)} reds (todos os índices)`;
     out.push({key:'cf|'+w+'|'+sym+'|'+V.T,entryT:V.T*1000,alvo:f.alvo,ord:-f.n*10+(f.contra||0),ok:true,gale:2,sym,nome:`⭐ ${f.n} conf.${f.contra?' (-'+f.contra+')':''}${pr} · ${symNome(sym).replace('Volatility','Vol')}`,curto:`${f.n}⭐ ${symNome(sym).replace('Volatility','Vol')}`}); }
   return out;
 }
@@ -11892,7 +11897,7 @@ function mbSelLoad(){ try{ return JSON.parse(localStorage.getItem(MBR_SEL)||'{}'
 function mbSelSet(w,id){ const o=mbSelLoad(); if(id) o[w]=id; else delete o[w]; try{ localStorage.setItem(MBR_SEL,JSON.stringify(o)); }catch(e){} }
 function mbRoboDe(w){ const s=mbSt(w); if(s.robo===undefined) s.robo=mbSelLoad()[w]||null; return s.robo?mbPresets().find(p=>p.id===s.robo)||null:null; }
 function mbRoboResumo(c){
-  const fonte={padroes:'padrões',hfix:'horário fixo'+(c.hfLvl>=0?' '+['TS','G1','G2'][c.hfLvl]:'')+' '+(c.hfMin||5)+'d',ambos:'padrões + horário fixo',cforte:'⭐ sinais fortes',cposred:'🔁 sinal forte pós-red ('+((MB_CFPR.find(x=>x[0]===(c.cfPr||'R'))||[])[1]||'')+')'}[c.fonte||'padroes'];
+  const fonte={padroes:'padrões',hfix:'horário fixo'+(c.hfLvl>=0?' '+['TS','G1','G2'][c.hfLvl]:'')+' '+(c.hfMin||5)+'d',ambos:'padrões + horário fixo',cforte:'⭐ sinais fortes',cposred:'🔁 sinal forte pós-red ('+((MB_CFPR.find(x=>x[0]===(c.cfPr||'R'))||[])[1]||'')+')',cposredg:'🔴 sinal forte após '+Math.max(1,+c.cfN||3)+' reds (todos os índices)'+(+(c.cfSo1??1)?'':' · enquanto red')}[c.fonte||'padroes'];
   const gale=c.gale<0?'gale do robô':+c.gale?'G'+c.gale+(c.galeModo==='sinal'?' no próximo sinal':'')+(c.galeCalc==='zero'?' só recuperar':c.galeCalc==='lucro'?' recup.+lucro':' ×'+c.fat):'sem gale';
   const L=[`$ ${(+c.val||0.35).toFixed(2)}`,fonte,gale];
   if(+c.rec) L.push(`🔁 ${c.rec} green${c.rec>1?'s':''}${+c.recLucro?' +lucro':''}${+c.recMax?' máx $'+c.recMax:''}`);
@@ -11927,6 +11932,10 @@ function mbRobosExportar(){ const a=document.createElement('a'); a.href=URL.crea
 function mbRobosImportar(inp){ const f=inp.files&&inp.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ try{ const j=JSON.parse(rd.result), R=Array.isArray(j)?j:j.robos; if(!Array.isArray(R)) throw 0;
   const L=mbPresets(), ids=new Set(L.map(p=>p.id)); let n=0; for(const r of R) if(r&&r.id&&r.c&&!ids.has(r.id)){ L.push(r); n++; } mbPresetsGravar(L); if(localStorage.getItem(MBR_KEY)===JSON.stringify(MBR)) alert(`✅ ${n} robô(s) importado(s).`); mesaRender(true); }catch(e){ alert('Arquivo inválido.'); } }; rd.readAsText(f); inp.value=''; }
 
+(function mbSeedCf2(){ try{ if(localStorage.getItem('dpi_seed_cf_v2')) return; const L=mbPresets(), base={...MB_DEF,val:0.35,gale:2,galeModo:'seguido',galeCalc:'zero',rec:3,recLucro:0,recMax:0,fat:2.2};
+  const novos=[{id:'R_cf_pos2',nome:'🔁 Forte pós-2 reds (mesmo índice) · G2 · rec 3',w:10,c:{...base,fonte:'cposred',cfPr:'RR'},sym:'R_100',criado:Date.now()},
+               {id:'R_cf_pos3g',nome:'🔴 Forte após 3 reds (todos os índices) · G2 · rec 3',w:10,c:{...base,fonte:'cposredg',cfN:3,cfSo1:1},sym:'R_100',criado:Date.now()}];
+  const ids=new Set(L.map(p=>p.id)); mbPresetsGravar([...novos.filter(r=>!ids.has(r.id)),...L]); if(mbPresets().some(p=>p.id==='R_cf_pos3g')) localStorage.setItem('dpi_seed_cf_v2','1'); }catch(e){ console.warn('robôs prontos 2',e); } })();
 // 🤖 robôs prontos pedidos: sinais fortes e sinal forte pós-red (10s · até G2 · gale só recuperar · recupera em 3 greens)
 (function mbSeedCf(){ try{ if(localStorage.getItem('dpi_seed_cf_v1')) return; const L=mbPresets(), base={...MB_DEF,val:0.35,gale:2,galeModo:'seguido',galeCalc:'zero',rec:3,recLucro:0,recMax:0,fat:2.2};
   const novos=[{id:'R_cf_forte',nome:'⭐ Sinais fortes · G2 só recuperar · rec 3',w:10,c:{...base,fonte:'cforte'},sym:'R_100',criado:Date.now()},
@@ -11973,7 +11982,7 @@ function mbPdf(w,de,ate){
   const ac=L.filter(x=>x.res==='green').length, er=L.filter(x=>x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0))).length, pl=L.reduce((a,x)=>a+(+x.profit||0),0), E=mbExpo(w,L);
   const H=mbHist(w).slice().sort((a,b)=>a.T-b.T), Hv=H.filter(h=>h.tipo==='v');
   const tab=document.createElement('div'); tab.innerHTML=mbVTabela(w);
-  const fonte={padroes:'robôs de padrão',hfix:'horário fixo 100%',ambos:'padrões + horário fixo',cforte:'sinais fortes (confirmações)',cposred:'sinal forte pós-red'}[C.fonte||'padroes'];
+  const fonte={padroes:'robôs de padrão',hfix:'horário fixo 100%',ambos:'padrões + horário fixo',cforte:'sinais fortes (confirmações)',cposred:'sinal forte pós-red',cposredg:'sinal forte após X reds (todos os índices)'}[C.fonte||'padroes'];
   const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Robô ${w}s — ${new Date().toLocaleDateString('pt-BR')}</title><style>
     body{font-family:Arial,sans-serif;color:#111;margin:0;padding:18px;font-size:12px}h1{font-size:20px;margin:0 0 2px}h2{font-size:14px;margin:18px 0 6px;border-bottom:2px solid #7c3aed;padding-bottom:3px}
     .sub{color:#666;margin-bottom:10px}.cards{display:flex;gap:8px;flex-wrap:wrap}.c{border:1px solid #ddd;border-radius:8px;padding:8px 12px;min-width:110px}.c b{display:block;font-size:17px}.c span{color:#666;font-size:10px;text-transform:uppercase}
@@ -12098,9 +12107,12 @@ function mbEsqHtml(w){
       <div id="msRec" class="ms-nota" style="margin-top:4px"></div></div>
     <div class="ms-row2"><div class="ms-box"><span class="ms-lb">STOP WIN $</span><div class="ms-val" style="font-size:18px">${inpt('sw',C.sw,1)}</div></div>
       <div class="ms-box"><span class="ms-lb">STOP LOSS $</span><div class="ms-val" style="font-size:18px">${inpt('sl',C.sl,1)}</div></div></div>
-    <div class="ms-box"><span class="ms-lb">FONTE DOS SINAIS</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'fonte',this.value)">${[['padroes','🤖 robôs de padrão (aba '+w+'s)'],['hfix','🕒 horário fixo 100% da hora atual'],['ambos','os dois juntos'],['cforte','⭐ sinais fortes (todos os índices)'],['cposred','🔁 sinal forte pós-red (mesma volatilidade)']].map(([v,t])=>`<option value="${v}" ${C.fonte===v?'selected':''}>${t}</option>`).join('')}</select>
+    <div class="ms-box"><span class="ms-lb">FONTE DOS SINAIS</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'fonte',this.value)">${[['padroes','🤖 robôs de padrão (aba '+w+'s)'],['hfix','🕒 horário fixo 100% da hora atual'],['ambos','os dois juntos'],['cforte','⭐ sinais fortes (todos os índices)'],['cposred','🔁 sinal forte pós-red (mesma volatilidade)'],['cposredg','🔴 sinal forte após X reds (todos os índices)']].map(([v,t])=>`<option value="${v}" ${C.fonte===v?'selected':''}>${t}</option>`).join('')}</select>
       ${MB_CF.includes(C.fonte)?`<div class="ms-nota" style="margin-top:6px">Usa os sinais fortes da aba ⭐ CONFIRMAÇÕES (≥ ${mcfC().min} círculos, em todos os índices escaneados: ${mcfSyms().map(x=>symNome(x).replace('Volatility','Vol')).join(', ')}). Entra no índice do sinal; se 2 índices pedirem o mesmo jogo, fica com o mais forte.</div>
-      ${C.fonte==='cposred'?`<label class="ms-chk" style="margin-top:6px">entrar <select class="ms-sel" onchange="mbSetCfg(${w},'cfPr',this.value)">${MB_CFPR.map(([v,t])=>`<option value="${v}" ${(C.cfPr||'R')===v?'selected':''}>${t}</option>`).join('')}</select></label><div class="ms-nota">Red/green da vol contado até G${C.gale<0?2:Math.min(2,+C.gale)} (o gale deste robô).</div>`:''}`:''}
+      ${C.fonte==='cposred'?`<label class="ms-chk" style="margin-top:6px">entrar <select class="ms-sel" onchange="mbSetCfg(${w},'cfPr',this.value)">${MB_CFPR.map(([v,t])=>`<option value="${v}" ${(C.cfPr||'R')===v?'selected':''}>${t}</option>`).join('')}</select></label><div class="ms-nota">Red/green da vol contado até G${C.gale<0?2:Math.min(2,+C.gale)} (o gale deste robô).</div>`:''}
+      ${C.fonte==='cposredg'?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">após <input type="number" min="1" max="8" value="${Math.max(1,+C.cfN||3)}" style="width:44px" onchange="mbSetCfg(${w},'cfN',+this.value)"> reds seguidos</label></div>
+        <label class="ms-chk"><input type="checkbox" ${+(C.cfSo1??1)?'checked':''} onchange="mbSetCfg(${w},'cfSo1',this.checked?1:0)"> só no 1º sinal forte depois deles (se der red de novo, espera outra sequência)</label>
+        <div class="ms-nota">Conta os sinais fortes de todos os índices juntos, na ordem em que fecharam (red = perdeu até G${C.gale<0?2:Math.min(2,+C.gale)}). Agora: <b>${mbCfSeqG(w,C.gale<0?2:Math.min(2,+C.gale)).slice(-12)||'—'}</b></div>`:''}`:''}
       ${C.fonte!=='padroes'&&!MB_CF.includes(C.fonte)?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">mín. dias 100% <input type="number" min="2" value="${C.hfMin}" style="width:52px" onchange="mbSetCfg(${w},'hfMin',+this.value)"></label><label class="ms-chk">olhar <input type="number" min="5" value="${C.hfDias}" style="width:52px" onchange="mbSetCfg(${w},'hfDias',+this.value)"> dias</label></div>
       <label class="ms-chk" style="margin-top:6px">horário 100% em <select class="ms-sel" onchange="mbSetCfg(${w},'hfLvl',+this.value)">${[[-1,'igual ao gale'],[0,'tiro seco'],[1,'até G1'],[2,'até G2']].map(([v,t])=>`<option value="${v}" ${+C.hfLvl===v?'selected':''}>${t}</option>`).join('')}</select> <span class="mu">(agora: ${NIVEL[mbHfNivel(w)]})</span></label>`:''}</div>
     ${mbHpBoxHtml(w)}
@@ -12153,7 +12165,8 @@ function mbFilaHtml(w){
 
 function mbCfFilaHtml(w,C){ const L=mbCfSinais(w,C).sort((a,b)=>a.entryT-b.entryT), s=mbSt(w), now=dmNow();
   const todos=mcfSyms().map(sym=>{ const V=MCF.votos[w+'|'+sym]; const f=V&&V.T>now?mcfForca(V.v):null; return {sym,V,f}; });
-  return `<div class="ms-hl" style="grid-template-columns:1fr;color:#facc15;font-weight:700">${C.fonte==='cposred'?'🔁 Sinal forte pós-red':'⭐ Sinais fortes'} · ${w}s · ${mcfSyms().length} índice(s) · mín. ${mcfC().min} círculos</div>
+  const Gx=C.gale<0?2:Math.min(2,+C.gale), gl=C.fonte==='cposredg'?`<div class="ms-hl" style="grid-template-columns:1fr">🔴 sequência dos sinais fortes (todos os índices): <b>${mbCfSeqG(w,Gx).slice(-16).split('').map(x=>`<span class="${x==='G'?'okc':'ruimc'}">${x}</span>`).join('')||'—'}</b> · ${mbCfGlobOk(w,C,Gx)?'<b class="okc">✅ bateu '+Math.max(1,+C.cfN||3)+' reds — entra no próximo sinal forte</b>':'esperando '+Math.max(1,+C.cfN||3)+' reds seguidos'}</div>`:'';
+  return gl+`<div class="ms-hl" style="grid-template-columns:1fr;color:#facc15;font-weight:700">${C.fonte==='cposred'?'🔁 Sinal forte pós-red':C.fonte==='cposredg'?'🔴 Sinal forte após reds (todos)':'⭐ Sinais fortes'} · ${w}s · ${mcfSyms().length} índice(s) · mín. ${mcfC().min} círculos</div>
     ${L.length?L.map(x=>`<div class="ms-hl" style="grid-template-columns:90px 70px 1fr 110px"><span><b>${hmsOf(x.entryT/1000)}</b></span><span class="${x.alvo?'ruimc':'okc'}"><b>${x.alvo?'ÍMPAR':'PAR'}</b></span><span>${x.nome}</span><span>${s.taken.has(x.key)?'<span class="mu">decidido</span>':Math.ceil(x.entryT/1000-now)+'s'}</span></div>`).join('')
       :'<div class="mu" style="padding:8px">Nenhum sinal forte agora — esperando.</div>'}
     <div class="ms-nota" style="padding:4px 8px">Próximo jogo de cada índice: ${todos.map(({sym,f})=>`${symNome(sym).replace('Volatility','Vol')} ${f?`<b class="${f.n>=mcfC().min?'okc':''}">${f.n}</b>`:'—'}${C.fonte==='cposred'?` <span class="mu">(${mcfPrGR((mcfPrBoot(mcfLoad(w))[sym]||'').slice(-4),C.gale<0?2:Math.min(2,+C.gale))||'—'})</span>`:''}`).join(' · ')}</div>`; }
