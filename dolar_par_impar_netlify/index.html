@@ -363,6 +363,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 #pacPop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:10001;padding:16px}#pacPop .rbpc{background:var(--p1);border:1px solid var(--bd);border-radius:14px;padding:16px}#pacPop .rbpt{font-size:18px;font-weight:800;margin-bottom:6px}
 .pac-box{border:1px solid var(--bd);border-radius:11px;padding:10px 12px;margin-top:8px}.pac-bk{display:flex;flex-direction:column;gap:2px;max-height:160px;overflow:auto;font-size:12px}
 #pacBtn{padding:3px 9px;border-radius:10px;font-size:12px}
+#lsPop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:10002;padding:16px}#lsPop .rbpc{background:var(--p1);border:1px solid var(--bd);border-radius:14px;padding:16px}#lsPop .rbpt{font-size:18px;font-weight:800;margin-bottom:6px}
 #nuvemBtn{padding:3px 9px;border-radius:10px;font-size:12px}#nuvemBtn.nvok{border-color:var(--g);color:var(--g)}#nuvemBtn.nverr{border-color:var(--am);color:var(--am)}
 </style>
 <style>
@@ -657,7 +658,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.07 · 10/10/2026 · 🤖 Robôs: fonte ⭐ sinais fortes e 🔁 sinal forte pós-red (todos os índices) + 2 robôs prontos (G2 só recuperar, recupera em 3 greens)';
+const VERSAO='v4.08 · 10/10/2026 · 🧹 Espaço do navegador: libera caches quando a memória enche (robôs voltam a salvar) + lista do que ocupa espaço';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -11881,7 +11882,10 @@ function mbPresets(){
     try{ localStorage.setItem(MBR_KEY,JSON.stringify(L)); localStorage.removeItem('mb_presets_v1'); }catch(e){} if(cfg.mbPresets){ delete cfg.mbPresets; saveCfg(); } }
   MBR=L; return L;
 }
-function mbPresetsGravar(L){ MBR=L.slice(0,60); try{ localStorage.setItem(MBR_KEY,JSON.stringify(MBR)); }catch(e){ alert('⚠ O navegador não deixou salvar o robô. Use ⬇ exportar para guardar em arquivo.'); } }
+function mbPresetsGravar(L){ MBR=L.slice(0,60); const txt=JSON.stringify(MBR);
+  try{ localStorage.setItem(MBR_KEY,txt); return; }catch(e){}
+  const liberado=lsLiberar(); try{ localStorage.setItem(MBR_KEY,txt); if(liberado) console.info('robôs salvos depois de liberar '+(liberado/1024).toFixed(0)+' KB'); return; }catch(e){}
+  alert('⚠ A memória do navegador está cheia e o robô não foi salvo. Vou abrir a lista do que ocupa espaço — apague o que não precisa e salve de novo.'); lsAbrir(); }
 window.addEventListener('storage',e=>{ if(e.key===MBR_KEY){ MBR=null; if(typeof MESA!=='undefined'&&MESA.open) mesaRender(true); } });
 // robô ligado a cada tempo (lembra depois de recarregar a página)
 function mbSelLoad(){ try{ return JSON.parse(localStorage.getItem(MBR_SEL)||'{}')||{}; }catch(e){ return {}; } }
@@ -11921,7 +11925,7 @@ function mbPresetApagar(id){ const p=mbPresets().find(x=>x.id===id); if(!p||!con
   mbPresetsGravar(mbPresets().filter(x=>x.id!==id)); mesaRender(true); }
 function mbRobosExportar(){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify({tipo:'mesa_robos',v:1,em:new Date().toISOString(),robos:mbPresets()},null,1)],{type:'application/json'})); a.download=`meus_robos_mesa_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
 function mbRobosImportar(inp){ const f=inp.files&&inp.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ try{ const j=JSON.parse(rd.result), R=Array.isArray(j)?j:j.robos; if(!Array.isArray(R)) throw 0;
-  const L=mbPresets(), ids=new Set(L.map(p=>p.id)); let n=0; for(const r of R) if(r&&r.id&&r.c&&!ids.has(r.id)){ L.push(r); n++; } mbPresetsGravar(L); alert(`✅ ${n} robô(s) importado(s).`); mesaRender(true); }catch(e){ alert('Arquivo inválido.'); } }; rd.readAsText(f); inp.value=''; }
+  const L=mbPresets(), ids=new Set(L.map(p=>p.id)); let n=0; for(const r of R) if(r&&r.id&&r.c&&!ids.has(r.id)){ L.push(r); n++; } mbPresetsGravar(L); if(localStorage.getItem(MBR_KEY)===JSON.stringify(MBR)) alert(`✅ ${n} robô(s) importado(s).`); mesaRender(true); }catch(e){ alert('Arquivo inválido.'); } }; rd.readAsText(f); inp.value=''; }
 
 // 🤖 robôs prontos pedidos: sinais fortes e sinal forte pós-red (10s · até G2 · gale só recuperar · recupera em 3 greens)
 (function mbSeedCf(){ try{ if(localStorage.getItem('dpi_seed_cf_v1')) return; const L=mbPresets(), base={...MB_DEF,val:0.35,gale:2,galeModo:'seguido',galeCalc:'zero',rec:3,recLucro:0,recMax:0,fat:2.2};
@@ -13157,6 +13161,24 @@ function afterUpdate(novo) {
   setInterval(() => { rbProcessPending(); rbRefreshOpenPopup(); srobResolvePending(); srobRefreshPopup(); }, 1000);
 })();
 
+
+// =================== 🧹 ESPAÇO DO NAVEGADOR (localStorage tem ~5 MB por site) ===================
+// Caches que se refazem sozinhos e podem ser apagados quando a memória enche.
+const LS_CACHE=[/^ud_arq_/,/^dpi_deriv_symbols_cache/,/^hdl/];
+function lsTam(k){ const v=localStorage.getItem(k)||''; return (k.length+v.length)*2; }
+function lsLista(){ const L=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k) L.push({k,b:lsTam(k)}); } return L.sort((a,b)=>b.b-a.b); }
+function lsLiberar(){ let b=0; for(const {k,b:t} of lsLista()) if(LS_CACHE.some(r=>r.test(k))){ try{ localStorage.removeItem(k); b+=t; }catch(e){} } return b; }
+function lsNome(k){ return /^ud_arq_/.test(k)?'📊 DÍGITOS · arquivo de padrões '+k.slice(7)+' (cache, refaz sozinho)':/^mesa_cf_sim/.test(k)?'🔁 simulação do passado '+k.split('_').pop()+'s':/^mesa_cf_v1/.test(k)?'⭐ confirmações '+k.split('_').pop()+'s (estatísticas)':k===MBR_KEY?'🤖 meus robôs':k==='dpi_cfg'?'⚙️ configuração principal':/^dpi_demo_log/.test(k)?'💼 log da conta demo':/log/i.test(k)?'📜 log / histórico':/^hdl/.test(k)?'📥 retomada de download (cache)':/deriv_symbols_cache/.test(k)?'lista de mercados (cache)':''; }
+function lsAbrir(){
+  let p=document.getElementById('lsPop'); if(!p){ p=document.createElement('div'); p.id='lsPop'; p.onclick=e=>{ if(e.target===p) p.style.display='none'; }; document.body.appendChild(p); }
+  const L=lsLista(), tot=L.reduce((a,x)=>a+x.b,0);
+  p.style.display='flex'; p.innerHTML=`<div class="rbpc" style="max-width:640px;width:100%;max-height:90vh;overflow:auto"><div class="rbpt">🧹 Espaço do navegador</div>
+    <div class="mu" style="font-size:12.5px">Usado: <b>${(tot/1048576).toFixed(2)} MB</b> de ~5 MB que o navegador dá para este site. Os jogos ficam em outro lugar (banco) e <b>não</b> entram nessa conta.</div>
+    <div class="cf-prog"><i style="width:${Math.min(100,100*tot/5242880)}%;${tot>4.5*1048576?'background:#ef4444':''}"></i></div>
+    <button class="mb-mini" onclick="const b=lsLiberar();alert('Liberado '+(b/1024).toFixed(0)+' KB de caches.');lsAbrir()">🧹 apagar só os caches (seguro)</button>
+    <table class="cf-t2" style="margin-top:8px"><tr><th>O que é</th><th>Tamanho</th><th></th></tr>${L.slice(0,40).map(x=>`<tr><td>${lsNome(x.k)||'<span class="mu">'+esc(x.k)+'</span>'}<div class="mu" style="font-size:10.5px">${esc(x.k)}</div></td><td>${x.b>=1048576?(x.b/1048576).toFixed(2)+' MB':(x.b/1024).toFixed(0)+' KB'}</td><td>${PAC_SEGREDO.test(x.k)||x.k===MBR_KEY||x.k==='dpi_cfg'?'<span class="mu">manter</span>':`<button class="mb-mini" onclick="if(confirm('Apagar ${esc(x.k)}?')){localStorage.removeItem('${x.k.replace(/'/g,"\\'")}');lsAbrir()}">🗑</button>`}</td></tr>`).join('')}</table>
+    <div class="rbactions" style="margin-top:10px"><button onclick="document.getElementById('lsPop').style.display='none'">Fechar</button></div></div>`;
+}
 // =================== 📦 LEVAR DADOS: pacote com TUDO (jogos do banco + configurações/estatísticas) de um navegador para outro ===================
 // Ex.: VPS → PC. Gera um arquivo .dpi.gz (compactado). No outro navegador, "importar" junta os jogos (sem duplicar) e traz a configuração.
 // Senhas e tokens NUNCA vão no pacote.
@@ -13189,7 +13211,7 @@ async function pacAbrir(){
         <input type="file" id="pacArq" accept=".gz,.json,.dpi" onchange="pacImportar(this.files[0])"></div>
       <div class="mu" style="font-size:11.5px;margin-top:4px">Feche as outras abas deste HTML (Mesa, robôs) antes de importar, para nenhuma delas regravar a configuração antiga por cima.</div></div>
     <div id="pacSt" style="font-size:13px;margin-top:8px">${PAC.msg||''}</div>
-    <div class="rbactions" style="margin-top:10px"><button onclick="document.getElementById('pacPop').style.display='none'">Fechar</button></div></div>`;
+    <div class="rbactions" style="margin-top:10px"><button onclick="lsAbrir()">🧹 espaço do navegador</button><button onclick="document.getElementById('pacPop').style.display='none'">Fechar</button></div></div>`;
 }
 // lê um banco em páginas (não segura milhões de jogos na memória de uma vez)
 function pacPagina(b,depois,lim){ return new Promise(res=>{ try{ const hi=b+'|￿', rg=depois?IDBKeyRange.bound(depois,hi,true,false):IDBKeyRange.bound(b+'|',hi), q=DB.transaction('ticks').objectStore('ticks').getAll(rg,lim); q.onsuccess=()=>res(q.result||[]); q.onerror=()=>res([]); }catch(e){ res([]); } }); }
@@ -13236,7 +13258,7 @@ async function pacImportar(f){
     if(buf.trim()) await linha(buf);
     if(v1){ for(const bk of H.bancos){ for(let i=0;i<bk.rows.length;i+=20000) await idbPut(pacRecs(bk.b,bk.rows.slice(i,i+20000),H.cols)); total+=bk.rows.length; } }
     if(!H) throw new Error('arquivo vazio');
-    let nls=0; if(modo==='tudo'&&H.ls) for(const [k,v] of Object.entries(H.ls)){ if(PAC_SEGREDO.test(k)||/^dpi_nuvem_/.test(k)) continue; try{ localStorage.setItem(k,v); nls++; }catch(e){} }
+    let nls=0; if(modo==='tudo'&&H.ls) for(const [k,v] of Object.entries(H.ls)){ if(PAC_SEGREDO.test(k)||/^dpi_nuvem_/.test(k)) continue; try{ localStorage.setItem(k,v); nls++; }catch(e){ lsLiberar(); try{ localStorage.setItem(k,v); nls++; }catch(e2){} } }
     PAC.busy=false; pacSet(`✅ Importado de <b>${H.origem}</b> (${new Date(H.criado).toLocaleString('pt-BR')}): <b>${num(total)}</b> jogos${nls?` + ${nls} configurações/estatísticas`:''}. Recarregando…`,100);
     if(modo==='tudo'){ window.saveCfg=function(){}; }
     setTimeout(()=>location.reload(),1800);
