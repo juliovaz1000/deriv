@@ -657,7 +657,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.05 · 10/10/2026 · 🔴 Simulação: reds seguidos (maior sequência, 2/3/4+ seguidos, red após red, por índice e por combinação)';
+const VERSAO='v4.07 · 10/10/2026 · 🤖 Robôs: fonte ⭐ sinais fortes e 🔁 sinal forte pós-red (todos os índices) + 2 robôs prontos (G2 só recuperar, recupera em 3 greens)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10803,7 +10803,7 @@ function piStats(L,lvl){
 // mesmo jogo → ⭐ SINAL FORTE (som + notificação + barra com "entrar" naquele índice).
 // Cada círculo e cada combinação (ex.: 1+3+7) guarda o placar TS/G1/G2/red, por tempo de jogo.
 // =====================================================================================
-const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20,simH:24,simG:1,prMode:'R',prPop:1};
+const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20,simH:24,simG:1,simRk:2,prMode:'R',prPop:1};
 const MCF_CIRC=[[1,'🕒','Horário fixo 100%'],[2,'🕐','Horas pagantes'],[3,'🖼','Figura gráfica'],[4,'🟨','Linha amarela'],[5,'🤖','Robôs ligados'],[6,'🧭','Tendência'],[7,'🔢','Número chama']];
 const MCF_2S=['R_10','R_25','R_50','R_75','R_100','RDBEAR','RDBULL'];
 function mcfC(){ return {...MCF_DEF,...(cfg.mesa_cf||{})}; }
@@ -10893,7 +10893,11 @@ function mcfAlerta(w,sym,T,f){
 // a cada jogo novo em cada índice: confere os votos antigos e vota no próximo jogo
 function mcfTick(){
   if(!MESA.open) return;
-  const w=mesaW(), st=mcfLoad(w), c=mcfC(); let mud=false;
+  const Ws=new Set([mesaW()]); try{ for(const w of MESA_TEMPOS){ if(mbSt(w).on&&MB_CF.includes(mbCfg(w).fonte)) Ws.add(w); } }catch(e){}
+  for(const w of Ws) mcfTickW(w,w===mesaW());
+}
+function mcfTickW(w,vis){
+  const st=mcfLoad(w), c=mcfC(); let mud=false;
   for(const sym of mcfSyms()){
     const W=LIVE[mcfBank(w,sym)]||[]; if(!W.length) continue;
     const kk=w+'|'+sym, last=W.at(-1), lastS=Math.round(last.t/1000), T=lastS+w, P=MCF.pend[kk]||(MCF.pend[kk]={});
@@ -10908,13 +10912,25 @@ function mcfTick(){
       delete P[k]; mud=true;
     }
     if(MCF.ultT[kk]!==T&&dmNow()<T-0.5){ MCF.ultT[kk]=T; const v=mcfVotar(w,T,sym); P[T]={v}; MCF.votos[kk]={T,v,sym};
-      const f=mcfForca(v); if((f.n>=c.min||mcfSelTem(w,f))&&MCF.alertado[kk]!==T){ MCF.alertado[kk]=T; const pr=f.n>=c.min&&c.prPop?mcfPrEstado(w,sym):null; pr?mcfAlertaPr(w,sym,T,f,pr):mcfAlerta(w,sym,T,f); }
-      try{ mcfAuto(w,sym,T,f); }catch(e){ console.warn('auto',e); } }
+      const f=mcfForca(v); if(vis&&(f.n>=c.min||mcfSelTem(w,f))&&MCF.alertado[kk]!==T){ MCF.alertado[kk]=T; const pr=f.n>=c.min&&c.prPop?mcfPrEstado(w,sym):null; pr?mcfAlertaPr(w,sym,T,f,pr):mcfAlerta(w,sym,T,f); }
+      if(vis) try{ mcfAuto(w,sym,T,f); }catch(e){ console.warn('auto',e); } }
   }
   if(mud){ mcfSave(w); const S=MCFSIM.st[w]; if(S&&S._sujo){ delete S._sujo; mcfSimSave(w); } try{ mcfMinAuto(w); }catch(e){} }
 }
 setInterval(()=>{ try{ mcfTick(); }catch(e){ console.warn('confirmações',e); } },500);
 
+
+// ⭐ sinais fortes como FONTE dos robôs da Mesa (todos os índices escaneados)
+const MB_CF=['cforte','cposred'];
+const MB_CFPR=[['R','após 1 red da vol'],['RG','após 1 red e 1 green da vol'],['R|RG','após 1 red ou red + green'],['RR','após 2 reds seguidos da vol']];
+function mcfPrOkG(w,sym,m,G){ const q=mcfPrGR(mcfPrBoot(mcfLoad(w))[sym]||'',G); return m==='R'?q.endsWith('R'):m==='RG'?q.endsWith('RG'):m==='RR'?q.endsWith('RR'):(q.endsWith('R')||q.endsWith('RG')); }
+function mbCfSinais(w,C){
+  const c=mcfC(), out=[], now=dmNow(), G=C.gale<0?2:Math.min(2,+C.gale);
+  for(const sym of mcfSyms()){ const V=MCF.votos[w+'|'+sym]; if(!V||V.T<=now) continue; const f=mcfForca(V.v); if(f.n<c.min||f.alvo==null) continue;
+    let pr=''; if(C.fonte==='cposred'){ if(!mcfPrOkG(w,sym,C.cfPr||'R',G)) continue; pr=' · pós-'+mcfPrGR((mcfPrBoot(mcfLoad(w))[sym]||'').slice(-3),G); }
+    out.push({key:'cf|'+w+'|'+sym+'|'+V.T,entryT:V.T*1000,alvo:f.alvo,ord:-f.n*10+(f.contra||0),ok:true,gale:2,sym,nome:`⭐ ${f.n} conf.${f.contra?' (-'+f.contra+')':''}${pr} · ${symNome(sym).replace('Volatility','Vol')}`,curto:`${f.n}⭐ ${symNome(sym).replace('Volatility','Vol')}`}); }
+  return out;
+}
 // 🤖 entrada automática: 1 = só sinais fortes · 2 = todos os sinais (2+ círculos). Entra na cor da MAIORIA dos círculos.
 const MCF_GAT=[['','sempre'],['R','após 1 red'],['RR','após 2 reds seguidos'],['RG','após 1 red e 1 green'],['G','após 1 green'],['GG','após 2 greens'],['GR','após 1 green e 1 red'],['RRG','após 2 reds e 1 green']];
 function mcfGmax(){ return Math.min(mesaGale(),2); }
@@ -11063,8 +11079,11 @@ function mcfVer(o,g,acaso,nMin){ if(!o||o.n<nMin) return {t:'poucos',c:'mu'}; re
 // 🔴 reds seguidos: a partir de uma sequência de níveis (0..5) no nível de gale g
 function mcfStreak(q,g){ let cur=0,max=0,red=0,rr=0,rAnt=0; const L={}; for(let i=0;i<q.length;i++){ const r=+q[i]>g; if(r){ red++; cur++; if(cur>max) max=cur; if(i&&+q[i-1]>g) rr++; } else { if(cur) L[cur]=(L[cur]||0)+1; cur=0; } if(i<q.length-1&&r) rAnt++; }
   if(cur) L[cur]=(L[cur]||0)+1; return {n:q.length,red,max,L,rr,rAnt,pRR:rAnt?100*rr/rAnt:null,pR:q.length?100*red/q.length:0}; }
-function mcfSimReds(S,g,crit){
+function mcfSimReds(S,g,crit){ S={...S};
   if(!S.q) return '<div class="mu" style="font-size:12px">Clique em ▶ simular agora de novo para ver os reds seguidos.</div>';
+  const rk=Math.max(2,Math.min(4,+mcfC().simRk||2)), okI=i=>(S.keys[S.qk.charCodeAt(i)-65]||'').split('+').length>=rk;
+  if(rk>2){ let q='',qk='',qs=''; for(let i=0;i<S.q.length;i++) if(okI(i)){ q+=S.q[i]; qk+=S.qk[i]; qs+=S.qs[i]; } S={...S,q,qk,qs}; }
+  if(!S.q.length) return `<div class="mu" style="font-size:12px">Nenhum sinal com ${rk === 4 ? 'os 4 círculos' : '≥ '+rk+' círculos'} nesta simulação.</div>`;
   const A=mcfStreak(S.q,g), Lk=Object.keys(A.L).map(Number).sort((a,b)=>a-b), cnt=k=>Lk.filter(x=>k==='5+'?x>=5:x===k).reduce((a,x)=>a+A.L[x],0);
   const esperado=A.n&&A.pR>0&&A.pR<100?Math.log(A.n*(1-A.pR/100))/Math.log(100/A.pR):0;   // maior sequência esperada só pelo acaso
   const filtro=(ch,str,c)=>{ let o=''; for(let i=0;i<S.q.length;i++) if(str[i]===c) o+=S.q[i]; return o; };
@@ -11075,8 +11094,8 @@ function mcfSimReds(S,g,crit){
   return `<div class="cf-niv"><div><b>maior sequência</b><span class="${A.max>=3?'ruimc':''}">${A.max} red${A.max===1?'':'s'}</span><small>seguidos (${crit}) · acaso ≈ ${esperado.toFixed(1)}</small></div>
       <div><b>1 red sozinho</b><span>${cnt(1)}×</span><small>vez(es)</small></div><div><b>2 seguidos</b><span class="${cnt(2)?'ruimc':''}">${cnt(2)}×</span><small>vez(es)</small></div>
       <div><b>3 seguidos</b><span class="${cnt(3)?'ruimc':''}">${cnt(3)}×</span><small>vez(es)</small></div><div><b>4 ou mais</b><span class="${cnt(4)+cnt('5+')?'ruimc':''}">${cnt(4)+cnt('5+')}×</span><small>${Lk.filter(x=>x>=4).map(x=>x+'×'+A.L[x]).join(' · ')||'nenhuma'}</small></div></div>
-    <div style="font-size:12.5px;margin:4px 0">Depois de um red, o sinal seguinte também deu red em <b>${A.pRR==null?'—':A.pRR.toFixed(1)+'%'}</b> das vezes (${A.rAnt} casos) · red normal: <b>${A.pR.toFixed(1)}%</b>${A.pRR!=null&&A.rAnt>=20?(A.pRR>A.pR*1.5?' → <span class="ruimc">os reds vêm grudados</span>':A.pRR<A.pR*0.5?' → <span class="okc">depois de red costuma vir green</span>':' → <span class="mu">parecido: um red não muda a chance do próximo</span>'):''}
-      · só sinais com ≥ 3 círculos: maior sequência <b>${M3.max}</b>, ${M3.red} red em ${M3.n}</div>
+    <div style="font-size:12.5px;margin:4px 0"><b>${rk===2?'Todos os sinais (2+ círculos)':rk===3?'Só sinais com ≥ 3 círculos':'Só sinais com os 4 círculos'}</b> · ${A.n} sinais · ${A.red} red. Depois de um red, o sinal seguinte também deu red em <b>${A.pRR==null?'—':A.pRR.toFixed(1)+'%'}</b> das vezes (${A.rAnt} casos) · red normal: <b>${A.pR.toFixed(1)}%</b>${A.pRR!=null&&A.rAnt>=20?(A.pRR>A.pR*1.5?' → <span class="ruimc">os reds vêm grudados</span>':A.pRR<A.pR*0.5?' → <span class="okc">depois de red costuma vir green</span>':' → <span class="mu">parecido: um red não muda a chance do próximo</span>'):''}
+${rk===2?`      · só sinais com ≥ 3 círculos: maior sequência <b>${M3.max}</b>, ${M3.red} red em ${M3.n}`:''}</div>
     <div class="cf-tb" style="margin-top:4px"><div><table class="cf-t2"><tr><th>Índice</th><th>Sinais</th><th>Red</th><th>Maior seq.</th><th>Red após red</th></tr>${porSym.map(({sym,st})=>`<tr><td><b>${symNome(sym).replace('Volatility','Vol')}</b></td><td>${st.n}</td><td class="${st.red?'ruimc':''}">${st.red}</td><td class="${st.max>=3?'ruimc':''}"><b>${st.max}</b></td><td>${rr(st)}</td></tr>`).join('')}</table></div>
       <div><table class="cf-t2"><tr><th>Combinação</th><th>Sinais</th><th>Red</th><th>Maior seq.</th><th>Red após red</th></tr>${porK.map(({k,st})=>`<tr><td><b>${k}</b></td><td>${st.n}</td><td class="${st.red?'ruimc':''}">${st.red}</td><td class="${st.max>=3?'ruimc':''}"><b>${st.max}</b></td><td>${rr(st)}</td></tr>`).join('')}</table></div></div>
     <div class="mu" style="font-size:11px">Seguidos = na ordem em que os sinais aconteceram. A primeira linha junta todos os índices (como se entrasse em todos os sinais); as tabelas olham cada índice e cada combinação sozinhos. "acaso ≈" é a maior sequência que costuma aparecer só por sorte com esse número de sinais. Atenção: sinais em jogos vizinhos (mesmo índice) dependem dos mesmos resultados, então quando um dá red o vizinho costuma dar também — com "1 entrada por vez" você não entra nos dois.</div>`;
@@ -11086,7 +11105,7 @@ function mcfSimNiveis(S){ const T=mcfZ6(); for(const o of Object.values(S.combo)
   return `<div class="cf-niv">${[0,1,2,3,4].map(g=>{ const h=mcfHits(T,g), ac=100*(1-Math.pow(0.5,g+1)), r=T.n-h; return `<div><b>${g?'até G'+g:'TS'}</b><span>${(100*h/T.n).toFixed(1)}%</span><small>acaso ${ac.toFixed(ac%1?ac>99?2:1:0)}% · ${r} red</small></div>`; }).join('')}</div><div class="mu" style="font-size:11px">Todos os sinais simulados (2+ círculos, ${T.n}). Cada gale a mais aumenta o acerto, mas o red fica bem mais caro — confira o fator de gale.</div>`; }
 function mcfSimCtlHtml(){ const c=mcfC(); return `<div class="cf-sim"><div class="cf-r" style="flex-wrap:wrap"><b style="margin-left:0;font-size:13px">🔁 SIMULAÇÃO DO PASSADO · 🖼3 🟨4 📈6 🔢7 · ${mesaW()}s</b>
   <label class="ms-chk">últimas <select onchange="mcfSet('simH',+this.value)">${[6,12,24,48,72].map(h=>`<option value="${h}" ${+c.simH===h?'selected':''}>${h}h</option>`).join('')}</select></label>
-  <label class="ms-chk">ver até <select onchange="mcfSet('simG',+this.value)">${[0,1,2,3,4].map(g=>`<option value="${g}" ${(+c.simG||0)===g?'selected':''}>${g?'G'+g:'TS'}</option>`).join('')}</select></label><button class="mb-mini" onclick="mcfSimular()">▶ simular agora</button><button class="mb-mini" onclick="if(MCFSIM.run) MCFSIM.run.parar=true">■ parar</button></div><div id="msSimR">${mcfSimHtml()}</div></div>`; }
+  <label class="ms-chk">ver até <select onchange="mcfSet('simG',+this.value)">${[0,1,2,3,4].map(g=>`<option value="${g}" ${(+c.simG||0)===g?'selected':''}>${g?'G'+g:'TS'}</option>`).join('')}</select></label><label class="ms-chk">reds seguidos de <select onchange="mcfSet('simRk',+this.value)">${[[2,'todos (2+)'],[3,'só ≥ 3 círculos'],[4,'só 4 círculos']].map(([v,t])=>`<option value="${v}" ${(+c.simRk||2)===v?'selected':''}>${t}</option>`).join('')}</select></label><button class="mb-mini" onclick="mcfSimular()">▶ simular agora</button><button class="mb-mini" onclick="if(MCFSIM.run) MCFSIM.run.parar=true">■ parar</button></div><div id="msSimR">${mcfSimHtml()}</div></div>`; }
 function mcfSimHtml(){
   const w=mesaW(), c=mcfC(), g=Math.max(0,Math.min(4,+c.simG||0)), acaso=100*(1-Math.pow(0.5,g+1)), crit=g?'até G'+g:'TS', run=MCFSIM.run;
   if(run) return `<div class="cf-prog"><i style="width:${run.total?Math.min(100,100*run.feito/run.total):0}%"></i></div><div class="mu" style="font-size:12px">simulando ${symNome(run.sym||'')} · ${run.feito} de ${run.total} jogos…</div>`;
@@ -11100,7 +11119,7 @@ function mcfSimHtml(){
   return `<div class="mu" style="font-size:11.5px;margin:4px 0 6px">Simulado em ${new Date(S.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · últimas ${S.horas}h · ${S.syms.length} índice(s) · ${S.jogos} jogos · ${S.sinais} sinais (2+ círculos) · critério <b>${crit}</b> (acaso ${acaso}%)${S.params!==mcfSimParams(c)?' · <span class="ruimc">⚠ os ajustes dos círculos mudaram desde a simulação — simule de novo</span>':''}</div>
     <table class="cf-t2"><tr><th>Mínimo</th><th>Descoberta</th><th>red</th><th></th><th>Conferência</th><th>red</th><th></th><th>Ao vivo</th><th>red</th><th></th></tr>${mins.map(m=>`<tr><td><b>≥ ${m.k} círculos</b></td><td>${tx(m.A)}</td><td>${red(m.A)}</td><td>${ver(m.A)}</td><td>${tx(m.B)}</td><td>${red(m.B)}</td><td>${ver(m.B)}</td><td>${tx(m.V)}</td><td>${red(m.V)}</td><td>${ver(m.V)}</td></tr>`).join('')}</table>
     ${mcfSimNiveis(S)}
-    <div class="ms-lb" style="margin-top:8px">🔴 REDS SEGUIDOS · ${crit}</div>${mcfSimReds(S,g,crit)}
+    <div class="ms-lb" style="margin-top:8px">🔴 REDS SEGUIDOS · ${crit} · ${(+c.simRk||2)===2?'todos os sinais (2+)':(+c.simRk===3?'só ≥ 3 círculos':'só 4 círculos')}</div>${mcfSimReds(S,g,crit)}
     <table class="cf-t2" style="margin-top:8px"><tr><th>Combinação</th><th>Descoberta (${crit})</th><th>red</th><th>Conferência</th><th>red</th><th>Passou nas 2?</th><th>Ao vivo desde ${new Date(S.vivoDesde).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</th><th>red</th><th>Confirmando?</th></tr>
     ${rows.length?rows.slice(0,14).map(r=>`<tr class="${pass(r)?'cf-best':''}"><td><b>${r.k}</b></td><td>${tx(r.o.a)}</td><td>${red(r.o.a)}</td><td>${tx(r.o.b)}</td><td>${red(r.o.b)}</td><td>${pass(r)?'<b class="okc">✔ passou</b>':'<span class="mu">não</span>'}</td><td>${tx(r.vi)}</td><td>${red(r.vi)}</td><td>${ver(r.vi)}</td></tr>`).join(''):'<tr><td colspan="9" class="mu">Nenhuma combinação com 5+ sinais.</td></tr>'}</table>
     <div class="mu" style="font-size:11px;margin-top:3px">Red = não pagou até o nível escolhido (${crit}). ✔ = mesmo descontando a sorte da amostra, acertou acima do acaso (mín. 20 sinais). Só merece confiança o que passa na descoberta, na conferência <b>e</b> continua ✔ ao vivo. O ao vivo conta só com os mesmos 4 círculos, separado das tabelas de cima.</div>`;
@@ -11112,7 +11131,7 @@ const MCF_PRM=[['R','após 1 red dela'],['RG','após 1 red e 1 green dela'],['R|
 const MCF_PRP=[['R','depois de 1 red'],['RR','depois de 2 reds'],['RG','depois de red + green'],['RGG','depois de red + 2 greens'],['G','depois de 1 green'],['GG','depois de 2 greens']];
 function mcfPrBoot(st){ if(st.prv) return st.prv; st.prv={}; for(const h of st.hist) if(h.f&&h.s&&h.nv!=null) st.prv[h.s]=((st.prv[h.s]||'')+h.nv).slice(-300); return st.prv; }
 function mcfPrReg(st,sym,nv){ const P=mcfPrBoot(st); P[sym]=((P[sym]||'')+nv).slice(-300); }
-function mcfPrGR(s){ const G=mcfGmax(); return s.split('').map(x=>+x<=G?'G':'R').join(''); }
+function mcfPrGR(s,Gx){ const G=Gx==null?mcfGmax():Gx; return s.split('').map(x=>+x<=G?'G':'R').join(''); }
 function mcfPrSeqTxt(w,sym){ return mcfPrGR((mcfPrBoot(mcfLoad(w))[sym]||'').slice(-6)); }
 function mcfPrEstado(w,sym){ const q=mcfPrGR(mcfPrBoot(mcfLoad(w))[sym]||''); return q.endsWith('RR')?'RR':q.endsWith('R')?'R':q.endsWith('RG')?'RG':null; }
 function mcfPrOk(w,sym,m){ const q=mcfPrGR(mcfPrBoot(mcfLoad(w))[sym]||''); return m==='R'?q.endsWith('R'):m==='RG'?q.endsWith('RG'):m==='RR'?q.endsWith('RR'):(q.endsWith('R')||q.endsWith('RG')); }
@@ -11589,12 +11608,13 @@ function mbTick(){
     }
     try{ mbVTick(w); }catch(e){ console.warn('virtual',e); }
     const bank=mbBank(w); let sigs=[];
-    if(fonte!=='hfix'){
+    if(fonte==='padroes'||fonte==='ambos'){
       const elig=new Map(mbRobos(w).map(x=>[x.rb.id,RBOTS.indexOf(x.rb)]));
       for(const g of RB_PENDING){ if(g.done||g.bank!==bank) continue; const rb=RBOTS.find(x=>x.id===g.rbId); if(!rb) continue;
         sigs.push({key:g.key,entryT:g.entryT,alvo:g.alvo,ord:elig.get(g.rbId)??1e9,ok:elig.has(g.rbId),gale:rbNivel(rb),nome:rbName(rb),curto:rbGat(rb)}); }
     }
-    if(fonte!=='padroes'){ mbHfLoad(w); sigs=sigs.concat(mbHfSinais(w)); }
+    if(fonte==='hfix'||fonte==='ambos'){ mbHfLoad(w); sigs=sigs.concat(mbHfSinais(w)); }
+    if(MB_CF.includes(fonte)) sigs=sigs.concat(mbCfSinais(w,C));
     if(+C.hpOn){ mbHpLoad(w); sigs=sigs.concat(mbHpSinais(w)); }
     sigs=sigs.filter(g=>!s.taken.has(g.key)&&g.entryT/1000-now>(w<=2?1.2:1.6));
     sigs=sigs.filter(g=>{ if(!g.cond) return true; if(g.entryT/1000-now>(w<=2?2.4:3.4)) return true;
@@ -11606,8 +11626,9 @@ function mbTick(){
     if(T/1000-now>(w<=2?2.4:3.4)) continue;                       // decide ~3s antes, com todos os sinais do jogo já conhecidos
     const doJogo=sigs.filter(g=>g.entryT===T);
     doJogo.forEach(g=>s.taken.add(g.key));
-    const ok=doJogo.filter(g=>g.ok).sort((a,b)=>a.ord-b.ord);
+    let ok=doJogo.filter(g=>g.ok).sort((a,b)=>a.ord-b.ord);
     if(!ok.length) continue;
+    if(ok[0].sym){ const s0=ok[0].sym; ok=ok.filter(x=>x.sym===s0); }      // sinais fortes: cada índice é um mercado — fica com o índice mais forte
     const hh=hmsOf(T/1000), vs=mbVEstado(w);
     if(new Set(ok.map(g=>g.alvo)).size>1){ if(!obs) mbLog(w,`⛔ ${hh}: ABORTADO — PAR e ÍMPAR no mesmo jogo (${ok.map(g=>(g.alvo?'Í ':'P ')+g.curto).join(' · ')})`,'r'); continue; }
     const g=ok[0], gale=C.gale<0?g.gale:C.gale, base=Math.max(0.35,+C.val||0.35), fat=Math.max(1,+C.fat||2.2), gv=C.galeModo==='sinal'?0:gale;
@@ -11622,8 +11643,8 @@ function mbTick(){
     let siE=0; if(siOn(w)){ const d=siDecide(w,g,T,gv,hh); if(d.skip) continue; siE=d.extra||0; }
     const R=mbRec(w), rec=R.on?{recAlvo:R.alvo+siE,recMax:+C.recMax||0,ratio:R.r}:{}, rtxt=R.on?` · 🔁 recuperando $ ${R.falta.toFixed(2)} (${R.k} green${R.k>1?'s':''}) → aposta $ ${Math.min(R.stake,+C.recMax||Infinity).toFixed(2)}`:'';
     if(C.galeModo==='sinal'){ const k=mbGaleK(w), G=C.gale<0?2:+C.gale;
-      dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:0,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.round((mbStakeSinal(w)+(R.on?0:siE/mbRatio(w)))*100)/100,fator:fat,mcor:g.alvo,gk:k,gmax:G,siExtra:siE,...rec}); }
-    else dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.round((base+(R.on?0:siE/mbRatio(w)))*100)/100,fator:fat,galeCalc:C.galeCalc,mcor:g.alvo,siExtra:siE,...rec});
+      dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:g.sym||mesaSym(),T:T/1000,step:w,maxN:0,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.round((mbStakeSinal(w)+(R.on?0:siE/mbRatio(w)))*100)/100,fator:fat,mcor:g.alvo,gk:k,gmax:G,siExtra:siE,...rec}); }
+    else dmRegistrar({key:'mbot|'+g.key,src:'mbot',man:1,nome:`🤖 ${w}s · ${g.nome}`,sym:g.sym||mesaSym(),T:T/1000,step:w,maxN:gale,ct:g.alvo?'DIGITODD':'DIGITEVEN',stakeBase:Math.round((base+(R.on?0:siE/mbRatio(w)))*100)/100,fator:fat,galeCalc:C.galeCalc,mcor:g.alvo,siExtra:siE,...rec});
     if(siE>0) mbLog(w,`🧠 ${hh}: +$ ${siE.toFixed(2)} de lucro extra na entrada para pagar a dívida oculta ($ ${SI.divida.toFixed(2)})`,'evt');
     if(R.on) mbLog(w,`🔁 ${hmsOf(T/1000)}: modo recuperação${rtxt}`,'evt');
     s.feitos.add(g.key);
@@ -11768,16 +11789,16 @@ function mbVBate(seq,V){
 // chamado pelo mbTick em vez de apostar quando está esperando
 function mbVAnotar(w,g,T,gale,mudo){
   const s=mbVEstado(w);
-  s.vPend.push({T:T/1000,alvo:g.alvo,gale:gale,nome:g.nome,k:'v|'+g.key});
+  s.vPend.push({T:T/1000,alvo:g.alvo,gale:gale,nome:g.nome,k:'v|'+g.key,sym:g.sym||''});
   if(!mudo) mbLog(w,`👻 ${hmsOf(T/1000)}: sinal VIRTUAL ${g.alvo?'ÍMPAR':'PAR'} · ${g.nome} (sem apostar)`,'evt');
 }
 // resolve os sinais virtuais com o resultado do jogo e confere as regras
 function mbVTick(w){
   const s=mbVEstado(w), V=mbV(w), W=LIVE[mbBank(w)]||[], now=dmNow();
   if(s.vPend.length){
-    const byT=new Map(W.slice(-400).map(x=>[Math.round(x.t/1000),x]));
+    const byT0=new Map(W.slice(-400).map(x=>[Math.round(x.t/1000),x])), MAPS={};
     s.vPend=s.vPend.filter(p=>{
-      let res=null;
+      let res=null; const byT=p.sym&&p.sym!==mesaSym()?(MAPS[p.sym]||(MAPS[p.sym]=new Map((LIVE[d5BankName(w,p.sym)]||[]).slice(-400).map(x=>[Math.round(x.t/1000),x])))):byT0;
       for(let g=0;g<=p.gale;g++){
         const r=byT.get(p.T+g*w);
         if(!r){ if(now>p.T+g*w+3*w+5){ res='?'; } break; }
@@ -11867,7 +11888,7 @@ function mbSelLoad(){ try{ return JSON.parse(localStorage.getItem(MBR_SEL)||'{}'
 function mbSelSet(w,id){ const o=mbSelLoad(); if(id) o[w]=id; else delete o[w]; try{ localStorage.setItem(MBR_SEL,JSON.stringify(o)); }catch(e){} }
 function mbRoboDe(w){ const s=mbSt(w); if(s.robo===undefined) s.robo=mbSelLoad()[w]||null; return s.robo?mbPresets().find(p=>p.id===s.robo)||null:null; }
 function mbRoboResumo(c){
-  const fonte={padroes:'padrões',hfix:'horário fixo'+(c.hfLvl>=0?' '+['TS','G1','G2'][c.hfLvl]:'')+' '+(c.hfMin||5)+'d',ambos:'padrões + horário fixo'}[c.fonte||'padroes'];
+  const fonte={padroes:'padrões',hfix:'horário fixo'+(c.hfLvl>=0?' '+['TS','G1','G2'][c.hfLvl]:'')+' '+(c.hfMin||5)+'d',ambos:'padrões + horário fixo',cforte:'⭐ sinais fortes',cposred:'🔁 sinal forte pós-red ('+((MB_CFPR.find(x=>x[0]===(c.cfPr||'R'))||[])[1]||'')+')'}[c.fonte||'padroes'];
   const gale=c.gale<0?'gale do robô':+c.gale?'G'+c.gale+(c.galeModo==='sinal'?' no próximo sinal':'')+(c.galeCalc==='zero'?' só recuperar':c.galeCalc==='lucro'?' recup.+lucro':' ×'+c.fat):'sem gale';
   const L=[`$ ${(+c.val||0.35).toFixed(2)}`,fonte,gale];
   if(+c.rec) L.push(`🔁 ${c.rec} green${c.rec>1?'s':''}${+c.recLucro?' +lucro':''}${+c.recMax?' máx $'+c.recMax:''}`);
@@ -11901,6 +11922,12 @@ function mbPresetApagar(id){ const p=mbPresets().find(x=>x.id===id); if(!p||!con
 function mbRobosExportar(){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify({tipo:'mesa_robos',v:1,em:new Date().toISOString(),robos:mbPresets()},null,1)],{type:'application/json'})); a.download=`meus_robos_mesa_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
 function mbRobosImportar(inp){ const f=inp.files&&inp.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ try{ const j=JSON.parse(rd.result), R=Array.isArray(j)?j:j.robos; if(!Array.isArray(R)) throw 0;
   const L=mbPresets(), ids=new Set(L.map(p=>p.id)); let n=0; for(const r of R) if(r&&r.id&&r.c&&!ids.has(r.id)){ L.push(r); n++; } mbPresetsGravar(L); alert(`✅ ${n} robô(s) importado(s).`); mesaRender(true); }catch(e){ alert('Arquivo inválido.'); } }; rd.readAsText(f); inp.value=''; }
+
+// 🤖 robôs prontos pedidos: sinais fortes e sinal forte pós-red (10s · até G2 · gale só recuperar · recupera em 3 greens)
+(function mbSeedCf(){ try{ if(localStorage.getItem('dpi_seed_cf_v1')) return; const L=mbPresets(), base={...MB_DEF,val:0.35,gale:2,galeModo:'seguido',galeCalc:'zero',rec:3,recLucro:0,recMax:0,fat:2.2};
+  const novos=[{id:'R_cf_forte',nome:'⭐ Sinais fortes · G2 só recuperar · rec 3',w:10,c:{...base,fonte:'cforte'},sym:'R_100',criado:Date.now()},
+               {id:'R_cf_posred',nome:'🔁 Forte pós-red · G2 só recuperar · rec 3',w:10,c:{...base,fonte:'cposred',cfPr:'R'},sym:'R_100',criado:Date.now()}];
+  const ids=new Set(L.map(p=>p.id)); mbPresetsGravar([...novos.filter(r=>!ids.has(r.id)),...L]); localStorage.setItem('dpi_seed_cf_v1','1'); }catch(e){ console.warn('robôs prontos',e); } })();
 function mbPresetsHtml(w){
   const L=mbPresets(), atual=mbRoboDe(w);
   const card=p=>{ const s=mbSt(p.w), roda=s.on&&s.robo===p.id;
@@ -11942,7 +11969,7 @@ function mbPdf(w,de,ate){
   const ac=L.filter(x=>x.res==='green').length, er=L.filter(x=>x.res==='red'&&(x.gk!=null?x.gk>=x.gmax:x.nivel>=(x.mmax??0))).length, pl=L.reduce((a,x)=>a+(+x.profit||0),0), E=mbExpo(w,L);
   const H=mbHist(w).slice().sort((a,b)=>a.T-b.T), Hv=H.filter(h=>h.tipo==='v');
   const tab=document.createElement('div'); tab.innerHTML=mbVTabela(w);
-  const fonte={padroes:'robôs de padrão',hfix:'horário fixo 100%',ambos:'padrões + horário fixo'}[C.fonte||'padroes'];
+  const fonte={padroes:'robôs de padrão',hfix:'horário fixo 100%',ambos:'padrões + horário fixo',cforte:'sinais fortes (confirmações)',cposred:'sinal forte pós-red'}[C.fonte||'padroes'];
   const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Robô ${w}s — ${new Date().toLocaleDateString('pt-BR')}</title><style>
     body{font-family:Arial,sans-serif;color:#111;margin:0;padding:18px;font-size:12px}h1{font-size:20px;margin:0 0 2px}h2{font-size:14px;margin:18px 0 6px;border-bottom:2px solid #7c3aed;padding-bottom:3px}
     .sub{color:#666;margin-bottom:10px}.cards{display:flex;gap:8px;flex-wrap:wrap}.c{border:1px solid #ddd;border-radius:8px;padding:8px 12px;min-width:110px}.c b{display:block;font-size:17px}.c span{color:#666;font-size:10px;text-transform:uppercase}
@@ -11951,7 +11978,7 @@ function mbPdf(w,de,ate){
     <h1>🎮 Mesa Play — Robô ${w}s</h1><div class="sub">${de?`Sessão de ${new Date(de).toLocaleString('pt-BR')} até ${new Date(ate).toLocaleTimeString('pt-BR')}`:tudo?'Histórico completo':`Sessão iniciada ${new Date(s.ini||MESA.ini).toLocaleString('pt-BR')}`} · ${symNome(mesaSym())} · gerado em ${new Date().toLocaleString('pt-BR')}</div>
     <div class="cards"><div class="c"><span>Acertos</span><b class="g">${ac}</b></div><div class="c"><span>Erros</span><b class="r">${er}</b></div><div class="c"><span>Resultado</span><b class="${pl>=0?'g':'r'}">${pl>=0?'+':''}$ ${pl.toFixed(2)}</b></div>
       <div class="c"><span>Maior valor exposto</span><b>$ ${E.ex.toFixed(2)}</b><span>${E.exT?hmsOf(E.exT):''}</span></div><div class="c"><span>Maior queda do saldo</span><b>$ ${E.queda.toFixed(2)}</b></div><div class="c"><span>Maior aposta</span><b>$ ${E.maxA.toFixed(2)}</b></div></div>
-    <h2>Configuração</h2><div>Fonte: <b>${fonte}</b>${C.fonte!=='padroes'?` · horário 100% em ${NIVEL[mbHfNivel(w)]} · mín. ${C.hfMin} dias`:''} · Entrada $ ${(+C.val).toFixed(2)} · Gales: ${C.gale<0?'seguir o robô':C.gale?'G'+C.gale:'sem gale'} (${C.galeModo==='sinal'?'no próximo sinal':'nos jogos seguintes'}, ${{fator:'× '+C.fat,zero:'só recuperar',lucro:'recuperar + lucro'}[C.galeCalc||'fator']}) · Recuperação: ${+C.rec?C.rec+' green(s)'+(+C.recLucro?' + lucro':' sem lucro'):'desligada'}${+C.recMax?' · aposta máx $ '+C.recMax:''} · Stop win ${+C.sw||'—'} · Stop loss ${+C.sl||'—'}<br>Virtual: ${+V.vOn?mbVRegraTxt(w):'desligado'}</div>
+    <h2>Configuração</h2><div>Fonte: <b>${fonte}</b>${C.fonte!=='padroes'&&!MB_CF.includes(C.fonte)?` · horário 100% em ${NIVEL[mbHfNivel(w)]} · mín. ${C.hfMin} dias`:''} · Entrada $ ${(+C.val).toFixed(2)} · Gales: ${C.gale<0?'seguir o robô':C.gale?'G'+C.gale:'sem gale'} (${C.galeModo==='sinal'?'no próximo sinal':'nos jogos seguintes'}, ${{fator:'× '+C.fat,zero:'só recuperar',lucro:'recuperar + lucro'}[C.galeCalc||'fator']}) · Recuperação: ${+C.rec?C.rec+' green(s)'+(+C.recLucro?' + lucro':' sem lucro'):'desligada'}${+C.recMax?' · aposta máx $ '+C.recMax:''} · Stop win ${+C.sw||'—'} · Stop loss ${+C.sl||'—'}<br>Virtual: ${+V.vOn?mbVRegraTxt(w):'desligado'}</div>
     <h2>Entradas reais (${L.length})</h2><table><tr><th>Data</th><th>Jogo</th><th>Cor</th><th>Sinal</th><th>Nível</th><th>Aposta</th><th>Resultado</th><th>Saldo</th></tr>
     ${(()=>{ let acc=0; return L.map(x=>{ acc+=(+x.profit||0); const d=new Date((x.planT||x.T)*1000); return `<tr><td>${d.toLocaleDateString('pt-BR')}</td><td>${hmsOf(x.planT||x.T)}</td><td>${x.mcor?'ÍMPAR':'PAR'}</td><td>${esc((x.nome||'').replace(/^🤖 \d+s · /,''))}</td><td>${x.gk!=null?(x.gk?'G'+x.gk+'·sinal':'TS'):(NIVEL[x.nivel]||'G'+x.nivel)}</td><td>$ ${(+x.stake||0).toFixed(2)}</td><td class="${x.res==='green'?'g':x.res==='red'?'r':'mu'}">${x.res==='green'?'GREEN +'+(+x.profit).toFixed(2):x.res==='red'?'RED '+(+x.profit).toFixed(2):x.res}</td><td>${acc>=0?'+':''}${acc.toFixed(2)}</td></tr>`; }).join(''); })()}</table>
     <h2>Sinais virtuais (${Hv.length})</h2>${Hv.length?`<table><tr><th>Data</th><th>Jogo</th><th>Cor</th><th>Sinal</th><th>Resultado</th></tr>${Hv.map(h=>`<tr><td>${new Date(h.T*1000).toLocaleDateString('pt-BR')}</td><td>${hmsOf(h.T)}</td><td>${h.alvo?'ÍMPAR':'PAR'}</td><td>${esc(h.nome||'')}</td><td class="${h.res==='W'?'g':'r'}">${h.res==='W'?'WIN virtual':'LOSS virtual'}</td></tr>`).join('')}</table>`:'<div class="mu">Nenhum.</div>'}
@@ -12067,11 +12094,13 @@ function mbEsqHtml(w){
       <div id="msRec" class="ms-nota" style="margin-top:4px"></div></div>
     <div class="ms-row2"><div class="ms-box"><span class="ms-lb">STOP WIN $</span><div class="ms-val" style="font-size:18px">${inpt('sw',C.sw,1)}</div></div>
       <div class="ms-box"><span class="ms-lb">STOP LOSS $</span><div class="ms-val" style="font-size:18px">${inpt('sl',C.sl,1)}</div></div></div>
-    <div class="ms-box"><span class="ms-lb">FONTE DOS SINAIS</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'fonte',this.value)">${[['padroes','🤖 robôs de padrão (aba '+w+'s)'],['hfix','🕒 horário fixo 100% da hora atual'],['ambos','os dois juntos']].map(([v,t])=>`<option value="${v}" ${C.fonte===v?'selected':''}>${t}</option>`).join('')}</select>
-      ${C.fonte!=='padroes'?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">mín. dias 100% <input type="number" min="2" value="${C.hfMin}" style="width:52px" onchange="mbSetCfg(${w},'hfMin',+this.value)"></label><label class="ms-chk">olhar <input type="number" min="5" value="${C.hfDias}" style="width:52px" onchange="mbSetCfg(${w},'hfDias',+this.value)"> dias</label></div>
+    <div class="ms-box"><span class="ms-lb">FONTE DOS SINAIS</span><select class="ms-sel" style="width:100%;margin-top:4px" onchange="mbSetCfg(${w},'fonte',this.value)">${[['padroes','🤖 robôs de padrão (aba '+w+'s)'],['hfix','🕒 horário fixo 100% da hora atual'],['ambos','os dois juntos'],['cforte','⭐ sinais fortes (todos os índices)'],['cposred','🔁 sinal forte pós-red (mesma volatilidade)']].map(([v,t])=>`<option value="${v}" ${C.fonte===v?'selected':''}>${t}</option>`).join('')}</select>
+      ${MB_CF.includes(C.fonte)?`<div class="ms-nota" style="margin-top:6px">Usa os sinais fortes da aba ⭐ CONFIRMAÇÕES (≥ ${mcfC().min} círculos, em todos os índices escaneados: ${mcfSyms().map(x=>symNome(x).replace('Volatility','Vol')).join(', ')}). Entra no índice do sinal; se 2 índices pedirem o mesmo jogo, fica com o mais forte.</div>
+      ${C.fonte==='cposred'?`<label class="ms-chk" style="margin-top:6px">entrar <select class="ms-sel" onchange="mbSetCfg(${w},'cfPr',this.value)">${MB_CFPR.map(([v,t])=>`<option value="${v}" ${(C.cfPr||'R')===v?'selected':''}>${t}</option>`).join('')}</select></label><div class="ms-nota">Red/green da vol contado até G${C.gale<0?2:Math.min(2,+C.gale)} (o gale deste robô).</div>`:''}`:''}
+      ${C.fonte!=='padroes'&&!MB_CF.includes(C.fonte)?`<div class="ms-row2" style="margin-top:6px"><label class="ms-chk">mín. dias 100% <input type="number" min="2" value="${C.hfMin}" style="width:52px" onchange="mbSetCfg(${w},'hfMin',+this.value)"></label><label class="ms-chk">olhar <input type="number" min="5" value="${C.hfDias}" style="width:52px" onchange="mbSetCfg(${w},'hfDias',+this.value)"> dias</label></div>
       <label class="ms-chk" style="margin-top:6px">horário 100% em <select class="ms-sel" onchange="mbSetCfg(${w},'hfLvl',+this.value)">${[[-1,'igual ao gale'],[0,'tiro seco'],[1,'até G1'],[2,'até G2']].map(([v,t])=>`<option value="${v}" ${+C.hfLvl===v?'selected':''}>${t}</option>`).join('')}</select> <span class="mu">(agora: ${NIVEL[mbHfNivel(w)]})</span></label>`:''}</div>
     ${mbHpBoxHtml(w)}
-    ${C.fonte==='hfix'?'':`<label class="ms-chk"><input type="checkbox" ${C.so100?'checked':''} onchange="mbSetCfg(${w},'so100',this.checked?1:0)"> só robôs 100% (nenhum red no banco)</label>
+    ${C.fonte==='hfix'||MB_CF.includes(C.fonte)?'':`<label class="ms-chk"><input type="checkbox" ${C.so100?'checked':''} onchange="mbSetCfg(${w},'so100',this.checked?1:0)"> só robôs 100% (nenhum red no banco)</label>
     <label class="ms-chk"><input type="checkbox" ${C.soAuto?'checked':''} onchange="mbSetCfg(${w},'soAuto',this.checked?1:0)"> só robôs automáticos ♻</label>`}
     <div class="ms-nota">0 no stop = sem stop. Gale ${C.gale<0?'até G2':C.gale?'até G'+C.gale:'desligado'} · ×${(+C.fat).toFixed(1)} · ${C.galeModo==='sinal'?'cada sinal é 1 entrada; depois de red a próxima entrada sobe de nível':'gale nos jogos logo depois da entrada'}</div>
     ${mbVBoxHtml(w)}
@@ -12108,6 +12137,7 @@ function mbRecTxt(w){
 }
 function mbFilaHtml(w){
   const C=mbCfg(w); let hf='';
+  if(MB_CF.includes(C.fonte)) return mbCfFilaHtml(w,C);
   if(C.fonte!=='padroes'){ mbHfLoad(w); const H=MBHF[w], L=mbHfSinais(w).sort((a,b)=>a.entryT-b.entryT);
     hf=`<div class="ms-hl" style="grid-template-columns:1fr;color:#c4b5fd;font-weight:700">🕒 Horário fixo ${w}s · ${{normal:'100% até '+NIVEL[mbHfNivel(w)],g1ts:'🎯 tiro seco G1',ambos:'tiro seco normal + 🎯 tiro seco G1'}[mbHfTipo(w)]} · mín. ${C.hfMin} dias${H&&H.dias!=null?` · banco com ${H.dias} dia(s)`:''}${H&&H.busy?' · calculando…':''} · ${L.length} horário(s) nos próximos 60 min</div>`+
       (L.length?L.slice(0,40).map(x=>`<div class="ms-hl" style="grid-template-columns:90px 70px 1fr 110px"><span><b>${hmsOf(x.entryT/1000)}</b></span><span class="${x.alvo?'ruimc':'okc'}"><b>${x.alvo?'ÍMPAR':'PAR'}</b></span><span>${x.cond?'🎯 ':''}${x.nome.replace('🕒 Horário fixo ','').replace('🕒 Tiro seco G1 ','se o 1º der red: ')}</span><span>${mbSt(w).taken.has(x.key)?'<span class="mu">passou</span>':`faltam ${uoTempo(x.entryT/1000-dmNow())}`}</span></div>`).join('')
@@ -12116,6 +12146,13 @@ function mbFilaHtml(w){
   if(C.fonte==='hfix') return hf;
   return hf+mbFilaPadroes(w);
 }
+
+function mbCfFilaHtml(w,C){ const L=mbCfSinais(w,C).sort((a,b)=>a.entryT-b.entryT), s=mbSt(w), now=dmNow();
+  const todos=mcfSyms().map(sym=>{ const V=MCF.votos[w+'|'+sym]; const f=V&&V.T>now?mcfForca(V.v):null; return {sym,V,f}; });
+  return `<div class="ms-hl" style="grid-template-columns:1fr;color:#facc15;font-weight:700">${C.fonte==='cposred'?'🔁 Sinal forte pós-red':'⭐ Sinais fortes'} · ${w}s · ${mcfSyms().length} índice(s) · mín. ${mcfC().min} círculos</div>
+    ${L.length?L.map(x=>`<div class="ms-hl" style="grid-template-columns:90px 70px 1fr 110px"><span><b>${hmsOf(x.entryT/1000)}</b></span><span class="${x.alvo?'ruimc':'okc'}"><b>${x.alvo?'ÍMPAR':'PAR'}</b></span><span>${x.nome}</span><span>${s.taken.has(x.key)?'<span class="mu">decidido</span>':Math.ceil(x.entryT/1000-now)+'s'}</span></div>`).join('')
+      :'<div class="mu" style="padding:8px">Nenhum sinal forte agora — esperando.</div>'}
+    <div class="ms-nota" style="padding:4px 8px">Próximo jogo de cada índice: ${todos.map(({sym,f})=>`${symNome(sym).replace('Volatility','Vol')} ${f?`<b class="${f.n>=mcfC().min?'okc':''}">${f.n}</b>`:'—'}${C.fonte==='cposred'?` <span class="mu">(${mcfPrGR((mcfPrBoot(mcfLoad(w))[sym]||'').slice(-4),C.gale<0?2:Math.min(2,+C.gale))||'—'})</span>`:''}`).join(' · ')}</div>`; }
 function mbFilaPadroes(w){
   const L=mbRobos(w), now=dmNow();
   const todos=RBOTS.filter(rb=>rb.bank===mbBank(w)).length;
