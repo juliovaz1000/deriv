@@ -657,7 +657,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.03 · 10/10/2026 · 📦 Levar dados: pacote com todos os jogos + configurações/estatísticas de um navegador para outro (VPS → PC)';
+const VERSAO='v4.04 · 10/10/2026 · 📦 Levar dados: pacote compactado aos poucos (aguenta bancos enormes) — corrige "Failed to fetch"';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -13128,39 +13128,57 @@ async function pacAbrir(){
     <div id="pacSt" style="font-size:13px;margin-top:8px">${PAC.msg||''}</div>
     <div class="rbactions" style="margin-top:10px"><button onclick="document.getElementById('pacPop').style.display='none'">Fechar</button></div></div>`;
 }
+// lê um banco em páginas (não segura milhões de jogos na memória de uma vez)
+function pacPagina(b,depois,lim){ return new Promise(res=>{ try{ const hi=b+'|￿', rg=depois?IDBKeyRange.bound(depois,hi,true,false):IDBKeyRange.bound(b+'|',hi), q=DB.transaction('ticks').objectStore('ticks').getAll(rg,lim); q.onsuccess=()=>res(q.result||[]); q.onerror=()=>res([]); }catch(e){ res([]); } }); }
+// formato v2: uma linha por bloco (cabeçalho na 1ª linha), compactado em gzip AOS POUCOS → aguenta bancos enormes
 async function pacExportar(){
   if(PAC.busy) return; PAC.busy=true;
   try{
     const B=[...document.querySelectorAll('.pacB:checked')].map(x=>x.value), dias=+document.getElementById('pacDias').value, desde=dias?Date.now()-dias*86400e3:0, comCfg=document.getElementById('pacCfg').checked;
     const ls={}; if(comCfg) for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&!PAC_SEGREDO.test(k)&&!/^dpi_nuvem_/.test(k)) ls[k]=localStorage.getItem(k); }
-    const parts=[`{"formato":"${PAC_FMT}","criado":${Date.now()},"origem":${JSON.stringify(location.host||'arquivo')},"desde":${desde},"ls":${JSON.stringify(ls)},"cols":["id","t","d","p","q","src","sym","w","te"],"bancos":[`]; let tot=0;
-    for(let i=0;i<B.length;i++){ pacSet(`lendo ${B[i]}…`,100*i/B.length); const rows=await pacLer(B[i],desde); tot+=rows.length;
-      parts.push((i?',':'')+`{"b":${JSON.stringify(B[i])},"rows":[`); for(let j=0;j<rows.length;j+=20000) parts.push((j?',':'')+rows.slice(j,j+20000).map(r=>JSON.stringify(r)).join(',')); parts.push(']}'); }
-    parts.push(']}'); pacSet('compactando…',99);
-    let blob=new Blob(parts,{type:'application/json'}), ext='json';
-    if(typeof CompressionStream!=='undefined'){ blob=await new Response(blob.stream().pipeThrough(new CompressionStream('gzip'))).blob(); ext='dpi.gz'; }
-    const dt=new Date().toISOString().replace(/[:.]/g,'-').slice(0,16), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`dpi_pacote_${(location.host||'local').replace(/[^\w.-]/g,'_')}_${dt}.${ext}`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    const N={}; let previsto=0; for(const b of B){ N[b]=await pacContar(b); previsto+=N[b]; }
+    const enc=new TextEncoder(), gz=typeof CompressionStream!=='undefined';
+    let escrever, fechar;
+    if(gz){ const cs=new CompressionStream('gzip'), wr=cs.writable.getWriter(), ch=[];
+      const leitor=(async()=>{ const r=cs.readable.getReader(); for(;;){ const {done,value}=await r.read(); if(done) break; ch.push(value); } return new Blob(ch,{type:'application/gzip'}); })();
+      escrever=async t=>{ await wr.ready; await wr.write(enc.encode(t)); }; fechar=async()=>{ await wr.close(); return await leitor; };
+    } else { const parts=[]; escrever=async t=>{ parts.push(t); }; fechar=async()=>new Blob(parts,{type:'application/json'}); }
+    await escrever(JSON.stringify({formato:'dpi_pacote_v2',criado:Date.now(),origem:location.host||'arquivo',desde,ls,cols:['id','t','d','p','q','src','sym','w','te'],bancos:B})+'\n');
+    let tot=0, lidos=0;
+    for(const b of B){ let ult=null;
+      for(;;){ const pg=await pacPagina(b,ult,20000); if(!pg.length) break; ult=pg[pg.length-1].k; lidos+=pg.length;
+        const rows=[]; for(const x of pg) if(!desde||x.t>=desde) rows.push([x.id,x.t,x.d??null,x.p??null,x.q??'',x.src||'',x.sym||'',x.w||0,x.te||0]);
+        if(rows.length){ await escrever(JSON.stringify({b,rows})+'\n'); tot+=rows.length; }
+        pacSet(`lendo e compactando ${b} · ${num(lidos)} de ${num(previsto)}`,Math.min(98,100*lidos/Math.max(1,previsto))); if(pg.length<20000) break; } }
+    pacSet('finalizando o arquivo…',99); const blob=await fechar();
+    const dt=new Date().toISOString().replace(/[:.]/g,'-').slice(0,16), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`dpi_pacote_${(location.host||'local').replace(/[^\w.-]/g,'_')}_${dt}.${gz?'dpi.gz':'dpi'}`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },60000);
     PAC.busy=false; pacSet(`✅ Pacote baixado: <b>${num(tot)}</b> jogos de ${B.length} banco(s)${comCfg?` + ${Object.keys(ls).length} configurações/estatísticas`:''} · ${(blob.size/1048576).toFixed(1)} MB. Leve o arquivo para o outro navegador e use <b>importar pacote</b>.`,100);
-  }catch(e){ PAC.busy=false; pacSet('❌ Erro ao gerar o pacote: '+e.message); }
+  }catch(e){ PAC.busy=false; pacSet('❌ Erro ao gerar o pacote: '+(e&&e.message||e)+'. Tente marcar menos bancos ou um período menor (ex.: últimos 7 dias) e baixar em partes.'); }
 }
+function pacRecs(b,rows,C){ const ix={}; C.forEach((k,i)=>ix[k]=i); return rows.map(r=>{ const o={k:b+'|'+r[ix.id],b,id:r[ix.id],t:r[ix.t],d:r[ix.d],p:r[ix.p],q:r[ix.q],src:r[ix.src]||''}; if(r[ix.sym]) o.sym=r[ix.sym]; if(r[ix.w]) o.w=r[ix.w]; if(r[ix.te]) o.te=r[ix.te]; return o; }); }
 async function pacImportar(f){
   if(!f||PAC.busy) return; PAC.busy=true;
   try{
-    pacSet('lendo o arquivo…',2); const head=new Uint8Array(await f.slice(0,2).arrayBuffer()); let txt;
-    if(head[0]===0x1f&&head[1]===0x8b){ if(typeof DecompressionStream==='undefined') throw new Error('este navegador não descompacta .gz — use Chrome/Edge atualizado'); txt=await new Response(f.stream().pipeThrough(new DecompressionStream('gzip'))).text(); } else txt=await f.text();
-    pacSet('abrindo o pacote…',5); const J=JSON.parse(txt); txt=null;
-    if(!J||J.formato!==PAC_FMT) throw new Error('este arquivo não é um pacote 📦 do Dólar Par/Ímpar');
-    const modo=(document.querySelector('input[name=pacModo]:checked')||{}).value||'tudo', C=J.cols, ix=k=>C.indexOf(k);
-    const total=J.bancos.reduce((a,b)=>a+b.rows.length,0); let feito=0;
-    for(const bk of J.bancos){ for(let j=0;j<bk.rows.length;j+=20000){ const recs=bk.rows.slice(j,j+20000).map(r=>{ const o={k:bk.b+'|'+r[ix('id')],b:bk.b,id:r[ix('id')],t:r[ix('t')],d:r[ix('d')],p:r[ix('p')],q:r[ix('q')],src:r[ix('src')]||''}; if(r[ix('sym')]) o.sym=r[ix('sym')]; if(r[ix('w')]) o.w=r[ix('w')]; if(r[ix('te')]) o.te=r[ix('te')]; return o; });
-        await idbPut(recs); feito+=recs.length; pacSet(`gravando jogos · ${bk.b} · ${num(feito)} de ${num(total)}`,5+90*feito/Math.max(1,total)); } }
-    let nls=0; if(modo==='tudo'&&J.ls) for(const [k,v] of Object.entries(J.ls)){ if(PAC_SEGREDO.test(k)||/^dpi_nuvem_/.test(k)) continue; try{ localStorage.setItem(k,v); nls++; }catch(e){} }
-    PAC.busy=false; pacSet(`✅ Importado de <b>${J.origem}</b> (${new Date(J.criado).toLocaleString('pt-BR')}): <b>${num(total)}</b> jogos em ${J.bancos.length} banco(s)${nls?` + ${nls} configurações/estatísticas`:''}. Recarregando…`,100);
-    if(modo==='tudo'){ window.saveCfg=function(){}; }      // não deixa a config antiga em memória regravar por cima antes de recarregar
+    const modo=(document.querySelector('input[name=pacModo]:checked')||{}).value||'tudo';
+    pacSet('lendo o arquivo…',1); const head=new Uint8Array(await f.slice(0,2).arrayBuffer()), gz=head[0]===0x1f&&head[1]===0x8b;
+    if(gz&&typeof DecompressionStream==='undefined') throw new Error('este navegador não descompacta .gz — use Chrome/Edge atualizado');
+    let st=f.stream(); if(gz) st=st.pipeThrough(new DecompressionStream('gzip')); const rd=st.pipeThrough(new TextDecoderStream()).getReader();
+    let buf='', H=null, total=0, lidoBytes=0, v1=false; const tam=f.size;
+    const linha=async L=>{ if(!L.trim()) return; const j=JSON.parse(L);
+      if(!H){ if(j.formato==='dpi_pacote_v1'){ v1=true; H=j; return; } if(j.formato!=='dpi_pacote_v2') throw new Error('este arquivo não é um pacote 📦 do Dólar Par/Ímpar'); H=j; return; }
+      for(let i=0;i<j.rows.length;i+=20000){ await idbPut(pacRecs(j.b,j.rows.slice(i,i+20000),H.cols)); } total+=j.rows.length; pacSet(`gravando jogos · ${j.b} · ${num(total)} jogos`,Math.min(97,gz?Math.min(97,5+total/1e4):100*lidoBytes/tam)); };
+    for(;;){ const {done,value}=await rd.read(); if(done) break; lidoBytes+=value.length; buf+=value;
+      if(!H&&buf.length>2&&buf.trimStart()[0]==='{'&&!buf.includes('\n')&&buf.length<5e8) continue;   // cabeçalho ainda chegando (ou pacote v1 inteiro numa linha)
+      let k; while((k=buf.indexOf('\n'))>=0){ const L=buf.slice(0,k); buf=buf.slice(k+1); await linha(L); } }
+    if(buf.trim()) await linha(buf);
+    if(v1){ for(const bk of H.bancos){ for(let i=0;i<bk.rows.length;i+=20000) await idbPut(pacRecs(bk.b,bk.rows.slice(i,i+20000),H.cols)); total+=bk.rows.length; } }
+    if(!H) throw new Error('arquivo vazio');
+    let nls=0; if(modo==='tudo'&&H.ls) for(const [k,v] of Object.entries(H.ls)){ if(PAC_SEGREDO.test(k)||/^dpi_nuvem_/.test(k)) continue; try{ localStorage.setItem(k,v); nls++; }catch(e){} }
+    PAC.busy=false; pacSet(`✅ Importado de <b>${H.origem}</b> (${new Date(H.criado).toLocaleString('pt-BR')}): <b>${num(total)}</b> jogos${nls?` + ${nls} configurações/estatísticas`:''}. Recarregando…`,100);
+    if(modo==='tudo'){ window.saveCfg=function(){}; }
     setTimeout(()=>location.reload(),1800);
-  }catch(e){ PAC.busy=false; pacSet('❌ Erro ao importar: '+e.message); }
+  }catch(e){ PAC.busy=false; pacSet('❌ Erro ao importar: '+(e&&e.message||e)); }
 }
-
 // =================== ☁ NUVEM (quando o HTML está hospedado na Netlify) ===================
 // Guarda robôs, relatórios, banca virtual e configurações num banco da própria Netlify (Netlify Blobs),
 // para abrir igual no PC e no celular. Os jogos NÃO vão para a nuvem: cada aparelho busca direto da Deriv.
