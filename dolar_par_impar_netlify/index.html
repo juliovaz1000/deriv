@@ -487,6 +487,8 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .cf-rs>b{width:100%;font-size:12.5px}.cf-rs.f{border-color:rgba(234,179,8,.55);background:rgba(234,179,8,.08)}.cf-rs.f>b{color:#facc15}
 .cf-fb{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:12px;color:#a49dbb}.cf-fb .mb-mini.on{background:var(--mr);border-color:var(--mr2);color:#fff}
 .cf-gr td{background:rgba(6,182,212,.1)}
+.cf-sim{margin-top:12px;background:#0d1420;border:1px solid rgba(59,130,246,.45);border-radius:14px;padding:12px}.cf-sim select{background:#15121f;border:1px solid var(--mb);color:#fff;border-radius:7px;padding:3px 5px}
+.cf-prog{height:8px;background:#2a2638;border-radius:9px;overflow:hidden;margin:6px 0}.cf-prog i{display:block;height:100%;background:linear-gradient(90deg,#3b82f6,#a855f7)}
 .cf-min{margin-top:10px;background:var(--mg);border:1px solid var(--mb);border-radius:12px;padding:9px 11px}.cf-min select{background:#15121f;border:1px solid var(--mb);color:#fff;border-radius:7px;padding:3px 5px}.cf-best td{background:rgba(34,197,94,.1)}
 .cf-sc{text-align:left;align-items:stretch!important}.cf-sc .cf-r{justify-content:flex-start!important;width:100%}.cf-sc .cf-r b{margin-left:0}
 .cf-sel{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}.cf-sc{background:var(--mg);border:1px solid rgba(34,211,238,.4);border-radius:12px;padding:9px 11px;display:flex;flex-direction:column;gap:4px}
@@ -642,7 +644,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v3.99 · 10/10/2026 · 🧪 Confirmações: o sistema testa qual mínimo de círculos acerta mais (TS/G1/G2) e pode ajustar sozinho';
+const VERSAO='v4.00 · 10/10/2026 · 🔁 Confirmações: simulação do passado (figura, linha amarela, tendência, número chama) com descoberta × conferência e confirmação ao vivo';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10098,7 +10100,7 @@ function mesaRender(full){
       <div class="ms-corpo">
         <div class="ms-esq">${cfg.mesa_modo==='robo'?mbEsqHtml(mesaW()):mesaEsqManual(qv)}</div>
         <div class="ms-dir"><div class="ms-bars">${mesaBarrasCtlHtml()}<div id="msBarras"></div></div><div id="msCentro"></div>
-          <div class="ms-pi">${mcfCtlHtml()}<div id="msPi"></div>${mcfAutoHtml()}</div>
+          <div class="ms-pi">${mcfCtlHtml()}<div id="msPi"></div>${mcfAutoHtml()}${mcfSimCtlHtml()}</div>
           <div class="ms-strip" id="msStrip"></div>
           ${cfg.mesa_modo==='robo'?`<div class="ms-lb" style="margin-top:10px">ROBÔS DE ${mesaW()}s NA ORDEM <span class="mu">(se 2 pedem o mesmo jogo, vale o de cima)</span></div><div class="ms-hist" id="msFila" style="max-height:230px"></div><div id="msHist"></div>`
             :`<div class="ms-lb" style="margin-top:10px">MINHAS ENTRADAS · ${mesaW()}s</div><div class="ms-hist" id="msHist"></div>`}</div>
@@ -10117,7 +10119,7 @@ function mesaRender(full){
   $('#msCentro').innerHTML=rob?mbCentroHtml(w):mesaCentroHtml();
   $('#msStrip').innerHTML=mesaBalls(W,40,false);
   try{ $('#msBarras').innerHTML=mesaBarrasHtml(); }catch(e){ console.warn('barras',e); }
-  try{ $('#msPi').innerHTML=mcfHtml(); const as=$('#mcfAutoSt'); if(as) as.innerHTML=mcfAutoSt(); }catch(e){ console.warn('confirmações',e); }
+  try{ $('#msPi').innerHTML=mcfHtml(); const as=$('#mcfAutoSt'); if(as) as.innerHTML=mcfAutoSt(); const sr=$('#msSimR'); if(sr) sr.innerHTML=mcfSimHtml(); }catch(e){ console.warn('confirmações',e); }
   if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); const ss=mbSess(w); $('#msSess').innerHTML=`<div><b>${ss.ac}</b><span>ACERTOS</span></div><div><b>${ss.er}</b><span>ERROS</span></div><div><b class="${ss.pl>=0?'okc':'ruimc'}">${ss.pl>=0?'+':''}$ ${ss.pl.toFixed(2)}</b><span>RESULTADO</span></div>`; $('#msFila').innerHTML=mbFilaHtml(w); $('#msHist').innerHTML=mbHistHtml(w); }
   else { $('#msSess').innerHTML=mesaSessHtml(); $('#msHist').innerHTML=mesaHistHtml(); }
 }
@@ -10788,7 +10790,7 @@ function piStats(L,lvl){
 // mesmo jogo → ⭐ SINAL FORTE (som + notificação + barra com "entrar" naquele índice).
 // Cada círculo e cada combinação (ex.: 1+3+7) guarda o placar TS/G1/G2/red, por tempo de jogo.
 // =====================================================================================
-const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20};
+const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20,simH:24};
 const MCF_CIRC=[[1,'🕒','Horário fixo 100%'],[2,'🕐','Horas pagantes'],[3,'🖼','Figura gráfica'],[4,'🟨','Linha amarela'],[5,'🤖','Robôs ligados'],[6,'🧭','Tendência'],[7,'🔢','Número chama']];
 const MCF_2S=['R_10','R_25','R_50','R_75','R_100','RDBEAR','RDBULL'];
 function mcfC(){ return {...MCF_DEF,...(cfg.mesa_cf||{})}; }
@@ -10884,6 +10886,7 @@ function mcfTick(){
     const kk=w+'|'+sym, last=W.at(-1), lastS=Math.round(last.t/1000), T=lastS+w, P=MCF.pend[kk]||(MCF.pend[kk]={});
     for(const k of Object.keys(P)){ const p=P[k], Tk=+k; if(Tk+2*w>lastS) continue;
       for(const [id] of MCF_CIRC){ const vt=p.v[id]; if(!vt||vt.alvo==null) continue; const nv=mcfNivel(W,Tk,w,vt.alvo); if(nv==null) continue; const o=st.circ[id]||(st.circ[id]={n:0,lv:[0,0,0,0]}); o.n++; o.lv[nv]++; }
+      try{ mcfSimVivo(w,p.v,W,Tk); }catch(e){}
       const f=mcfForca(p.v);
       if(f.n>=2){ const nv=mcfNivel(W,Tk,w,f.alvo); if(nv!=null){ const key=f.ids.join('+'), o=st.combo[key]||(st.combo[key]={n:0,lv:[0,0,0,0]}); o.n++; o.lv[nv]++;
         const os=(o.s||(o.s={}))[sym]||(o.s[sym]={n:0,lv:[0,0,0,0]}); os.n++; os.lv[nv]++; mcfSelReg(w,key,sym,nv,Tk);
@@ -10895,7 +10898,7 @@ function mcfTick(){
       const f=mcfForca(v); if((f.n>=c.min||mcfSelTem(w,f))&&MCF.alertado[kk]!==T){ MCF.alertado[kk]=T; mcfAlerta(w,sym,T,f); }
       try{ mcfAuto(w,sym,T,f); }catch(e){ console.warn('auto',e); } }
   }
-  if(mud){ mcfSave(w); try{ mcfMinAuto(w); }catch(e){} }
+  if(mud){ mcfSave(w); const S=MCFSIM.st[w]; if(S&&S._sujo){ delete S._sujo; mcfSimSave(w); } try{ mcfMinAuto(w); }catch(e){} }
 }
 setInterval(()=>{ try{ mcfTick(); }catch(e){ console.warn('confirmações',e); } },500);
 
@@ -10993,6 +10996,64 @@ function mcfMinHtml(st,c){
     <div class="mu" style="font-size:11px;margin-top:3px">${best?`Pelo <b>${crit}</b>, o melhor agora é <b>≥ ${best.k} círculos</b> (${(100*[0,1,2].slice(0,c.minCrit+1).reduce((a,i)=>a+best.o.lv[i],0)/best.o.n).toFixed(0)}% em ${best.o.n} sinais; acaso ${acaso}%). `:`Ainda nenhum mínimo com ${c.minN}+ sinais. `}A escolha desconta a sorte de amostra pequena: um mínimo com poucos sinais e 100% não ganha de um com muitos sinais e acerto alto.${c.minAuto?' O 🤖 troca o mínimo sozinho quando o melhor mudar (o "sinal forte", os avisos e a entrada automática passam a usar o novo).':''}</div></div>`;
 }
 function mcfMinAuto(w){ const c=mcfC(); if(!c.minAuto) return; const {best}=mcfMinTab(mcfLoad(w),c); if(best&&best.k!==c.min){ MCF.autoMsg=`🧪 mínimo de círculos ajustado sozinho: ${c.min} → ${best.k}`; mcfSet('min',best.k); } }
+
+// =====================================================================================
+// 🔁 SIMULAÇÃO DO PASSADO (separada): refaz jogo a jogo só os círculos que dá para reconstruir com segurança
+// (🖼3 figura, 🟨4 linha amarela, 📈6 tendência, 🔢7 número chama). Em cada jogo usa SÓ os jogos anteriores.
+// Metade antiga = DESCOBERTA, metade nova = CONFERÊNCIA. Depois o AO VIVO confere as mesmas combinações daqui pra frente.
+// =====================================================================================
+const MCF_SIMC=[3,4,6,7];
+let MCFSIM={st:{},run:null};
+function mcfSimLoad(w){ if(MCFSIM.st[w]) return MCFSIM.st[w]; let o=null; try{ o=JSON.parse(localStorage.getItem('mesa_cf_sim_v1_'+w)||'null'); }catch(e){} return MCFSIM.st[w]=o; }
+function mcfSimSave(w){ try{ localStorage.setItem('mesa_cf_sim_v1_'+w,JSON.stringify(MCFSIM.st[w])); }catch(e){} }
+function mcfSub(v){ const o={}; for(const id of MCF_SIMC) if(v[id]) o[id]=v[id]; return o; }
+function mcfSimParams(c){ return [c.jan,c.lim,c.verde,c.fD,c.fMin,c.tend,c.nMin].join('|'); }
+const mcfZ=()=>({n:0,lv:[0,0,0,0]});
+function mcfAdd(o,nv){ o.n++; o.lv[nv]++; }
+async function mcfSimular(){
+  if(MCFSIM.run) return; const w=mesaW(), c=mcfC(), H=Math.max(2,+c.simH||24), syms=mcfSyms(), fim=Date.now(), ini=fim-H*3600e3, meio=ini+(fim-ini)/2;
+  const R={quando:Date.now(),horas:H,w,syms,params:mcfSimParams(c),jogos:0,sinais:0,circ:{},combo:{},vivo:{},vivoDesde:Date.now()};
+  const run=MCFSIM.run={w,feito:0,total:0,sym:'',parar:false}; mesaRender(false);
+  const dados=[]; for(const sym of syms){ const bank=mcfBank(w,sym); let G=await idbRange(bank,ini-3000*w*1000,fim); if(!G||G.length<300) G=(LIVE[bank]||[]).filter(x=>x.t>=ini-3000*w*1000); G=G.filter(x=>x&&x.t&&x.p!=null&&x.p>=0).map(x=>({t:x.t,d:x.d,p:x.p})); const u=[]; let lt=0; for(const x of G){ if(x.t!==lt) u.push(x); lt=x.t; } dados.push({sym,G:u}); run.total+=u.filter(x=>x.t>=ini).length; }
+  for(const {sym,G} of dados){ run.sym=sym; const ws=w*1000;
+    for(let i=200;i<G.length-3;i++){
+      if(run.parar) break; if(G[i].t<ini) continue; run.feito++; R.jogos++;
+      if(G[i+1].t!==G[i].t+ws||G[i+2].t!==G[i].t+2*ws||G[i+3].t!==G[i].t+3*ws) continue;
+      const W=G.slice(Math.max(0,i-5999),i+1), v={};       // só o passado (até 6000 jogos, como o ao vivo)
+      v[3]=mcfFigura(W,c,'sim|'+sym)||{alvo:null}; v[4]=mcfLinha(W,c)||{alvo:null}; v[6]=mcfTend(W,c)||{alvo:null}; v[7]=mcfNumero(W,c)||{alvo:null};
+      const nvOf=alvo=>{ for(let k=1;k<=3;k++) if(G[i+k].p===alvo) return k-1; return 3; }, parte=G[i].t<meio?'a':'b';
+      for(const id of MCF_SIMC){ const x=v[id]; if(!x||x.alvo==null) continue; const o=R.circ[id]||(R.circ[id]={a:mcfZ(),b:mcfZ()}); mcfAdd(o[parte],nvOf(x.alvo)); }
+      const f=mcfForca(v); if(f.n>=2){ const nv=nvOf(f.alvo), key=f.ids.join('+'), o=R.combo[key]||(R.combo[key]={a:mcfZ(),b:mcfZ(),s:{}}); mcfAdd(o[parte],nv); mcfAdd(o.s[sym]||(o.s[sym]=mcfZ()),nv); R.sinais++; }
+      if(run.feito%150===0) await new Promise(r=>setTimeout(r,0));
+    }
+  }
+  const velho=mcfSimLoad(w); if(velho&&velho.params===R.params&&!run.parar){ R.vivo=velho.vivo||{}; R.vivoDesde=velho.vivoDesde||R.quando; }
+  if(!run.parar){ MCFSIM.st[w]=R; mcfSimSave(w); }
+  MCFSIM.run=null; mesaRender(true);
+}
+// ao vivo: as mesmas combinações (só com os círculos 3,4,6,7) daqui pra frente
+function mcfSimVivo(w,v,W,Tk){ const S=mcfSimLoad(w); if(!S) return; const f=mcfForca(mcfSub(v)); if(f.n<2) return; const nv=mcfNivel(W,Tk,w,f.alvo); if(nv==null) return; const key=f.ids.join('+'); mcfAdd(S.vivo[key]||(S.vivo[key]=mcfZ()),nv); S._sujo=1; }
+function mcfHits(o,g){ let h=0; for(let k=0;k<=g;k++) h+=o.lv[k]; return h; }
+function mcfVer(o,g,acaso,nMin){ if(!o||o.n<nMin) return {t:'poucos',c:'mu'}; return mcfWilson(mcfHits(o,g),o.n)*100>acaso?{t:'✔',c:'okc'}:{t:'✖',c:'ruimc'}; }
+function mcfSimCtlHtml(){ const c=mcfC(); return `<div class="cf-sim"><div class="cf-r" style="flex-wrap:wrap"><b style="margin-left:0;font-size:13px">🔁 SIMULAÇÃO DO PASSADO · 🖼3 🟨4 📈6 🔢7 · ${mesaW()}s</b>
+  <label class="ms-chk">últimas <select onchange="mcfSet('simH',+this.value)">${[6,12,24,48,72].map(h=>`<option value="${h}" ${+c.simH===h?'selected':''}>${h}h</option>`).join('')}</select></label>
+  <button class="mb-mini" onclick="mcfSimular()">▶ simular agora</button><button class="mb-mini" onclick="if(MCFSIM.run) MCFSIM.run.parar=true">■ parar</button></div><div id="msSimR">${mcfSimHtml()}</div></div>`; }
+function mcfSimHtml(){
+  const w=mesaW(), c=mcfC(), g=c.minCrit, acaso=[50,75,87.5][g], crit=['TS','até G1','até G2'][g], run=MCFSIM.run;
+  if(run) return `<div class="cf-prog"><i style="width:${run.total?Math.min(100,100*run.feito/run.total):0}%"></i></div><div class="mu" style="font-size:12px">simulando ${symNome(run.sym||'')} · ${run.feito} de ${run.total} jogos…</div>`;
+  const S=mcfSimLoad(w); if(!S) return `<div class="mu" style="font-size:12px">Refaz o passado jogo a jogo com os 4 círculos que dá para reconstruir com segurança (horário fixo, horas pagantes e robôs ficam de fora). Usa só os jogos anteriores a cada momento. A metade mais antiga descobre, a mais nova confere, e depois o ao vivo confirma. Fica separado das tabelas ao vivo.</div>`;
+  const tx=o=>o&&o.n?`${(100*mcfHits(o,g)/o.n).toFixed(0)}% <span class="mu">(${o.n})</span>`:'<span class="mu">—</span>';
+  const red=o=>o&&o.n?`<span class="${o.lv[3]?'ruimc':''}">${o.lv[3]}</span>`:'—';
+  const rows=Object.entries(S.combo).map(([k,o])=>{ const t={n:o.a.n+o.b.n,lv:o.a.lv.map((x,i)=>x+o.b.lv[i])}; return {k,o,t,vi:S.vivo[k]}; }).filter(r=>r.t.n>=5).sort((a,b)=>mcfWilson(mcfHits(b.t,g),b.t.n)-mcfWilson(mcfHits(a.t,g),a.t.n));
+  const mins=[2,3,4].map(k=>{ const A=mcfZ(),B=mcfZ(),V=mcfZ(); for(const [key,o] of Object.entries(S.combo)) if(key.split('+').length>=k){ for(const [X,Y] of [[A,o.a],[B,o.b]]){ X.n+=Y.n; Y.lv.forEach((x,i)=>X.lv[i]+=x); } const vi=S.vivo[key]; if(vi){ V.n+=vi.n; vi.lv.forEach((x,i)=>V.lv[i]+=x); } } return {k,A,B,V}; }).filter(x=>x.A.n+x.B.n);
+  const ver=(o)=>{ const r=mcfVer(o,g,acaso,20); return `<b class="${r.c}">${r.t}</b>`; };
+  const pass=r=>mcfVer(r.o.a,g,acaso,20).t==='✔'&&mcfVer(r.o.b,g,acaso,20).t==='✔';
+  return `<div class="mu" style="font-size:11.5px;margin:4px 0 6px">Simulado em ${new Date(S.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · últimas ${S.horas}h · ${S.syms.length} índice(s) · ${S.jogos} jogos · ${S.sinais} sinais (2+ círculos) · critério <b>${crit}</b> (acaso ${acaso}%)${S.params!==mcfSimParams(c)?' · <span class="ruimc">⚠ os ajustes dos círculos mudaram desde a simulação — simule de novo</span>':''}</div>
+    <table class="cf-t2"><tr><th>Mínimo</th><th>Descoberta</th><th></th><th>Conferência</th><th></th><th>Ao vivo</th><th></th></tr>${mins.map(m=>`<tr><td><b>≥ ${m.k} círculos</b></td><td>${tx(m.A)}</td><td>${ver(m.A)}</td><td>${tx(m.B)}</td><td>${ver(m.B)}</td><td>${tx(m.V)}</td><td>${ver(m.V)}</td></tr>`).join('')}</table>
+    <table class="cf-t2" style="margin-top:8px"><tr><th>Combinação</th><th>Descoberta (${crit})</th><th>red</th><th>Conferência</th><th>red</th><th>Passou nas 2?</th><th>Ao vivo desde ${new Date(S.vivoDesde).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</th><th>red</th><th>Confirmando?</th></tr>
+    ${rows.length?rows.slice(0,14).map(r=>`<tr class="${pass(r)?'cf-best':''}"><td><b>${r.k}</b></td><td>${tx(r.o.a)}</td><td>${red(r.o.a)}</td><td>${tx(r.o.b)}</td><td>${red(r.o.b)}</td><td>${pass(r)?'<b class="okc">✔ passou</b>':'<span class="mu">não</span>'}</td><td>${tx(r.vi)}</td><td>${red(r.vi)}</td><td>${ver(r.vi)}</td></tr>`).join(''):'<tr><td colspan="9" class="mu">Nenhuma combinação com 5+ sinais.</td></tr>'}</table>
+    <div class="mu" style="font-size:11px;margin-top:3px">✔ = mesmo descontando a sorte da amostra, acertou acima do acaso (mín. 20 sinais). Só merece confiança o que passa na descoberta, na conferência <b>e</b> continua ✔ ao vivo. O ao vivo conta só com os mesmos 4 círculos, separado das tabelas de cima.</div>`;
+}
 function mcfTaxa(o,g){ if(!o||!o.n) return null; let s=0; for(let k=0;k<=g;k++) s+=o.lv[k]; return 100*s/o.n; }
 function mcfCapturar2s(){ const L=[...new Set([...d5Syms(),...MCF_2S])]; d5SetSyms(L); setTimeout(()=>mesaRender(true),1500); }
 // barras dos índices com sinal forte (vão no topo de "PRÓXIMOS SINAIS")
