@@ -487,6 +487,14 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .cf-rs>b{width:100%;font-size:12.5px}.cf-rs.f{border-color:rgba(234,179,8,.55);background:rgba(234,179,8,.08)}.cf-rs.f>b{color:#facc15}
 .cf-fb{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:12px;color:#a49dbb}.cf-fb .mb-mini.on{background:var(--mr);border-color:var(--mr2);color:#fff}
 .cf-gr td{background:rgba(6,182,212,.1)}
+.cf-big.pr.on{background:linear-gradient(135deg,#f97316,#c2410c);color:#fff;border-color:#fb923c}
+.cf-ab{grid-template-columns:repeat(4,1fr)!important}
+.mcf-t.pr{background:#1f0d06;border-color:#f97316;color:#ffedd5;box-shadow:0 0 0 2px rgba(249,115,22,.35),0 8px 24px rgba(0,0,0,.6)}.mcf-t.pr button{background:#f97316;color:#fff}.mcf-t.pr button+button{background:#3a3648}
+.cf-sc.prc{border-color:rgba(249,115,22,.5)}.cf-sc.prc.agora{box-shadow:0 0 18px rgba(249,115,22,.45);border-color:#f97316}
+.cf-agora{background:rgba(249,115,22,.15);border-radius:8px;padding:5px 8px;font-size:12.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cf-prr td{background:rgba(249,115,22,.06)}
+@media(max-width:1100px){.cf-ab{grid-template-columns:repeat(2,1fr)!important}}
+
 .cf-sim{margin-top:12px;background:#0d1420;border:1px solid rgba(59,130,246,.45);border-radius:14px;padding:12px}.cf-sim select{background:#15121f;border:1px solid var(--mb);color:#fff;border-radius:7px;padding:3px 5px}
 .cf-prog{height:8px;background:#2a2638;border-radius:9px;overflow:hidden;margin:6px 0}.cf-prog i{display:block;height:100%;background:linear-gradient(90deg,#3b82f6,#a855f7)}
 .cf-min{margin-top:10px;background:var(--mg);border:1px solid var(--mb);border-radius:12px;padding:9px 11px}.cf-min select{background:#15121f;border:1px solid var(--mb);color:#fff;border-radius:7px;padding:3px 5px}.cf-best td{background:rgba(34,197,94,.1)}
@@ -644,7 +652,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.00 · 10/10/2026 · 🔁 Confirmações: simulação do passado (figura, linha amarela, tendência, número chama) com descoberta × conferência e confirmação ao vivo';
+const VERSAO='v4.01 · 10/10/2026 · 🔁 Confirmações: quadro pós-red por volatilidade (win/loss virtual), aviso diferente e entrada no sinal forte pós-red';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10790,7 +10798,7 @@ function piStats(L,lvl){
 // mesmo jogo → ⭐ SINAL FORTE (som + notificação + barra com "entrar" naquele índice).
 // Cada círculo e cada combinação (ex.: 1+3+7) guarda o placar TS/G1/G2/red, por tempo de jogo.
 // =====================================================================================
-const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20,simH:24};
+const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20,simH:24,prMode:'R',prPop:1};
 const MCF_CIRC=[[1,'🕒','Horário fixo 100%'],[2,'🕐','Horas pagantes'],[3,'🖼','Figura gráfica'],[4,'🟨','Linha amarela'],[5,'🤖','Robôs ligados'],[6,'🧭','Tendência'],[7,'🔢','Número chama']];
 const MCF_2S=['R_10','R_25','R_50','R_75','R_100','RDBEAR','RDBULL'];
 function mcfC(){ return {...MCF_DEF,...(cfg.mesa_cf||{})}; }
@@ -10890,12 +10898,12 @@ function mcfTick(){
       const f=mcfForca(p.v);
       if(f.n>=2){ const nv=mcfNivel(W,Tk,w,f.alvo); if(nv!=null){ const key=f.ids.join('+'), o=st.combo[key]||(st.combo[key]={n:0,lv:[0,0,0,0]}); o.n++; o.lv[nv]++;
         const os=(o.s||(o.s={}))[sym]||(o.s[sym]={n:0,lv:[0,0,0,0]}); os.n++; os.lv[nv]++; mcfSelReg(w,key,sym,nv,Tk);
-        const forte=f.n>=c.min, ss=(st.sym||(st.sym={}))[sym]||(st.sym[sym]={n:0,lv:[0,0,0,0],fn:0,flv:[0,0,0,0]}); ss.n++; ss.lv[nv]++; if(forte){ ss.fn++; ss.flv[nv]++; }
+        const forte=f.n>=c.min, ss=(st.sym||(st.sym={}))[sym]||(st.sym[sym]={n:0,lv:[0,0,0,0],fn:0,flv:[0,0,0,0]}); ss.n++; ss.lv[nv]++; if(forte){ ss.fn++; ss.flv[nv]++; mcfPrReg(st,sym,nv); }
         st.hist.push({T:Tk,s:sym,ids:f.ids,alvo:f.alvo,contra:f.contra,nv,f:forte?1:0,a:MCF.autoFeito[sym+'|'+Tk]?1:0}); if(st.hist.length>300) st.hist.splice(0,st.hist.length-300); } }
       delete P[k]; mud=true;
     }
     if(MCF.ultT[kk]!==T&&dmNow()<T-0.5){ MCF.ultT[kk]=T; const v=mcfVotar(w,T,sym); P[T]={v}; MCF.votos[kk]={T,v,sym};
-      const f=mcfForca(v); if((f.n>=c.min||mcfSelTem(w,f))&&MCF.alertado[kk]!==T){ MCF.alertado[kk]=T; mcfAlerta(w,sym,T,f); }
+      const f=mcfForca(v); if((f.n>=c.min||mcfSelTem(w,f))&&MCF.alertado[kk]!==T){ MCF.alertado[kk]=T; const pr=f.n>=c.min&&c.prPop?mcfPrEstado(w,sym):null; pr?mcfAlertaPr(w,sym,T,f,pr):mcfAlerta(w,sym,T,f); }
       try{ mcfAuto(w,sym,T,f); }catch(e){ console.warn('auto',e); } }
   }
   if(mud){ mcfSave(w); const S=MCFSIM.st[w]; if(S&&S._sujo){ delete S._sujo; mcfSimSave(w); } try{ mcfMinAuto(w); }catch(e){} }
@@ -10910,19 +10918,20 @@ function mcfGatOk(w,c,sym){ const g=String(c.gat||'').toUpperCase().replace(/[^R
 function mcfAutoLog(txt){ MCF.autoMsg=txt; }
 function mcfAuto(w,sym,T,f){
   const c=mcfC(); if(!c.auto||f.alvo==null) return;
-  if(c.auto===3){ if(!mcfSelTem(w,f)) return; } else { const need=c.auto===1?Math.max(2,c.min):2; if(f.n<need) return; }
+  if(c.auto===4){ if(f.n<c.min) return; if(!mcfPrOk(w,sym,c.prMode)) return mcfAutoLog(`${hmsOf(T)} · ${symNome(sym)}: sinal forte, mas não está pós-red (${mcfPrSeqTxt(w,sym)||'sem histórico'})`); }
+  else if(c.auto===3){ if(!mcfSelTem(w,f)) return; } else { const need=c.auto===1?Math.max(2,c.min):2; if(f.n<need) return; }
   const k=sym+'|'+T; if(MCF.autoFeito[k]) return;
   const nm=symNome(sym);
   if((c.excl||[]).includes(sym)) return mcfAutoLog(`${hmsOf(T)} · ${nm}: pulado (índice desligado da entrada automática)`);
   if(c.semContra&&f.contra) return mcfAutoLog(`${hmsOf(T)} · ${nm}: pulado (${f.contra} círculo(s) contra)`);
-  if(!mcfGatOk(w,c,sym)) return mcfAutoLog(`${hmsOf(T)} · ${nm}: esperando o gatilho "${(MCF_GAT.find(x=>x[0]===c.gat)||[0,c.gat])[1]}"`);
+  if(c.auto!==4&&!mcfGatOk(w,c,sym)) return mcfAutoLog(`${hmsOf(T)} · ${nm}: esperando o gatilho "${(MCF_GAT.find(x=>x[0]===c.gat)||[0,c.gat])[1]}"`);
   if(!DM.ok||!DM.virt) return mcfAutoLog('⚠ conta DEMO não conectada — abra a aba 💼 Conta Demo');
   if(T-dmNow()<2.6) return;
   const abertas=DM.orders.filter(o=>(o.src==='mesa'||o.src==='mbot')&&['aguardando','comprando','em jogo'].includes(o.estado));
   if(c.umPor&&abertas.length) return mcfAutoLog(`${hmsOf(T)} · ${nm}: pulado (já tem uma entrada em andamento)`);
   if(abertas.some(o=>o.step===w&&o.mcor!==f.alvo&&o.sym===sym)) return;
   MCF.autoFeito[k]=1;
-  dmRegistrar({key:`mesa|${w}|${T}|${f.alvo}|${sym}`,src:'mesa',man:1,nome:`🤖 Mesa ${w}s ${f.alvo?'ÍMPAR':'PAR'} · ${c.auto===3?'🎯 '+f.ids.join('+'):'⭐ '+f.n+' conf.'}${f.contra?' (-'+f.contra+')':''} · ${nm}`,sym,T,step:w,maxN:mesaGale(),ct:f.alvo?'DIGITODD':'DIGITEVEN',stakeBase:mesaStake(),fator:mesaFator(),mcor:f.alvo});
+  dmRegistrar({key:`mesa|${w}|${T}|${f.alvo}|${sym}`,src:'mesa',man:1,nome:`🤖 Mesa ${w}s ${f.alvo?'ÍMPAR':'PAR'} · ${c.auto===4?'🔁 pós-red ('+mcfPrEstado(w,sym)+') ⭐ '+f.n+' conf.':c.auto===3?'🎯 '+f.ids.join('+'):'⭐ '+f.n+' conf.'}${f.contra?' (-'+f.contra+')':''} · ${nm}`,sym,T,step:w,maxN:mesaGale(),ct:f.alvo?'DIGITODD':'DIGITEVEN',stakeBase:mesaStake(),fator:mesaFator(),mcor:f.alvo});
   MCF.autoLog.unshift({T,sym,alvo:f.alvo,n:f.n,contra:f.contra}); MCF.autoLog.length=Math.min(MCF.autoLog.length,30);
   mcfAutoLog(`✅ ${hmsOf(T)} · entrou ${f.alvo?'ÍMPAR':'PAR'} em ${nm} (${f.n} confirmações${f.contra?', '+f.contra+' contra':''})`);
   try{ beep(); }catch(e){}
@@ -10930,7 +10939,7 @@ function mcfAuto(w,sym,T,f){
 function mcfExcl(sym){ const c=mcfC(), L=new Set(c.excl||[]); L.has(sym)?L.delete(sym):L.add(sym); mcfSet('excl',[...L]); }
 function mcfAutoSt(){ const c=mcfC(), w=mesaW(); if(!c.auto) return '<span class="mu">desligado — o sistema só avisa (bip, notificação e ▶ entrar)</span>';
   const seq=mcfSeq(w,c,mesaSym()).slice(-12);
-  return `<b class="okc">LIGADO</b> · ${c.auto===1?`só sinais fortes (≥ ${c.min} círculos)`:c.auto===3?`só as combinações gravadas (${Object.keys(mcfSel(w)).join(', ')||'nenhuma gravada ainda!'})`:'todos os sinais (2+ círculos)'} · valor $ ${mesaStake().toFixed(2)} · até G${mesaGale()} · fator ${mesaFator()}
+  return `<b class="okc">LIGADO</b> · ${c.auto===1?`só sinais fortes (≥ ${c.min} círculos)`:c.auto===4?`sinal forte pós-red na mesma volatilidade (${MCF_PRM.find(x=>x[0]===c.prMode)[1]})`:c.auto===3?`só as combinações gravadas (${Object.keys(mcfSel(w)).join(', ')||'nenhuma gravada ainda!'})`:'todos os sinais (2+ círculos)'} · valor $ ${mesaStake().toFixed(2)} · até G${mesaGale()} · fator ${mesaFator()}
     ${c.gat?` · gatilho: <b>${(MCF_GAT.find(x=>x[0]===c.gat)||[0,c.gat])[1]}</b> · últimos: ${seq?seq.split('').map(x=>`<b class="${x==='G'?'okc':'ruimc'}">${x}</b>`).join(''):'—'}`:''}
     <br>${MCF.autoMsg||'aguardando sinal…'}${MCF.autoLog.length?` · <span class="mu">${MCF.autoLog.length} entrada(s) automática(s) nesta sessão</span>`:''}`; }
 function mcfAutoHtml(){
@@ -10939,7 +10948,9 @@ function mcfAutoHtml(){
   return `<div class="cf-auto">
     <div class="cf-ab"><button class="cf-big ${c.auto===1?'on':''}" onclick="mcfSet('auto',${c.auto===1?0:1})">🤖 ${c.auto===1?'■ PARAR':'ENTRAR AUTOMÁTICO'} NOS SINAIS FORTES</button>
       <button class="cf-big t ${c.auto===2?'on':''}" onclick="mcfSet('auto',${c.auto===2?0:2})">⚡ ${c.auto===2?'■ PARAR':'ENTRAR EM TODOS OS SINAIS'}</button>
-      <button class="cf-big g ${c.auto===3?'on':''}" onclick="mcfSet('auto',${c.auto===3?0:3})">🎯 ${c.auto===3?'■ PARAR':'ENTRAR SÓ NAS COMBINAÇÕES GRAVADAS'}</button></div>
+      <button class="cf-big g ${c.auto===3?'on':''}" onclick="mcfSet('auto',${c.auto===3?0:3})">🎯 ${c.auto===3?'■ PARAR':'ENTRAR SÓ NAS COMBINAÇÕES GRAVADAS'}</button>
+      <button class="cf-big pr ${c.auto===4?'on':''}" onclick="mcfSet('auto',${c.auto===4?0:4})">🔁 ${c.auto===4?'■ PARAR':'ENTRAR NO SINAL FORTE PÓS-RED'}</button></div>
+    <div class="cf-ao"><label class="ms-chk">🔁 pós-red: entrar <select onchange="mcfSet('prMode',this.value)">${MCF_PRM.map(([v,t])=>`<option value="${v}" ${c.prMode===v?'selected':''}>${t}</option>`).join('')}</select></label>${ck('prPop','aviso diferente quando vier sinal forte pós-red')}</div>
     <div class="cf-ao"><label class="ms-chk">🎯 entrar <select onchange="mcfSet('gat',this.value)">${opts}</select></label>
       <label class="ms-chk">outro gatilho <input type="text" value="${c.gat||''}" placeholder="ex: RRG" style="width:60px;text-transform:uppercase" onchange="mcfSet('gat',this.value.toUpperCase().replace(/[^RG]/g,''))"></label>
       ${ck('gatIdx','gatilho contado no mesmo índice')}${ck('umPor','1 entrada por vez')}${ck('semContra','pular sinal com círculo contra')}</div>
@@ -11054,6 +11065,49 @@ function mcfSimHtml(){
     ${rows.length?rows.slice(0,14).map(r=>`<tr class="${pass(r)?'cf-best':''}"><td><b>${r.k}</b></td><td>${tx(r.o.a)}</td><td>${red(r.o.a)}</td><td>${tx(r.o.b)}</td><td>${red(r.o.b)}</td><td>${pass(r)?'<b class="okc">✔ passou</b>':'<span class="mu">não</span>'}</td><td>${tx(r.vi)}</td><td>${red(r.vi)}</td><td>${ver(r.vi)}</td></tr>`).join(''):'<tr><td colspan="9" class="mu">Nenhuma combinação com 5+ sinais.</td></tr>'}</table>
     <div class="mu" style="font-size:11px;margin-top:3px">✔ = mesmo descontando a sorte da amostra, acertou acima do acaso (mín. 20 sinais). Só merece confiança o que passa na descoberta, na conferência <b>e</b> continua ✔ ao vivo. O ao vivo conta só com os mesmos 4 círculos, separado das tabelas de cima.</div>`;
 }
+
+// 🔁 PÓS-RED por volatilidade: cada índice guarda a sequência dos SEUS sinais fortes (nível 0..3; 3 = red).
+// Quando um sinal forte dá red numa vol, ela vai para o quadro pós-red e o sistema acompanha (win/loss virtual) o que vem depois nela.
+const MCF_PRM=[['R','após 1 red dela'],['RG','após 1 red e 1 green dela'],['R|RG','após 1 red ou 1 red + 1 green'],['RR','após 2 reds seguidos dela']];
+const MCF_PRP=[['R','depois de 1 red'],['RR','depois de 2 reds'],['RG','depois de red + green'],['RGG','depois de red + 2 greens'],['G','depois de 1 green'],['GG','depois de 2 greens']];
+function mcfPrBoot(st){ if(st.prv) return st.prv; st.prv={}; for(const h of st.hist) if(h.f&&h.s&&h.nv!=null) st.prv[h.s]=((st.prv[h.s]||'')+h.nv).slice(-300); return st.prv; }
+function mcfPrReg(st,sym,nv){ const P=mcfPrBoot(st); P[sym]=((P[sym]||'')+nv).slice(-300); }
+function mcfPrGR(s){ const G=mcfGmax(); return s.split('').map(x=>+x<=G?'G':'R').join(''); }
+function mcfPrSeqTxt(w,sym){ return mcfPrGR((mcfPrBoot(mcfLoad(w))[sym]||'').slice(-6)); }
+function mcfPrEstado(w,sym){ const q=mcfPrGR(mcfPrBoot(mcfLoad(w))[sym]||''); return q.endsWith('RR')?'RR':q.endsWith('R')?'R':q.endsWith('RG')?'RG':null; }
+function mcfPrOk(w,sym,m){ const q=mcfPrGR(mcfPrBoot(mcfLoad(w))[sym]||''); return m==='R'?q.endsWith('R'):m==='RG'?q.endsWith('RG'):m==='RR'?q.endsWith('RR'):(q.endsWith('R')||q.endsWith('RG')); }
+// estatística: sinal forte numa vol depois de cada situação dela (todas as vols juntas e por vol)
+function mcfPrStats(w){ const P=mcfPrBoot(mcfLoad(w)), A={}, S={}, base=mcfZ();
+  for(const [sym,str] of Object.entries(P)){ const q=mcfPrGR(str); for(let j=1;j<str.length;j++){ const nv=+str[j], pre=q.slice(0,j); mcfAdd(base,nv);
+    for(const [pt] of MCF_PRP) if(pre.endsWith(pt)){ mcfAdd(A[pt]||(A[pt]=mcfZ()),nv); const ss=S[sym]||(S[sym]={}); mcfAdd(ss[pt]||(ss[pt]=mcfZ()),nv); } } }
+  return {A,S,base}; }
+function mcfPrTx(o){ return o&&o.n?`TS ${mcfTaxa(o,0).toFixed(0)}% · G1 ${mcfTaxa(o,1).toFixed(0)}% · G2 ${mcfTaxa(o,2).toFixed(0)}% · ${o.lv[3]} red (${o.n})`:'sem casos ainda'; }
+function mcfAlertaPr(w,sym,T,f,pr){
+  try{ beep(); setTimeout(()=>{ try{ beep(); }catch(e){} },200); setTimeout(()=>{ try{ beep(); }catch(e){} },400); }catch(e){}
+  const {A,S}=mcfPrStats(w), pt=pr==='RR'?'RR':pr, ga=A[pt], gv=(S[sym]||{})[pt];
+  try{ if(typeof Notification!=='undefined'&&Notification.permission==='granted') new Notification(`🔁 SINAL FORTE PÓS-RED · ${symNome(sym)}`,{body:`${symNome(sym)} vem de ${pr==='RG'?'red + green':pr==='RR'?'2 reds':'red'} · ${f.alvo?'ÍMPAR':'PAR'} no jogo ${hmsOf(T)}`,tag:'mcfpr-'+sym}); }catch(e){}
+  let el=document.getElementById('mcfToast'); if(!el){ el=document.createElement('div'); el.id='mcfToast'; document.body.appendChild(el); }
+  const id='p'+T+sym; el.insertAdjacentHTML('afterbegin',`<div class="mcf-t pr" id="${id}">🔁 <b>SINAL FORTE PÓS-RED · ${symNome(sym)}</b><br>vem de <b>${pr==='RG'?'RED + GREEN':pr==='RR'?'2 REDS':'RED'}</b> nela · ${f.n} confirmações → <b>${f.alvo?'ÍMPAR':'PAR'}</b> no jogo ${hmsOf(T)}
+    <div style="font-size:11.5px;opacity:.9;margin-top:3px">todas as vols ${pt==='RG'?'depois de red+green':pt==='RR'?'depois de 2 reds':'depois de red'}: ${mcfPrTx(ga)}<br>só ${symNome(sym).replace('Volatility','Vol')}: ${mcfPrTx(gv)}</div>
+    <div><button onclick="mesaAgendar(${T},${f.alvo},'🔁 pós-red ${pr}','${sym}');this.closest('.mcf-t').remove()">▶ entrar pós-red</button> <button onclick="this.closest('.mcf-t').remove()">fechar</button></div></div>`);
+  while(el.children.length>3) el.lastElementChild.remove();
+  setTimeout(()=>{ const x=document.getElementById(id); if(x) x.remove(); },Math.max(4000,(T-dmNow())*1000));
+}
+function mcfPrHtml(w){
+  const st=mcfLoad(w), P=mcfPrBoot(st), {A,S,base}=mcfPrStats(w), now=dmNow();
+  const tab=`<table class="cf-t2"><tr><th>Sinal forte na mesma vol…</th><th>Casos</th><th>TS</th><th>até G1</th><th>até G2</th><th>Red</th></tr>
+    <tr><td class="mu">qualquer momento (base)</td><td>${base.n}</td>${base.n?`<td>${mcfTaxa(base,0).toFixed(0)}%</td><td>${mcfTaxa(base,1).toFixed(0)}%</td><td>${mcfTaxa(base,2).toFixed(0)}%</td><td>${base.lv[3]} (${(100*base.lv[3]/base.n).toFixed(1)}%)</td>`:'<td colspan="4" class="mu">—</td>'}</tr>
+    ${MCF_PRP.map(([pt,t])=>{ const o=A[pt]; return `<tr class="${pt[0]==='R'?'cf-prr':''}"><td><b>${t}</b></td><td>${o?o.n:0}</td>${o&&o.n?`<td>${mcfTaxa(o,0).toFixed(0)}%</td><td>${mcfTaxa(o,1).toFixed(0)}%</td><td>${mcfTaxa(o,2).toFixed(0)}%</td><td class="${o.lv[3]?'ruimc':''}">${o.lv[3]} (${(100*o.lv[3]/o.n).toFixed(1)}%)</td>`:'<td colspan="4" class="mu">sem casos ainda</td>'}</tr>`; }).join('')}</table>`;
+  const vols=Object.entries(P).map(([sym,str])=>{ const q=mcfPrGR(str), ir=q.lastIndexOf('R'); return {sym,str,q,ir}; }).filter(x=>x.ir>=0&&x.q.length-x.ir<=6).sort((a,b)=>(a.q.length-a.ir)-(b.q.length-b.ir));
+  const cards=vols.length?`<div class="cf-sel">${vols.map(({sym,str,q,ir})=>{ const dep=q.slice(ir+1), est=mcfPrEstado(w,sym), V=MCF.votos[w+'|'+sym], fv=V&&V.T>now+0.5?mcfForca(V.v):null, agora=fv&&fv.n>=mcfC().min, ss=S[sym]||{};
+      return `<div class="cf-sc prc ${agora?'agora':''}"><div class="cf-r"><b style="font-size:14px">🚧 ${symNome(sym)}</b><span class="mu" style="font-size:11px">${est?'pós-'+(est==='RG'?'red+green':est==='RR'?'2 reds':'red'):'saindo do quadro'}</span></div>
+        <div class="cf-seq">${str.slice(-12).split('').map(x=>{ const g=+x<=mcfGmax(); return `<i class="${g?'g':'r'}" title="${['TS','G1','G2','red'][+x]}">${g?(+x?'G'+x:'TS'):'R'}</i>`; }).join('')}</div>
+        <div style="font-size:12px">depois do último red: <b class="okc">${dep.split('').filter(x=>x==='G').length} win</b> · <b class="ruimc">${dep.split('').filter(x=>x==='R').length} loss</b> <span class="mu">(virtual)</span></div>
+        <div class="mu" style="font-size:11.5px">nela depois de red: ${mcfPrTx(ss.R)}</div>
+        ${agora?`<div class="cf-agora">🔔 sinal forte AGORA → <b>${fv.alvo?'ÍMPAR':'PAR'}</b> ${hmsOf(V.T)} ${cfg.mesa_modo!=='robo'&&V.T-now>2.6?`<button class="ms-bag" onclick="mesaAgendar(${V.T},${fv.alvo},'🔁 pós-red ${est||''}','${sym}')">▶ entrar</button>`:''}</div>`:''}</div>`; }).join('')}</div>`
+    :'<div class="mu" style="font-size:12px">Nenhuma volatilidade tomou red em sinal forte recentemente. Quando tomar, ela aparece aqui e o sistema acompanha os próximos sinais fortes dela (win/loss virtual).</div>';
+  return `${cards}<div style="margin-top:8px">${tab}</div><div class="mu" style="font-size:11px;margin-top:3px">Compare cada linha com a <b>base</b>: só vale a pena "entrar pós-red" se depois de red o acerto for claramente maior que a base, com muitos casos. Red = perdeu até G2; win/loss do quadro conta green até G${mcfGmax()}.</div>`;
+}
 function mcfTaxa(o,g){ if(!o||!o.n) return null; let s=0; for(let k=0;k<=g;k++) s+=o.lv[k]; return 100*s/o.n; }
 function mcfCapturar2s(){ const L=[...new Set([...d5Syms(),...MCF_2S])]; d5SetSyms(L); setTimeout(()=>mesaRender(true),1500); }
 // barras dos índices com sinal forte (vão no topo de "PRÓXIMOS SINAIS")
@@ -11074,7 +11128,7 @@ function mcfCtlHtml(){
     <span class="mu" style="font-size:11.5px">escaneando ${mcfSyms().length} índice(s): ${mcfSyms().map(symNome).join(', ')}</span>
     ${faltam.length?`<button class="mb-mini" onclick="mcfCapturar2s()" title="passa a capturar também ${faltam.map(symNome).join(', ')}">📡 escanear os 7 índices de 2s</button>`:''}
     ${typeof Notification!=='undefined'&&Notification.permission==='default'?`<button class="mb-mini" onclick="Notification.requestPermission()">🔔 permitir notificações</button>`:''}
-    <button class="mb-mini" onclick="if(confirm('Zerar o histórico das confirmações deste tempo?')){MCF.st[${w}]={circ:{},combo:{},hist:[],sym:{}};mcfSave(${w});mesaRender(true);}">zerar histórico</button></div>`;
+    <button class="mb-mini" onclick="if(confirm('Zerar o histórico das confirmações deste tempo?')){MCF.st[${w}]={circ:{},combo:{},hist:[],sym:{},prv:{}};mcfSave(${w});mesaRender(true);}">zerar histórico</button></div>`;
 }
 function mcfHtml(){
   const w=mesaW(), st=mcfLoad(w), V=MCF.votos[w+'|'+mesaSym()], c=mcfC(), now=dmNow();
@@ -11096,6 +11150,7 @@ function mcfHtml(){
     ${mcfResumo(st,c)}${mcfMinHtml(st,c)}<div class="cf-fb">mostrar: ${fb('todos','todos')}${fb('forte','⭐ só fortes')}${fb('normal','só normais')}</div>
     <div class="cf-tb"><div><div class="ms-lb">🏆 COMBINAÇÕES MAIS CERTEIRAS · ${w}s · todos os índices${c.filt==='forte'?' · ⭐ fortes':c.filt==='normal'?' · normais':''}</div>${combos.length?`<table class="cf-t2"><tr><th title="gravar para as próximas entradas">🎯</th><th>Círculos</th><th>Sinais</th><th>TS</th><th>até G1</th><th>até G2</th><th>Red</th><th>mais red em</th></tr>${combos.map(([k,o])=>{ const pr=Object.entries(o.s||{}).filter(([,x])=>x.lv[3]).sort((a,b)=>b[1].lv[3]-a[1].lv[3])[0]; return `<tr class="${SL[k]?'cf-gr':''}"><td><input type="checkbox" title="gravar esta combinação para as próximas entradas" ${SL[k]?'checked':''} onclick="event.preventDefault();mcfSelToggle(${w},'${k}')"></td><td><b>${k}</b>${k.split('+').length>=c.min?' <span title="forte">⭐</span>':''}</td><td>${o.n}</td><td>${mcfTaxa(o,0).toFixed(0)}%</td><td>${mcfTaxa(o,1).toFixed(0)}%</td><td>${mcfTaxa(o,2).toFixed(0)}%</td><td class="${o.lv[3]?'ruimc':''}">${o.lv[3]}</td><td title="${Object.entries(o.s||{}).map(([s,x])=>symNome(s)+': '+x.n+' sinais, '+x.lv[3]+' red').join(' · ')}">${pr?`<span class="ruimc">${symNome(pr[0]).replace('Volatility','Vol')} (${pr[1].lv[3]})</span>`:'<span class="mu">—</span>'}</td></tr>`; }).join('')}</table>`:'<div class="mu" style="font-size:12px">Junta-se sozinho: cada vez que 2+ círculos concordam, o resultado entra aqui (mín. 3 vezes para aparecer).</div>'}</div>
       <div><div class="ms-lb">📜 HISTÓRICO DOS SINAIS CONFIRMADOS</div>${hist.length?hist.map(h=>`<div class="cf-hl"><span>${hmsOf(h.T)}</span><span>${h.s?symNome(h.s).replace('Volatility','Vol')+' · ':''}${h.ids.join('+')}${h.contra?' <span class="ruimc">(-'+h.contra+')</span>':''}${h.f?' ⭐':''}${h.a?' 🤖':''}</span><b class="${h.alvo?'':'okc'}">${h.alvo?'ÍMPAR':'PAR'}</b><span class="${h.nv<3?'okc':'ruimc'}">${h.nv<3?'✅ '+(h.nv?'G'+h.nv:'TS'):'❌ red'}</span></div>`).join(''):'<div class="mu" style="font-size:12px">Ainda nenhum sinal com 2+ confirmações neste tempo.</div>'}</div></div>
+    <div style="margin-top:10px"><div class="ms-lb">🔁 PÓS-RED POR VOLATILIDADE · ${w}s · sinais fortes</div>${mcfPrHtml(w)}</div>
     <div style="margin-top:10px"><div class="ms-lb">🎯 COMBINAÇÕES GRAVADAS · ${w}s · comportamento salvo no sistema</div>${mcfSelHtml(w)}</div>
     <div style="margin-top:10px"><div class="ms-lb">📉 POR ÍNDICE · qual volatilidade erra mais · ${w}s</div>${mcfPorIndice(st,c)}</div>
     <div class="ms-nota" style="margin-top:6px">Acaso: TS 50% · até G1 75% · até G2 87,5%. Uma combinação só merece confiança com muitos sinais e acerto acima desses números.</div>`;
