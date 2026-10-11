@@ -663,7 +663,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.17 · 11/10/2026 · 🔥 Confirmações: 8º círculo = Pressure Strategy (mesma análise e configuração da aba Pressure)';
+const VERSAO='v4.18 · 11/10/2026 · 🧠 Página principal calcula e grava os sinais (5s/10s/20s) sem precisar da Mesa; a Mesa só recebe e opera · 🔥 Pressure em todas as volatilidades';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10929,11 +10929,32 @@ function mcfAlerta(w,sym,T,f){
   setTimeout(()=>{ const x=document.getElementById(id); if(x) x.remove(); },Math.max(4000,(T-dmNow())*1000));
 }
 // a cada jogo novo em cada índice: confere os votos antigos e vota no próximo jogo
+// 🧠 CÉREBRO ÚNICO: a página principal calcula e grava (5s/10s/20s… escolhidos); a Mesa só recebe os votos e opera.
+// Se a principal não estiver aberta, a Mesa assume sozinha até ela voltar. Só um calcula por vez (nada é contado dobrado).
+const MCF_ID=Math.random().toString(36).slice(2), MCF_BC=(typeof BroadcastChannel!=='undefined')?new BroadcastChannel('dpi_mcf'):null;
+function mcfWsCerebro(){ const a=Array.isArray(cfg.mcf_ws)?cfg.mcf_ws:[5,10,20]; return a.map(Number).filter(w=>MESA_TEMPOS.includes(w)); }
+function mcfLider(){ try{ return JSON.parse(localStorage.getItem('dpi_mcf_lider')||'null'); }catch(e){ return null; } }
+function mcfSouCerebro(){ const L=mcfLider(), agora=Date.now(), vivo=L&&agora-L.t<6000&&L.id!==MCF_ID, eu=MESA_TAB?'mesa':'principal';
+  if(vivo&&(L.r==='principal'||eu==='mesa')) return MCF.cerebro=false;      // já tem outro calculando (a principal sempre tem prioridade)
+  if(!MCF.hb||agora-MCF.hb>1500){ MCF.hb=agora; try{ localStorage.setItem('dpi_mcf_lider',JSON.stringify({id:MCF_ID,r:eu,t:agora})); }catch(e){} }
+  return MCF.cerebro=true; }
+function mcfWsMesa(){ const S=new Set([mesaW()]); try{ for(const w of MESA_TEMPOS){ if(mbSt(w).on&&MB_CF.includes(mbCfg(w).fonte)) S.add(w); } }catch(e){} return [...S]; }
 function mcfTick(){
-  if(!MESA.open) return;
-  const Ws=new Set([mesaW()]); try{ for(const w of MESA_TEMPOS){ if(mbSt(w).on&&MB_CF.includes(mbCfg(w).fonte)) Ws.add(w); } }catch(e){}
-  for(const w of Ws) mcfTickW(w,w===mesaW());
+  if(MESA.open&&(!MCF.nd||Date.now()-MCF.nd>2000)){ MCF.nd=Date.now(); try{ localStorage.setItem('dpi_mcf_need',JSON.stringify({ws:mcfWsMesa(),t:Date.now()})); }catch(e){} }
+  if(MESA_TAB&&!MESA.open) return;
+  if(!mcfSouCerebro()) return;
+  const Ws=new Set(MESA_TAB?[]:mcfWsCerebro()); if(MESA.open) mcfWsMesa().forEach(w=>Ws.add(w));
+  try{ const N=JSON.parse(localStorage.getItem('dpi_mcf_need')||'null'); if(N&&Date.now()-N.t<8000) N.ws.forEach(w=>Ws.add(+w)); }catch(e){}
+  for(const w of Ws) mcfTickW(w,MESA.open&&w===mesaW());
 }
+// o que chega do cérebro (outra aba): votos novos → círculos, barras, popups e entrada automática da Mesa
+function mcfNovoVoto(w,sym,T,v){ const c=mcfC(), kk=w+'|'+sym, f=mcfForca(v);
+  if((f.n>=c.min||mcfSelTem(w,f))&&MCF.alertado[kk]!==T){ MCF.alertado[kk]=T; const pr=f.n>=c.min&&c.prPop?mcfPrEstado(w,sym):null; pr?mcfAlertaPr(w,sym,T,f,pr):mcfAlerta(w,sym,T,f); }
+  try{ mcfAuto(w,sym,T,f); }catch(e){ console.warn('auto',e); } }
+if(MCF_BC) MCF_BC.onmessage=e=>{ const m=e.data||{}; if(m.tipo!=='voto'||MCF.cerebro) return; MCF.votos[m.kk]=m.V; if(MESA.open&&m.w===mesaW()&&dmNow()<m.V.T-0.5) mcfNovoVoto(m.w,m.V.sym,m.V.T,m.V.v); };
+// quando outra aba grava, joga fora a cópia antiga da memória (lê de novo do navegador)
+window.addEventListener('storage',e=>{ const k=e.key||''; if(k.startsWith('mesa_cf_v1_')) delete MCF.st[+k.split('_').pop()]; else if(k==='mesa_cf_sel_v1') MCFSEL=null; else if(k.startsWith('mesa_cf_sim_v1_')) delete MCFSIM.st[+k.split('_').pop()]; });
+function mcfQuemTxt(){ const L=mcfLider(), vivo=L&&Date.now()-L.t<6000; return !vivo?'ninguém calculando agora':L.id===MCF_ID?(MESA_TAB?'🧠 esta Mesa está calculando (a página principal está fechada)':'🧠 esta página está calculando e gravando'):(L.r==='principal'?'🧠 a página principal está calculando — a Mesa só recebe':'🧠 a Mesa está calculando (página principal fechada)'); }
 function mcfTickW(w,vis){
   const st=mcfLoad(w), c=mcfC(); let mud=false;
   for(const sym of mcfSyms()){
@@ -10950,8 +10971,8 @@ function mcfTickW(w,vis){
       delete P[k]; mud=true;
     }
     if(MCF.ultT[kk]!==T&&dmNow()<T-0.5){ MCF.ultT[kk]=T; const v=mcfVotar(w,T,sym); P[T]={v}; MCF.votos[kk]={T,v,sym};
-      const f=mcfForca(v); if(vis&&(f.n>=c.min||mcfSelTem(w,f))&&MCF.alertado[kk]!==T){ MCF.alertado[kk]=T; const pr=f.n>=c.min&&c.prPop?mcfPrEstado(w,sym):null; pr?mcfAlertaPr(w,sym,T,f,pr):mcfAlerta(w,sym,T,f); }
-      if(vis) try{ mcfAuto(w,sym,T,f); }catch(e){ console.warn('auto',e); } }
+      try{ if(MCF_BC) MCF_BC.postMessage({tipo:'voto',w,kk,V:{T,v,sym}}); }catch(e){}
+      if(vis) mcfNovoVoto(w,sym,T,v); }
   }
   if(mud){ mcfSave(w); const S=MCFSIM.st[w]; if(S&&S._sujo){ delete S._sujo; mcfSimSave(w); } try{ mcfMinAuto(w); }catch(e){} }
 }
@@ -11292,7 +11313,7 @@ function mcfCtlHtml(){
     <label class="ms-chk">🔔 sinal forte com ≥ ${inp('min',1,44)} círculos</label><label class="ms-chk">gráfico de ${inp('jan',5)} jogos</label>
     <label class="ms-chk">🟨 contrária ≤ ${inp('lim',1,46)}% · verde ≥ ${inp('verde',1,46)}%</label><label class="ms-chk">🖼 parecido até ${inp('fD',4,46)} pts · mín. ${inp('fMin',1,40)}</label>
     <label class="ms-chk">🔢 mín. ${inp('nMin',5,46)} vezes</label>
-    <span class="mu" style="font-size:11.5px">escaneando ${mcfSyms().length} índice(s): ${mcfSyms().map(symNome).join(', ')}</span>
+    <span class="mu" style="font-size:11.5px">escaneando ${mcfSyms().length} índice(s): ${mcfSyms().map(symNome).join(', ')} · <b>${mcfQuemTxt()}</b></span>
     ${faltam.length?`<button class="mb-mini" onclick="mcfCapturar2s()" title="passa a capturar também ${faltam.map(symNome).join(', ')}">📡 escanear os 7 índices de 2s</button>`:''}
     ${typeof Notification!=='undefined'&&Notification.permission==='default'?`<button class="mb-mini" onclick="Notification.requestPermission()">🔔 permitir notificações</button>`:''}
     <button class="mb-mini" onclick="if(confirm('Zerar o histórico das confirmações deste tempo?')){MCF.st[${w}]={circ:{},combo:{},hist:[],sym:{},prv:{}};mcfSave(${w});mesaRender(true);}">zerar histórico</button></div>`;
@@ -12448,20 +12469,21 @@ function psScoreAmostra(par,n,min){ if(!n) return 0; const p=par/n, z=Math.abs(p
 const PSR_KEY='dpi_press_robos_v1';
 let PSR=null, PS_LOG=[];
 function psRobos(){ if(PSR) return PSR; try{ PSR=JSON.parse(localStorage.getItem(PSR_KEY)||'[]')||[]; }catch(e){ PSR=[]; } return PSR; }
-function psRobosSave(){ try{ localStorage.setItem(PSR_KEY,JSON.stringify(psRobos().map(r=>{ const {_lt,_pend,...o}=r; return o; }))); }catch(e){} }
+function psRobosSave(){ try{ localStorage.setItem(PSR_KEY,JSON.stringify(psRobos().map(r=>{ const {_lt,_pend,_st,...o}=r; return o; }))); }catch(e){} }
 window.addEventListener('storage',e=>{ if(e.key===PSR_KEY){ PSR=null; } });
 function psCriarRobo(){
   const P=psP(), w=psW(), nome=($('#psRNome')?.value||'').trim()||`PRESSURE ${w}S`;
-  const r={id:'PS'+Date.now(),nome,w,sym:psSym(),P:{...P},hora:$('#psRHora')?.value??'any',seg:$('#psRSeg')?.value??'any',dirF:$('#psRDir')?.value??'any',gale:+P.gale,demo:0,on:1,g:0,r:0,criado:Date.now()};
+  const r={id:'PS'+Date.now(),nome,w,sym:$('#psRTodos')?.checked?'*':psSym(),P:{...P},hora:$('#psRHora')?.value??'any',seg:$('#psRSeg')?.value??'any',dirF:$('#psRDir')?.value??'any',gale:+P.gale,demo:0,on:1,g:0,r:0,criado:Date.now()};
   psRobos().unshift(r); psRobosSave(); status(`🔥 Robô ${nome} criado`,'ok'); fillRes();
 }
 function psRoboTog(id,k){ const r=psRobos().find(x=>x.id===id); if(!r) return; r[k]=r[k]?0:1; psRobosSave(); fillRes(); }
 function psRoboDel(id){ if(!confirm('Apagar este robô Pressure?')) return; PSR=psRobos().filter(x=>x.id!==id); psRobosSave(); fillRes(); }
 function psLog(o){ PS_LOG.unshift({...o,t:Date.now()}); if(PS_LOG.length>300) PS_LOG.length=300; }
 function psRobosTick(){
-  for(const r of psRobos()){
-    if(!r.on) continue;
-    const bank=d5BankName(r.w,r.sym||psSym()), L=LIVE[bank]; if(!L||!L.length) continue;
+  for(const r0 of psRobos()){
+    if(!r0.on) continue;
+    for(const sym of (r0.sym==='*'?mcfSyms():[r0.sym||psSym()])){ const r=r0.sym==='*'?mbPsSt(r0,sym):r0;
+    const bank=d5BankName(r.w,sym), L=LIVE[bank]; if(!L||!L.length) continue;
     const last=L.at(-1); if(r._lt===last.t) continue; r._lt=last.t;
     const A=psArr(L.slice(-3000)), c=psCtx(A,r.w);
     // resolve a entrada pendente (TS → G1 → G2)
@@ -12477,10 +12499,13 @@ function psRobosTick(){
     if(r.hora!=='any'&&dt.getHours()!==+r.hora) continue; if(r.seg!=='any'&&dt.getSeconds()!==+r.seg) continue; if(r.dirF!=='any'&&+r.dirF!==a.sinal) continue;
     r._pend={T:Tn,dir:a.sinal,score:a.score};
     psLog({rid:r.id,nome:r.nome,T:Tn,dir:a.sinal,score:a.score,res:'sinal'});
-    if(r.demo&&typeof dmRegistrar==='function'&&DM.ok) dmRegistrar({key:'ps|'+r.id+'|'+Tn,src:'press',nome:'🔥 '+r.nome,sym:r.sym||psSym(),T:Tn,step:r.w,maxN:r.gale,ct:a.sinal?'DIGITODD':'DIGITEVEN'});
-    if(+psP().alerta&&a.score>=+psP().alertMin&&a.temTrig&&a.aprov) psPopup(r,a,Tn);
+    if(r.demo&&typeof dmRegistrar==='function'&&DM.ok) dmRegistrar({key:'ps|'+r.id+'|'+sym+'|'+Tn,src:'press',nome:'🔥 '+r.nome+(r0.sym==='*'?' · '+symNome(sym):''),sym,T:Tn,step:r.w,maxN:r.gale,ct:a.sinal?'DIGITODD':'DIGITEVEN'});
+    if(+psP().alerta&&a.score>=+psP().alertMin&&a.temTrig&&a.aprov) psPopup(r0.sym==='*'?{...r0,nome:r0.nome+' · '+symNome(sym)}:r,a,Tn);
+    }
   }
 }
+// estado por índice de um robô "todas as volatilidades" (placar e last3 continuam no robô)
+function mbPsSt(r0,sym){ const S=r0._st||(r0._st={}); const o=S[sym]||(S[sym]={}); return new Proxy(o,{get:(t,k)=>k in t||k==='_lt'||k==='_pend'?t[k]:r0[k],set:(t,k,v)=>{ if(k==='_lt'||k==='_pend') t[k]=v; else r0[k]=v; return true; }}); }
 setInterval(()=>{ try{ psRobosTick(); }catch(e){ console.warn('pressure robôs',e); } },1000);
 function psPopup(r,a,Tn){
   let p=$('#psPop'); if(!p){ p=document.createElement('div'); p.id='psPop'; document.body.appendChild(p); }
@@ -12489,6 +12514,34 @@ function psPopup(r,a,Tn){
     <div class="rbactions"><button onclick="$('#psPop').style.display='none'">fechar</button><button onclick="psSet('alerta',0,false);$('#psPop').style.display='none'">DESATIVAR POPUP</button></div></div>`;
   p.style.display='flex'; try{ beep(); }catch(e){}
 }
+
+// 🔥 PRESSURE EM TODAS AS VOLATILIDADES × TEMPOS (mesma configuração da aba)
+const PSA={c:{},avisado:{},t:0};
+function psAllCalc(){ const P=psP(), out=[];
+  for(const sym of mcfSyms()) for(const w of PS_WS){ const bank=d5BankName(w,sym), L=LIVE[bank]||[]; if(L.length<60){ out.push({sym,w,a:null,n:L.length}); continue; }
+    const lt=L.at(-1).t, ca=PSA.c[bank]; let r; if(ca&&ca.lt===lt&&ca.k===PS.liveKeyCfg) r=ca.r; else { const A=psArr(L.slice(-3000)), c=psCtx(A,w), a=A.n?psAt(c,A.n-1,P,{last3:[]}):null; r={a,Tn:A.n?A.T[A.n-1]+w:0,n:A.n}; PSA.c[bank]={lt,r,k:PS.liveKeyCfg}; }
+    out.push({sym,w,...r}); }
+  return out; }
+function psAllTick(){ if(MESA_TAB) return; PS.liveKeyCfg=JSON.stringify(cfg.ps||{}); const R=psAllCalc(), P=psP(), agora=dmNow(); PSA.R=R;
+  for(const x of R){ const a=x.a; if(!a||a.sinal==null||x.Tn<=agora+1) continue; const k=x.sym+'|'+x.w+'|'+x.Tn; if(PSA.avisado[k]) continue; PSA.avisado[k]=1;
+    if(+P.alerta&&a.score>=+P.alertMin&&a.temTrig&&a.aprov) psAllPopup(x); }
+  const el=document.getElementById('psAll'); if(el&&Date.now()-PSA.t>1500){ PSA.t=Date.now(); el.innerHTML=psAllHtml(); } }
+setInterval(()=>{ try{ psAllTick(); }catch(e){ console.warn('pressure todas',e); } },1000);
+function psAllEntrar(sym,w,T,dir){ if(!DM.ok||!DM.virt){ alert('Conecte a conta DEMO (aba 💼 Conta Demo).'); return; } if(T-dmNow()<2.2){ alert('Esse jogo já está em cima da hora.'); return; }
+  dmRegistrar({key:'psall|'+sym+'|'+w+'|'+T,src:'press',nome:`🔥 Pressure ${w}s · ${symNome(sym)}`,sym,T,step:w,maxN:+psP().gale,ct:dir?'DIGITODD':'DIGITEVEN'}); try{ beep(); }catch(e){} }
+function psAllPopup(x){ const a=x.a; let p=$('#psPop'); if(!p){ p=document.createElement('div'); p.id='psPop'; document.body.appendChild(p); }
+  p.innerHTML=`<div class="ps-popbox"><div style="font-size:22px;font-weight:900">🔥 PRESSURE SIGNAL</div><div style="font-size:15px;margin:4px 0">${x.w}S · ${esc(symNome(x.sym))}</div>
+    <div class="ps-big ${a.sinal?'imp':'par'}">${psLado(a.sinal)}</div><div>Score: <b>${a.score}</b> · ${a.classe} · entrada no jogo <b>${hmsOf(x.Tn)}</b></div><div class="nota">Gatilho confirmado. Sinal estatístico — não é garantia.</div>
+    <div class="rbactions"><button onclick="psAllEntrar('${x.sym}',${x.w},${x.Tn},${a.sinal});$('#psPop').style.display='none'">▶ entrar (demo)</button><button onclick="$('#psPop').style.display='none'">fechar</button><button onclick="psSet('alerta',0,false);$('#psPop').style.display='none'">DESATIVAR POPUP</button></div></div>`;
+  p.style.display='flex'; try{ beep(); }catch(e){} }
+function psAllHtml(){ const R=PSA.R||psAllCalc(), syms=[...new Set(R.map(x=>x.sym))], agora=dmNow();
+  if(!syms.length) return '<div class="nota">Nenhum índice escaneado.</div>';
+  const cel=x=>{ if(!x||!x.a) return `<td class="mu">${x&&x.n<60?'juntando jogos':'precisa de mais jogos seguidos'}</td>`; const a=x.a, falta=Math.round(x.Tn-agora);
+    if(falta<0) return `<td class="mu">esperando jogo novo (sem tick há ${-falta}s)</td>`;
+    return a.sinal!=null?`<td style="background:${a.sinal?'rgba(244,114,182,.15)':'rgba(96,165,250,.15)'}"><b class="${a.sinal?'':'ok'}">${psLado(a.sinal)}</b> · <b>${a.score}</b> <span class="mu">${a.classe}</span><br><span class="mu">${hmsOf(x.Tn)} · ${falta}s</span> ${falta>2?`<button onclick="psAllEntrar('${x.sym}',${x.w},${x.Tn},${a.sinal})">▶ entrar</button>`:''}</td>`
+      :`<td class="mu">${a.score} · ${a.classe}${a.aprov?'':' · conf. '+a.passed+'/'+a.tot}</td>`; };
+  return `<table class="ps-tab"><tr><th>Índice</th>${PS_WS.map(w=>`<th>${w}s</th>`).join('')}</tr>${syms.map(sym=>`<tr><td><b>${symNome(sym).replace('Volatility','Vol')}</b></td>${PS_WS.map(w=>cel(R.find(x=>x.sym===sym&&x.w===w))).join('')}</tr>`).join('')}</table>
+    <div class="nota">Mesma configuração desta aba, rodando ao mesmo tempo em todos os índices escaneados e nos 4 tempos. O popup avisa quando qualquer um der sinal (se o popup estiver ligado).</div>`; }
 // ---------- tela ----------
 function psExplica(a){
   if(!a) return '<div class="nota">Sem análise.</div>';
@@ -12597,8 +12650,9 @@ function psRobosHtml(){
       <label>Hora <select id="psRHora"><option value="any">qualquer</option>${[...Array(24).keys()].map(h=>`<option value="${h}">${p2d(h)}h</option>`).join('')}</select></label>
       <label>Segundo <select id="psRSeg"><option value="any">qualquer</option>${[...Array(60).keys()].filter(s=>s%psW()===0).map(s=>`<option value="${s}">:${p2d(s)}</option>`).join('')}</select></label>
       <label>Direção <select id="psRDir"><option value="any">PAR e ÍMPAR</option><option value="0">só PAR</option><option value="1">só ÍMPAR</option></select></label>
+      <label><input type="checkbox" id="psRTodos"> em todas as volatilidades</label>
       <button class="pri" onclick="psCriarRobo()">➕ CRIAR ROBÔ PRESSURE</button><span class="nota">usa a configuração atual (${psW()}s · janela ${P.nl} · score ≥ ${P.scoreMin} · ${['sem gale','G1','G2'][+P.gale]})</span></div>
-    ${L.length?`<table class="ps-tab"><tr><th>Robô</th><th>Config</th><th>Filtros</th><th>Placar</th><th>Pendente</th><th></th></tr>${L.map(r=>`<tr><td><b>${esc(r.nome)}</b><div class="mu">${r.w}s · ${esc(symNome(r.sym||psSym()))}</div></td>
+    ${L.length?`<table class="ps-tab"><tr><th>Robô</th><th>Config</th><th>Filtros</th><th>Placar</th><th>Pendente</th><th></th></tr>${L.map(r=>`<tr><td><b>${esc(r.nome)}</b><div class="mu">${r.w}s · ${r.sym==='*'?'todas as volatilidades':esc(symNome(r.sym||psSym()))}</div></td>
       <td class="mu">janelas ${r.P.nc}/${r.P.nm}/${r.P.nl} · score ≥ ${r.P.scoreMin} · ${['sem gale','G1','G2'][r.gale]} · ${r.P.dir==='contra'?'contra':'a favor'} · conf. ${+r.P.needAll?'todas':'−1'}</td>
       <td class="mu">${r.hora==='any'?'toda hora':p2d(r.hora)+'h'} · ${r.seg==='any'?'todo segundo':':'+p2d(r.seg)} · ${r.dirF==='any'?'PAR/ÍMPAR':psLado(+r.dirF)}</td>
       <td><b class="okc2">${r.g}</b> / <b class="ruimc2">${r.r}</b>${r.g+r.r?` · ${(r.g/(r.g+r.r)*100).toFixed(0)}%`:''}</td><td>${r._pend?`${psTag(r._pend.dir)} ${hmsOf(r._pend.T)}`:'—'}</td>
@@ -12611,6 +12665,7 @@ VIEWS.press={nome:'🔥 Pressure Strategy',live(){ psLiveFill(false); },html(){
     <div class="ctl"><span class="uowins">${PS_WS.map(v=>`<button class="${w===v?'on':''}" onclick="psSet('w',${v},false);PS.liveKey='';renderTab()">${v}s</button>`).join('')}</span>
       <label>Mercado <select onchange="cfg.ps_sym=this.value;saveCfg();PS.data={};PS.liveKey='';renderTab()">${d5Syms().map(s=>`<option value="${s}" ${psSym()===s?'selected':''}>${symNome(s)}</option>`).join('')}</select></label>
       <span class="nota">banco: <b>${psBank()}</b> · nunca mistura intervalos</span></div></div>
+    <div class="panel"><h3>🔥 Todas as volatilidades ao mesmo tempo <small>índice × tempo · atualiza sozinho</small></h3><div id="psAll">${psAllHtml()}</div></div>
     <div id="psLive"></div><div id="res"></div>`;
 },res(){
   setTimeout(()=>psLiveFill(true),0);
@@ -12693,7 +12748,8 @@ VIEWS.sfortes={nome:'⭐ Sinais Fortes',live(){ if(Date.now()-SF.t>15000) sfRend
   const c=sfCfg(), sel=(k,o)=>`<select onchange="sfSet('${k}',+this.value)">${o.map(([v,t])=>`<option value="${v}" ${+c[k]===v?'selected':''}>${t}</option>`).join('')}</select>`;
   setTimeout(sfRender,0);
   return `<div class="panel"><h3>⭐ Sinais fortes por volatilidade</h3><div class="ctl"><label>tempo ${sel('w',MESA_TEMPOS.map(x=>[x,x+'s']))}</label><label>green até ${sel('g',[[0,'TS'],[1,'G1'],[2,'G2']])}</label><label>mostrar ${sel('qtd',[[50,'50'],[100,'100'],[200,'200']])} por vol</label><label><input type="checkbox" ${c.hora?'checked':''} onchange="sfSet('hora',this.checked?1:0)"> mostrar horário (hora:minuto)</label><button onclick="sfRender()">⟳ atualizar</button></div>
-    <div class="nota">Dados que a 🎮 MESA grava (⭐ Confirmações) — deixe a Mesa aberta escaneando os índices para juntar mais. Atualiza sozinho a cada 15s.</div>
+    <div class="nota">Esta página calcula os círculos e grava os sinais fortes sozinha (não precisa da Mesa aberta). A Mesa recebe os sinais daqui e só opera. Atualiza a cada 15s.</div>
+    <div class="nota">${mcfQuemTxt()} · gravar sozinho (sem a Mesa) nos tempos: ${MESA_TEMPOS.filter(x=>x>=5).map(x=>`<label style="margin-right:6px"><input type="checkbox" ${mcfWsCerebro().includes(x)?'checked':''} onchange="const L=new Set(mcfWsCerebro()); this.checked?L.add(${x}):L.delete(${x}); cfg.mcf_ws=[...L].sort((a,b)=>a-b); saveCfg();"> ${x}s</label>`).join('')}</div>
     <div class="nota">Índices escaneados agora: <b>${d5Syms().map(x=>symNome(x).replace('Volatility','Vol')).join(', ')}</b>${MCF_2S.some(x=>!d5Syms().includes(x))?` <button onclick="d5SetSyms([...new Set([...d5Syms(),...MCF_2S])]);setTimeout(renderTab,800)">📡 escanear os 7 índices de 2s</button> <span class="mu">(faltam ${MCF_2S.filter(x=>!d5Syms().includes(x)).map(x=>symNome(x).replace('Volatility','Vol')).join(', ')} — só passam a aparecer aqui depois que a Mesa juntar sinais fortes deles)</span>`:' ✔ todos os 7'}</div></div><div id="sfR"></div>`; }};
 const TAB_ORDER = ['hist','sfortes', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
