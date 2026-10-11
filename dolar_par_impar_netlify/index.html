@@ -663,7 +663,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.16 · 11/10/2026 · ⭐ Aba Sinais Fortes: 200 por volatilidade, separado por PAR/ÍMPAR e opção de mostrar o horário de cada sinal';
+const VERSAO='v4.17 · 11/10/2026 · 🔥 Confirmações: 8º círculo = Pressure Strategy (mesma análise e configuração da aba Pressure)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10829,7 +10829,7 @@ function piStats(L,lvl){
 // Cada círculo e cada combinação (ex.: 1+3+7) guarda o placar TS/G1/G2/red, por tempo de jogo.
 // =====================================================================================
 const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20,simH:24,simG:1,simRk:2,prMode:'R',prPop:1};
-const MCF_CIRC=[[1,'🕒','Horário fixo 100%'],[2,'🕐','Horas pagantes'],[3,'🖼','Figura gráfica'],[4,'🟨','Linha amarela'],[5,'🤖','Robôs ligados'],[6,'🧭','Tendência'],[7,'🔢','Número chama']];
+const MCF_CIRC=[[1,'🕒','Horário fixo 100%'],[2,'🕐','Horas pagantes'],[3,'🖼','Figura gráfica'],[4,'🟨','Linha amarela'],[5,'🤖','Robôs ligados'],[6,'🧭','Tendência'],[7,'🔢','Número chama'],[8,'🔥','Pressure Strategy']];
 const MCF_2S=['R_10','R_25','R_50','R_75','R_100','RDBEAR','RDBULL'];
 function mcfC(){ return {...MCF_DEF,...(cfg.mesa_cf||{})}; }
 function mcfSet(k,v){ cfg.mesa_cf={...mcfC(),[k]:v}; saveCfg(); MCF.cache={}; mesaRender(true); }
@@ -10890,6 +10890,18 @@ function mcfNumero(W,c){
   let v=null; for(const cor of [0,1]) if(g1[cor]/k>=0.9&&(!v||g1[cor]>g1[v.alvo])) v={alvo:cor,txt:`depois do ${d}: ${cor?'ÍMPAR':'PAR'} ${(100*g1[cor]/k).toFixed(0)}% até G1 · TS ${(100*ts[cor]/k).toFixed(0)}% (${k}x)`};
   return v||{alvo:null,txt:`depois do ${d}: PAR ${(100*g1[0]/k).toFixed(0)}% · ÍMPAR ${(100*g1[1]/k).toFixed(0)}% até G1 (${k}x)`};
 }
+// 🔥 Pressure Strategy como círculo: mesma análise da aba 🔥 Pressure Strategy (com a configuração de lá), no índice e tempo do jogo
+function mcfPressure(W,w,bank,T){
+  if(typeof psAt!=='function'||W.length<60) return null;
+  const k='ps|'+bank, ca=MCF.cache[k], lt=W.at(-1).t; if(ca&&ca.lt===lt) return ca.v;
+  const P=psP(), A=psArr(W.slice(-3000)); let v;
+  if(!A.n||Math.round(A.T[A.n-1]+w)!==T) v={alvo:null,txt:'sem o último jogo'};
+  else { const c=psCtx(A,w), a=psAt(c,A.n-1,P,{last3:[]});
+    if(!a) v={alvo:null,txt:`precisa de ${Math.max(+P.nl,+P.nm,2*(+P.nc))+12} jogos seguidos`};
+    else if(a.sinal==null) v={alvo:null,txt:`score ${a.score}/100 · ${a.classe}${a.aprov?'':' · confirmação '+a.passed+'/'+a.tot}`};
+    else v={alvo:a.sinal,txt:`score ${a.score}/100 · ${a.classe} · pressão ${psJanTxt(a.pm)}`}; }
+  MCF.cache[k]={lt,v}; return v;
+}
 // votos de cada círculo para o jogo T (segundo) num índice
 function mcfVotar(w,T,sym){
   const c=mcfC(), bank=mcfBank(w,sym), W=LIVE[bank]||[], v={};
@@ -10901,6 +10913,7 @@ function mcfVotar(w,T,sym){
     v[5]=L.length&&cores.size===1?{alvo:L[0].alvo,txt:`${L.length} robô(s) neste jogo`}:{alvo:null,txt:L.length?'robôs em cores diferentes':'nenhum robô neste jogo'}; }catch(e){ v[5]={alvo:null,txt:'—'}; }
   v[6]=mcfTend(W,c)||{alvo:null,txt:'juntando jogos'};
   v[7]=mcfNumero(W,c)||{alvo:null,txt:'juntando jogos'};
+  try{ v[8]=mcfPressure(W,w,bank,T)||{alvo:null,txt:'juntando jogos'}; }catch(e){ v[8]={alvo:null,txt:'—'}; }
   return v;
 }
 function mcfForca(v){ const a=[0,1].map(cor=>MCF_CIRC.filter(([id])=>v[id]&&v[id].alvo===cor).map(([id])=>id)); if(a[0].length===a[1].length) return {n:0,alvo:null,ids:[],contra:a[0].length}; const cor=a[0].length>a[1].length?0:1; return {n:a[cor].length,alvo:cor,ids:a[cor],contra:a[1-cor].length}; }
@@ -11049,7 +11062,7 @@ function mcfResumo(st,c){ const A={f:{n:0,lv:[0,0,0,0]},n:{n:0,lv:[0,0,0,0]}}; f
 
 // 🧪 qual mínimo de círculos acerta mais: junta as combinações com ≥ k círculos e compara (limite inferior de Wilson, para amostra pequena não ganhar por sorte)
 function mcfWilson(h,n,z=1.645){ if(!n) return 0; const p=h/n, z2=z*z; return (p+z2/(2*n)-z*Math.sqrt(p*(1-p)/n+z2/(4*n*n)))/(1+z2/n); }
-function mcfMinTab(st,c){ const R=[]; for(let k=2;k<=7;k++){ const o={n:0,lv:[0,0,0,0]}, e={n:0,lv:[0,0,0,0]};
+function mcfMinTab(st,c){ const R=[]; for(let k=2;k<=8;k++){ const o={n:0,lv:[0,0,0,0]}, e={n:0,lv:[0,0,0,0]};
     for(const [key,x] of Object.entries(st.combo)){ const m=key.split('+').length; if(m>=k){ o.n+=x.n; for(let i=0;i<4;i++) o.lv[i]+=x.lv[i]; } if(m===k){ e.n+=x.n; for(let i=0;i<4;i++) e.lv[i]+=x.lv[i]; } }
     if(!o.n) continue; let h=0; for(let i=0;i<=c.minCrit;i++) h+=o.lv[i]; R.push({k,o,e,sc:mcfWilson(h,o.n)}); }
   const ok=R.filter(r=>r.o.n>=c.minN), best=ok.length?ok.reduce((a,b)=>b.sc>a.sc?b:a):null; return {R,best}; }
