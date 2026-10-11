@@ -363,6 +363,11 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 #pacPop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:10001;padding:16px}#pacPop .rbpc{background:var(--p1);border:1px solid var(--bd);border-radius:14px;padding:16px}#pacPop .rbpt{font-size:18px;font-weight:800;margin-bottom:6px}
 .pac-box{border:1px solid var(--bd);border-radius:11px;padding:10px 12px;margin-top:8px}.pac-bk{display:flex;flex-direction:column;gap:2px;max-height:160px;overflow:auto;font-size:12px}
 #pacBtn{padding:3px 9px;border-radius:10px;font-size:12px}
+.sf-ct{display:inline-flex;flex-direction:column;align-items:center;gap:1px;margin-right:1px}.sf-ct small{font-size:8.5px;color:#8b84a3;font-variant-numeric:tabular-nums}
+.sf-sep{border:1px solid var(--bd);border-radius:10px;padding:6px 10px;margin-bottom:8px}.sf-st{font-weight:800;font-size:13px;margin-bottom:2px}
+.sf-row{border-bottom:1px solid var(--bd);padding:6px 0}.sf-h{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;font-size:12.5px}.sf-h span{color:#a49dbb}
+.sf-chips{display:flex;flex-wrap:wrap;gap:2px;margin-top:4px}.sf-c{font-style:normal;min-width:22px;height:19px;padding:0 3px;border-radius:4px;font-size:10px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;color:#fff}.sf-c.t{background:#16a34a}.sf-c.g{background:#65a30d}.sf-c.r{background:#dc2626}
+
 #lsPop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:10002;padding:16px}#lsPop .rbpc{background:var(--p1);border:1px solid var(--bd);border-radius:14px;padding:16px}#lsPop .rbpt{font-size:18px;font-weight:800;margin-bottom:6px}
 #nuvemBtn{padding:3px 9px;border-radius:10px;font-size:12px}#nuvemBtn.nvok{border-color:var(--g);color:var(--g)}#nuvemBtn.nverr{border-color:var(--am);color:var(--am)}
 </style>
@@ -658,7 +663,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.12 · 10/10/2026 · 🔴 Robôs: modo ciclo — após X reds entra até pegar Z greens e espera de novo (todos os índices) + robô pronto 1 red → 3 greens';
+const VERSAO='v4.16 · 11/10/2026 · ⭐ Aba Sinais Fortes: 200 por volatilidade, separado por PAR/ÍMPAR e opção de mostrar o horário de cada sinal';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10133,7 +10138,7 @@ function mesaRender(full){
       <div class="ms-corpo">
         <div class="ms-esq">${cfg.mesa_modo==='robo'?mbEsqHtml(mesaW()):mesaEsqManual(qv)}</div>
         <div class="ms-dir"><div class="ms-bars">${mesaBarrasCtlHtml()}<div id="msBarras"></div></div><div id="msCentro"></div>
-          <div class="ms-pi">${mcfCtlHtml()}<div id="msPi"></div>${mcfAutoHtml()}${mcfSimCtlHtml()}</div>
+          <div class="ms-pi">${mcfCtlHtml()}<div id="msPi"></div>${mcfAutoHtml()}${mcfSimCtlHtml()}${mcfRegraHtml()}</div>
           <div class="ms-strip" id="msStrip"></div>
           ${cfg.mesa_modo==='robo'?`<div class="ms-lb" style="margin-top:10px">ROBÔS DE ${mesaW()}s NA ORDEM <span class="mu">(se 2 pedem o mesmo jogo, vale o de cima)</span></div><div class="ms-hist" id="msFila" style="max-height:230px"></div><div id="msHist"></div>`
             :`<div class="ms-lb" style="margin-top:10px">MINHAS ENTRADAS · ${mesaW()}s</div><div class="ms-hist" id="msHist"></div>`}</div>
@@ -10927,8 +10932,8 @@ function mcfTickW(w,vis){
       const f=mcfForca(p.v);
       if(f.n>=2){ const nv=mcfNivel(W,Tk,w,f.alvo); if(nv!=null){ const key=f.ids.join('+'), o=st.combo[key]||(st.combo[key]={n:0,lv:[0,0,0,0]}); o.n++; o.lv[nv]++;
         const os=(o.s||(o.s={}))[sym]||(o.s[sym]={n:0,lv:[0,0,0,0]}); os.n++; os.lv[nv]++; mcfSelReg(w,key,sym,nv,Tk);
-        const forte=f.n>=c.min, ss=(st.sym||(st.sym={}))[sym]||(st.sym[sym]={n:0,lv:[0,0,0,0],fn:0,flv:[0,0,0,0]}); ss.n++; ss.lv[nv]++; if(forte){ ss.fn++; ss.flv[nv]++; mcfPrReg(st,sym,nv); }
-        st.hist.push({T:Tk,s:sym,ids:f.ids,alvo:f.alvo,contra:f.contra,nv,f:forte?1:0,a:MCF.autoFeito[sym+'|'+Tk]?1:0}); if(st.hist.length>300) st.hist.splice(0,st.hist.length-300); } }
+        const forte=f.n>=c.min, ss=(st.sym||(st.sym={}))[sym]||(st.sym[sym]={n:0,lv:[0,0,0,0],fn:0,flv:[0,0,0,0]}); ss.n++; ss.lv[nv]++; if(forte){ ss.fn++; ss.flv[nv]++; mcfPrReg(st,sym,nv); mcfFhReg(st,sym,Tk,nv,f.alvo); }
+        st.hist.push({T:Tk,s:sym,ids:f.ids,alvo:f.alvo,contra:f.contra,nv,f:forte?1:0,a:MCF.autoFeito[sym+'|'+Tk]?1:0}); if(st.hist.length>1500) st.hist.splice(0,st.hist.length-1500); } }
       delete P[k]; mud=true;
     }
     if(MCF.ultT[kk]!==T&&dmNow()<T-0.5){ MCF.ultT[kk]=T; const v=mcfVotar(w,T,sym); P[T]={v}; MCF.votos[kk]={T,v,sym};
@@ -11133,6 +11138,63 @@ ${rk===2?`      · só sinais com ≥ 3 círculos: maior sequência <b>${M3.max}
 // resumo da simulação por nível de gale (TS..G4), todos os sinais 2+ círculos, com o acaso de cada nível
 function mcfSimNiveis(S){ const T=mcfZ6(); for(const o of Object.values(S.combo)) for(const X of [o.a,o.b]){ T.n+=X.n; X.lv.forEach((x,i)=>T.lv[i]+=x); } if(!T.n) return '';
   return `<div class="cf-niv">${[0,1,2,3,4].map(g=>{ const h=mcfHits(T,g), ac=100*(1-Math.pow(0.5,g+1)), r=T.n-h; return `<div><b>${g?'até G'+g:'TS'}</b><span>${(100*h/T.n).toFixed(1)}%</span><small>acaso ${ac.toFixed(ac%1?ac>99?2:1:0)}% · ${r} red</small></div>`; }).join('')}</div><div class="mu" style="font-size:11px">Todos os sinais simulados (2+ círculos, ${T.n}). Cada gale a mais aumenta o acerto, mas o red fica bem mais caro — confira o fator de gale.</div>`; }
+
+// =====================================================================================
+// 🧪 SIMULADOR DE REGRA NO PASSADO: espera X LOSS seguidos → espera Y WIN → ENTRA; green = entra de novo; red = volta a esperar
+// Fontes: confirmações gravadas ao vivo (até G2) ou a simulação do passado (4 círculos, até G4)
+// Grupos: sinais fortes todos juntos · sinais fortes por volatilidade · todos os sinais juntos · todos por volatilidade
+// =====================================================================================
+let RG={out:null};
+function rgCfg(){ return {fonte:'vivo',grupo:'forte_todos',X:3,Y:1,g:2,gest:'zero',val:0.35,pay:0.95,fat:2.2,...(cfg.rg||{})}; }
+function rgSet(k,v){ cfg.rg={...rgCfg(),[k]:v}; saveCfg(); RG.out=null; const el=document.getElementById('rgBox'); if(el) el.outerHTML=mcfRegraHtml(); }
+// sequências de níveis (0..N) na ordem do tempo
+function rgSeqs(c){
+  const w=mesaW(), forte=c.grupo.startsWith('forte'), porVol=c.grupo.endsWith('vol');
+  let ev=[];   // [nv, sym]
+  if(c.fonte==='vivo'){ const st=mcfLoad(w), min=mcfC().min; ev=st.hist.filter(h=>h.nv!=null&&(!forte||h.ids.length>=min)).map(h=>[h.nv,h.s||'?']); }
+  else { const S=mcfSimLoad(w); if(!S||!S.q) return null; for(let i=0;i<S.q.length;i++){ const k=(S.keys[S.qk.charCodeAt(i)-65]||''); if(forte&&k.split('+').length<3) continue; ev.push([+S.q[i],S.symL[S.qs.charCodeAt(i)-65]]); } }
+  if(!porVol) return {'todos':ev.map(e=>e[0])};
+  const M={}; for(const [nv,sym] of ev) (M[sym]||(M[sym]=[])).push(nv); return M;
+}
+// lucro de uma entrada no nível nv (gale até g), gestão só recuperar ou fator
+function rgLucro(nv,c){ const r=c.pay, b=c.val; let perda=0, st=b;
+  for(let k=0;k<=c.g;k++){ st=k===0?b:(c.gest==='zero'?Math.max(0.35,perda/r):b*Math.pow(c.fat,k)); if(nv===k) return st*r-perda; perda+=st; } return -perda; }
+function rgRodar(seq,c,X,Y){ let st='espera', run=0, win=0; const R={n:0,g:0,r:0,pl:0,maxR:0,curR:0,base:seq.length,baseG:0};
+  if(X===0) st='entra';   // base: entra em todos
+  for(const nv of seq){ const green=nv<=c.g; if(green) R.baseG++;
+    if(st==='entra'||X===0){ R.n++; R.pl+=rgLucro(nv,c); if(green){ R.g++; R.curR=0; } else { R.r++; R.curR++; R.maxR=Math.max(R.maxR,R.curR); if(X) { st='espera'; run=1; } } continue; }
+    if(st==='espera'){ run=green?0:run+1; if(run>=X){ st=Y>0?'armado':'entra'; win=0; } continue; }
+    if(st==='armado'){ if(green){ win++; if(win>=Y) st='entra'; } } }
+  return R; }
+function rgSoma(M,c,X,Y){ const T={n:0,g:0,r:0,pl:0,maxR:0,base:0,baseG:0}; for(const seq of Object.values(M)){ const R=rgRodar(seq,c,X,Y); for(const k of ['n','g','r','pl','base','baseG']) T[k]+=R[k]; T.maxR=Math.max(T.maxR,R.maxR); } return T; }
+function rgSimular(){ const c=rgCfg(), M=rgSeqs(c); if(!M){ RG.out={erro:'Faça antes a 🔁 simulação do passado (▶ simular agora) para usar esta fonte.'}; }
+  else { const grade=[]; for(let X=1;X<=6;X++) for(let Y=0;Y<=3;Y++) grade.push({X,Y,...rgSoma(M,c,X,Y)}); RG.out={c,grade,sel:rgSoma(M,c,c.X,c.Y),porVol:Object.keys(M).length>1?Object.entries(M).map(([sym,seq])=>({sym,...rgRodar(seq,c,c.X,c.Y)})):null}; }
+  const el=document.getElementById('rgBox'); if(el) el.outerHTML=mcfRegraHtml(); }
+function mcfRegraHtml(){
+  const c=rgCfg(), O=RG.out, maxG=c.fonte==='vivo'?2:4, sel=(k,opts)=>`<select onchange="rgSet('${k}',${typeof opts[0][0]==='number'?'+this.value':'this.value'})">${opts.map(([v,t])=>`<option value="${v}" ${String(c[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
+  const pct=(a,b)=>b?(100*a/b).toFixed(1)+'%':'—', money=v=>`<b class="${v>=0?'okc':'ruimc'}">${v>=0?'+':''}$ ${v.toFixed(2)}</b>`;
+  let res='<div class="mu" style="font-size:12px">Ajuste a regra e clique em ▶ simular a regra.</div>';
+  if(O&&O.erro) res=`<div class="ruimc" style="font-size:12.5px">${O.erro}</div>`;
+  else if(O){ const S=O.sel, base=pct(S.baseG,S.base), best=O.grade.filter(x=>x.n>=10).sort((a,b)=>b.pl-a.pl)[0];
+    res=`<div class="cf-niv" style="grid-template-columns:repeat(5,1fr)"><div><b>entradas</b><span>${S.n}</span><small>de ${S.base} sinais</small></div><div><b>acerto</b><span class="${S.n&&S.g/S.n>S.baseG/S.base?'okc':''}">${pct(S.g,S.n)}</span><small>base (entrando em tudo) ${base}</small></div>
+      <div><b>green / red</b><span>${S.g} / <span class="ruimc">${S.r}</span></span><small>até ${c.g?'G'+c.g:'TS'}</small></div><div><b>maior seq. red</b><span class="${S.maxR>=2?'ruimc':''}">${S.maxR}</span><small>nas entradas</small></div><div><b>resultado</b><span>${money(S.pl)}</span><small>$${c.val} · ${c.gest==='zero'?'gale só recuperar':'fator '+c.fat}</small></div></div>
+      <div class="mu" style="font-size:11.5px;margin:2px 0 6px">Entrando em todos os ${S.base} sinais daria ${money(rgSoma(rgSeqs(c),c,0,0).pl)} — compare com a regra.</div>
+      <div class="ms-lb">📊 TODAS AS REGRAS (X loss mínimos × Y win antes de entrar)</div>
+      <table class="cf-t2"><tr><th>X loss</th>${[0,1,2,3].map(Y=>`<th>Y = ${Y} win${Y?'':' (entra logo)'}</th>`).join('')}</tr>
+      ${[1,2,3,4,5,6].map(X=>`<tr><td><b>${X}</b></td>${[0,1,2,3].map(Y=>{ const r=O.grade.find(z=>z.X===X&&z.Y===Y); const at=X===c.X&&Y===c.Y, bb=best&&best.X===X&&best.Y===Y; return `<td style="${at?'outline:1px solid #a855f7;':''}${bb?'background:rgba(34,197,94,.12);':''}cursor:pointer" onclick="cfg.rg={...rgCfg(),X:${X},Y:${Y}};saveCfg();rgSimular()">${r.n?`${pct(r.g,r.n)} <span class="mu">(${r.n})</span><br>${money(r.pl)}${bb?' 🏆':''}`:'<span class="mu">sem entradas</span>'}</td>`; }).join('')}</tr>`).join('')}</table>
+      <div class="mu" style="font-size:11px;margin-top:3px">Clique numa célula para ver os detalhes dela. 🏆 = melhor resultado com 10+ entradas. Base sem regra: ${base} de acerto.</div>
+      ${O.porVol?`<div class="ms-lb" style="margin-top:8px">POR VOLATILIDADE (regra X=${c.X}, Y=${c.Y})</div><table class="cf-t2"><tr><th>Índice</th><th>Sinais</th><th>Entradas</th><th>Acerto</th><th>Red</th><th>Maior seq.</th><th>Resultado</th></tr>${O.porVol.sort((a,b)=>b.pl-a.pl).map(v=>`<tr><td><b>${symNome(v.sym).replace('Volatility','Vol')}</b></td><td>${v.base}</td><td>${v.n}</td><td>${pct(v.g,v.n)}</td><td class="${v.r?'ruimc':''}">${v.r}</td><td>${v.maxR}</td><td>${money(v.pl)}</td></tr>`).join('')}</table>`:''}`; }
+  return `<div class="cf-sim" id="rgBox" style="border-color:rgba(34,197,94,.45)"><div class="cf-r" style="flex-wrap:wrap"><b style="margin-left:0;font-size:13px">🧪 SIMULADOR DE REGRA · X loss → Y win → entra · ${mesaW()}s</b></div>
+    <div class="cf-ao" style="margin-top:6px">
+      <label class="ms-chk">dados ${sel('fonte',[['vivo','confirmações gravadas ao vivo'],['sim','simulação do passado (4 círculos)']])}</label>
+      <label class="ms-chk">sinais ${sel('grupo',[['forte_todos','⭐ fortes · todos os índices juntos'],['forte_vol','⭐ fortes · mesma volatilidade'],['todos_todos','todos (2+) · todos os índices juntos'],['todos_vol','todos (2+) · mesma volatilidade']])}</label>
+      <label class="ms-chk">esperar ${sel('X',[1,2,3,4,5,6].map(x=>[x,x+' loss']))} seguidos</label><label class="ms-chk">depois ${sel('Y',[0,1,2,3].map(y=>[y,y?y+' win':'nenhum win']))}</label>
+      <label class="ms-chk">green até ${sel('g',[...Array(maxG+1).keys()].map(g=>[g,g?'G'+g:'TS']))}</label>
+      <label class="ms-chk">gale ${sel('gest',[['zero','só recuperar'],['fator','× fator 2.2']])}</label>
+      <button class="mb-mini" onclick="rgSimular()">▶ simular a regra</button></div>
+    <div class="ms-nota" style="margin:4px 0 8px">Regra: espera <b>${c.X} loss seguidos</b> (mínimo)${c.Y?`, depois o <b>${c.Y}º win</b>`:''} → <b>entra</b>. Se a entrada der green, <b>entra de novo</b> no próximo; se der red, volta a esperar ${c.X} loss. ${c.grupo.endsWith('vol')?'Cada volatilidade tem a sua própria sequência.':'Todos os índices numa sequência só.'} ${c.fonte==='vivo'?'Fonte ao vivo: só os últimos 300 sinais gravados.':''}</div>
+    ${res}</div>`;
+}
 function mcfSimCtlHtml(){ const c=mcfC(); return `<div class="cf-sim"><div class="cf-r" style="flex-wrap:wrap"><b style="margin-left:0;font-size:13px">🔁 SIMULAÇÃO DO PASSADO · 🖼3 🟨4 📈6 🔢7 · ${mesaW()}s</b>
   <label class="ms-chk">últimas <select onchange="mcfSet('simH',+this.value)">${[6,12,24,48,72].map(h=>`<option value="${h}" ${+c.simH===h?'selected':''}>${h}h</option>`).join('')}</select></label>
   <label class="ms-chk">ver até <select onchange="mcfSet('simG',+this.value)">${[0,1,2,3,4].map(g=>`<option value="${g}" ${(+c.simG||0)===g?'selected':''}>${g?'G'+g:'TS'}</option>`).join('')}</select></label><label class="ms-chk">reds seguidos de <select onchange="mcfSet('simRk',+this.value)">${[[2,'todos (2+)'],[3,'só ≥ 3 círculos'],[4,'só 4 círculos']].map(([v,t])=>`<option value="${v}" ${(+c.simRk||2)===v?'selected':''}>${t}</option>`).join('')}</select></label><button class="mb-mini" onclick="mcfSimular()">▶ simular agora</button><button class="mb-mini" onclick="if(MCFSIM.run) MCFSIM.run.parar=true">■ parar</button></div><div id="msSimR">${mcfSimHtml()}</div></div>`; }
@@ -11160,6 +11222,9 @@ function mcfSimHtml(){
 const MCF_PRM=[['R','após 1 red dela'],['RG','após 1 red e 1 green dela'],['R|RG','após 1 red ou 1 red + 1 green'],['RR','após 2 reds seguidos dela']];
 const MCF_PRP=[['R','depois de 1 red'],['RR','depois de 2 reds'],['RG','depois de red + green'],['RGG','depois de red + 2 greens'],['G','depois de 1 green'],['GG','depois de 2 greens']];
 function mcfPrBoot(st){ if(st.prv) return st.prv; st.prv={}; for(const h of st.hist) if(h.f&&h.s&&h.nv!=null) st.prv[h.s]=((st.prv[h.s]||'')+h.nv).slice(-300); return st.prv; }
+// histórico dos sinais fortes por volatilidade com horário e cor: [T(seg), nível 0..3, alvo 0=PAR 1=ÍMPAR] — 200 por vol
+function mcfFhBoot(st){ if(st.fh) return st.fh; st.fh={}; for(const h of st.hist||[]) if(h.f&&h.s&&h.nv!=null){ const L=st.fh[h.s]||(st.fh[h.s]=[]); L.push([h.T,h.nv,h.alvo]); if(L.length>200) L.shift(); } return st.fh; }
+function mcfFhReg(st,sym,T,nv,alvo){ const F=mcfFhBoot(st), L=F[sym]||(F[sym]=[]); L.push([T,nv,alvo]); if(L.length>200) L.splice(0,L.length-200); }
 function mcfPrReg(st,sym,nv){ const P=mcfPrBoot(st); P[sym]=((P[sym]||'')+nv).slice(-300); }
 function mcfPrGR(s,Gx){ const G=Gx==null?mcfGmax():Gx; return s.split('').map(x=>+x<=G?'G':'R').join(''); }
 function mcfPrSeqTxt(w,sym){ return mcfPrGR((mcfPrBoot(mcfLoad(w))[sym]||'').slice(-6)); }
@@ -12542,7 +12607,82 @@ VIEWS.press={nome:'🔥 Pressure Strategy',live(){ psLiveFill(false); },html(){
 }};
 
 // ---------- render ----------
-const TAB_ORDER = ['hist', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
+
+// =====================================================================================
+// ⭐ ABA "SINAIS FORTES" (página principal): últimos 50 de cada volatilidade, padrões dentro da vol
+// e coincidências ENTRE vols. Lê o que a Mesa gravou (mesa_cf_v1_<tempo>), sempre fresco do navegador.
+// =====================================================================================
+const SF={t:0};
+function sfCfg(){ return {w:20,g:2,hora:0,qtd:200,...(cfg.sf||{})}; }
+function sfSet(k,v){ cfg.sf={...sfCfg(),[k]:v}; saveCfg(); sfRender(); }
+function sfStore(w){ try{ return JSON.parse(localStorage.getItem('mesa_cf_v1_'+w)||'null')||{hist:[]}; }catch(e){ return {hist:[]}; } }
+const SF_L=['TS','G1','G2','R'], sfCh=(nv,g)=>nv>g?'R':nv===0?'TS':'G'+nv;
+function sfZ(k,n,p0){ return n&&p0>0&&p0<1?(k/n-p0)/Math.sqrt(p0*(1-p0)/n):0; }
+function sfSeqs(st){ const min=(cfg.mesa_cf&&+cfg.mesa_cf.min)||3, M={}, ev=[], F={};
+  for(const h of st.hist||[]){ if(h.f&&h.s&&h.nv!=null){ const L=F[h.s]||(F[h.s]=[]); L.push([h.T,h.nv,h.alvo]); } }
+  for(const [sym,L] of Object.entries(st.fh||{})) if(!F[sym]||L.length>=F[sym].length) F[sym]=L;   // o registro próprio (200) vence quando é maior
+  for(const h of st.hist||[]){ if(h.nv==null||!h.s) continue; const forte=h.f!=null?!!h.f:h.ids&&h.ids.length>=min; if(!forte) continue; ev.push(h); (M[h.s]||(M[h.s]=[])).push(h.nv); }
+  // as sequências por vol do quadro pós-red (até 300 cada) completam quando o hist é curto
+  for(const [sym,L] of Object.entries(F)) if(!M[sym]||L.length>M[sym].length) M[sym]=L.map(x=>x[1]);
+  for(const [sym,str] of Object.entries(st.prv||{})){ if(!M[sym]||str.length>M[sym].length) M[sym]=str.split('').map(Number); }
+  return {M,ev,F}; }
+function sfRender(){ const el=document.getElementById('sfR'); if(el) el.innerHTML=sfHtml(); SF.t=Date.now(); }
+function sfHtml(){
+  const c=sfCfg(), st=sfStore(c.w), {M,ev,F}=sfSeqs(st), G=c.g, syms=Object.keys(M).sort(), Q=Math.max(10,+c.qtd||200);
+  if(!syms.length) return `<div class="nota">Ainda não há sinais fortes gravados em ${c.w}s. Abra a 🎮 MESA nesse tempo (ela escaneia os índices e grava os sinais fortes) e volte aqui.</div>`;
+  const base={TS:0,G1:0,G2:0,R:0}; let tot=0; for(const a of Object.values(M)) for(const nv of a){ base[sfCh(nv,G)]=(base[sfCh(nv,G)]||0)+1; tot++; }
+  const labs=G===0?['TS','R']:G===1?['TS','G1','R']:['TS','G1','G2','R'], pb=l=>tot?base[l]/tot:0;
+  const chip=l=>`<i class="sf-c ${l==='R'?'r':l==='TS'?'t':'g'}">${l==='R'?'R':l}</i>`;
+  // 1) últimos Q de cada vol (com horário quando houver)
+  const hm=T=>{ const d=new Date(T*1000); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+  const chipT=(l,T,alvo)=>c.hora?`<span class="sf-ct">${chip(l)}<small>${T?hm(T):'—'}</small></span>`:chip(l);
+  const linha=(L,titulo)=>{ const a=L.map(x=>sfCh(x[1],G)), cnt={}; a.forEach(x=>cnt[x]=(cnt[x]||0)+1); let mr=0,cr=0,mt=0,ct=0; for(const x of a){ if(x==='R'){cr++;mr=Math.max(mr,cr);} else cr=0; if(x==='TS'){ct++;mt=Math.max(mt,ct);} else ct=0; }
+    return `<div class="sf-row"><div class="sf-h"><b>${titulo}</b><span>${a.length} sinais · ${labs.map(l=>`${l} <b>${cnt[l]||0}</b>${a.length?` (${(100*(cnt[l]||0)/a.length).toFixed(0)}%)`:''}`).join(' · ')} · maior onda TS <b>${mt}</b> · maior seq. red <b class="${mr>=2?'ruim':''}">${mr}</b></span></div><div class="sf-chips">${L.map((x,i)=>chipT(a[i],x[0],x[2])).join('')||'<span class="mu">—</span>'}</div></div>`; };
+  const Lv=sym=>(F[sym]&&F[sym].length?F[sym]:M[sym].map(nv=>[0,nv,null])).slice(-Q);
+  const sep=syms.map(sym=>{ const L=Lv(sym), P=L.filter(x=>x[2]===0), I=L.filter(x=>x[2]===1); if(!P.length&&!I.length) return '';
+    return `<div class="sf-sep"><div class="sf-st">${symNome(sym)}</div>${linha(P,'<span style="color:#60a5fa">PAR</span>')}${linha(I,'<span style="color:#f472b6">ÍMPAR</span>')}</div>`; }).join('');
+  const ult0=syms.map(sym=>linha(Lv(sym),symNome(sym))).join('');
+  const ult=syms.map(sym=>{ const a=M[sym].slice(-50).map(nv=>sfCh(nv,G)), cnt={}; a.forEach(x=>cnt[x]=(cnt[x]||0)+1); let mr=0,cr=0,mt=0,ct=0; for(const x of a){ if(x==='R'){cr++;mr=Math.max(mr,cr);} else cr=0; if(x==='TS'){ct++;mt=Math.max(mt,ct);} else ct=0; }
+    return `<div class="sf-row"><div class="sf-h"><b>${symNome(sym)}</b><span>${a.length} sinais · ${labs.map(l=>`${l} <b>${cnt[l]||0}</b>`).join(' · ')} · maior onda TS <b>${mt}</b> · maior seq. red <b class="${mr>=2?'ruim':''}">${mr}</b></span></div><div class="sf-chips">${a.map(chip).join('')}</div></div>`; }).join('');
+  // 2) padrões dentro da mesma vol: depois de [contexto] → próximo
+  const ctx={};
+  for(const sym of syms){ const a=M[sym].map(nv=>sfCh(nv,G)), meio=Math.floor(a.length/2);
+    for(let i=1;i<a.length;i++){ for(let k=1;k<=3&&k<=i;k++){ const key=a.slice(i-k,i).join(' '), o=ctx[key]||(ctx[key]={n:0,c:{},A:{n:0,c:{}},B:{n:0,c:{}}}); o.n++; o.c[a[i]]=(o.c[a[i]]||0)+1; const h=i<meio?o.A:o.B; h.n++; h.c[a[i]]=(h.c[a[i]]||0)+1; }
+      // ondas: depois de X TS seguidos
+      let run=0; for(let j=i-1;j>=0&&a[j]==='TS';j--) run++; if(run>=2){ const key=`onda de ${run>=4?'4+':run} TS`, o=ctx[key]||(ctx[key]={n:0,c:{},A:{n:0,c:{}},B:{n:0,c:{}},onda:1}); o.n++; o.c[a[i]]=(o.c[a[i]]||0)+1; const h=i<meio?o.A:o.B; h.n++; h.c[a[i]]=(h.c[a[i]]||0)+1; } } }
+  const achados=[]; for(const [key,o] of Object.entries(ctx)){ if(o.n<12) continue; for(const l of labs){ const k=o.c[l]||0, z=sfZ(k,o.n,pb(l)); if(Math.abs(z)<1.5) continue;
+      const zA=sfZ(o.A.c[l]||0,o.A.n,pb(l)), zB=sfZ(o.B.c[l]||0,o.B.n,pb(l)), mesmo=o.A.n>=5&&o.B.n>=5&&Math.sign(zA)===Math.sign(z)&&Math.sign(zB)===Math.sign(z);
+      const conf=Math.abs(z)>=3.5&&mesmo&&Math.abs(zA)>=1.5&&Math.abs(zB)>=1.5?2:Math.abs(z)>=2.5&&mesmo?1:0;
+      achados.push({key,l,k,n:o.n,p:k/o.n,z,conf}); } }
+  achados.sort((a,b)=>b.conf-a.conf||Math.abs(b.z)-Math.abs(a.z));
+  // 3) coincidências entre vols: estado da vol A (últimos sinais dela) quando sai sinal forte na vol B
+  const last={}, cruz={}, baseB={};
+  for(const h of ev.slice().sort((x,y)=>x.T-y.T)){ const r=sfCh(h.nv,G), B=h.s; const bb=baseB[B]||(baseB[B]={n:0,c:{}}); bb.n++; bb.c[r]=(bb.c[r]||0)+1;
+    for(const [A,L] of Object.entries(last)){ if(A===B||!L.length) continue; const tA=L.at(-1).T; if(h.T-tA>15*60) continue;   // vol A teve sinal forte nos últimos 15 min
+      const sA=L.slice(-3).map(x=>x.r), est=[]; if(sA.length===3&&sA.every(x=>x==='TS')) est.push('onda de 3 TS'); if(sA.at(-1)==='R') est.push('acabou de dar red'); if(sA.length>=2&&sA.slice(-2).every(x=>x!=='TS'&&x!=='R')) est.push('2 seguidos em gale (G1/G2)');
+      for(const e of est){ const key=A+'|'+e+'|'+B, o=cruz[key]||(cruz[key]={A,e,B,n:0,c:{}}); o.n++; o.c[r]=(o.c[r]||0)+1; } }
+    (last[B]||(last[B]=[])).push({T:h.T,r}); if(last[B].length>10) last[B].shift(); }
+  const coinc=[]; for(const o of Object.values(cruz)){ if(o.n<8) continue; const bb=baseB[o.B]; for(const l of labs){ const p0=bb.n?(bb.c[l]||0)/bb.n:0, k=o.c[l]||0, z=sfZ(k,o.n,p0); if(Math.abs(z)>=1.8) coinc.push({...o,l,k,p:k/o.n,p0,z}); } }
+  coinc.sort((a,b)=>Math.abs(b.z)-Math.abs(a.z));
+  const nm=x=>symNome(x).replace('Volatility','Vol'), pc=x=>(100*x).toFixed(0)+'%';
+  return `<div class="panel"><h3>📊 Base · ${tot} sinais fortes · ${syms.length} volatilidade(s) · ${c.w}s</h3><div class="nota">${labs.map(l=>`${chip(l)} <b>${pc(pb(l))}</b>`).join(' &nbsp; ')} &nbsp;— é contra esses números que os padrões abaixo são comparados.</div></div>
+  <div class="panel"><h3>🕒 Últimos ${Q} sinais fortes de cada volatilidade · tudo junto <small>(mais antigo → mais novo)</small></h3>${ult0}</div>
+  <div class="panel"><h3>🔵🔴 Separado por cor · PAR e ÍMPAR <small>(os mesmos sinais, divididos pela cor que o sinal pediu)</small></h3>${sep||'<div class="nota">Os sinais antigos não guardavam a cor. Os novos já vêm com PAR/ÍMPAR e horário.</div>'}</div>
+  <div class="panel"><h3>🔎 Padrões dentro da mesma volatilidade <small>"depois de X, costuma vir Y" · todas as vols somadas</small></h3>
+    ${achados.length?`<table class="tbl"><tr><th>Depois de…</th><th>vem</th><th>quanto</th><th>normal</th><th>casos</th><th>força</th><th>confiança</th></tr>${achados.slice(0,25).map(a=>`<tr><td><b>${a.key}</b></td><td>${chip(a.l)}</td><td class="${a.z>0?(a.l==='R'?'ruim':'ok'):''}">${pc(a.p)}</td><td class="mu">${pc(pb(a.l))}</td><td>${a.n}</td><td>${a.z>0?'▲':'▼'} ${Math.abs(a.z).toFixed(1)}</td><td>${a.conf===2?'<span class="ok">⭐ forte</span>':a.conf===1?'<span style="color:#facc15">talvez</span>':'<span class="mu">acaso provável</span>'}</td></tr>`).join('')}</table>`:'<div class="nota">Nenhum padrão fugiu do normal ainda (precisa de 12+ casos e diferença clara).</div>'}
+  </div>
+  <div class="panel"><h3>🔀 Coincidências entre volatilidades <small>"quando a vol A está assim, o próximo sinal forte da vol B…"</small></h3>
+    ${coinc.length?`<table class="tbl"><tr><th>Quando…</th><th>a vol</th><th>deu</th><th>quanto</th><th>normal dela</th><th>casos</th><th>força</th><th>confiança</th></tr>${coinc.slice(0,25).map(o=>`<tr><td><b>${nm(o.A)}</b> ${o.e}</td><td><b>${nm(o.B)}</b></td><td>${chip(o.l)}</td><td class="${o.z>0?(o.l==='R'?'ruim':'ok'):''}">${pc(o.p)}</td><td class="mu">${pc(o.p0)}</td><td>${o.n}</td><td>${o.z>0?'▲':'▼'} ${Math.abs(o.z).toFixed(1)}</td><td>${Math.abs(o.z)>=3.5?'<span class="ok">⭐ forte</span>':Math.abs(o.z)>=2.5?'<span style="color:#facc15">talvez</span>':'<span class="mu">acaso provável</span>'}</td></tr>`).join('')}</table>`:'<div class="nota">Nenhuma coincidência clara ainda (precisa de 8+ casos). Com mais horas de Mesa aberta, aparecem mais.</div>'}
+    <div class="nota" style="margin-top:6px">Só conta a vol A se ela teve sinal forte nos 15 minutos anteriores. Estados olhados: onda de 3 TS, acabou de dar red, 2 seguidos em gale.</div></div>
+  <div class="panel"><div class="nota"><b>Como ler:</b> "força" mostra o quanto o número fugiu do normal (▲ acima, ▼ abaixo). Como o sistema testa centenas de padrões de uma vez, vários sempre parecem "fortes" só por sorte (testando com dados aleatórios aparecem dezenas com força 2 a 3). Por isso: <b>⭐ forte</b> = força 3,5+ e aparece igual na metade antiga e na metade nova dos dados; <b>talvez</b> = força 2,5+ nas duas metades; o resto é <b>acaso provável</b>. Os dígitos da Deriv são sorteados, então o esperado é que quase tudo fique perto do normal.</div></div>`;
+}
+VIEWS.sfortes={nome:'⭐ Sinais Fortes',live(){ if(Date.now()-SF.t>15000) sfRender(); },html(){
+  const c=sfCfg(), sel=(k,o)=>`<select onchange="sfSet('${k}',+this.value)">${o.map(([v,t])=>`<option value="${v}" ${+c[k]===v?'selected':''}>${t}</option>`).join('')}</select>`;
+  setTimeout(sfRender,0);
+  return `<div class="panel"><h3>⭐ Sinais fortes por volatilidade</h3><div class="ctl"><label>tempo ${sel('w',MESA_TEMPOS.map(x=>[x,x+'s']))}</label><label>green até ${sel('g',[[0,'TS'],[1,'G1'],[2,'G2']])}</label><label>mostrar ${sel('qtd',[[50,'50'],[100,'100'],[200,'200']])} por vol</label><label><input type="checkbox" ${c.hora?'checked':''} onchange="sfSet('hora',this.checked?1:0)"> mostrar horário (hora:minuto)</label><button onclick="sfRender()">⟳ atualizar</button></div>
+    <div class="nota">Dados que a 🎮 MESA grava (⭐ Confirmações) — deixe a Mesa aberta escaneando os índices para juntar mais. Atualiza sozinho a cada 15s.</div>
+    <div class="nota">Índices escaneados agora: <b>${d5Syms().map(x=>symNome(x).replace('Volatility','Vol')).join(', ')}</b>${MCF_2S.some(x=>!d5Syms().includes(x))?` <button onclick="d5SetSyms([...new Set([...d5Syms(),...MCF_2S])]);setTimeout(renderTab,800)">📡 escanear os 7 índices de 2s</button> <span class="mu">(faltam ${MCF_2S.filter(x=>!d5Syms().includes(x)).map(x=>symNome(x).replace('Volatility','Vol')).join(', ')} — só passam a aparecer aqui depois que a Mesa juntar sinais fortes deles)</span>`:' ✔ todos os 7'}</div></div><div id="sfR"></div>`; }};
+const TAB_ORDER = ['hist','sfortes', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
 let LAST_HEAVY = 0;
 function fillRes() {
