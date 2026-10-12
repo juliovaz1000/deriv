@@ -363,7 +363,6 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 #pacPop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:10001;padding:16px}#pacPop .rbpc{background:var(--p1);border:1px solid var(--bd);border-radius:14px;padding:16px}#pacPop .rbpt{font-size:18px;font-weight:800;margin-bottom:6px}
 .pac-box{border:1px solid var(--bd);border-radius:11px;padding:10px 12px;margin-top:8px}.pac-bk{display:flex;flex-direction:column;gap:2px;max-height:160px;overflow:auto;font-size:12px}
 #pacBtn{padding:3px 9px;border-radius:10px;font-size:12px}
-.acc-n{display:inline-block;min-width:24px;padding:1px 3px;margin:1px;border-radius:4px;font-size:11px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums}.acc-n.g{background:rgba(34,197,94,.18);color:#86efac}.acc-n.r{background:rgba(239,68,68,.18);color:#fca5a5}.acc-n.ab{background:rgba(59,130,246,.3);color:#bfdbfe}
 
 .sf-ct{display:inline-flex;flex-direction:column;align-items:center;gap:1px;margin-right:1px}.sf-ct small{font-size:8.5px;color:#8b84a3;font-variant-numeric:tabular-nums}.sf-ct small.sf-dia{color:#facc15;font-weight:800}
 .sf-sep{border:1px solid var(--bd);border-radius:10px;padding:6px 10px;margin-bottom:8px}.sf-st{font-weight:800;font-size:13px;margin-bottom:2px}
@@ -665,7 +664,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.21 · 11/10/2026 · ⭐ Sinais Fortes: data de cada sinal (período na linha, data quando o dia muda e no passar do mouse)';
+const VERSAO='v4.22 · 12/10/2026 · ⭐ Sinais Fortes: só os últimos ao vivo (com horário), filtro de horas e "último há X min" · aba Accumulators retirada';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -12683,23 +12682,25 @@ VIEWS.press={nome:'🔥 Pressure Strategy',live(){ psLiveFill(false); },html(){
 // e coincidências ENTRE vols. Lê o que a Mesa gravou (mesa_cf_v1_<tempo>), sempre fresco do navegador.
 // =====================================================================================
 const SF={t:0};
-function sfCfg(){ return {w:20,g:2,hora:0,qtd:500,...(cfg.sf||{})}; }
+function sfCfg(){ return {w:20,g:2,hora:0,qtd:500,horas:24,...(cfg.sf||{})}; }
 function sfSet(k,v){ cfg.sf={...sfCfg(),[k]:v}; saveCfg(); sfRender(); }
 function sfStore(w){ try{ return JSON.parse(localStorage.getItem('mesa_cf_v1_'+w)||'null')||{hist:[]}; }catch(e){ return {hist:[]}; } }
 const SF_L=['TS','G1','G2','R'], sfCh=(nv,g)=>nv>g?'R':nv===0?'TS':'G'+nv;
 function sfZ(k,n,p0){ return n&&p0>0&&p0<1?(k/n-p0)/Math.sqrt(p0*(1-p0)/n):0; }
-function sfSeqs(st){ const min=(cfg.mesa_cf&&+cfg.mesa_cf.min)||3, M={}, ev=[], F={};
-  for(const h of st.hist||[]){ if(h.f&&h.s&&h.nv!=null){ const L=F[h.s]||(F[h.s]=[]); L.push([h.T,h.nv,h.alvo]); } }
-  for(const [sym,L] of Object.entries(st.fh||{})) if(!F[sym]||L.length>=F[sym].length) F[sym]=L;   // o registro próprio (200) vence quando é maior
-  for(const h of st.hist||[]){ if(h.nv==null||!h.s) continue; const forte=h.f!=null?!!h.f:h.ids&&h.ids.length>=min; if(!forte) continue; ev.push(h); (M[h.s]||(M[h.s]=[])).push(h.nv); }
-  // as sequências por vol do quadro pós-red (até 300 cada) completam quando o hist é curto
-  for(const [sym,L] of Object.entries(F)) if(!M[sym]||L.length>M[sym].length) M[sym]=L.map(x=>x[1]);
-  for(const [sym,str] of Object.entries(st.prv||{})){ if(!M[sym]||str.length>M[sym].length) M[sym]=str.split('').map(Number); }
+function sfSeqs(st){ const min=(cfg.mesa_cf&&+cfg.mesa_cf.min)||3, M={}, ev=[], F={}, H=+sfCfg().horas||0, corte=H?Date.now()/1000-H*3600:0;
+  // só sinais ao vivo COM horário (os últimos 500 de cada vol); os mais antigos que o filtro de horas ficam de fora
+  for(const h of st.hist||[]){ if(h.f&&h.s&&h.nv!=null&&h.T>=corte){ const L=F[h.s]||(F[h.s]=[]); L.push([h.T,h.nv,h.alvo]); } }
+  for(const [sym,L0] of Object.entries(st.fh||{})){ const L=L0.filter(x=>x[0]>=corte); if(!F[sym]||L.length>=F[sym].length) F[sym]=L; }
+  for(const k of Object.keys(F)) if(!F[k].length) delete F[k];
+  ev.length=0; for(const h of st.hist||[]) if(h.T>=corte&&h.nv!=null&&h.s&&(h.f!=null?h.f:h.ids&&h.ids.length>=min)) ev.push(h);
+  for(const [sym,L] of Object.entries(F)) M[sym]=L.slice(-500).map(x=>x[1]);
   return {M,ev,F}; }
+function sfLimpar(){ const c=sfCfg(), H=+c.horas||0; if(!H){ alert('Escolha um limite de horas primeiro (ex.: 24h).'); return; } if(!confirm(`Apagar os sinais fortes com mais de ${H}h em ${c.w}s?`)) return; const corte=Date.now()/1000-H*3600, st=sfStore(c.w);
+  for(const k of Object.keys(st.fh||{})) st.fh[k]=st.fh[k].filter(x=>x[0]>=corte); st.hist=(st.hist||[]).filter(h=>h.T>=corte); try{ localStorage.setItem('mesa_cf_v1_'+c.w,JSON.stringify(st)); }catch(e){} delete MCF.st[c.w]; sfRender(); }
 function sfRender(){ const el=document.getElementById('sfR'); if(el) el.innerHTML=sfHtml(); SF.t=Date.now(); }
 function sfHtml(){
   const c=sfCfg(), st=sfStore(c.w), {M,ev,F}=sfSeqs(st), G=c.g, syms=Object.keys(M).sort(), Q=Math.max(10,+c.qtd||500);
-  if(!syms.length) return `<div class="nota">Ainda não há sinais fortes gravados em ${c.w}s. Abra a 🎮 MESA nesse tempo (ela escaneia os índices e grava os sinais fortes) e volte aqui.</div>`;
+  if(!syms.length) return `<div class="nota">Nenhum sinal forte ${c.horas?'nas últimas '+c.horas+'h':''} em ${c.w}s. Deixe esta página aberta com esse tempo marcado em "gravar sozinho" — os sinais fortes vão aparecendo aqui conforme acontecem.</div>`;
   const base={TS:0,G1:0,G2:0,R:0}; let tot=0; for(const a of Object.values(M)) for(const nv of a){ base[sfCh(nv,G)]=(base[sfCh(nv,G)]||0)+1; tot++; }
   const labs=G===0?['TS','R']:G===1?['TS','G1','R']:['TS','G1','G2','R'], pb=l=>tot?base[l]/tot:0;
   const chip=l=>`<i class="sf-c ${l==='R'?'r':l==='TS'?'t':'g'}">${l==='R'?'R':l}</i>`;
@@ -12710,9 +12711,10 @@ function sfHtml(){
   const chipT=(l,T,alvo,i)=>{ if(i===0) diaAnt=''; const dd=T?dia(T):''; const novo=T&&dd!==diaAnt; if(T) diaAnt=dd;
     return c.hora?`<span class="sf-ct" title="${T?new Date(T*1000).toLocaleString('pt-BR'):''}">${chip(l)}<small>${T?hm(T):'—'}</small>${novo?`<small class="sf-dia">${dd}</small>`:''}</span>`:`<span title="${T?new Date(T*1000).toLocaleString('pt-BR'):''}">${chip(l)}</span>`; };
   const linha=(L,titulo)=>{ const a=L.map(x=>sfCh(x[1],G)), cnt={}; a.forEach(x=>cnt[x]=(cnt[x]||0)+1); let mr=0,cr=0,mt=0,ct=0; for(const x of a){ if(x==='R'){cr++;mr=Math.max(mr,cr);} else cr=0; if(x==='TS'){ct++;mt=Math.max(mt,ct);} else ct=0; }
+    const ha=L.length?Math.round((Date.now()/1000-L.at(-1)[0])/60):null, fresco=ha==null?'':` · <b class="${ha<=10?'ok':ha<=60?'':'ruim'}">último há ${ha<60?ha+' min':Math.floor(ha/60)+'h'+String(ha%60).padStart(2,'0')}</b>`;
     const per=L.length&&L[0][0]&&L.at(-1)[0]?` · ${new Date(L[0][0]*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} → ${new Date(L.at(-1)[0]*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:'';
-    return `<div class="sf-row"><div class="sf-h"><b>${titulo}</b><span>${a.length} sinais${per} · ${labs.map(l=>`${l} <b>${cnt[l]||0}</b>${a.length?` (${(100*(cnt[l]||0)/a.length).toFixed(0)}%)`:''}`).join(' · ')} · maior onda TS <b>${mt}</b> · maior seq. red <b class="${mr>=2?'ruim':''}">${mr}</b></span></div><div class="sf-chips">${L.map((x,i)=>chipT(a[i],x[0],x[2],i)).join('')||'<span class="mu">—</span>'}</div></div>`; };
-  const Lv=sym=>(F[sym]&&F[sym].length?F[sym]:M[sym].map(nv=>[0,nv,null])).slice(-Q);
+    return `<div class="sf-row"><div class="sf-h"><b>${titulo}</b><span>${a.length} sinais${per}${fresco} · ${labs.map(l=>`${l} <b>${cnt[l]||0}</b>${a.length?` (${(100*(cnt[l]||0)/a.length).toFixed(0)}%)`:''}`).join(' · ')} · maior onda TS <b>${mt}</b> · maior seq. red <b class="${mr>=2?'ruim':''}">${mr}</b></span></div><div class="sf-chips">${L.map((x,i)=>chipT(a[i],x[0],x[2],i)).join('')||'<span class="mu">—</span>'}</div></div>`; };
+  const Lv=sym=>(F[sym]||[]).slice(-Q);
   const sep=syms.map(sym=>{ const L=Lv(sym), P=L.filter(x=>x[2]===0), I=L.filter(x=>x[2]===1); if(!P.length&&!I.length) return '';
     return `<div class="sf-sep"><div class="sf-st">${symNome(sym)}</div>${linha(P,'<span style="color:#60a5fa">PAR</span>')}${linha(I,'<span style="color:#f472b6">ÍMPAR</span>')}</div>`; }).join('');
   const ult0=syms.map(sym=>linha(Lv(sym),symNome(sym))).join('');
@@ -12740,7 +12742,7 @@ function sfHtml(){
   coinc.sort((a,b)=>Math.abs(b.z)-Math.abs(a.z));
   const nm=x=>symNome(x).replace('Volatility','Vol'), pc=x=>(100*x).toFixed(0)+'%';
   return `<div class="panel"><h3>📊 Base · ${tot} sinais fortes · ${syms.length} volatilidade(s) · ${c.w}s</h3><div class="nota">${labs.map(l=>`${chip(l)} <b>${pc(pb(l))}</b>`).join(' &nbsp; ')} &nbsp;— é contra esses números que os padrões abaixo são comparados.</div></div>
-  <div class="panel"><h3>🕒 Últimos ${Q} sinais fortes de cada volatilidade · tudo junto <small>(mais antigo → mais novo)</small></h3>${ult0}</div>
+  <div class="panel"><h3>🕒 Últimos ${Q} sinais fortes de cada volatilidade · ao vivo${c.horas?' · últimas '+c.horas+'h':''} <small>(mais antigo → mais novo)</small></h3>${ult0}</div>
   <div class="panel"><h3>🔵🔴 Separado por cor · PAR e ÍMPAR <small>(os mesmos sinais, divididos pela cor que o sinal pediu)</small></h3>${sep||'<div class="nota">Os sinais antigos não guardavam a cor. Os novos já vêm com PAR/ÍMPAR e horário.</div>'}</div>
   <div class="panel"><h3>🔎 Padrões dentro da mesma volatilidade <small>"depois de X, costuma vir Y" · todas as vols somadas</small></h3>
     ${achados.length?`<table class="tbl"><tr><th>Depois de…</th><th>vem</th><th>quanto</th><th>normal</th><th>casos</th><th>força</th><th>confiança</th></tr>${achados.slice(0,25).map(a=>`<tr><td><b>${a.key}</b></td><td>${chip(a.l)}</td><td class="${a.z>0?(a.l==='R'?'ruim':'ok'):''}">${pc(a.p)}</td><td class="mu">${pc(pb(a.l))}</td><td>${a.n}</td><td>${a.z>0?'▲':'▼'} ${Math.abs(a.z).toFixed(1)}</td><td>${a.conf===2?'<span class="ok">⭐ forte</span>':a.conf===1?'<span style="color:#facc15">talvez</span>':'<span class="mu">acaso provável</span>'}</td></tr>`).join('')}</table>`:'<div class="nota">Nenhum padrão fugiu do normal ainda (precisa de 12+ casos e diferença clara).</div>'}
@@ -12753,100 +12755,11 @@ function sfHtml(){
 VIEWS.sfortes={nome:'⭐ Sinais Fortes',live(){ if(Date.now()-SF.t>15000) sfRender(); },html(){
   const c=sfCfg(), sel=(k,o)=>`<select onchange="sfSet('${k}',+this.value)">${o.map(([v,t])=>`<option value="${v}" ${+c[k]===v?'selected':''}>${t}</option>`).join('')}</select>`;
   setTimeout(sfRender,0);
-  return `<div class="panel"><h3>⭐ Sinais fortes por volatilidade</h3><div class="ctl"><label>tempo ${sel('w',MESA_TEMPOS.map(x=>[x,x+'s']))}</label><label>green até ${sel('g',[[0,'TS'],[1,'G1'],[2,'G2']])}</label><label>mostrar ${sel('qtd',[[50,'50'],[100,'100'],[200,'200'],[300,'300'],[500,'500']])} por vol</label><label><input type="checkbox" ${c.hora?'checked':''} onchange="sfSet('hora',this.checked?1:0)"> mostrar horário (hora:minuto)</label><button onclick="sfRender()">⟳ atualizar</button></div>
+  return `<div class="panel"><h3>⭐ Sinais fortes por volatilidade</h3><div class="ctl"><label>tempo ${sel('w',MESA_TEMPOS.map(x=>[x,x+'s']))}</label><label>green até ${sel('g',[[0,'TS'],[1,'G1'],[2,'G2']])}</label><label>mostrar ${sel('qtd',[[50,'50'],[100,'100'],[200,'200'],[300,'300'],[500,'500']])} por vol</label><label>só das últimas ${sel('horas',[[1,'1h'],[3,'3h'],[6,'6h'],[12,'12h'],[24,'24h'],[0,'sem limite']])}</label><button onclick="sfLimpar()" title="apaga do registro os sinais mais antigos que o filtro de horas">🗑 apagar os antigos</button><label><input type="checkbox" ${c.hora?'checked':''} onchange="sfSet('hora',this.checked?1:0)"> mostrar horário (hora:minuto)</label><button onclick="sfRender()">⟳ atualizar</button></div>
     <div class="nota">Esta página calcula os círculos e grava os sinais fortes sozinha (não precisa da Mesa aberta). A Mesa recebe os sinais daqui e só opera. Atualiza a cada 15s.</div>
     <div class="nota">${mcfQuemTxt()} · gravar sozinho (sem a Mesa) nos tempos: ${MESA_TEMPOS.filter(x=>x>=5).map(x=>`<label style="margin-right:6px"><input type="checkbox" ${mcfWsCerebro().includes(x)?'checked':''} onchange="const L=new Set(mcfWsCerebro()); this.checked?L.add(${x}):L.delete(${x}); cfg.mcf_ws=[...L].sort((a,b)=>a-b); saveCfg();"> ${x}s</label>`).join('')}</div>
     <div class="nota">Índices escaneados agora: <b>${d5Syms().map(x=>symNome(x).replace('Volatility','Vol')).join(', ')}</b>${MCF_2S.some(x=>!d5Syms().includes(x))?` <button onclick="d5SetSyms([...new Set([...d5Syms(),...MCF_2S])]);setTimeout(renderTab,800)">📡 escanear os 7 índices de 2s</button> <span class="mu">(faltam ${MCF_2S.filter(x=>!d5Syms().includes(x)).map(x=>symNome(x).replace('Volatility','Vol')).join(', ')} — só passam a aparecer aqui depois que a Mesa juntar sinais fortes deles)</span>`:' ✔ todos os 7'}</div></div><div id="sfR"></div>`; }};
-// =====================================================================================
-// 📈 ACCUMULATORS (Deriv · contrato ACCU) — histórico de contagem de ticks por índice e por taxa (1% a 5%)
-// API pública: proposal ACCU → contract_details.ticks_stayed_in (últimas 200 contagens) + tick_size_barrier.
-// Regra conferida: o tick "fica dentro" se |preço − preço anterior| ÷ preço anterior < tick_size_barrier.
-// Com isso o histórico longo é refeito a partir do ticks_history (1000 ticks por pedido).
-// =====================================================================================
-const ACC_URL='wss://api.derivws.com/trading/v1/options/ws/public';
-const ACC_SYMS=[['R_10','Vol 10'],['R_25','Vol 25'],['R_50','Vol 50'],['R_75','Vol 75'],['R_100','Vol 100'],['1HZ10V','Vol 10 (1s)'],['1HZ15V','Vol 15 (1s)'],['1HZ25V','Vol 25 (1s)'],['1HZ30V','Vol 30 (1s)'],['1HZ50V','Vol 50 (1s)'],['1HZ75V','Vol 75 (1s)'],['1HZ90V','Vol 90 (1s)'],['1HZ100V','Vol 100 (1s)']];
-const ACC_G=[1,2,3,4,5];
-let ACC={ws:null,ok:false,req:0,cb:{},d:{},ticks:{},busy:0,msg:'',t:0,lp:0};
-function accCfg(){ return {g:3,N:5,sym:'R_100',pag:20,cond:'u<3',...(cfg.acc||{})}; }
-function accSet(k,v){ cfg.acc={...accCfg(),[k]:v}; saveCfg(); accRender(); if(k==='g'||k==='sym') accAtualizar(); }
-function accNome(s){ return (ACC_SYMS.find(x=>x[0]===s)||[0,s])[1]; }
-function accWs(){ if(ACC.ws&&ACC.ok) return Promise.resolve();
-  return new Promise((res,rej)=>{ try{ const w=new WebSocket(ACC_URL); ACC.ws=w;
-    w.onopen=()=>{ ACC.ok=true; res(); }; w.onclose=()=>{ ACC.ok=false; for(const k in ACC.cb){ ACC.cb[k]({error:{message:'conexão fechada'}}); delete ACC.cb[k]; } };
-    w.onerror=()=>{ ACC.ok=false; rej(new Error('não conectou na Deriv')); };
-    w.onmessage=m=>{ let j; try{ j=JSON.parse(m.data); }catch(e){ return; } const f=ACC.cb[j.req_id]; if(f){ delete ACC.cb[j.req_id]; f(j); } };
-  }catch(e){ rej(e); } }); }
-function accReq(o){ return new Promise(res=>{ const id=++ACC.req; ACC.cb[id]=res; try{ ACC.ws.send(JSON.stringify({...o,req_id:id})); }catch(e){ delete ACC.cb[id]; res({error:{message:e.message}}); } setTimeout(()=>{ if(ACC.cb[id]){ delete ACC.cb[id]; res({error:{message:'sem resposta'}}); } },15000); }); }
-async function accProp(sym,g){ const j=await accReq({proposal:1,amount:1,basis:'stake',contract_type:'ACCU',currency:'USD',growth_rate:g/100,underlying_symbol:sym});
-  if(j.error) return {erro:j.error.message||j.error.code}; const d=j.proposal.contract_details; return {tsb:+d.tick_size_barrier,hist:d.ticks_stayed_in||[],maxT:d.maximum_ticks,maxPay:d.maximum_payout,t:Date.now()}; }
-async function accAtualizar(){ if(ACC.busy) return; ACC.busy=1; ACC.msg='atualizando…';
-  try{ await accWs(); const c=accCfg(), T=[];
-    for(const [s] of ACC_SYMS) T.push(accProp(s,c.g).then(r=>{ ACC.d[s+'@'+c.g]=r; }));
-    for(const g of ACC_G) if(g!==c.g) T.push(accProp(c.sym,g).then(r=>{ ACC.d[c.sym+'@'+g]=r; }));
-    await Promise.all(T); ACC.msg=''; ACC.t=Date.now(); }catch(e){ ACC.msg='⚠ '+e.message; }
-  ACC.busy=0; accRender(); }
-// histórico longo: pagina o ticks_history para trás e guarda os preços
-async function accLongo(){ const c=accCfg(), sym=c.sym, pag=Math.max(1,Math.min(100,+c.pag||20)); if(ACC.busy) return; ACC.busy=1;
-  try{ await accWs(); for(const g of ACC_G) if(!ACC.d[sym+'@'+g]||ACC.d[sym+'@'+g].erro) ACC.d[sym+'@'+g]=await accProp(sym,g);
-    let end='latest', P=[], Tm=[];
-    for(let i=0;i<pag;i++){ ACC.msg=`baixando ticks de ${accNome(sym)} · ${i+1}/${pag}…`; accRender();
-      const j=await accReq({ticks_history:sym,end,count:1000,style:'ticks'}); if(j.error){ ACC.msg='⚠ '+(j.error.message||j.error.code); break; }
-      const h=j.history; if(!h||!h.times||!h.times.length) break; P=h.prices.map(Number).concat(P); Tm=h.times.concat(Tm); end=h.times[0]-1; }
-    ACC.ticks[sym]={P,T:Tm,em:Date.now()}; ACC.msg=''; }catch(e){ ACC.msg='⚠ '+e.message; }
-  ACC.busy=0; accRender(); }
-function accRuns(P,tsb){ const R=[]; let c=0; for(let i=1;i<P.length;i++){ if(Math.abs(P[i]-P[i-1])/P[i-1]<tsb) c++; else { R.push(c); c=0; } } return {R,aberto:c}; }
-// sequência de contagens usada nas análises: longa (refeita) se houver, senão as 200 da Deriv
-function accSeq(sym,g){ const d=ACC.d[sym+'@'+g], L=ACC.ticks[sym]; if(L&&d&&d.tsb){ const r=accRuns(L.P,d.tsb); return {R:r.R,fonte:`${L.P.length} ticks refeitos`,aberto:r.aberto}; }
-  if(d&&d.hist&&d.hist.length) return {R:d.hist.slice(0,-1),fonte:'200 da Deriv',aberto:d.hist.at(-1)}; return {R:[],fonte:'—',aberto:0}; }
-function accSt(R,N,g){ const n=R.length; if(!n) return null; const media=R.reduce((a,b)=>a+b,0)/n, q=media/(media+1), ge=R.filter(x=>x>=N).length, pay=Math.pow(1+g/100,N);
-  return {n,media,q,ge,pE:ge/n,pT:Math.pow(q,N),pay,ev:(ge/n)*pay-1,evT:Math.pow(q,N)*pay-1}; }
-const ACC_COND=[['u<1','último deu 0 ticks',(R,i)=>R[i-1]<1],['u<3','último < 3 ticks',(R,i)=>R[i-1]<3],['u<5','último < 5 ticks',(R,i)=>R[i-1]<5],['uu<5','últimos 2 < 5 ticks',(R,i)=>i>=2&&R[i-1]<5&&R[i-2]<5],
-  ['uuu<10','últimos 3 < 10 ticks',(R,i)=>i>=3&&R[i-1]<10&&R[i-2]<10&&R[i-3]<10],['u>=50','último ≥ 50 ticks',(R,i)=>R[i-1]>=50],['u>=100','último ≥ 100 ticks',(R,i)=>R[i-1]>=100],['m10<med','média dos últimos 10 abaixo da média',(R,i,m)=>i>=10&&R.slice(i-10,i).reduce((a,b)=>a+b,0)/10<m]];
-function accCondTab(R,N,g){ const st=accSt(R,N,g); if(!st) return []; const out=[];
-  for(const [id,nome,fn] of ACC_COND){ let n=0,k=0,nA=0,kA=0,nB=0,kB=0; const meio=Math.floor(R.length/2);
-    for(let i=1;i<R.length;i++){ if(!fn(R,i,st.media)) continue; const w=R[i]>=N; n++; if(w) k++; if(i<meio){ nA++; if(w) kA++; } else { nB++; if(w) kB++; } }
-    if(!n){ out.push({id,nome,n:0}); continue; } const p0=st.pE, z=sfZ(k,n,p0), zA=sfZ(kA,nA,p0), zB=sfZ(kB,nB,p0), mesmo=nA>=5&&nB>=5&&Math.sign(zA)===Math.sign(z)&&Math.sign(zB)===Math.sign(z);
-    out.push({id,nome,n,k,p:k/n,z,conf:Math.abs(z)>=3.5&&mesmo&&Math.abs(zA)>=1.5&&Math.abs(zB)>=1.5?2:Math.abs(z)>=2.5&&mesmo?1:0,ev:(k/n)*st.pay-1}); }
-  return out; }
-function accRender(){ const el=document.getElementById('accR'); if(el) el.innerHTML=accHtml(); const st=document.getElementById('accSt'); if(st) st.innerHTML=ACC.msg||(ACC.t?'atualizado '+new Date(ACC.t).toLocaleTimeString('pt-BR'):''); }
-function accHtml(){
-  const c=accCfg(), g=c.g, N=Math.max(1,+c.N||5), pc=x=>(100*x).toFixed(1)+'%', ev=x=>`<b class="${x>=0?'ok':'ruim'}">${x>=0?'+':''}${(100*x).toFixed(1)}%</b>`;
-  // 1) todos os índices na taxa escolhida
-  const linhas=ACC_SYMS.map(([s,nm])=>{ const d=ACC.d[s+'@'+g]; if(!d) return `<tr><td><b>${nm}</b></td><td colspan="6" class="mu">carregando…</td></tr>`; if(d.erro) return `<tr><td><b>${nm}</b></td><td colspan="6" class="mu">${esc(d.erro)}</td></tr>`;
-    const R=d.hist.slice(0,-1), st=accSt(R,N,g), ult=d.hist.slice(-25).reverse();
-    return `<tr style="cursor:pointer;${s===c.sym?'background:rgba(168,85,247,.12)':''}" onclick="accSet('sym','${s}')"><td><b>${nm}</b></td><td style="text-align:left;white-space:normal">${ult.map((x,i)=>`<span class="acc-n ${i===0?'ab':x<N?'r':'g'}" title="${i===0?'em andamento':''}">${x}</span>`).join('')}</td>
-      <td>${st?st.media.toFixed(0):'—'}</td><td>${st?pc(st.pE):'—'}</td><td class="mu">${st?pc(st.pT):'—'}</td><td>${st?ev(st.ev):'—'}</td><td>${d.maxT}</td></tr>`; }).join('');
-  // 2) índice escolhido nas 5 taxas
-  const taxas=ACC_G.map(gg=>{ const d=ACC.d[c.sym+'@'+gg]; if(!d||d.erro) return `<tr><td>${gg}%</td><td colspan="7" class="mu">${d&&d.erro?esc(d.erro):'carregando…'}</td></tr>`; const S=accSeq(c.sym,gg), st=accSt(S.R,N,gg);
-    return `<tr class="${gg===g?'cf-best':''}"><td><b>${gg}%</b></td><td>${(d.tsb*100).toFixed(4)}%</td><td>${st?st.media.toFixed(1):'—'}</td><td>${st?pc(st.pE):'—'}</td><td class="mu">${st?pc(st.pT):'—'}</td><td>+${st?(100*(st.pay-1)).toFixed(1):'—'}%</td><td>${st?ev(st.ev):'—'}</td><td class="mu">${st?st.n:0} (${S.fonte})</td></tr>`; }).join('');
-  // 3) padrões no índice/taxa escolhidos
-  const S=accSeq(c.sym,g), st=accSt(S.R,N,g), CT=accCondTab(S.R,N,g);
-  const dist=st?[0,1,2,3,5,10,20,50,100].map((a,i,A)=>{ const b=A[i+1]; const k=S.R.filter(x=>x>=a&&(b==null||x<b)).length; return `<div><b>${b==null?a+'+':a===b-1?a:a+'–'+(b-1)}</b><span>${k}</span><small>${pc(k/st.n)}</small></div>`; }).join(''):'';
-  const cond=ACC_COND.find(x=>x[0]===c.cond)||ACC_COND[1], sim=CT.find(x=>x.id===cond[0]);
-  return `<div class="panel"><h3>📊 Todos os índices · taxa ${g}% · alvo ${N} ticks <small>clique num índice para ver os detalhes dele</small></h3>
-    <table><tr><th style="text-align:left">Índice</th><th style="text-align:left">Últimas contagens (mais nova à esquerda · <span class="acc-n ab">azul</span> = em andamento)</th><th>média</th><th>pegou ≥${N}</th><th>teórico</th><th>resultado por entrada</th><th>máx. ticks</th></tr>${linhas}</table>
-    <div class="nota">"pegou ≥${N}" = quantas das 200 últimas contagens chegaram a ${N} ticks. "teórico" = o que daria se cada tick fosse independente (com a mesma média). "resultado por entrada" = ganho médio apostando 1 e saindo em ${N} ticks (lucro de ${(100*(Math.pow(1+g/100,N)-1)).toFixed(1)}% quando pega, perde tudo quando não pega).</div></div>
-  <div class="panel"><h3>🔎 ${accNome(c.sym)} nas 5 taxas · alvo ${N} ticks</h3>
-    <table><tr><th>taxa</th><th>barreira por tick</th><th>média de ticks</th><th>pegou ≥${N}</th><th>teórico</th><th>lucro se pegar</th><th>resultado por entrada</th><th>contagens</th></tr>${taxas}</table>
-    <div class="ctl" style="margin-top:6px"><label>histórico longo: <select onchange="accSet('pag',+this.value)">${[5,10,20,50,100].map(p=>`<option value="${p}" ${+c.pag===p?'selected':''}>${p} mil ticks</option>`).join('')}</select></label><button onclick="accLongo()">⬇ refazer histórico longo de ${accNome(c.sym)}</button>
-      <span class="nota">${ACC.ticks[c.sym]?`carregado: ${ACC.ticks[c.sym].P.length} ticks (${new Date(ACC.ticks[c.sym].T[0]*1000).toLocaleString('pt-BR')} → agora)`:'usa só as 200 contagens da Deriv até você baixar'}</span></div></div>
-  <div class="panel"><h3>🧪 Padrões · ${accNome(c.sym)} · ${g}% · alvo ${N} ticks <small>${S.fonte} · ${st?st.n:0} contagens</small></h3>
-    ${st?`<div class="cf-niv" style="grid-template-columns:repeat(9,1fr)">${dist}</div>
-    <table><tr><th style="text-align:left">Entrar quando…</th><th>casos</th><th>pegou ≥${N}</th><th>normal</th><th>força</th><th>confiança</th><th>resultado por entrada</th></tr>
-      <tr><td style="text-align:left">sempre (base)</td><td>${st.n}</td><td>${pc(st.pE)}</td><td class="mu">—</td><td>—</td><td>—</td><td>${ev(st.ev)}</td></tr>
-      ${CT.map(x=>x.n?`<tr class="${x.id===c.cond?'cf-best':''}" style="cursor:pointer" onclick="accSet('cond','${x.id}')"><td style="text-align:left">${x.nome}</td><td>${x.n}</td><td>${pc(x.p)}</td><td class="mu">${pc(st.pE)}</td><td>${x.z>0?'▲':'▼'} ${Math.abs(x.z).toFixed(1)}</td><td>${x.conf===2?'<span class="ok">⭐ forte</span>':x.conf===1?'<span style="color:#facc15">talvez</span>':'<span class="mu">acaso provável</span>'}</td><td>${ev(x.ev)}</td></tr>`:`<tr><td style="text-align:left">${x.nome}</td><td colspan="6" class="mu">sem casos</td></tr>`).join('')}</table>
-    ${sim&&sim.n?`<div class="nota" style="margin-top:6px"><b>Simulação "${cond[1]}" → sair em ${N} ticks, apostando $1:</b> ${sim.n} entradas · ${sim.k} pegaram · ${sim.n-sim.k} quebraram · saldo <b class="${sim.k*(st.pay-1)-(sim.n-sim.k)>=0?'ok':'ruim'}">$ ${(sim.k*(st.pay-1)-(sim.n-sim.k)).toFixed(2)}</b> (entrando em tudo: $ ${(st.ge*(st.pay-1)-(st.n-st.ge)).toFixed(2)}). Clique numa linha para simular outra regra.</div>`:''}`:'<div class="nota">Sem contagens ainda.</div>'}
-    <div class="nota" style="margin-top:6px"><b>Como ler:</b> a Deriv calibra a barreira para que, na média, o ganho por tick não compense o risco — por isso "resultado por entrada" costuma ficar levemente negativo em todas as taxas. Se os ticks forem independentes (como num sorteio), nenhuma regra de "esperar contagens curtas" muda a chance do próximo: o "normal" e o "teórico" vão bater. Só vale prestar atenção numa regra marcada <b>⭐ forte</b> no histórico longo.</div></div>`;
-}
-VIEWS.acc={nome:'📈 Accumulators',live(){ if(Date.now()-(ACC.lp||0)>15000){ ACC.lp=Date.now(); accAtualizar(); } },html(){
-  const c=accCfg(), sel=(k,o)=>`<select onchange="accSet('${k}',+this.value)">${o.map(([v,t])=>`<option value="${v}" ${+c[k]===v?'selected':''}>${t}</option>`).join('')}</select>`;
-  setTimeout(()=>{ accRender(); if(!ACC.t||Date.now()-ACC.t>15000) accAtualizar(); },0);
-  return `<div class="panel"><h3>📈 Accumulators <small>histórico de contagem de ticks da Deriv · todos os índices · 1% a 5%</small></h3>
-    <div class="ctl"><label>taxa ${sel('g',ACC_G.map(x=>[x,x+'%']))}</label><label>alvo ${sel('N',[1,2,3,4,5,6,8,10,15,20,30].map(x=>[x,x+' ticks']))}</label><button onclick="accAtualizar()">⟳ atualizar</button><span class="nota" id="accSt"></span></div>
-    <div class="nota">Cada taxa tem uma barreira diferente, então a contagem muda com a taxa (quanto maior a taxa, mais estreita a barreira e menos ticks). Atualiza sozinho a cada 15s enquanto esta aba estiver aberta.</div></div><div id="accR"></div>`; }};
-setInterval(()=>{ try{ if(typeof S!=='undefined'&&S.tab==='acc'&&Date.now()-(ACC.lp||0)>15000){ ACC.lp=Date.now(); accAtualizar(); } }catch(e){} },5000);
-
-const TAB_ORDER = ['hist','sfortes','acc', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
+const TAB_ORDER = ['hist','sfortes', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
 let LAST_HEAVY = 0;
 function fillRes() {
