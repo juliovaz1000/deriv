@@ -664,7 +664,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.22 · 12/10/2026 · ⭐ Sinais Fortes: só os últimos ao vivo (com horário), filtro de horas e "último há X min" · aba Accumulators retirada';
+const VERSAO='v4.23 · 12/10/2026 · 🏭 Fábrica de robôs (círculo 9): cria robôs 100% de tiro seco/G1 em todos os índices × 5s/10s, observa ao vivo, aprova/reprova e vota no círculo 9';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -7189,7 +7189,8 @@ function rbLogHtml(){
   </table></div>`;
 }
 VIEWS.robos={nome:'🤖 Robôs',live:rbLive,html(){
-  return `${raPanelHtml()}<div class="panel"><h3>🤖 Robôs de soma, dupla e número</h3>
+  setTimeout(fbRender,0);
+  return `<div class="panel"><h3>🏭 Fábrica de robôs → círculo 9 <small>cria, observa, aprova e reprova sozinho · tiro seco e até G1 · todos os índices × 5s/10s</small></h3><div id="fbBox"></div></div>${raPanelHtml()}<div class="panel"><h3>🤖 Robôs de soma, dupla e número</h3>
     <div class="ctl">
       <label><input type="checkbox" ${cfg.rb_popup?'checked':''} onchange="rbToggleGlobal(this)"> Popup geral</label>
       <button onclick="rbClearLog()">🧹 Limpar placar ao vivo</button>
@@ -10830,7 +10831,7 @@ function piStats(L,lvl){
 // Cada círculo e cada combinação (ex.: 1+3+7) guarda o placar TS/G1/G2/red, por tempo de jogo.
 // =====================================================================================
 const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20,simH:24,simG:1,simRk:2,prMode:'R',prPop:1};
-const MCF_CIRC=[[1,'🕒','Horário fixo 100%'],[2,'🕐','Horas pagantes'],[3,'🖼','Figura gráfica'],[4,'🟨','Linha amarela'],[5,'🤖','Robôs ligados'],[6,'🧭','Tendência'],[7,'🔢','Número chama'],[8,'🔥','Pressure Strategy']];
+const MCF_CIRC=[[1,'🕒','Horário fixo 100%'],[2,'🕐','Horas pagantes'],[3,'🖼','Figura gráfica'],[4,'🟨','Linha amarela'],[5,'🤖','Robôs ligados'],[6,'🧭','Tendência'],[7,'🔢','Número chama'],[8,'🔥','Pressure Strategy'],[9,'🏭','Fábrica de robôs']];
 const MCF_2S=['R_10','R_25','R_50','R_75','R_100','RDBEAR','RDBULL'];
 function mcfC(){ return {...MCF_DEF,...(cfg.mesa_cf||{})}; }
 function mcfSet(k,v){ cfg.mesa_cf={...mcfC(),[k]:v}; saveCfg(); MCF.cache={}; mesaRender(true); }
@@ -10915,6 +10916,7 @@ function mcfVotar(w,T,sym){
   v[6]=mcfTend(W,c)||{alvo:null,txt:'juntando jogos'};
   v[7]=mcfNumero(W,c)||{alvo:null,txt:'juntando jogos'};
   try{ v[8]=mcfPressure(W,w,bank,T)||{alvo:null,txt:'juntando jogos'}; }catch(e){ v[8]={alvo:null,txt:'—'}; }
+  try{ v[9]=typeof fbVoto==='function'?fbVoto(w,T,sym,bank,W):{alvo:null,txt:'—'}; }catch(e){ v[9]={alvo:null,txt:'—'}; }
   return v;
 }
 function mcfForca(v){ const a=[0,1].map(cor=>MCF_CIRC.filter(([id])=>v[id]&&v[id].alvo===cor).map(([id])=>id)); if(a[0].length===a[1].length) return {n:0,alvo:null,ids:[],contra:a[0].length}; const cor=a[0].length>a[1].length?0:1; return {n:a[cor].length,alvo:cor,ids:a[cor],contra:a[1-cor].length}; }
@@ -11084,7 +11086,7 @@ function mcfResumo(st,c){ const A={f:{n:0,lv:[0,0,0,0]},n:{n:0,lv:[0,0,0,0]}}; f
 
 // 🧪 qual mínimo de círculos acerta mais: junta as combinações com ≥ k círculos e compara (limite inferior de Wilson, para amostra pequena não ganhar por sorte)
 function mcfWilson(h,n,z=1.645){ if(!n) return 0; const p=h/n, z2=z*z; return (p+z2/(2*n)-z*Math.sqrt(p*(1-p)/n+z2/(4*n*n)))/(1+z2/n); }
-function mcfMinTab(st,c){ const R=[]; for(let k=2;k<=8;k++){ const o={n:0,lv:[0,0,0,0]}, e={n:0,lv:[0,0,0,0]};
+function mcfMinTab(st,c){ const R=[]; for(let k=2;k<=9;k++){ const o={n:0,lv:[0,0,0,0]}, e={n:0,lv:[0,0,0,0]};
     for(const [key,x] of Object.entries(st.combo)){ const m=key.split('+').length; if(m>=k){ o.n+=x.n; for(let i=0;i<4;i++) o.lv[i]+=x.lv[i]; } if(m===k){ e.n+=x.n; for(let i=0;i<4;i++) e.lv[i]+=x.lv[i]; } }
     if(!o.n) continue; let h=0; for(let i=0;i<=c.minCrit;i++) h+=o.lv[i]; R.push({k,o,e,sc:mcfWilson(h,o.n)}); }
   const ok=R.filter(r=>r.o.n>=c.minN), best=ok.length?ok.reduce((a,b)=>b.sc>a.sc?b:a):null; return {R,best}; }
@@ -12759,6 +12761,97 @@ VIEWS.sfortes={nome:'⭐ Sinais Fortes',live(){ if(Date.now()-SF.t>15000) sfRend
     <div class="nota">Esta página calcula os círculos e grava os sinais fortes sozinha (não precisa da Mesa aberta). A Mesa recebe os sinais daqui e só opera. Atualiza a cada 15s.</div>
     <div class="nota">${mcfQuemTxt()} · gravar sozinho (sem a Mesa) nos tempos: ${MESA_TEMPOS.filter(x=>x>=5).map(x=>`<label style="margin-right:6px"><input type="checkbox" ${mcfWsCerebro().includes(x)?'checked':''} onchange="const L=new Set(mcfWsCerebro()); this.checked?L.add(${x}):L.delete(${x}); cfg.mcf_ws=[...L].sort((a,b)=>a-b); saveCfg();"> ${x}s</label>`).join('')}</div>
     <div class="nota">Índices escaneados agora: <b>${d5Syms().map(x=>symNome(x).replace('Volatility','Vol')).join(', ')}</b>${MCF_2S.some(x=>!d5Syms().includes(x))?` <button onclick="d5SetSyms([...new Set([...d5Syms(),...MCF_2S])]);setTimeout(renderTab,800)">📡 escanear os 7 índices de 2s</button> <span class="mu">(faltam ${MCF_2S.filter(x=>!d5Syms().includes(x)).map(x=>symNome(x).replace('Volatility','Vol')).join(', ')} — só passam a aparecer aqui depois que a Mesa juntar sinais fortes deles)</span>`:' ✔ todos os 7'}</div></div><div id="sfR"></div>`; }};
+// =====================================================================================
+// 🏭 FÁBRICA DE ROBÔS → CÍRCULO 9
+// Reaproveita o motor de descoberta do 🎯 Somente Robô (scScanFamily, srobScanCores, hpScan, srobStarts, srobChave, srobNome)
+// para criar robôs de TIRO SECO e até G1 em cada índice escaneado × 5s/10s. Nada é apostado: cada robô começa
+// EM OBSERVAÇÃO (confere green/red ao vivo); só os aprovados e marcados votam no círculo 9 quando o jogo deles é o jogo da vez.
+// Varredura a cada 5 min, um índice/tempo por vez (sem travar a página). Os reprovados ficam guardados para consulta.
+// =====================================================================================
+const FB_KEY='dpi_fab_v1';
+let FB=null, FBQ={fila:[],ciclo:0,busy:false,tw:{},prox:0};
+function fbCfg(){ return {on:1,ws:[5,10],maxTot:10,porComb:5,niveis:[0,1],minObs:3,maxRed:2,janela:10,obsVota:0,minTeste:3,min:12,pulo:5,hora:1,...(cfg.fb||{})}; }
+function fbSetCfg(k,v){ cfg.fb={...fbCfg(),[k]:v}; saveCfg(); fbRender(); }
+function fbLoad(){ if(FB) return FB; try{ FB=JSON.parse(localStorage.getItem(FB_KEY)||'null'); }catch(e){} if(!FB||!Array.isArray(FB.robos)) FB={robos:[],sig:[],log:[],ult:0}; return FB; }
+function fbSave(){ const F=fbLoad(); F.sig=F.sig.filter(s=>!s.done||Date.now()-s.T*1000<3600e3).slice(-300); F.log=F.log.slice(-150); F.robos=F.robos.filter(r=>r.estado!=='reprovado').concat(F.robos.filter(r=>r.estado==='reprovado').slice(-60)); try{ localStorage.setItem(FB_KEY,JSON.stringify(F)); }catch(e){} }
+window.addEventListener('storage',e=>{ if(e.key===FB_KEY) FB=null; });
+function fbLog(t){ fbLoad().log.push({t:Date.now(),txt:t}); }
+function fbAtivos(){ return fbLoad().robos.filter(r=>r.estado==='obs'||r.estado==='aprovado'); }
+function fbBanks(){ const c=fbCfg(), L=[]; for(const sym of mcfSyms()) for(const w of c.ws) L.push({sym,w,bank:d5BankName(w,sym)}); return L; }
+function fbChave(bank,nivel,x){ return bank+'|'+nivel+'|'+srobChave(x); }
+// jogos do banco inteiro para horas pagantes (cache de 30 min por banco)
+async function fbTempoW(bank){ const c=FBQ.tw[bank]; if(c&&Date.now()-c.when<30*60e3) return c.W; let W=[]; try{ W=await idbRange(bank,Date.now()-3*86400e3,Date.now()+60000); }catch(e){} FBQ.tw[bank]={W,when:Date.now()}; return W; }
+// descobre candidatos 100% (descoberta 70% + conferência 30%) num banco e num nível — mesmo critério do Somente Robô
+async function fbScanBank(bank,w,nivel){ const c=fbCfg(), W=(LIVE[bank]||[]).slice(-Math.max(1000,+cfg.srob_n||3000)); if(W.length<300) return [];
+  const cut=Math.floor(W.length*0.7), min=Math.max(5,+c.min), pulo=Math.max(0,Math.min(15,+c.pulo)); let all=[];
+  for(const [f,F] of [['numeros','Número'],['duplas','Dupla'],['trios','Trio'],['somas','Soma'],['seq','Sequência']]) try{ all=all.concat(scScanFamily(W,f,pulo,nivel,min,cut)); }catch(e){}
+  try{ all=all.concat(srobScanCores(W,pulo,nivel,min,cut)); }catch(e){}
+  let L=all.filter(x=>x.red===0&&x.test&&x.test.done>=c.minTeste&&x.test.red===0).map(x=>({...x,tot:x.done+x.test.done}));
+  if(+c.hora){ const TW=await fbTempoW(bank), G=TW.length>=300?gridBuild(TW,w):null; if(G) for(const r of hpScan(G,'all')){ const o=r.L[nivel]; if(o.n<12||o.ok!==o.n) continue; L.push({kind:'Hora',off:r.off,alvo:r.alvo,skip:0,done:o.n,sg:o.pos[0],red:0,test:{done:0,red:0},tot:o.n}); } }
+  return L.sort((a,b)=>b.tot-a.tot||a.skip-b.skip); }
+// uma etapa da varredura: um índice/tempo (os dois níveis); preenche vagas e revalida quem está em observação
+async function fbPasso(){ const c=fbCfg(); if(!+c.on||FBQ.busy||!MCF.cerebro) return; if(!FBQ.fila.length){ if(Date.now()<FBQ.prox) return; FBQ.fila=fbBanks(); FBQ.ciclo++; FBQ.prox=Date.now()+5*60e3; fbLoad().ult=Date.now(); }
+  const it=FBQ.fila.shift(); if(!it) return; FBQ.busy=true; const t0=performance.now();
+  try{ const F=fbLoad(), W=LIVE[it.bank]||[];
+    // revalida os em observação no histórico novo (quem deixou de ser 100% sai)
+    for(const r of F.robos) if(r.bank===it.bank&&r.estado==='obs'&&r.rb.kind!=='Hora'){ try{ if(!srobAindaOk(W.slice(-3000),r.rb,r.nivel)){ r.estado='reprovado'; r.motivo='deixou de ser 100% no histórico'; r.fim=Date.now(); fbLog(`❌ ${fbNomeR(r)} reprovado: deixou de ser 100%`); } }catch(e){} }
+    for(const nivel of c.niveis){ let ativos=fbAtivos(); if(ativos.length>=+c.maxTot) break; if(ativos.filter(r=>r.bank===it.bank).length>=+c.porComb) break;
+      const cand=await fbScanBank(it.bank,it.w,nivel), ja=new Set(F.robos.map(r=>r.chave));
+      for(const x of cand){ ativos=fbAtivos(); if(ativos.length>=+c.maxTot||ativos.filter(r=>r.bank===it.bank).length>=+c.porComb) break;
+        const chave=fbChave(it.bank,nivel,x); if(ja.has(chave)) continue;
+        // não repete a mesma estratégia com outro nome: mesma família/gatilho/alvo no mesmo banco conta como igual
+        if(F.robos.some(r=>r.estado!=='reprovado'&&r.bank===it.bank&&srobChave(r.rb)===srobChave(x))) continue;
+        const r={id:'F'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),chave,bank:it.bank,sym:it.sym,w:it.w,nivel,rb:{...x,test:{done:x.test.done,red:x.test.red}},criado:Date.now(),estado:'obs',motivo:'em observação ao vivo',hist:{n:x.tot,teste:x.test.done},vivo:{n:0,g:0,r:0,ult:''},envia:1};
+        F.robos.push(r); ja.add(chave); fbLog(`🆕 ${fbNomeR(r)} criado (${x.tot} acertos no histórico, ${x.test.done} na conferência)`); } }
+    fbSave(); }catch(e){ fbLog('⚠ erro na varredura: '+e.message); }
+  FBQ.busy=false; FBQ.ms=Math.round(performance.now()-t0); fbRender(); }
+setInterval(()=>{ fbPasso().catch(()=>{ FBQ.busy=false; }); },8000);
+setInterval(()=>{ try{ if(!MCF.cerebro||!+fbCfg().on) return; for(const it of fbBanks()) fbSinais(it.bank,LIVE[it.bank]); }catch(e){ console.warn('fábrica',e); } },2000);
+function fbNomeR(r){ return `${symNome(r.sym).replace('Volatility','Vol')} ${r.w}s · ${srobNome(r.rb)} · ${r.nivel?'até G1':'tiro seco'}`; }
+// sinais: cada jogo novo do banco arma os robôs cujo gatilho bateu; horas pagantes armam perto do minuto
+function fbSinais(bank,W){ const F=fbLoad(); if(!W||W.length<2) return; const last=W.at(-1); FBQ.lt=FBQ.lt||{}; if(FBQ.lt[bank]===last.t) return; FBQ.lt[bank]=last.t;
+  const step=(bankIntervalSec(bank)||5)*1000, M={}, agora=Date.now()/1000; let mud=false;
+  for(const r of F.robos){ if(r.bank!==bank||(r.estado!=='obs'&&r.estado!=='aprovado')) continue; if(F.sig.some(s=>s.id===r.id&&!s.done)) continue;
+    let T=null; if(r.rb.kind==='Hora'){ const t=srobNextT(r.rb,agora); if(t-agora<=step/1000*1.5) T=t; }
+    else { let st; try{ st=srobStarts(W,r.rb,M); }catch(e){ st=[]; } if(st.at(-1)===W.length-1) T=Math.round((last.t+((+r.rb.skip||0)+1)*step)/1000); }
+    if(T==null) continue; const key=r.id+'|'+T; if(F.sig.some(s=>s.key===key)) continue;
+    F.sig.push({key,id:r.id,bank,T,alvo:r.rb.alvo,nivel:r.nivel,step:step/1000,done:false}); mud=true; }
+  // resolve
+  const byT=new Map(W.slice(-600).map(x=>[Math.round(x.t/1000),x]));
+  for(const s of F.sig){ if(s.done||s.bank!==bank) continue; let res=null;
+    for(let g=0;g<=s.nivel;g++){ const x=byT.get(s.T+g*s.step); if(!x){ if(agora>s.T+(g+3)*s.step) res='?'; break; } if(x.p===s.alvo){ res='G'+g; break; } if(g===s.nivel) res='R'; }
+    if(res==null) continue; s.done=true; s.res=res; mud=true; const r=F.robos.find(x=>x.id===s.id); if(!r||res==='?') continue;
+    r.vivo.n++; if(res==='R') r.vivo.r++; else r.vivo.g++; r.vivo.ult=(r.vivo.ult+(res==='R'?'R':'G')).slice(-20); const c=fbCfg();
+    if(r.estado==='obs'){ if(res==='R'){ r.estado='reprovado'; r.motivo='deu red na observação'; r.fim=Date.now(); fbLog(`❌ ${fbNomeR(r)} reprovado na observação`); }
+      else if(r.vivo.g>=+c.minObs){ r.estado='aprovado'; r.motivo=`${r.vivo.g} greens seguidos ao vivo`; r.aprov=Date.now(); fbLog(`✅ ${fbNomeR(r)} aprovado`); } }
+    else if(r.estado==='aprovado'){ const ult=r.vivo.ult.slice(-(+c.janela)), reds=ult.split('').filter(x=>x==='R').length; if(reds>=+c.maxRed){ r.estado='reprovado'; r.motivo=`${reds} reds nos últimos ${ult.length} ao vivo`; r.fim=Date.now(); fbLog(`❌ ${fbNomeR(r)} reprovado: ${r.motivo}`); } } }
+  if(mud) fbSave(); }
+// voto do círculo 9 para o jogo T (segundo) do índice
+function fbVoto(w,T,sym,bank,W){ try{ fbSinais(bank,W); }catch(e){}
+  const c=fbCfg(), F=fbLoad(), L=F.sig.filter(s=>!s.done&&s.bank===bank&&s.T===T).map(s=>({s,r:F.robos.find(x=>x.id===s.id)})).filter(o=>o.r&&+o.r.envia&&(o.r.estado==='aprovado'||(+c.obsVota&&o.r.estado==='obs')));
+  if(!L.length){ const n=fbAtivos().filter(r=>r.bank===bank).length; return {alvo:null,txt:n?`${n} robô(s) neste índice · nenhum neste jogo`:'nenhum robô neste índice/tempo'}; }
+  const cores=new Set(L.map(o=>o.s.alvo)); if(cores.size>1) return {alvo:null,txt:'robôs em cores diferentes'};
+  return {alvo:L[0].s.alvo,txt:`${L.length} robô(s): ${L.map(o=>srobNome(o.r.rb)+(o.r.nivel?' (G1)':' (TS)')).join(' · ')}`}; }
+function fbToggle(id,k){ const r=fbLoad().robos.find(x=>x.id===id); if(!r) return; if(k==='envia') r.envia=r.envia?0:1; else if(k==='del'){ r.estado='reprovado'; r.motivo='retirado por você'; r.fim=Date.now(); } fbSave(); fbRender(); }
+function fbRender(){ const el=document.getElementById('fbBox'); if(el) el.innerHTML=fbHtml(); }
+function fbHtml(){ const c=fbCfg(), F=fbLoad(), A=F.robos.filter(r=>r.estado!=='reprovado'), R=F.robos.filter(r=>r.estado==='reprovado'), obs=A.filter(r=>r.estado==='obs').length, apr=A.filter(r=>r.estado==='aprovado').length;
+  const gv=F.robos.reduce((a,r)=>a+r.vivo.g,0), rv=F.robos.reduce((a,r)=>a+r.vivo.r,0), quando=t=>t?new Date(t).toLocaleTimeString('pt-BR'):'—';
+  const pend=id=>{ const s=F.sig.find(x=>x.id===id&&!x.done); return s?`${hmsOf(s.T)} ${s.alvo?'ÍMPAR':'PAR'}`:'—'; };
+  const lin=r=>`<tr><td style="text-align:left"><b>${symNome(r.sym).replace('Volatility','Vol')}</b> ${r.w}s</td><td style="text-align:left;white-space:normal">${esc(srobNome(r.rb))}</td><td>${r.nivel?'até G1':'tiro seco'}</td>
+    <td>${r.hist.n} <span class="mu">(conf. ${r.hist.teste})</span></td><td><b class="ok">${r.vivo.g}</b> / <b class="${r.vivo.r?'ruim':''}">${r.vivo.r}</b> <span class="mu">${r.vivo.ult.slice(-8)}</span></td>
+    <td>${r.estado==='aprovado'?'<b class="ok">✅ aprovado</b>':r.estado==='obs'?`<span style="color:#facc15">👀 observação ${r.vivo.g}/${c.minObs}</span>`:'<span class="ruim">❌ reprovado</span>'}<div class="mu" style="font-size:11px">${esc(r.motivo||'')}</div></td>
+    <td>${r.estado==='reprovado'?'—':pend(r.id)}</td><td>${r.estado==='reprovado'?'':`<label title="envia sinais para o círculo 9"><input type="checkbox" ${+r.envia?'checked':''} onchange="fbToggle('${r.id}','envia')"> círculo 9</label> <button onclick="fbToggle('${r.id}','del')" title="retirar">✖</button>`}</td></tr>`;
+  const ck=(k,t)=>`<label><input type="checkbox" ${+c[k]?'checked':''} onchange="fbSetCfg('${k}',this.checked?1:0)"> ${t}</label>`, num=(k,mn,mx,wd=48)=>`<input type="number" min="${mn}" max="${mx}" value="${c[k]}" style="width:${wd}px" onchange="fbSetCfg('${k}',+this.value)">`;
+  return `<div class="ps-kpis" style="display:flex;flex-wrap:wrap;gap:14px;font-size:13px;margin-bottom:6px"><span>ativos <b>${A.length}</b>/${c.maxTot}</span><span>👀 observação <b>${obs}</b></span><span>✅ aprovados <b>${apr}</b></span><span>❌ reprovados <b>${R.length}</b></span><span>ao vivo <b class="ok">${gv} green</b> · <b class="ruim">${rv} red</b></span><span>última varredura ${quando(F.ult)}</span><span>próxima ${FBQ.fila.length?'em andamento ('+FBQ.fila.length+' faltam)':quando(FBQ.prox)}</span>${MCF.cerebro?'':'<span class="ruim">esta aba não é a que calcula — a varredura roda na aba que calcula</span>'}</div>
+    <div class="ctl">${ck('on','fábrica ligada')}<label>tempos ${[5,10].map(x=>`<label style="margin-right:4px"><input type="checkbox" ${c.ws.includes(x)?'checked':''} onchange="const L=new Set(fbCfg().ws); this.checked?L.add(${x}):L.delete(${x}); fbSetCfg('ws',[...L].sort((a,b)=>a-b))"> ${x}s</label>`).join('')}</label>
+      <label>níveis ${[[0,'tiro seco'],[1,'até G1']].map(([v,t])=>`<label style="margin-right:4px"><input type="checkbox" ${c.niveis.includes(v)?'checked':''} onchange="const L=new Set(fbCfg().niveis); this.checked?L.add(${v}):L.delete(${v}); fbSetCfg('niveis',[...L].sort())"> ${t}</label>`).join('')}</label>
+      <label>máx. ativos ${num('maxTot',1,100)}</label><label>por índice/tempo ${num('porComb',1,10)}</label><label>aprovar com ${num('minObs',1,20)} greens ao vivo</label><label>reprovar com ${num('maxRed',1,10)} reds nos últimos ${num('janela',3,50)}</label>
+      ${ck('obsVota','robôs em observação também votam')}${ck('hora','incluir horas pagantes')}<button onclick="FBQ.prox=0;FBQ.fila=[];fbPasso()">▶ varrer agora</button></div>
+    <table class="ps-tab" style="margin-top:6px"><tr><th style="text-align:left">Índice</th><th style="text-align:left">Estratégia</th><th>Nível</th><th>Histórico</th><th>Ao vivo G/R</th><th>Situação</th><th>Próxima entrada</th><th></th></tr>${A.length?A.map(lin).join(''):'<tr><td colspan="8" class="mu">Nenhum robô ainda — a primeira varredura cria até '+c.maxTot+' (precisa de 300+ jogos por índice/tempo).</td></tr>'}</table>
+    ${R.length?`<details style="margin-top:6px"><summary>❌ reprovados (${R.length}) — guardados para consulta</summary><table class="ps-tab">${R.slice().reverse().map(lin).join('')}</table></details>`:''}
+    <details style="margin-top:6px"><summary>📜 registro</summary><div class="nota" style="max-height:180px;overflow:auto">${F.log.slice().reverse().map(l=>`${new Date(l.t).toLocaleTimeString('pt-BR')} · ${esc(l.txt)}`).join('<br>')||'—'}</div></details>
+    <div class="nota" style="margin-top:6px"><b>Como funciona:</b> a cada 5 min a fábrica passa por cada índice escaneado × tempo marcado (um por vez) e procura padrões 100% (números, duplas, trios, somas com e sem pular casas, sequências, cores${+c.hora?', horas pagantes':''}) em tiro seco e até G1 — descobertos na parte antiga do banco e conferidos na parte nova (mesmo motor do 🎯 Somente Robô). Cada robô novo fica <b>👀 em observação</b>: confere ao vivo sem apostar; ${c.minObs} greens seguidos → <b>✅ aprovado</b>; red na observação → reprovado. Aprovado só sai com ${c.maxRed} reds nos últimos ${c.janela} ao vivo (um red isolado não tira). Só os aprovados com o quadrinho "círculo 9" marcado votam no círculo 9 quando o jogo do robô é o jogo da vez. 100% no passado não garante o futuro.</div>`; }
+
 const TAB_ORDER = ['hist','sfortes', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
 let LAST_HEAVY = 0;
