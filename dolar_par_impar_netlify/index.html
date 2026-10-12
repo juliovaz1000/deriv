@@ -497,6 +497,15 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .cf-rs>b{width:100%;font-size:12.5px}.cf-rs.f{border-color:rgba(234,179,8,.55);background:rgba(234,179,8,.08)}.cf-rs.f>b{color:#facc15}
 .cf-fb{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:12px;color:#a49dbb}.cf-fb .mb-mini.on{background:var(--mr);border-color:var(--mr2);color:#fff}
 .cf-gr td{background:rgba(6,182,212,.1)}
+.mp-alerta{margin-top:8px;border:1px solid #f97316;background:rgba(249,115,22,.15);border-radius:10px;padding:8px 10px;font-size:12.5px;animation:mpPisca 1s infinite;display:flex;flex-direction:column;gap:5px}
+.mp-alerta button{background:#f97316;color:#fff;border:0;border-radius:7px;padding:5px 10px;font-weight:800;cursor:pointer}.mp-alerta .mp-x{background:#3a3648}
+@keyframes mpPisca{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,.0)}50%{box-shadow:0 0 18px 3px rgba(249,115,22,.65)}}
+.mp-box{margin-top:8px;background:var(--mg);border:1px solid var(--mb);border-radius:12px;padding:8px 10px}
+.mp-chips{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}.mp-chips button{background:#15121f;border:1px solid var(--mb);color:#ece9f6;border-radius:7px;padding:4px 7px;font-size:11.5px;cursor:pointer}.mp-chips button.on{background:var(--mr);border-color:var(--mr2)}
+.mp-cor{display:flex;gap:5px}.mp-cor button{flex:1;border:1px solid var(--mb);background:#15121f;color:#ece9f6;border-radius:8px;padding:6px;font-weight:900;cursor:pointer}.mp-cor button.par.on{background:#2563eb}.mp-cor button.imp.on{background:#db2777}.mp-cor .mp-ok{background:linear-gradient(135deg,#eab308,#a16207);color:#1a1205}
+.mp-arm{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;font-size:12px}.mp-arm span{background:rgba(234,179,8,.15);border:1px solid #eab308;border-radius:7px;padding:2px 6px}.mp-arm button{background:none;border:0;color:#fca5a5;cursor:pointer}
+.mp-merc{display:grid;grid-template-columns:1fr;gap:2px;margin-top:6px;font-size:11.5px}.mp-merc>div{display:flex;gap:6px;align-items:center}.mp-merc b{min-width:84px}.mp-merc span{padding:1px 6px;border-radius:6px;background:#15121f}.mp-merc span.ok{color:#86efac}.mp-merc span.bl{color:#fca5a5;background:rgba(239,68,68,.15)}
+
 .cf-big.pr.on{background:linear-gradient(135deg,#f97316,#c2410c);color:#fff;border-color:#fb923c}
 .cf-ab{grid-template-columns:repeat(4,1fr)!important}
 .mcf-t.pr{background:#1f0d06;border-color:#f97316;color:#ffedd5;box-shadow:0 0 0 2px rgba(249,115,22,.35),0 8px 24px rgba(0,0,0,.6)}.mcf-t.pr button{background:#f97316;color:#fff}.mcf-t.pr button+button{background:#3a3648}
@@ -664,7 +673,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.23 · 12/10/2026 · 🏭 Fábrica de robôs (círculo 9): cria robôs 100% de tiro seco/G1 em todos os índices × 5s/10s, observa ao vivo, aprova/reprova e vota no círculo 9';
+const VERSAO='v4.24 · 12/10/2026 · 🧭 Mercados por vol+cor (bloqueia o ruim, só virtual), vols para operar, entrar na próxima (armar vol+cor), alerta piscando de red em mercado bom, loss virtual por mercado';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10122,6 +10131,7 @@ function mesaEsqManual(qv){ return `
           <div class="ms-nota">Gale: ${[...Array(mesaGale()+1).keys()].map(g=>`${g?'G'+g:'entrada'} $ ${(mesaStake()*Math.pow(mesaFator(),g)).toFixed(2)}`).join(' · ')}</div>
           <span class="ms-lb">SUA SESSÃO · ${mesaW()}s</span><div class="ms-sess" id="msSess"></div>
           <div class="ms-bt"><button class="par" onclick="mesaEntrar(0)">PAR</button><button class="imp" onclick="mesaEntrar(1)">ÍMPAR</button></div>
+          <div id="msProx">${mcfProxHtml()}</div>
 `; }
 function mesaRender(full){
   const p=$('#mesaPop'); if(!p||!MESA.open) return;
@@ -10159,7 +10169,7 @@ function mesaRender(full){
   $('#msCentro').innerHTML=rob?mbCentroHtml(w):mesaCentroHtml();
   $('#msStrip').innerHTML=mesaBalls(W,40,false);
   try{ $('#msBarras').innerHTML=mesaBarrasHtml(); }catch(e){ console.warn('barras',e); }
-  try{ $('#msPi').innerHTML=mcfHtml(); const as=$('#mcfAutoSt'); if(as) as.innerHTML=mcfAutoSt(); const sr=$('#msSimR'); if(sr) sr.innerHTML=mcfSimHtml(); }catch(e){ console.warn('confirmações',e); }
+  try{ const px=$('#msProx'); if(px) px.innerHTML=mcfProxHtml(); $('#msPi').innerHTML=mcfHtml(); const as=$('#mcfAutoSt'); if(as) as.innerHTML=mcfAutoSt(); const sr=$('#msSimR'); if(sr) sr.innerHTML=mcfSimHtml(); }catch(e){ console.warn('confirmações',e); }
   if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); const ss=mbSess(w); $('#msSess').innerHTML=`<div><b>${ss.ac}</b><span>ACERTOS</span></div><div><b>${ss.er}</b><span>ERROS</span></div><div><b class="${ss.pl>=0?'okc':'ruimc'}">${ss.pl>=0?'+':''}$ ${ss.pl.toFixed(2)}</b><span>RESULTADO</span></div>`; $('#msFila').innerHTML=mbFilaHtml(w); $('#msHist').innerHTML=mbHistHtml(w); }
   else { $('#msSess').innerHTML=mesaSessHtml(); $('#msHist').innerHTML=mesaHistHtml(); }
 }
@@ -10952,6 +10962,8 @@ function mcfTick(){
 }
 // o que chega do cérebro (outra aba): votos novos → círculos, barras, popups e entrada automática da Mesa
 function mcfNovoVoto(w,sym,T,v){ const c=mcfC(), kk=w+'|'+sym, f=mcfForca(v);
+  if(f.n>=c.min&&f.alvo!=null&&MCF.arm&&MCF.arm.length){ const i=MCF.arm.findIndex(a=>a.sym===sym&&a.cor===f.alvo); if(i>=0&&T-dmNow()>2.6){ MCF.arm.splice(i,1); mesaAgendar(T,f.alvo,'⚡ próxima armada',sym); } }
+  if(!mcfOpOk(sym)||(f.alvo!=null&&mcfMerc(w,sym,f.alvo).bloq)) return;   // vol fora da operação ou mercado bloqueado: só virtual
   if((f.n>=c.min||mcfSelTem(w,f))&&MCF.alertado[kk]!==T){ MCF.alertado[kk]=T; const pr=f.n>=c.min&&c.prPop?mcfPrEstado(w,sym):null; pr?mcfAlertaPr(w,sym,T,f,pr):mcfAlerta(w,sym,T,f); }
   try{ mcfAuto(w,sym,T,f); }catch(e){ console.warn('auto',e); } }
 if(MCF_BC) MCF_BC.onmessage=e=>{ const m=e.data||{}; if(m.tipo!=='voto'||MCF.cerebro) return; MCF.votos[m.kk]=m.V; if(MESA.open&&m.w===mesaW()&&dmNow()<m.V.T-0.5) mcfNovoVoto(m.w,m.V.sym,m.V.T,m.V.v); };
@@ -10998,11 +11010,49 @@ function mbCfSinais(w,C){
   const c=mcfC(), out=[], now=dmNow(), G=C.gale<0?2:Math.min(2,+C.gale);
   if(C.fonte==='cposredg'&&!mbCfGlobOk(w,C,G)) return out;
   for(const sym of mcfSyms()){ const V=MCF.votos[w+'|'+sym]; if(!V||V.T<=now) continue; const f=mcfForca(V.v); if(f.n<c.min||f.alvo==null) continue;
+    if(!mcfOpOk(sym)||mcfMerc(w,sym,f.alvo).bloq) continue;
+    if(+C.vmOn){ const q=mcfMercSeq(w,sym,f.alvo,G).seq, pat='R'.repeat(Math.max(1,+C.vmX||1))+(C.vmModo==='lw'?'G'.repeat(Math.max(1,+C.vmY||1)):''); if(!q.endsWith(pat)) continue; }
     let pr=''; if(C.fonte==='cposred'){ if(!mcfPrOkG(w,sym,C.cfPr||'R',G)) continue; pr=' · pós-'+mcfPrGR((mcfPrBoot(mcfLoad(w))[sym]||'').slice(-3),G); }
     if(C.fonte==='cposredg'){ if(C.cfModo==='ciclo'){ const k=mbCfCiclo(w,C,G); pr=` · ciclo ${k.win}/${k.Z} greens (após ${k.X} red${k.X>1?'s':''})`; } else pr=` · após ${mbCfPadrao(C).txt} (todos os índices)`; }
     out.push({key:'cf|'+w+'|'+sym+'|'+V.T,entryT:V.T*1000,alvo:f.alvo,ord:-f.n*10+(f.contra||0),ok:true,gale:2,sym,nome:`⭐ ${f.n} conf.${f.contra?' (-'+f.contra+')':''}${pr} · ${symNome(sym).replace('Volatility','Vol')}`,curto:`${f.n}⭐ ${symNome(sym).replace('Volatility','Vol')}`}); }
   return out;
 }
+
+// =====================================================================================
+// 🧭 MERCADOS (volatilidade × cor) + vols para operar + "entrar na próxima"
+// Mercado = uma vol numa cor (ex.: Vol 75 · PAR). Lê os sinais fortes gravados (com cor e horário) de cada vol.
+// Mercado com ≥ X reds nos últimos Y sinais fortes dele fica BLOQUEADO: não entra (manual automático/robôs), só segue no virtual;
+// quando melhora, volta a liberar sozinho.
+// =====================================================================================
+function mcfOpVols(){ const L=cfg.op_vols; return Array.isArray(L)&&L.length?L:null; }
+function mcfOpOk(sym){ const L=mcfOpVols(); return !L||L.includes(sym); }
+function mcfOpTog(sym){ const all=mcfSyms(), L=new Set(mcfOpVols()||all); L.has(sym)?L.delete(sym):L.add(sym); cfg.op_vols=L.size===all.length||!L.size?null:[...L]; saveCfg(); mesaRender(true); }
+function mcfMercCfg(){ return {on:1,X:2,Y:8,...(cfg.merc||{})}; }
+function mcfMercSet(k,v){ cfg.merc={...mcfMercCfg(),[k]:v}; saveCfg(); mesaRender(true); }
+function mcfMercSeq(w,sym,cor,G){ const F=(mcfFhBoot(mcfLoad(w))[sym]||[]).filter(x=>x[2]===cor); return {F,seq:F.map(x=>x[1]<=G?'G':'R').join('')}; }
+function mcfMerc(w,sym,cor){ const c=mcfMercCfg(), G=mcfGmax(), {F,seq}=mcfMercSeq(w,sym,cor,G), ult=seq.slice(-(+c.Y||8)), reds=(ult.match(/R/g)||[]).length, last=F.at(-1);
+  return {n:F.length,ult,reds,bloq:!!(+c.on&&ult.length>=3&&reds>=+c.X),lastR:!!(last&&last[1]>G),lastT:last?last[0]:0,acerto:ult.length?(ult.length-reds)/ult.length:null}; }
+function mcfCorTxt(c){ return c?'ÍMPAR':'PAR'; }
+// "entrar na próxima": arma uma vol + cor; no próximo sinal forte dela nessa cor, a Mesa entra sozinha
+function mcfArmar(sym,cor){ MCF.arm=(MCF.arm||[]).filter(a=>!(a.sym===sym&&a.cor===cor)); MCF.arm.push({sym,cor,t:Date.now()}); if(MCF.visto) MCF.visto[sym+'|'+cor]=1e12; try{ beep(); }catch(e){} mesaRender(false); }
+function mcfDesarmar(i){ (MCF.arm||[]).splice(i,1); mesaRender(false); }
+function mcfArmSelTog(sym){ const S=MCF.armSel||(MCF.armSel={syms:[],cor:0}); S.syms=S.syms.includes(sym)?S.syms.filter(x=>x!==sym):S.syms.concat(sym); mesaRender(false); }
+function mcfArmSelCor(c){ (MCF.armSel||(MCF.armSel={syms:[],cor:0})).cor=c; mesaRender(false); }
+function mcfArmSelOk(){ const S=MCF.armSel||{syms:[]}; if(!S.syms.length){ alert('Marque pelo menos uma volatilidade.'); return; } for(const sym of S.syms) mcfArmar(sym,S.cor); S.syms=[]; }
+function mcfVistoRed(sym,cor,T){ (MCF.visto||(MCF.visto={}))[sym+'|'+cor]=T; mesaRender(false); }
+function mcfProxHtml(){ const w=mesaW(), vols=mcfSyms().filter(mcfOpOk), nm=x=>symNome(x).replace('Volatility','Vol'), agora=Date.now()/1000, V=MCF.visto||(MCF.visto={});
+  // alerta piscando: mercado bom que acabou de dar red
+  const alertas=[]; for(const sym of vols) for(const cor of [0,1]){ const m=mcfMerc(w,sym,cor); if(!m.lastR||m.bloq||agora-m.lastT>15*60||V[sym+'|'+cor]>=m.lastT) continue; alertas.push({sym,cor,m}); }
+  const novo=alertas.find(a=>!(MCF.bipRed||{})[a.sym+'|'+a.cor+'|'+a.m.lastT]); if(novo){ (MCF.bipRed||(MCF.bipRed={}))[novo.sym+'|'+novo.cor+'|'+novo.m.lastT]=1; try{ beep(); }catch(e){} }
+  const S=MCF.armSel||(MCF.armSel={syms:[],cor:0}), arm=MCF.arm||[];
+  return `${alertas.map(a=>`<div class="mp-alerta"><div>⚠ <b>${nm(a.sym)} · ${mcfCorTxt(a.cor)}</b> deu red — mercado bom (${Math.round(100*a.m.acerto)}% nos últimos ${a.m.ult.length})</div>
+      <div><button onclick="mcfArmar('${a.sym}',${a.cor})">▶ entrar na próxima ${mcfCorTxt(a.cor)}</button> <button class="mp-x" onclick="mcfVistoRed('${a.sym}',${a.cor},${a.m.lastT})">✖</button></div></div>`).join('')}
+    <div class="mp-box"><span class="ms-lb">⚡ ENTRAR NA PRÓXIMA (sinal forte)</span>
+      <div class="mp-chips">${vols.map(x=>`<button class="${S.syms.includes(x)?'on':''}" onclick="mcfArmSelTog('${x}')">${nm(x)}</button>`).join('')||'<span class="mu">nenhuma vol para operar</span>'}</div>
+      <div class="mp-cor"><button class="par ${S.cor===0?'on':''}" onclick="mcfArmSelCor(0)">PAR</button><button class="imp ${S.cor===1?'on':''}" onclick="mcfArmSelCor(1)">ÍMPAR</button><button class="mp-ok" onclick="mcfArmSelOk()">⚡ armar</button></div>
+      ${arm.length?`<div class="mp-arm">${arm.map((a,i)=>`<span>⏳ ${nm(a.sym)} · ${mcfCorTxt(a.cor)} <button onclick="mcfDesarmar(${i})">✖</button></span>`).join('')}</div>`:''}
+      <div class="mp-merc">${vols.map(x=>`<div><b>${nm(x)}</b>${[0,1].map(cor=>{ const m=mcfMerc(w,x,cor); return `<span class="${m.bloq?'bl':m.n?'ok':''}" title="últimos ${m.ult.length}: ${m.ult}">${mcfCorTxt(cor)} ${m.bloq?'⛔':m.n?'✅':'—'} ${m.acerto!=null?Math.round(100*m.acerto)+'%':''}</span>`; }).join('')}</div>`).join('')}</div>
+      <div class="ms-nota">Arme uma ou mais vols + a cor: no próximo sinal forte dessa vol nessa cor, a Mesa entra sozinha (só na mesma vol e na mesma cor). ⛔ = mercado bloqueado (só virtual).</div></div>`; }
 // 🤖 entrada automática: 1 = só sinais fortes · 2 = todos os sinais (2+ círculos). Entra na cor da MAIORIA dos círculos.
 const MCF_GAT=[['','sempre'],['R','após 1 red'],['RR','após 2 reds seguidos'],['RG','após 1 red e 1 green'],['G','após 1 green'],['GG','após 2 greens'],['GR','após 1 green e 1 red'],['RRG','após 2 reds e 1 green']];
 function mcfGmax(){ return Math.min(mesaGale(),2); }
@@ -11015,6 +11065,8 @@ function mcfAuto(w,sym,T,f){
   else if(c.auto===3){ if(!mcfSelTem(w,f)) return; } else { const need=c.auto===1?Math.max(2,c.min):2; if(f.n<need) return; }
   const k=sym+'|'+T; if(MCF.autoFeito[k]) return;
   const nm=symNome(sym);
+  if(!mcfOpOk(sym)) return;
+  if(mcfMerc(w,sym,f.alvo).bloq) return mcfAutoLog(`${hmsOf(T)} · ${nm}: mercado ${mcfCorTxt(f.alvo)} bloqueado — só virtual`);
   if((c.excl||[]).includes(sym)) return mcfAutoLog(`${hmsOf(T)} · ${nm}: pulado (índice desligado da entrada automática)`);
   if(c.semContra&&f.contra) return mcfAutoLog(`${hmsOf(T)} · ${nm}: pulado (${f.contra} círculo(s) contra)`);
   if(c.auto!==4&&!mcfGatOk(w,c,sym)) return mcfAutoLog(`${hmsOf(T)} · ${nm}: esperando o gatilho "${(MCF_GAT.find(x=>x[0]===c.gat)||[0,c.gat])[1]}"`);
@@ -11038,7 +11090,10 @@ function mcfAutoSt(){ const c=mcfC(), w=mesaW(); if(!c.auto) return '<span class
 function mcfAutoHtml(){
   const c=mcfC(), ck=(k,t)=>`<label class="ms-chk"><input type="checkbox" ${c[k]?'checked':''} onchange="mcfSet('${k}',this.checked?1:0)"> ${t}</label>`;
   const opts=MCF_GAT.map(([v,t])=>`<option value="${v}" ${c.gat===v?'selected':''}>${t}</option>`).join('')+(MCF_GAT.some(x=>x[0]===c.gat)?'':`<option value="${c.gat}" selected>personalizado: ${c.gat}</option>`);
+  const mc=mcfMercCfg();
   return `<div class="cf-auto">
+    <div class="cf-ao" style="margin-bottom:8px"><span class="ms-lb" style="margin-right:6px">🎯 OPERAR SÓ NAS VOLS</span>${mcfSyms().map(x=>`<button class="mb-mini ${mcfOpOk(x)?'on':''}" onclick="mcfOpTog('${x}')">${mcfOpOk(x)?'✔':'✖'} ${symNome(x).replace('Volatility','Vol')}</button>`).join('')}<span class="mu" style="font-size:11px">vale para manual (barras/popups) e automático (botões abaixo e robôs)</span></div>
+    <div class="cf-ao" style="margin-bottom:8px"><label class="ms-chk"><input type="checkbox" ${+mc.on?'checked':''} onchange="mcfMercSet('on',this.checked?1:0)"> 🧭 bloquear mercado (vol + cor) com ≥ <input type="number" min="1" value="${mc.X}" style="width:40px" onchange="mcfMercSet('X',+this.value)"> reds nos últimos <input type="number" min="3" value="${mc.Y}" style="width:40px" onchange="mcfMercSet('Y',+this.value)"> sinais fortes dele</label><span class="mu" style="font-size:11px">bloqueado = não entra, só segue no virtual; volta sozinho quando melhorar</span></div>
     <div class="cf-ab"><button class="cf-big ${c.auto===1?'on':''}" onclick="mcfSet('auto',${c.auto===1?0:1})">🤖 ${c.auto===1?'■ PARAR':'ENTRAR AUTOMÁTICO'} NOS SINAIS FORTES</button>
       <button class="cf-big t ${c.auto===2?'on':''}" onclick="mcfSet('auto',${c.auto===2?0:2})">⚡ ${c.auto===2?'■ PARAR':'ENTRAR EM TODOS OS SINAIS'}</button>
       <button class="cf-big g ${c.auto===3?'on':''}" onclick="mcfSet('auto',${c.auto===3?0:3})">🎯 ${c.auto===3?'■ PARAR':'ENTRAR SÓ NAS COMBINAÇÕES GRAVADAS'}</button>
@@ -11304,11 +11359,11 @@ function mcfCapturar2s(){ const L=[...new Set([...d5Syms(),...MCF_2S])]; d5SetSy
 // barras dos índices com sinal forte (vão no topo de "PRÓXIMOS SINAIS")
 function mcfBarras(){
   const w=mesaW(), c=mcfC(), now=dmNow(), jan=mesaBarJan(), manual=cfg.mesa_modo!=='robo', out=[];
-  for(const sym of mcfSyms()){ const V=MCF.votos[w+'|'+sym]; if(!V||V.T<=now+0.5) continue; const f=mcfForca(V.v); if(f.n<Math.max(2,c.min-1)&&!mcfSelTem(w,f)) continue; out.push({sym,T:V.T,f}); }
+  for(const sym of mcfSyms()){ if(!mcfOpOk(sym)) continue; const V=MCF.votos[w+'|'+sym]; if(!V||V.T<=now+0.5) continue; const f=mcfForca(V.v); if(f.n<Math.max(2,c.min-1)&&!mcfSelTem(w,f)) continue; out.push({sym,T:V.T,f}); }
   return out.sort((a,b)=>b.f.n-a.f.n||a.T-b.T).map(({sym,T,f})=>{ const falta=T-now, pct=Math.max(0,Math.min(100,100*(1-falta/Math.max(w,jan/10)))), forte=f.n>=c.min;
     return `<div class="ms-barra ${forte?'cz':f.alvo?'imp':'par'}"><div class="ms-bfill" style="width:${pct}%"></div><div class="ms-btx"><span class="ms-bcor ${f.alvo?'imp':'par'}">${f.alvo?'ÍMPAR':'PAR'}</span><b>${hmsOf(T)}</b>${mcfSelTem(w,f)?'<b class="ms-btag" style="background:#0e7490">🎯 GRAVADA</b>':''}${forte?'<b class="ms-btag cz">⭐ SINAL FORTE</b>':mcfSelTem(w,f)?'':'<b class="ms-btag" style="background:#3a3648">quase</b>'}
       <span class="ms-bits"><b>${symNome(sym)}</b> · ${f.n} confirmações (${f.ids.map(i=>MCF_CIRC.find(x=>x[0]===i)[1]+i).join(' ')})${f.contra?` · <span class="ruimc">${f.contra} contra</span>`:''}</span><span class="ms-bfal">${Math.ceil(falta)}s</span>
-      ${manual&&falta>2.6?`<button class="ms-bag" onclick="mesaAgendar(${T},${f.alvo},'⭐ ${f.n} confirmações','${sym}')">▶ entrar</button>`:''}</div></div>`; }).join('');
+      ${f.alvo!=null&&mcfMerc(w,sym,f.alvo).bloq?'<b class="ms-btag" style="background:#7f1d1d">⛔ mercado ruim · virtual</b>':manual&&falta>2.6?`<button class="ms-bag" onclick="mesaAgendar(${T},${f.alvo},'⭐ ${f.n} confirmações','${sym}')">▶ entrar</button>`:''}</div></div>`; }).join('');
 }
 function mcfCtlHtml(){
   const c=mcfC(), w=mesaW(), inp=(k,st,wd=52)=>`<input type="number" value="${c[k]}" step="${st}" style="width:${wd}px" onchange="mcfSet('${k}',+this.value)">`, faltam=MCF_2S.filter(s=>!d5Syms().includes(s));
@@ -12098,7 +12153,11 @@ function mbVBoxHtml(w){
       ${V.vModo==='sigla'?`<div class="ms-nota">Siglas: ${(V.vSiglas||[]).map(p=>mbSgCaixas(p)).join(' · ')||'nenhuma — escolha na lista 🔤 SIGLAS do lado direito'}</div>`:''}
       <div class="ms-row2" style="${V.vModo==='sigla'?'display:none':''}">${V.vModo!=='win'?`<label class="ms-chk">X loss ${num('vX',1)}</label>`:''}${V.vModo!=='loss'?`<label class="ms-chk">Y win ${num('vY',1)}</label>`:''}</div>
       <label class="ms-chk">Voltar a esperar ${sel('vVolta',[['green','depois de GREEN real'],['red','depois de RED real'],['qualquer','depois de qualquer resultado'],['n','depois de N entradas']])}${V.vVolta==='n'?' N '+num('vN',1):''}</label>
-      <div class="ms-nota">${mbVRegraTxt(w)}</div></div>`:''}</div>`;
+      <div class="ms-nota">${mbVRegraTxt(w)}</div></div>`:''}
+    ${(()=>{ const C=mbCfg(w); return `<label class="ms-chk" style="margin-top:6px"><input type="checkbox" ${+C.vmOn?'checked':''} onchange="mbSetCfg(${w},'vmOn',this.checked?1:0)"> 🧭 loss virtual <b>por mercado</b> (mesma vol + mesma cor)</label>
+    ${+C.vmOn?`<div class="ms-row2" style="margin-top:4px"><label class="ms-chk">entrar <select class="ms-sel" onchange="mbSetCfg(${w},'vmModo',this.value)"><option value="l" ${C.vmModo!=='lw'?'selected':''}>após X loss</option><option value="lw" ${C.vmModo==='lw'?'selected':''}>após X loss e Y win</option></select></label>
+      <label class="ms-chk">X loss <input type="number" min="1" value="${Math.max(1,+C.vmX||1)}" style="width:44px" onchange="mbSetCfg(${w},'vmX',+this.value)"></label>${C.vmModo==='lw'?`<label class="ms-chk">Y win <input type="number" min="1" value="${Math.max(1,+C.vmY||1)}" style="width:44px" onchange="mbSetCfg(${w},'vmY',+this.value)"></label>`:''}</div>
+      <div class="ms-nota">Cada vol tem uma sequência de PAR e outra de ÍMPAR (sinais fortes). Ex.: Vol 75 tomou 2 loss no PAR → só o PAR dela conta; o ÍMPAR segue a própria sequência. Vale para os robôs com fonte ⭐ sinais fortes / 🔁 pós-red / 🔴 após reds.</div>`:''}`; })()}</div>`;
 }
 // status do virtual (centro)
 function mbVStatusHtml(w){
