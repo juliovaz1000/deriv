@@ -673,7 +673,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.24 · 12/10/2026 · 🧭 Mercados por vol+cor (bloqueia o ruim, só virtual), vols para operar, entrar na próxima (armar vol+cor), alerta piscando de red em mercado bom, loss virtual por mercado';
+const VERSAO='v4.25 · 12/10/2026 · 🎯 Confirmações com nível único (tiro seco / até G1 / até G2): todos os círculos, sinais fortes, mercados e entradas obedecem';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10840,9 +10840,13 @@ function piStats(L,lvl){
 // mesmo jogo → ⭐ SINAL FORTE (som + notificação + barra com "entrar" naquele índice).
 // Cada círculo e cada combinação (ex.: 1+3+7) guarda o placar TS/G1/G2/red, por tempo de jogo.
 // =====================================================================================
-const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20,simH:24,simG:1,simRk:2,prMode:'R',prPop:1};
+const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20,simH:24,simG:1,simRk:2,prMode:'R',prPop:1,nivel:1};
 const MCF_CIRC=[[1,'🕒','Horário fixo 100%'],[2,'🕐','Horas pagantes'],[3,'🖼','Figura gráfica'],[4,'🟨','Linha amarela'],[5,'🤖','Robôs ligados'],[6,'🧭','Tendência'],[7,'🔢','Número chama'],[8,'🔥','Pressure Strategy'],[9,'🏭','Fábrica de robôs']];
 const MCF_2S=['R_10','R_25','R_50','R_75','R_100','RDBEAR','RDBULL'];
+// 🎯 nível de análise das confirmações (0 = tiro seco, 1 = até G1, 2 = até G2): todos os círculos e regras obedecem
+function mcfNv(){ const n=+mcfC().nivel; return n>=0&&n<=2?n:1; }
+const MCF_NVTXT=['tiro seco','até G1','até G2'];
+function mcfNivelSet(n){ n=Math.max(0,Math.min(2,+n)); cfg.mesa_cf={...mcfC(),nivel:n,minCrit:n}; cfg.mesa_gale=n; cfg.sf={...(cfg.sf||{}),g:n}; saveCfg(); MCF.cache={}; MCFHF={}; MCFHP={}; mesaRender(true); }
 function mcfC(){ return {...MCF_DEF,...(cfg.mesa_cf||{})}; }
 function mcfSet(k,v){ cfg.mesa_cf={...mcfC(),[k]:v}; saveCfg(); MCF.cache={}; mesaRender(true); }
 let MCF={st:{},pend:{},ultT:{},cache:{},alertado:{},votos:{},autoFeito:{},autoLog:[],autoMsg:''};
@@ -10853,7 +10857,7 @@ function mcfBank(w,sym){ return d5BankName(w,sym); }
 // ---------- horário fixo e horas pagantes por índice (cache de 10 min) ----------
 let MCFHF={}, MCFHP={};
 async function mcfHfLoad(bank,w){
-  const C=mbCfg(w), lvl=mbHfNivel(w), hr=new Date().getHours(), mn=Math.max(2,+C.hfMin||5), dias=Math.max(mn+1,+C.hfDias||7), key=[lvl,hr,mn,dias].join('|'), c=MCFHF[bank];
+  const C=mbCfg(w), lvl=mcfNv(), hr=new Date().getHours(), mn=Math.max(2,+C.hfMin||5), dias=Math.max(mn+1,+C.hfDias||7), key=[lvl,hr,mn,dias].join('|'), c=MCFHF[bank];
   if(c&&(c.busy||(c.key===key&&Date.now()-c.when<10*60e3))) return;
   MCFHF[bank]={...(c||{}),busy:true};
   try{ const rows=await idbRange(bank,Date.now()-dias*86400e3-3600e3,Date.now()+60000), G=rows&&rows.length?gridBuild(rows,w):null, out=[];
@@ -10861,7 +10865,7 @@ async function mcfHfLoad(bank,w){
     MCFHF[bank]={key,when:Date.now(),rows:out,busy:false}; }catch(e){ MCFHF[bank]={key,when:Date.now(),rows:[],busy:false}; }
 }
 async function mcfHpLoad(bank,w){
-  const C=mbCfg(w), lvl=mbHpNivel(w), mn=mbHpMin(w), per=Math.max(mn+3,+C.hpPer||24), hr=new Date().getHours(), key=[lvl,mn,per,hr].join('|'), c=MCFHP[bank];
+  const C=mbCfg(w), lvl=mcfNv(), mn=mbHpMin(w), per=Math.max(mn+3,+C.hpPer||24), hr=new Date().getHours(), key=[lvl,mn,per,hr].join('|'), c=MCFHP[bank];
   if(c&&(c.busy||(c.key===key&&Date.now()-c.when<5*60e3))) return;
   MCFHP[bank]={...(c||{}),busy:true};
   try{ const rows=await idbRange(bank,Date.now()-per*3600e3,Date.now()+60000), G=rows&&rows.length?gridBuild(rows,w):null, out=[];
@@ -10872,7 +10876,7 @@ async function mcfHpLoad(bank,w){
 // ao vivo; nas vezes parecidas (distância ≤ fD) vota na cor que pagou ≥ 90% até o G1.
 function mcfFigura(W,c,bank){
   const N=c.jan, n=W.length; if(n<N*3) return null;
-  const key=n+'|'+W[n-1].t+'|'+N+'|'+c.fD+'|'+c.fMin, ca=MCF.cache['fig|'+bank]; if(ca&&ca.key===key) return ca.v;
+  const NV=mcfNv(), key=n+'|'+W[n-1].t+'|'+N+'|'+c.fD+'|'+c.fMin+'|'+NV, ca=MCF.cache['fig|'+bank]; if(ca&&ca.key===key) return ca.v;
   const D=W.map(x=>x.d), P=W.map(x=>x.p), cnt=Array(10).fill(0); for(let i=n-N;i<n;i++) if(D[i]>=0) cnt[D[i]]++;
   const alvo=cnt.map(x=>100*x/N), win=Array(10).fill(0); let viz=0; const ok=[0,0];
   for(let i=0;i<N;i++) if(D[i]>=0) win[D[i]]++;
@@ -10880,9 +10884,9 @@ function mcfFigura(W,c,bank){
     if(fim>N-1){ if(D[fim]>=0) win[D[fim]]++; if(D[fim-N]>=0) win[D[fim-N]]--; }
     let d=0; for(let k=0;k<10;k++){ d+=Math.abs(100*win[k]/N-alvo[k]); if(d>c.fD) break; }
     if(d>c.fD) continue; viz++;
-    for(const cor of [0,1]) if(P[fim+1]===cor||P[fim+2]===cor) ok[cor]++;
+    for(const cor of [0,1]) if(P[fim+1]===cor||(NV>=1&&P[fim+2]===cor)||(NV>=2&&P[fim+3]===cor)) ok[cor]++;
   }
-  let v=null; if(viz>=c.fMin) for(const cor of [0,1]) if(ok[cor]/viz>=0.9&&(!v||ok[cor]>ok[v.alvo])) v={alvo:cor,txt:`${viz} gráficos parecidos · ${(100*ok[cor]/viz).toFixed(0)}% até G1`};
+  let v=null; if(viz>=c.fMin) for(const cor of [0,1]) if(ok[cor]/viz>=0.9&&(!v||ok[cor]>ok[v.alvo])) v={alvo:cor,txt:`${viz} gráficos parecidos · ${(100*ok[cor]/viz).toFixed(0)}% ${MCF_NVTXT[NV]}`};
   if(!v) v={alvo:null,txt:viz?`${viz} parecidos, sem cor forte`:'nenhum gráfico parecido'};
   MCF.cache['fig|'+bank]={key,v}; return v;
 }
@@ -10896,17 +10900,18 @@ function mcfTend(W,c){ const A=W.slice(-50); if(A.length<50) return null; const 
 // 🔢 número chama: depois deste número, o que veio nos 2 jogos seguintes (histórico ao vivo)
 function mcfNumero(W,c){
   const n=W.length; if(n<200) return null; const d=W[n-1].d; if(d==null||d<0) return null;
-  let k=0; const ts=[0,0], g1=[0,0];
-  for(let i=Math.max(0,n-3000);i<n-2;i++){ if(W[i].d!==d) continue; k++; for(const cor of [0,1]){ if(W[i+1].p===cor){ ts[cor]++; g1[cor]++; } else if(W[i+2].p===cor) g1[cor]++; } }
+  let k=0; const ts=[0,0], g1=[0,0], NV=mcfNv();
+  for(let i=Math.max(0,n-3000);i<n-3;i++){ if(W[i].d!==d) continue; k++; for(const cor of [0,1]){ if(W[i+1].p===cor){ ts[cor]++; g1[cor]++; } else if((NV>=1&&W[i+2].p===cor)||(NV>=2&&W[i+3].p===cor)) g1[cor]++; } }
   if(k<c.nMin) return {alvo:null,txt:`depois do ${d}: só ${k} vezes`};
-  let v=null; for(const cor of [0,1]) if(g1[cor]/k>=0.9&&(!v||g1[cor]>g1[v.alvo])) v={alvo:cor,txt:`depois do ${d}: ${cor?'ÍMPAR':'PAR'} ${(100*g1[cor]/k).toFixed(0)}% até G1 · TS ${(100*ts[cor]/k).toFixed(0)}% (${k}x)`};
-  return v||{alvo:null,txt:`depois do ${d}: PAR ${(100*g1[0]/k).toFixed(0)}% · ÍMPAR ${(100*g1[1]/k).toFixed(0)}% até G1 (${k}x)`};
+  const lab=MCF_NVTXT[NV];
+  let v=null; for(const cor of [0,1]) if(g1[cor]/k>=0.9&&(!v||g1[cor]>g1[v.alvo])) v={alvo:cor,txt:`depois do ${d}: ${cor?'ÍMPAR':'PAR'} ${(100*g1[cor]/k).toFixed(0)}% ${lab}${NV?' · TS '+(100*ts[cor]/k).toFixed(0)+'%':''} (${k}x)`};
+  return v||{alvo:null,txt:`depois do ${d}: PAR ${(100*g1[0]/k).toFixed(0)}% · ÍMPAR ${(100*g1[1]/k).toFixed(0)}% ${lab} (${k}x)`};
 }
 // 🔥 Pressure Strategy como círculo: mesma análise da aba 🔥 Pressure Strategy (com a configuração de lá), no índice e tempo do jogo
 function mcfPressure(W,w,bank,T){
   if(typeof psAt!=='function'||W.length<60) return null;
-  const k='ps|'+bank, ca=MCF.cache[k], lt=W.at(-1).t; if(ca&&ca.lt===lt) return ca.v;
-  const P=psP(), A=psArr(W.slice(-3000)); let v;
+  const k='ps|'+bank+'|'+mcfNv(), ca=MCF.cache[k], lt=W.at(-1).t; if(ca&&ca.lt===lt) return ca.v;
+  const P={...psP(),gale:mcfNv()}, A=psArr(W.slice(-3000)); let v;
   if(!A.n||Math.round(A.T[A.n-1]+w)!==T) v={alvo:null,txt:'sem o último jogo'};
   else { const c=psCtx(A,w), a=psAt(c,A.n-1,P,{last3:[]});
     if(!a) v={alvo:null,txt:`precisa de ${Math.max(+P.nl,+P.nm,2*(+P.nc))+12} jogos seguidos`};
@@ -10921,7 +10926,7 @@ function mcfVotar(w,T,sym){
   mcfHpLoad(bank,w); { const H=MCFHP[bank], r=H&&H.rows?H.rows.find(x=>hpNext(x.off)===T):null; v[2]=r?{alvo:r.alvo,txt:`:${msOf(r.off)} · ${r.cur}h pagando`}:{alvo:null,txt:H&&H.rows?`${H.rows.length} horário(s) · nenhum neste jogo`:'calculando…'}; }
   v[3]=mcfFigura(W,c,bank)||{alvo:null,txt:'juntando jogos'};
   v[4]=mcfLinha(W,c)||{alvo:null,txt:'juntando jogos'};
-  try{ const L=RB_PENDING.filter(g=>!g.done&&g.bank===bank&&Math.round(g.entryT/1000)===T&&(RBOTS.find(r=>r.id===g.rbId)||{}).on), cores=new Set(L.map(g=>g.alvo));
+  try{ const L=RB_PENDING.filter(g=>!g.done&&g.bank===bank&&Math.round(g.entryT/1000)===T&&(g.maxNivel==null||g.maxNivel<=mcfNv())&&(RBOTS.find(r=>r.id===g.rbId)||{}).on), cores=new Set(L.map(g=>g.alvo));
     v[5]=L.length&&cores.size===1?{alvo:L[0].alvo,txt:`${L.length} robô(s) neste jogo`}:{alvo:null,txt:L.length?'robôs em cores diferentes':'nenhum robô neste jogo'}; }catch(e){ v[5]={alvo:null,txt:'—'}; }
   v[6]=mcfTend(W,c)||{alvo:null,txt:'juntando jogos'};
   v[7]=mcfNumero(W,c)||{alvo:null,txt:'juntando jogos'};
@@ -10968,6 +10973,7 @@ function mcfNovoVoto(w,sym,T,v){ const c=mcfC(), kk=w+'|'+sym, f=mcfForca(v);
   try{ mcfAuto(w,sym,T,f); }catch(e){ console.warn('auto',e); } }
 if(MCF_BC) MCF_BC.onmessage=e=>{ const m=e.data||{}; if(m.tipo!=='voto'||MCF.cerebro) return; MCF.votos[m.kk]=m.V; if(MESA.open&&m.w===mesaW()&&dmNow()<m.V.T-0.5) mcfNovoVoto(m.w,m.V.sym,m.V.T,m.V.v); };
 // quando outra aba grava, joga fora a cópia antiga da memória (lê de novo do navegador)
+window.addEventListener('storage',e=>{ if(e.key==='dpi_cfg'&&e.newValue){ try{ const n=JSON.parse(e.newValue); for(const k of ['mesa_cf','merc','op_vols','fb','mcf_ws','mesa_gale','sf','ps']) if(k in n) cfg[k]=n[k]; MCF.cache={}; }catch(x){} } });
 window.addEventListener('storage',e=>{ const k=e.key||''; if(k.startsWith('mesa_cf_v1_')) delete MCF.st[+k.split('_').pop()]; else if(k==='mesa_cf_sel_v1') MCFSEL=null; else if(k.startsWith('mesa_cf_sim_v1_')) delete MCFSIM.st[+k.split('_').pop()]; });
 function mcfQuemTxt(){ const L=mcfLider(), vivo=L&&Date.now()-L.t<6000; return !vivo?'ninguém calculando agora':L.id===MCF_ID?(MESA_TAB?'🧠 esta Mesa está calculando (a página principal está fechada)':'🧠 esta página está calculando e gravando'):(L.r==='principal'?'🧠 a página principal está calculando — a Mesa só recebe':'🧠 a Mesa está calculando (página principal fechada)'); }
 function mcfTickW(w,vis){
@@ -11055,7 +11061,7 @@ function mcfProxHtml(){ const w=mesaW(), vols=mcfSyms().filter(mcfOpOk), nm=x=>s
       <div class="ms-nota">Arme uma ou mais vols + a cor: no próximo sinal forte dessa vol nessa cor, a Mesa entra sozinha (só na mesma vol e na mesma cor). ⛔ = mercado bloqueado (só virtual).</div></div>`; }
 // 🤖 entrada automática: 1 = só sinais fortes · 2 = todos os sinais (2+ círculos). Entra na cor da MAIORIA dos círculos.
 const MCF_GAT=[['','sempre'],['R','após 1 red'],['RR','após 2 reds seguidos'],['RG','após 1 red e 1 green'],['G','após 1 green'],['GG','após 2 greens'],['GR','após 1 green e 1 red'],['RRG','após 2 reds e 1 green']];
-function mcfGmax(){ return Math.min(mesaGale(),2); }
+function mcfGmax(){ return mcfNv(); }
 function mcfSeq(w,c,sym){ const st=mcfLoad(w), G=mcfGmax(), SL=mcfSel(w); return st.hist.filter(h=>(c.auto!==1||h.f)&&(c.auto!==3||SL[h.ids.join('+')])&&(!c.gatIdx||h.s===sym)).map(h=>h.nv<=G?'G':'R').join(''); }
 function mcfGatOk(w,c,sym){ const g=String(c.gat||'').toUpperCase().replace(/[^RG]/g,''); if(!g) return true; return mcfSeq(w,c,sym).endsWith(g); }
 function mcfAutoLog(txt){ MCF.autoMsg=txt; }
@@ -11368,6 +11374,7 @@ function mcfBarras(){
 function mcfCtlHtml(){
   const c=mcfC(), w=mesaW(), inp=(k,st,wd=52)=>`<input type="number" value="${c[k]}" step="${st}" style="width:${wd}px" onchange="mcfSet('${k}',+this.value)">`, faltam=MCF_2S.filter(s=>!d5Syms().includes(s));
   return `<div class="ms-pih"><b>⭐ CONFIRMAÇÕES · ${w}s</b>
+    <label class="ms-chk" style="border:1px solid #facc15;border-radius:8px;padding:2px 6px">🎯 análise <select onchange="mcfNivelSet(+this.value)">${MCF_NVTXT.map((t,i)=>`<option value="${i}" ${mcfNv()===i?'selected':''}>${t}</option>`).join('')}</select></label>
     <label class="ms-chk">🔔 sinal forte com ≥ ${inp('min',1,44)} círculos</label><label class="ms-chk">gráfico de ${inp('jan',5)} jogos</label>
     <label class="ms-chk">🟨 contrária ≤ ${inp('lim',1,46)}% · verde ≥ ${inp('verde',1,46)}%</label><label class="ms-chk">🖼 parecido até ${inp('fD',4,46)} pts · mín. ${inp('fMin',1,40)}</label>
     <label class="ms-chk">🔢 mín. ${inp('nMin',5,46)} vezes</label>
@@ -12887,7 +12894,7 @@ function fbSinais(bank,W){ const F=fbLoad(); if(!W||W.length<2) return; const la
   if(mud) fbSave(); }
 // voto do círculo 9 para o jogo T (segundo) do índice
 function fbVoto(w,T,sym,bank,W){ try{ fbSinais(bank,W); }catch(e){}
-  const c=fbCfg(), F=fbLoad(), L=F.sig.filter(s=>!s.done&&s.bank===bank&&s.T===T).map(s=>({s,r:F.robos.find(x=>x.id===s.id)})).filter(o=>o.r&&+o.r.envia&&(o.r.estado==='aprovado'||(+c.obsVota&&o.r.estado==='obs')));
+  const c=fbCfg(), F=fbLoad(), L=F.sig.filter(s=>!s.done&&s.bank===bank&&s.T===T).map(s=>({s,r:F.robos.find(x=>x.id===s.id)})).filter(o=>o.r&&+o.r.envia&&o.r.nivel<=mcfNv()&&(o.r.estado==='aprovado'||(+c.obsVota&&o.r.estado==='obs')));
   if(!L.length){ const n=fbAtivos().filter(r=>r.bank===bank).length; return {alvo:null,txt:n?`${n} robô(s) neste índice · nenhum neste jogo`:'nenhum robô neste índice/tempo'}; }
   const cores=new Set(L.map(o=>o.s.alvo)); if(cores.size>1) return {alvo:null,txt:'robôs em cores diferentes'};
   return {alvo:L[0].s.alvo,txt:`${L.length} robô(s): ${L.map(o=>srobNome(o.r.rb)+(o.r.nivel?' (G1)':' (TS)')).join(' · ')}`}; }
