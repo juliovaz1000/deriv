@@ -365,7 +365,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 #pacBtn{padding:3px 9px;border-radius:10px;font-size:12px}
 .acc-n{display:inline-block;min-width:24px;padding:1px 3px;margin:1px;border-radius:4px;font-size:11px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums}.acc-n.g{background:rgba(34,197,94,.18);color:#86efac}.acc-n.r{background:rgba(239,68,68,.18);color:#fca5a5}.acc-n.ab{background:rgba(59,130,246,.3);color:#bfdbfe}
 
-.sf-ct{display:inline-flex;flex-direction:column;align-items:center;gap:1px;margin-right:1px}.sf-ct small{font-size:8.5px;color:#8b84a3;font-variant-numeric:tabular-nums}
+.sf-ct{display:inline-flex;flex-direction:column;align-items:center;gap:1px;margin-right:1px}.sf-ct small{font-size:8.5px;color:#8b84a3;font-variant-numeric:tabular-nums}.sf-ct small.sf-dia{color:#facc15;font-weight:800}
 .sf-sep{border:1px solid var(--bd);border-radius:10px;padding:6px 10px;margin-bottom:8px}.sf-st{font-weight:800;font-size:13px;margin-bottom:2px}
 .sf-row{border-bottom:1px solid var(--bd);padding:6px 0}.sf-h{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;font-size:12.5px}.sf-h span{color:#a49dbb}
 .sf-chips{display:flex;flex-wrap:wrap;gap:2px;margin-top:4px}.sf-c{font-style:normal;min-width:22px;height:19px;padding:0 3px;border-radius:4px;font-size:10px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;color:#fff}.sf-c.t{background:#16a34a}.sf-c.g{background:#65a30d}.sf-c.r{background:#dc2626}
@@ -665,7 +665,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.20 · 11/10/2026 · ⭐ Sinais Fortes: guarda e mostra até 500 sinais fortes por volatilidade';
+const VERSAO='v4.21 · 11/10/2026 · ⭐ Sinais Fortes: data de cada sinal (período na linha, data quando o dia muda e no passar do mouse)';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -12705,9 +12705,13 @@ function sfHtml(){
   const chip=l=>`<i class="sf-c ${l==='R'?'r':l==='TS'?'t':'g'}">${l==='R'?'R':l}</i>`;
   // 1) últimos Q de cada vol (com horário quando houver)
   const hm=T=>{ const d=new Date(T*1000); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
-  const chipT=(l,T,alvo)=>c.hora?`<span class="sf-ct">${chip(l)}<small>${T?hm(T):'—'}</small></span>`:chip(l);
+  const dia=T=>{ const d=new Date(T*1000); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'); };
+  let diaAnt='';   // marca a data quando o dia muda (e no primeiro de cada linha)
+  const chipT=(l,T,alvo,i)=>{ if(i===0) diaAnt=''; const dd=T?dia(T):''; const novo=T&&dd!==diaAnt; if(T) diaAnt=dd;
+    return c.hora?`<span class="sf-ct" title="${T?new Date(T*1000).toLocaleString('pt-BR'):''}">${chip(l)}<small>${T?hm(T):'—'}</small>${novo?`<small class="sf-dia">${dd}</small>`:''}</span>`:`<span title="${T?new Date(T*1000).toLocaleString('pt-BR'):''}">${chip(l)}</span>`; };
   const linha=(L,titulo)=>{ const a=L.map(x=>sfCh(x[1],G)), cnt={}; a.forEach(x=>cnt[x]=(cnt[x]||0)+1); let mr=0,cr=0,mt=0,ct=0; for(const x of a){ if(x==='R'){cr++;mr=Math.max(mr,cr);} else cr=0; if(x==='TS'){ct++;mt=Math.max(mt,ct);} else ct=0; }
-    return `<div class="sf-row"><div class="sf-h"><b>${titulo}</b><span>${a.length} sinais · ${labs.map(l=>`${l} <b>${cnt[l]||0}</b>${a.length?` (${(100*(cnt[l]||0)/a.length).toFixed(0)}%)`:''}`).join(' · ')} · maior onda TS <b>${mt}</b> · maior seq. red <b class="${mr>=2?'ruim':''}">${mr}</b></span></div><div class="sf-chips">${L.map((x,i)=>chipT(a[i],x[0],x[2])).join('')||'<span class="mu">—</span>'}</div></div>`; };
+    const per=L.length&&L[0][0]&&L.at(-1)[0]?` · ${new Date(L[0][0]*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} → ${new Date(L.at(-1)[0]*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:'';
+    return `<div class="sf-row"><div class="sf-h"><b>${titulo}</b><span>${a.length} sinais${per} · ${labs.map(l=>`${l} <b>${cnt[l]||0}</b>${a.length?` (${(100*(cnt[l]||0)/a.length).toFixed(0)}%)`:''}`).join(' · ')} · maior onda TS <b>${mt}</b> · maior seq. red <b class="${mr>=2?'ruim':''}">${mr}</b></span></div><div class="sf-chips">${L.map((x,i)=>chipT(a[i],x[0],x[2],i)).join('')||'<span class="mu">—</span>'}</div></div>`; };
   const Lv=sym=>(F[sym]&&F[sym].length?F[sym]:M[sym].map(nv=>[0,nv,null])).slice(-Q);
   const sep=syms.map(sym=>{ const L=Lv(sym), P=L.filter(x=>x[2]===0), I=L.filter(x=>x[2]===1); if(!P.length&&!I.length) return '';
     return `<div class="sf-sep"><div class="sf-st">${symNome(sym)}</div>${linha(P,'<span style="color:#60a5fa">PAR</span>')}${linha(I,'<span style="color:#f472b6">ÍMPAR</span>')}</div>`; }).join('');
