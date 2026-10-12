@@ -673,7 +673,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.25 · 12/10/2026 · 🎯 Confirmações com nível único (tiro seco / até G1 / até G2): todos os círculos, sinais fortes, mercados e entradas obedecem';
+const VERSAO='v4.26 · 12/10/2026 · ⭐ Sinais Fortes: cada sinal grava com qual nível de análise (TS/G1/G2) foi gerado + filtro “gerados na análise”';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10987,8 +10987,8 @@ function mcfTickW(w,vis){
       const f=mcfForca(p.v);
       if(f.n>=2){ const nv=mcfNivel(W,Tk,w,f.alvo); if(nv!=null){ const key=f.ids.join('+'), o=st.combo[key]||(st.combo[key]={n:0,lv:[0,0,0,0]}); o.n++; o.lv[nv]++;
         const os=(o.s||(o.s={}))[sym]||(o.s[sym]={n:0,lv:[0,0,0,0]}); os.n++; os.lv[nv]++; mcfSelReg(w,key,sym,nv,Tk);
-        const forte=f.n>=c.min, ss=(st.sym||(st.sym={}))[sym]||(st.sym[sym]={n:0,lv:[0,0,0,0],fn:0,flv:[0,0,0,0]}); ss.n++; ss.lv[nv]++; if(forte){ ss.fn++; ss.flv[nv]++; mcfPrReg(st,sym,nv); mcfFhReg(st,sym,Tk,nv,f.alvo); }
-        st.hist.push({T:Tk,s:sym,ids:f.ids,alvo:f.alvo,contra:f.contra,nv,f:forte?1:0,a:MCF.autoFeito[sym+'|'+Tk]?1:0}); if(st.hist.length>1500) st.hist.splice(0,st.hist.length-1500); } }
+        const forte=f.n>=c.min, ss=(st.sym||(st.sym={}))[sym]||(st.sym[sym]={n:0,lv:[0,0,0,0],fn:0,flv:[0,0,0,0]}); ss.n++; ss.lv[nv]++; if(forte){ ss.fn++; ss.flv[nv]++; mcfPrReg(st,sym,nv); mcfFhReg(st,sym,Tk,nv,f.alvo,mcfNv()); }
+        st.hist.push({T:Tk,s:sym,ids:f.ids,alvo:f.alvo,contra:f.contra,nv,f:forte?1:0,a:MCF.autoFeito[sym+'|'+Tk]?1:0,nl:mcfNv()}); if(st.hist.length>1500) st.hist.splice(0,st.hist.length-1500); } }
       delete P[k]; mud=true;
     }
     if(MCF.ultT[kk]!==T&&dmNow()<T-0.5){ MCF.ultT[kk]=T; const v=mcfVotar(w,T,sym); P[T]={v}; MCF.votos[kk]={T,v,sym};
@@ -11321,8 +11321,8 @@ const MCF_PRM=[['R','após 1 red dela'],['RG','após 1 red e 1 green dela'],['R|
 const MCF_PRP=[['R','depois de 1 red'],['RR','depois de 2 reds'],['RG','depois de red + green'],['RGG','depois de red + 2 greens'],['G','depois de 1 green'],['GG','depois de 2 greens']];
 function mcfPrBoot(st){ if(st.prv) return st.prv; st.prv={}; for(const h of st.hist) if(h.f&&h.s&&h.nv!=null) st.prv[h.s]=((st.prv[h.s]||'')+h.nv).slice(-500); return st.prv; }
 // histórico dos sinais fortes por volatilidade com horário e cor: [T(seg), nível 0..3, alvo 0=PAR 1=ÍMPAR] — 200 por vol
-function mcfFhBoot(st){ if(st.fh) return st.fh; st.fh={}; for(const h of st.hist||[]) if(h.f&&h.s&&h.nv!=null){ const L=st.fh[h.s]||(st.fh[h.s]=[]); L.push([h.T,h.nv,h.alvo]); if(L.length>500) L.shift(); } return st.fh; }
-function mcfFhReg(st,sym,T,nv,alvo){ const F=mcfFhBoot(st), L=F[sym]||(F[sym]=[]); L.push([T,nv,alvo]); if(L.length>500) L.splice(0,L.length-500); }
+function mcfFhBoot(st){ if(st.fh) return st.fh; st.fh={}; for(const h of st.hist||[]) if(h.f&&h.s&&h.nv!=null){ const L=st.fh[h.s]||(st.fh[h.s]=[]); L.push([h.T,h.nv,h.alvo,h.nl]); if(L.length>500) L.shift(); } return st.fh; }
+function mcfFhReg(st,sym,T,nv,alvo,nl){ const F=mcfFhBoot(st), L=F[sym]||(F[sym]=[]); L.push([T,nv,alvo,nl]); if(L.length>500) L.splice(0,L.length-500); }
 function mcfPrReg(st,sym,nv){ const P=mcfPrBoot(st); P[sym]=((P[sym]||'')+nv).slice(-500); }
 function mcfPrGR(s,Gx){ const G=Gx==null?mcfGmax():Gx; return s.split('').map(x=>+x<=G?'G':'R').join(''); }
 function mcfPrSeqTxt(w,sym){ return mcfPrGR((mcfPrBoot(mcfLoad(w))[sym]||'').slice(-6)); }
@@ -12750,17 +12750,19 @@ VIEWS.press={nome:'🔥 Pressure Strategy',live(){ psLiveFill(false); },html(){
 // e coincidências ENTRE vols. Lê o que a Mesa gravou (mesa_cf_v1_<tempo>), sempre fresco do navegador.
 // =====================================================================================
 const SF={t:0};
-function sfCfg(){ return {w:20,g:2,hora:0,qtd:500,horas:24,...(cfg.sf||{})}; }
+function sfCfg(){ return {w:20,g:2,hora:0,qtd:500,horas:24,an:-1,...(cfg.sf||{})}; }
+// filtro “gerado na análise”: -1 todos · 0 TS · 1 G1 · 2 G2 · 9 antigos (gravados antes da v4.26, sem marca)
+function sfAnOk(nl){ const a=+sfCfg().an; return a<0||(a===9?nl==null:nl===a); }
 function sfSet(k,v){ cfg.sf={...sfCfg(),[k]:v}; saveCfg(); sfRender(); }
 function sfStore(w){ try{ return JSON.parse(localStorage.getItem('mesa_cf_v1_'+w)||'null')||{hist:[]}; }catch(e){ return {hist:[]}; } }
 const SF_L=['TS','G1','G2','R'], sfCh=(nv,g)=>nv>g?'R':nv===0?'TS':'G'+nv;
 function sfZ(k,n,p0){ return n&&p0>0&&p0<1?(k/n-p0)/Math.sqrt(p0*(1-p0)/n):0; }
 function sfSeqs(st){ const min=(cfg.mesa_cf&&+cfg.mesa_cf.min)||3, M={}, ev=[], F={}, H=+sfCfg().horas||0, corte=H?Date.now()/1000-H*3600:0;
   // só sinais ao vivo COM horário (os últimos 500 de cada vol); os mais antigos que o filtro de horas ficam de fora
-  for(const h of st.hist||[]){ if(h.f&&h.s&&h.nv!=null&&h.T>=corte){ const L=F[h.s]||(F[h.s]=[]); L.push([h.T,h.nv,h.alvo]); } }
-  for(const [sym,L0] of Object.entries(st.fh||{})){ const L=L0.filter(x=>x[0]>=corte); if(!F[sym]||L.length>=F[sym].length) F[sym]=L; }
+  for(const h of st.hist||[]){ if(h.f&&h.s&&h.nv!=null&&h.T>=corte&&sfAnOk(h.nl)){ const L=F[h.s]||(F[h.s]=[]); L.push([h.T,h.nv,h.alvo,h.nl]); } }
+  for(const [sym,L0] of Object.entries(st.fh||{})){ const L=L0.filter(x=>x[0]>=corte&&sfAnOk(x[3])); if(!F[sym]||L.length>=F[sym].length) F[sym]=L; }
   for(const k of Object.keys(F)) if(!F[k].length) delete F[k];
-  ev.length=0; for(const h of st.hist||[]) if(h.T>=corte&&h.nv!=null&&h.s&&(h.f!=null?h.f:h.ids&&h.ids.length>=min)) ev.push(h);
+  ev.length=0; for(const h of st.hist||[]) if(h.T>=corte&&sfAnOk(h.nl)&&h.nv!=null&&h.s&&(h.f!=null?h.f:h.ids&&h.ids.length>=min)) ev.push(h);
   for(const [sym,L] of Object.entries(F)) M[sym]=L.slice(-500).map(x=>x[1]);
   return {M,ev,F}; }
 function sfLimpar(){ const c=sfCfg(), H=+c.horas||0; if(!H){ alert('Escolha um limite de horas primeiro (ex.: 24h).'); return; } if(!confirm(`Apagar os sinais fortes com mais de ${H}h em ${c.w}s?`)) return; const corte=Date.now()/1000-H*3600, st=sfStore(c.w);
@@ -12776,12 +12778,12 @@ function sfHtml(){
   const hm=T=>{ const d=new Date(T*1000); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
   const dia=T=>{ const d=new Date(T*1000); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'); };
   let diaAnt='';   // marca a data quando o dia muda (e no primeiro de cada linha)
-  const chipT=(l,T,alvo,i)=>{ if(i===0) diaAnt=''; const dd=T?dia(T):''; const novo=T&&dd!==diaAnt; if(T) diaAnt=dd;
-    return c.hora?`<span class="sf-ct" title="${T?new Date(T*1000).toLocaleString('pt-BR'):''}">${chip(l)}<small>${T?hm(T):'—'}</small>${novo?`<small class="sf-dia">${dd}</small>`:''}</span>`:`<span title="${T?new Date(T*1000).toLocaleString('pt-BR'):''}">${chip(l)}</span>`; };
+  const chipT=(l,T,alvo,i,nl)=>{ if(i===0) diaAnt=''; const dd=T?dia(T):''; const novo=T&&dd!==diaAnt; if(T) diaAnt=dd;
+    return c.hora?`<span class="sf-ct" title="${T?new Date(T*1000).toLocaleString('pt-BR'):''}${nl!=null?' · análise '+MCF_NVTXT[nl]:''}">${chip(l)}<small>${T?hm(T):'—'}</small>${novo?`<small class="sf-dia">${dd}</small>`:''}</span>`:`<span title="${T?new Date(T*1000).toLocaleString('pt-BR'):''}${nl!=null?' · análise '+MCF_NVTXT[nl]:''}">${chip(l)}</span>`; };
   const linha=(L,titulo)=>{ const a=L.map(x=>sfCh(x[1],G)), cnt={}; a.forEach(x=>cnt[x]=(cnt[x]||0)+1); let mr=0,cr=0,mt=0,ct=0; for(const x of a){ if(x==='R'){cr++;mr=Math.max(mr,cr);} else cr=0; if(x==='TS'){ct++;mt=Math.max(mt,ct);} else ct=0; }
     const ha=L.length?Math.round((Date.now()/1000-L.at(-1)[0])/60):null, fresco=ha==null?'':` · <b class="${ha<=10?'ok':ha<=60?'':'ruim'}">último há ${ha<60?ha+' min':Math.floor(ha/60)+'h'+String(ha%60).padStart(2,'0')}</b>`;
     const per=L.length&&L[0][0]&&L.at(-1)[0]?` · ${new Date(L[0][0]*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} → ${new Date(L.at(-1)[0]*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:'';
-    return `<div class="sf-row"><div class="sf-h"><b>${titulo}</b><span>${a.length} sinais${per}${fresco} · ${labs.map(l=>`${l} <b>${cnt[l]||0}</b>${a.length?` (${(100*(cnt[l]||0)/a.length).toFixed(0)}%)`:''}`).join(' · ')} · maior onda TS <b>${mt}</b> · maior seq. red <b class="${mr>=2?'ruim':''}">${mr}</b></span></div><div class="sf-chips">${L.map((x,i)=>chipT(a[i],x[0],x[2],i)).join('')||'<span class="mu">—</span>'}</div></div>`; };
+    return `<div class="sf-row"><div class="sf-h"><b>${titulo}</b><span>${a.length} sinais${per}${fresco} · ${labs.map(l=>`${l} <b>${cnt[l]||0}</b>${a.length?` (${(100*(cnt[l]||0)/a.length).toFixed(0)}%)`:''}`).join(' · ')} · maior onda TS <b>${mt}</b> · maior seq. red <b class="${mr>=2?'ruim':''}">${mr}</b></span></div><div class="sf-chips">${L.map((x,i)=>chipT(a[i],x[0],x[2],i,x[3])).join('')||'<span class="mu">—</span>'}</div></div>`; };
   const Lv=sym=>(F[sym]||[]).slice(-Q);
   const sep=syms.map(sym=>{ const L=Lv(sym), P=L.filter(x=>x[2]===0), I=L.filter(x=>x[2]===1); if(!P.length&&!I.length) return '';
     return `<div class="sf-sep"><div class="sf-st">${symNome(sym)}</div>${linha(P,'<span style="color:#60a5fa">PAR</span>')}${linha(I,'<span style="color:#f472b6">ÍMPAR</span>')}</div>`; }).join('');
@@ -12823,7 +12825,7 @@ function sfHtml(){
 VIEWS.sfortes={nome:'⭐ Sinais Fortes',live(){ if(Date.now()-SF.t>15000) sfRender(); },html(){
   const c=sfCfg(), sel=(k,o)=>`<select onchange="sfSet('${k}',+this.value)">${o.map(([v,t])=>`<option value="${v}" ${+c[k]===v?'selected':''}>${t}</option>`).join('')}</select>`;
   setTimeout(sfRender,0);
-  return `<div class="panel"><h3>⭐ Sinais fortes por volatilidade</h3><div class="ctl"><label>tempo ${sel('w',MESA_TEMPOS.map(x=>[x,x+'s']))}</label><label>green até ${sel('g',[[0,'TS'],[1,'G1'],[2,'G2']])}</label><label>mostrar ${sel('qtd',[[50,'50'],[100,'100'],[200,'200'],[300,'300'],[500,'500']])} por vol</label><label>só das últimas ${sel('horas',[[1,'1h'],[3,'3h'],[6,'6h'],[12,'12h'],[24,'24h'],[0,'sem limite']])}</label><button onclick="sfLimpar()" title="apaga do registro os sinais mais antigos que o filtro de horas">🗑 apagar os antigos</button><label><input type="checkbox" ${c.hora?'checked':''} onchange="sfSet('hora',this.checked?1:0)"> mostrar horário (hora:minuto)</label><button onclick="sfRender()">⟳ atualizar</button></div>
+  return `<div class="panel"><h3>⭐ Sinais fortes por volatilidade</h3><div class="ctl"><label>tempo ${sel('w',MESA_TEMPOS.map(x=>[x,x+'s']))}</label><label title="cada sinal novo grava com qual 🎯 nível das confirmações ele foi gerado">gerados na análise ${sel('an',[[-1,'todos'],[0,'tiro seco'],[1,'até G1'],[2,'até G2'],[9,'antigos (sem marca)']])}</label><label>green até ${sel('g',[[0,'TS'],[1,'G1'],[2,'G2']])}</label><label>mostrar ${sel('qtd',[[50,'50'],[100,'100'],[200,'200'],[300,'300'],[500,'500']])} por vol</label><label>só das últimas ${sel('horas',[[1,'1h'],[3,'3h'],[6,'6h'],[12,'12h'],[24,'24h'],[0,'sem limite']])}</label><button onclick="sfLimpar()" title="apaga do registro os sinais mais antigos que o filtro de horas">🗑 apagar os antigos</button><label><input type="checkbox" ${c.hora?'checked':''} onchange="sfSet('hora',this.checked?1:0)"> mostrar horário (hora:minuto)</label><button onclick="sfRender()">⟳ atualizar</button></div>
     <div class="nota">Esta página calcula os círculos e grava os sinais fortes sozinha (não precisa da Mesa aberta). A Mesa recebe os sinais daqui e só opera. Atualiza a cada 15s.</div>
     <div class="nota">${mcfQuemTxt()} · gravar sozinho (sem a Mesa) nos tempos: ${MESA_TEMPOS.filter(x=>x>=5).map(x=>`<label style="margin-right:6px"><input type="checkbox" ${mcfWsCerebro().includes(x)?'checked':''} onchange="const L=new Set(mcfWsCerebro()); this.checked?L.add(${x}):L.delete(${x}); cfg.mcf_ws=[...L].sort((a,b)=>a-b); saveCfg();"> ${x}s</label>`).join('')}</div>
     <div class="nota">Índices escaneados agora: <b>${d5Syms().map(x=>symNome(x).replace('Volatility','Vol')).join(', ')}</b>${MCF_2S.some(x=>!d5Syms().includes(x))?` <button onclick="d5SetSyms([...new Set([...d5Syms(),...MCF_2S])]);setTimeout(renderTab,800)">📡 escanear os 7 índices de 2s</button> <span class="mu">(faltam ${MCF_2S.filter(x=>!d5Syms().includes(x)).map(x=>symNome(x).replace('Volatility','Vol')).join(', ')} — só passam a aparecer aqui depois que a Mesa juntar sinais fortes deles)</span>`:' ✔ todos os 7'}</div></div><div id="sfR"></div>`; }};
