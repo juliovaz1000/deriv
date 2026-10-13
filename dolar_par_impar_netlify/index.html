@@ -10160,11 +10160,35 @@ function mesaEsqManual(qv){ return `
           <div id="msTss">${typeof tssMesaHtml==='function'?tssMesaHtml():''}</div>
 `; }
 function mesaSaldoHtml(){
+  if(MESA.trocando) return `<span>SALDO</span><b>⏳ trocando de conta…</b>`;
   if(DM.ok){
     const real=!DM.virt;
-    return `<span>SALDO ${real?'REAL':'DEMO'}</span><b>${real?'':'$ '}${DM.bal!=null?DM.bal.toFixed(2):'—'} ${DM.cur||''}</b><div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap"><button class="ms-x" onclick="dmDesconectar();mesaRender(true)">DESCONECTAR</button>${real?'<span style="font-size:10px;color:#facc15">REAL CONECTADA</span>':'<button class="ms-con" onclick="mesaRealAbrir()">CONECTAR REAL</button>'}</div>`;
+    const troca = real
+      ? `<button class="ms-con" onclick="mesaTrocarDemo()">🔁 TROCAR PARA DEMO</button>`
+      : `<button class="ms-con" onclick="mesaRealAbrir()">🔁 TROCAR PARA REAL</button>`;
+    return `<span>SALDO ${real?'REAL':'DEMO'}</span><b>${real?'':'$ '}${DM.bal!=null?DM.bal.toFixed(2):'—'} ${DM.cur||''}</b><div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap"><button class="ms-x" onclick="dmDesconectar();mesaRender(true)">DESCONECTAR</button>${troca}${real?'<span style="font-size:10px;color:#facc15">REAL CONECTADA</span>':''}</div>`;
   }
-  return `<div style="display:flex;gap:5px;flex-wrap:wrap"><button class="ms-x" onclick="mesaFechar();S.tab='demo';renderTab()">CONECTAR DEMO</button><button class="ms-con" onclick="mesaRealAbrir()">CONECTAR REAL</button></div>`;
+  return `<div style="display:flex;gap:5px;flex-wrap:wrap"><button class="ms-con" onclick="mesaTrocarDemo()">CONECTAR DEMO</button><button class="ms-con" onclick="mesaRealAbrir()">CONECTAR REAL</button></div>`;
+}
+// 🔁 troca DEMO ⇄ REAL sem sair da Mesa: a troca para DEMO usa a conta demo salva (OAuth ou token demo)
+async function mesaTrocarDemo(){
+  if(MESA.trocando) return;
+  if(DM.orders.some(o=>['aguardando','comprando','em jogo'].includes(o.estado))){ alert('Espere as entradas em andamento terminarem antes de trocar de conta.'); return; }
+  let oa=null, tokDemo='';
+  try{ oa=dmOa2(); tokDemo=localStorage.getItem('dpi_demo_tok')||''; }catch(e){}
+  if(!(oa&&oa.at) && !tokDemo){
+    if(confirm('Ainda não há conta DEMO salva. Abrir a aba 💼 Conta Demo para conectar?')){ mesaFechar(); S.tab='demo'; renderTab(); }
+    return;
+  }
+  MESA.trocando=true; mesaRender(false);
+  try{
+    DM._tok=tokDemo;                 // não reaproveita o token REAL que ficou em memória
+    dmDesconectar(true);
+    await dmConectar();
+  }catch(e){ dmSet('Falha ao trocar para DEMO: '+(e.message||e)); }
+  finally{ MESA.trocando=false; }
+  if(!(DM.ok&&DM.virt)){ dmDesconectar(true); alert('Não consegui conectar a conta DEMO. Confira na aba 💼 Conta Demo.'); }
+  mesaRender(true);
 }
 function mesaRealAbrir(){
   const pop=document.getElementById('mesaRealPop'); if(!pop) return;
