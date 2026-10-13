@@ -673,7 +673,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.27 · 12/10/2026 · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
+const VERSAO='v4.28 · 12/10/2026 · 🧩 quadro do TS Somado na Mesa (entra pela Mesa) · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10132,6 +10132,7 @@ function mesaEsqManual(qv){ return `
           <span class="ms-lb">SUA SESSÃO · ${mesaW()}s</span><div class="ms-sess" id="msSess"></div>
           <div class="ms-bt"><button class="par" onclick="mesaEntrar(0)">PAR</button><button class="imp" onclick="mesaEntrar(1)">ÍMPAR</button></div>
           <div id="msProx">${mcfProxHtml()}</div>
+          <div id="msTss">${typeof tssMesaHtml==='function'?tssMesaHtml():''}</div>
 `; }
 function mesaRender(full){
   const p=$('#mesaPop'); if(!p||!MESA.open) return;
@@ -10973,7 +10974,7 @@ function mcfNovoVoto(w,sym,T,v){ const c=mcfC(), kk=w+'|'+sym, f=mcfForca(v);
   try{ mcfAuto(w,sym,T,f); }catch(e){ console.warn('auto',e); } }
 if(MCF_BC) MCF_BC.onmessage=e=>{ const m=e.data||{}; if(m.tipo!=='voto'||MCF.cerebro) return; MCF.votos[m.kk]=m.V; if(MESA.open&&m.w===mesaW()&&dmNow()<m.V.T-0.5) mcfNovoVoto(m.w,m.V.sym,m.V.T,m.V.v); };
 // quando outra aba grava, joga fora a cópia antiga da memória (lê de novo do navegador)
-window.addEventListener('storage',e=>{ if(e.key==='dpi_cfg'&&e.newValue){ try{ const n=JSON.parse(e.newValue); for(const k of ['mesa_cf','merc','op_vols','fb','mcf_ws','mesa_gale','sf','ps']) if(k in n) cfg[k]=n[k]; MCF.cache={}; }catch(x){} } });
+window.addEventListener('storage',e=>{ if(e.key==='dpi_cfg'&&e.newValue){ try{ const n=JSON.parse(e.newValue); for(const k of ['mesa_cf','merc','op_vols','fb','mcf_ws','mesa_gale','sf','ps','tss']) if(k in n) cfg[k]=n[k]; MCF.cache={}; }catch(x){} } });
 window.addEventListener('storage',e=>{ const k=e.key||''; if(k.startsWith('mesa_cf_v1_')) delete MCF.st[+k.split('_').pop()]; else if(k==='mesa_cf_sel_v1') MCFSEL=null; else if(k.startsWith('mesa_cf_sim_v1_')) delete MCFSIM.st[+k.split('_').pop()]; });
 function mcfQuemTxt(){ const L=mcfLider(), vivo=L&&Date.now()-L.t<6000; return !vivo?'ninguém calculando agora':L.id===MCF_ID?(MESA_TAB?'🧠 esta Mesa está calculando (a página principal está fechada)':'🧠 esta página está calculando e gravando'):(L.r==='principal'?'🧠 a página principal está calculando — a Mesa só recebe':'🧠 a Mesa está calculando (página principal fechada)'); }
 function mcfTickW(w,vis){
@@ -12923,13 +12924,40 @@ function tssLoop(){
 // ---------- 3) entrada na conta DEMO (opcional, uma regra por vez) ----------
 function tssDemo(e,ch,c){
   const C=tssC(); if(C.demo!==e.id) return;
-  if(typeof DM==='undefined'||!DM.ok||!DM.virt) return;
   const base=Math.max(0.35,+C.val||0.35), r=typeof mbRatio==='function'?mbRatio(5):0.95, perdeu=ch.s.length-1;
   let perda=0, st=base; for(let i=0;i<perdeu;i++){ perda+=st; st=C.calc==='fixo'?base:C.calc==='lucro'?(perda+base*r)/r:Math.max(base,perda/r); }
   st=Math.max(0.35,Math.round(st*100)/100);
   const w=tssTempos(c.T)[0]||5;
-  dmRegistrar({key:`tss|${e.id}|${c.T}|${c.sym}`,src:'tss',man:1,nome:`🧩 TS somado · ${e.nome} · passo ${ch.s.length}`,sym:c.sym,T:c.T,step:w,maxN:0,ct:c.alvo?'DIGITODD':'DIGITEVEN',stakeBase:st,stakeFix:st,mcor:c.alvo});
+  const o={key:`tss|${e.id}|${c.T}|${c.sym}`,src:'tss',man:1,nome:`🧩 TS somado · ${e.nome} · passo ${ch.s.length}`,sym:c.sym,T:c.T,step:w,maxN:0,ct:c.alvo?'DIGITODD':'DIGITEVEN',stakeBase:st,stakeFix:st,mcor:c.alvo};
+  // com a 🎮 Mesa aberta, quem entra é a Mesa (é lá que a conta DEMO costuma estar conectada); senão entra por esta página
+  if(!MESA_TAB&&tssMesaAberta()&&MCF_BC){ try{ MCF_BC.postMessage({tipo:'tss',o}); }catch(x){} return; }
+  if(typeof DM==='undefined'||!DM.ok||!DM.virt) return;
+  dmRegistrar(o);
 }
+function tssMesaAberta(){ try{ const N=JSON.parse(localStorage.getItem('dpi_mcf_need')||'null'); return !!(N&&Date.now()-N.t<8000); }catch(e){ return false; } }
+if(MCF_BC) MCF_BC.addEventListener('message',e=>{ const m=e.data||{}; if(m.tipo==='tss'&&m.o&&MESA_TAB&&MESA.open){ if(!DM.ok||!DM.virt){ try{ atuAviso('🧩 TS somado: conecte a conta DEMO na Mesa para entrar','tss'); }catch(x){} return; } dmRegistrar(m.o); } });
+// ---------- quadro na 🎮 Mesa ----------
+let TSS_MT=0;
+function tssMesaHtml(){
+  if(!MCF.cerebro&&Date.now()-TSS_MT>3000){ TSS.st=null; TSS_MT=Date.now(); }
+  const C=tssC(), st=tssLoad(), agora=dmNow(), sn=x=>symNome(x).replace('Volatility','Vol'), tag=a=>`<b style="color:${a?'#f472b6':'#60a5fa'}">${a?'ÍMPAR':'PAR'}</b>`;
+  const sel=(k,o)=>`<select onchange="tssSet('${k}',${typeof C[k]==='string'?'this.value':'+this.value'});tssMesaAtu()">${o.map(([v,t])=>`<option value="${v}" ${String(C[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
+  const linhas=TSS_EST.filter(e=>!C.demo||e.id===C.demo).map(e=>{ const E=st.E[e.id], H=E.h.filter(x=>x.r!=='X'), n=H.length, g=H.filter(x=>x.r==='G').length; let ent=0,ac=0; H.forEach(x=>x.s.forEach(p=>{ if(p[3]===0||p[3]===1){ ent++; ac+=p[3]; } }));
+    const ch=E.c, and=ch?` · ▶ ${ch.s.map((p,i)=>`${i+1}º ${hmsOf(p[0])} ${sn(p[1])} ${tag(p[2])} ${p[3]===1?'✅':p[3]===0?'❌':'⏳'}`).join(' → ')}`:'';
+    const chips=H.slice(-20).map(x=>`<i class="sf-c ${x.r==='G'?(x.k===1?'t':'g'):'r'}" title="${hmOf(x.t0)}">${x.r==='G'?(x.k===1?'1':x.k+'º'):'R'}</i>`).join('');
+    return `<div style="margin:4px 0"><b>${e.nome}</b> <span class="mu">${n?`${g}/${n} green · acerto por TS ${ent?(100*ac/ent).toFixed(0):'—'}%`:'sem sinais ainda'}</span>${and}<div class="sf-chips">${chips}</div></div>`; }).join('');
+  let P=[]; try{ P=(MCF.cerebro&&TSS.pool.length?TSS.pool:(JSON.parse(localStorage.getItem(TSS_PKEY)||'null')||{L:[]}).L).filter(x=>x.T>=agora).slice(0,5); }catch(e){}
+  const L=(typeof DM!=='undefined'?DM.log:[]).filter(x=>x.src==='tss').slice(-6).reverse();
+  return `<div class="ms-box" style="margin-top:8px;border:1px solid #a78bfa">
+    <span class="ms-lb">🧩 TS SOMADO · TESTE</span>
+    <div class="ms-nota">entrar na DEMO com ${sel('demo',[['','nenhuma (só registrar)'],...TSS_EST.map(e=>[e.id,e.nome])])} · valor ${sel('val',[[0.35,'$0,35'],[0.5,'$0,50'],[1,'$1'],[2,'$2']])} · após red ${sel('calc',[['zero','recupera'],['lucro','recupera+lucro'],['fixo','mesmo valor']])}</div>
+    ${linhas}
+    <div class="ms-nota">próximos TS: ${P.length?P.map(x=>`${hmsOf(x.T)} ${sn(x.sym)} ${tag(x.alvo)}`).join(' · '):'nenhum na próxima hora ainda'}</div>
+    ${L.length?`<div class="ms-nota">entradas na DEMO: ${L.map(x=>`${hmsOf(x.planT||x.T)} ${sn(x.sym)} ${x.res==='green'?'✅':x.res==='red'?'❌':x.res||'…'}${x.profit?' '+(+x.profit).toFixed(2):''}`).join(' · ')}</div>`:''}
+    <div class="ms-nota">Os sinais são calculados na página principal (aba 🧩 TS Somado) — deixe ela aberta. Com a Mesa aberta, a entrada sai por aqui.</div></div>`;
+}
+function tssMesaAtu(){ const el=document.getElementById('msTss'); if(el) el.innerHTML=tssMesaHtml(); }
+setInterval(()=>{ if(MESA.open) try{ tssMesaAtu(); }catch(e){} },2000);
 setInterval(()=>{ try{ tssLoop(); }catch(e){ console.warn('ts somado',e); } },500);
 setInterval(()=>{ tssScanTick().catch(e=>console.warn('ts somado scan',e)); },4000);
 // ---------- 4) aba ----------
