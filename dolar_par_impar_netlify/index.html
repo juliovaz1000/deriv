@@ -673,7 +673,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.29 · 12/10/2026 · 🧩 caixinhas do TS Somado na Mesa não fecham mais sozinhas · 🧩 quadro do TS Somado na Mesa (entra pela Mesa) · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
+const VERSAO='v4.30 · 12/10/2026 · 🧩 TS Somado: opção “só quando os 2 confirmam” (horas pagantes + horário fixo no mesmo jogo) · 🧩 caixinhas do TS Somado na Mesa não fecham mais sozinhas · 🧩 quadro do TS Somado na Mesa (entra pela Mesa) · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -12871,7 +12871,7 @@ function tssMontaPool(){
     if(!o){ M.set(k,{...x}); continue; }
     if(o.alvo!==x.alvo){ o.conf=1; continue; }                       // horas e fixo em cores diferentes no mesmo jogo: descarta
     if(o.f!==x.f) o.f='hp+hf'; o.h=Math.max(o.h,x.h); o.d=Math.max(o.d,x.d); }
-  TSS.pool=[...M.values()].filter(x=>!x.conf).sort((a,b)=>a.T-b.T||tssForcaN(b)-tssForcaN(a));
+  TSS.pool=[...M.values()].filter(x=>!x.conf&&(tssC().fonte!=='juntos'||x.f==='hp+hf')).sort((a,b)=>a.T-b.T||tssForcaN(b)-tssForcaN(a));
   try{ localStorage.setItem(TSS_PKEY,JSON.stringify({t:Date.now(),L:TSS.pool.filter(x=>x.T>=dmNow()).slice(0,80)})); }catch(e){}
 }
 function tssForcaN(x){ return (x.f==='hp+hf'?100:0)+x.d*10+x.h; }
@@ -12993,7 +12993,7 @@ VIEWS.tss={nome:'🧩 TS Somado',live(){ if(Date.now()-TSS.ui>3000) tssRender();
     <div class="ctl" style="flex-wrap:wrap">
       <label>horas pagantes TS ≥ ${sel('hpMin',[[3,'3h'],[4,'4h'],[5,'5h'],[6,'6h'],[8,'8h'],[10,'10h']])}</label>
       <label>horário fixo TS ≥ ${sel('hfDias',[[3,'3 dias'],[4,'4 dias'],[5,'5 dias'],[7,'7 dias']])} 100%</label>
-      <label>usar ${sel('fonte',[['ambos','horas + fixo'],['horas','só horas pagantes'],['fixo','só horário fixo']])}</label>
+      <label>usar ${sel('fonte',[['ambos','horas OU fixo'],['juntos','só quando os 2 confirmam'],['horas','só horas pagantes'],['fixo','só horário fixo']])}</label>
       <label>tempos ${[5,10,20,30].map(w=>`<label style="margin-left:4px"><input type="checkbox" ${C.tempos.includes(w)?'checked':''} onchange="const L=new Set(tssC().tempos); this.checked?L.add(${w}):L.delete(${w}); tssSet('tempos',[...L].sort((a,b)=>a-b))"> ${w}s</label>`).join('')}</label>
       <label>TS por sinal ${sel('passos',[[1,'1'],[2,'2'],[3,'3'],[4,'4']])}</label>
       <label>mín. entre passos: mesma vol ${sel('gapM',[[5,'5s'],[10,'10s'],[15,'15s'],[20,'20s']])} · outra vol ${sel('gapO',[[5,'5s'],[10,'10s'],[15,'15s'],[20,'20s']])}</label>
