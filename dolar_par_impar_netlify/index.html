@@ -598,8 +598,8 @@ tr.scativo td{background:rgba(245,197,24,.07)}
   <span id="ponte">ponte: —</span>
   <span id="status">pronto</span>
   <span id="repairBox" style="display:none"></span>
-  <button id="ilBtn" onclick="ilLigar(!cfg.il_on)" title="junta 5s + 10s + 20s só com fontes 100%">🔗 INTERLIGAR</button>
-  <button id="il2Btn" onclick="il2Abrir()" title="interligado só com padrões vindo de 2 reds + 1 green atual">🔁 2R+G</button>
+  <button id="ilBtn" style="display:none" onclick="ilLigar(!cfg.il_on)" title="junta 5s + 10s + 20s só com fontes 100%">🔗 INTERLIGAR</button>
+  <button id="il2Btn" style="display:none" onclick="il2Abrir()" title="interligado só com padrões vindo de 2 reds + 1 green atual">🔁 2R+G</button>
   <button id="popBtn" onclick="popToggle()" title="ligar/desligar todos os popups automáticos">🔕 POPUPS</button>
   <button id="mkBtn" onclick="mkAbrir()" title="qual volatilidade está melhor agora">🌐 MERCADOS</button>
   <button id="mesaBtn" onclick="mesaNovaAba()" title="tela de operar na Deriv com 10s, 20s e 30s separados">🎮 MESA</button>
@@ -673,7 +673,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.26 · 12/10/2026 · ⭐ Sinais Fortes: cada sinal grava com qual nível de análise (TS/G1/G2) foi gerado + filtro “gerados na análise”';
+const VERSAO='v4.27 · 12/10/2026 · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -8771,7 +8771,7 @@ function dmPodeOperar(o){
 }
 // registra uma entrada vinda de qualquer robô (par/ímpar, segundos ou Under/Over)
 function dmRegistrar(o){
-  if(typeof MESA_TAB!=='undefined'&&MESA_TAB&&!['mesa','mbot'].includes(o.src)) return;   // na aba da Mesa só a Mesa opera (evita entrada dobrada)
+  if(typeof MESA_TAB!=='undefined'&&MESA_TAB&&!['mesa','mbot','tss'].includes(o.src)) return;   // na aba da Mesa só a Mesa opera (evita entrada dobrada)
   if(!o.sym){ dmAddLog({...o,res:'não enviada',obs:'banco sem mercado Deriv (use um banco DERIV …)',stake:0,profit:0}); return; }
   const motivo=dmPodeOperar(o);
   if(motivo){ dmAddLog({...o,res:'não enviada',obs:motivo,stake:0,profit:0}); return; }
@@ -12830,6 +12830,157 @@ VIEWS.sfortes={nome:'⭐ Sinais Fortes',live(){ if(Date.now()-SF.t>15000) sfRend
     <div class="nota">${mcfQuemTxt()} · gravar sozinho (sem a Mesa) nos tempos: ${MESA_TEMPOS.filter(x=>x>=5).map(x=>`<label style="margin-right:6px"><input type="checkbox" ${mcfWsCerebro().includes(x)?'checked':''} onchange="const L=new Set(mcfWsCerebro()); this.checked?L.add(${x}):L.delete(${x}); cfg.mcf_ws=[...L].sort((a,b)=>a-b); saveCfg();"> ${x}s</label>`).join('')}</div>
     <div class="nota">Índices escaneados agora: <b>${d5Syms().map(x=>symNome(x).replace('Volatility','Vol')).join(', ')}</b>${MCF_2S.some(x=>!d5Syms().includes(x))?` <button onclick="d5SetSyms([...new Set([...d5Syms(),...MCF_2S])]);setTimeout(renderTab,800)">📡 escanear os 7 índices de 2s</button> <span class="mu">(faltam ${MCF_2S.filter(x=>!d5Syms().includes(x)).map(x=>symNome(x).replace('Volatility','Vol')).join(', ')} — só passam a aparecer aqui depois que a Mesa juntar sinais fortes deles)</span>`:' ✔ todos os 7'}</div></div><div id="sfR"></div>`; }};
 // =====================================================================================
+// 🧩 TS SOMADO — junta os TIROS SECOS de horas pagantes (≥ X horas seguidas) e horário fixo (≥ Y dias 100%)
+// de TODAS as volatilidades escaneadas, nos segundos de 5s / 10s / 20s / 30s, e transforma vários TS em 1 sinal (cadeia):
+//   • Mesma vol ............ 35:05 → 35:10 → 35:20 na mesma volatilidade (se der red, vai para o próximo TS dela)
+//   • Vols diferentes ...... 35:10 na Vol 10 → 35:20 na Vol 25 → 35:25 na Vol 50 (cada passo num índice diferente)
+//   • PAR/ÍMPAR alternado .. 1º passo PAR → 2º ÍMPAR → 3º PAR (ou o contrário), em qualquer vol
+// Cada regra roda de 2 jeitos: NORMAL (só o TS) e FORTE (o TS só vale se os círculos das ⭐ Confirmações também
+// apontarem a mesma cor com o mínimo de confirmações). Tudo é registrado aqui (green/red), separado das outras análises.
+// Observação honesta: o jogo das 35:20 é o MESMO tick em 5s, 10s e 20s (todos pegam o tick daquele segundo).
+// Por isso o mesmo segundo nunca conta duas vezes — a soma é por SEGUNDO diferente, e o banco de 5s já cobre todos.
+// Só a página que calcula (🧠 cérebro) roda o motor; as outras só leem o registro.
+// =====================================================================================
+const TSS_DEF={hpMin:5,hpPer:24,hfDias:3,hfJan:7,fonte:'ambos',tempos:[5,10,20,30],passos:3,gapM:5,gapO:5,espera:15,demo:'',val:0.35,calc:'zero',hist:300};
+const TSS_REGRAS=[['mv','🎯 Mesma vol'],['ov','🔀 Vols diferentes'],['al','🔁 PAR/ÍMPAR alternado']];
+const TSS_EST=[]; for(const [r,n] of TSS_REGRAS) for(const f of [0,1]) TSS_EST.push({id:r+(f?'_f':''),r,f,nome:n+(f?' · ⭐ forte':' · normal')});
+const TSS_KEY='dpi_tss_v1', TSS_PKEY='dpi_tss_pool_v1';
+let TSS={pool:[],scan:{},st:null,t:0,busy:false,ui:0};
+function tssC(){ const c={...TSS_DEF,...(cfg.tss||{})}; if(!Array.isArray(c.tempos)||!c.tempos.length) c.tempos=[5,10,20,30]; return c; }
+function tssSet(k,v){ cfg.tss={...tssC(),[k]:v}; saveCfg(); if(['hpMin','hpPer','hfDias','hfJan','fonte','tempos'].includes(k)) TSS.scan={}; tssRender(); }
+function tssLoad(){ if(TSS.st) return TSS.st; let s=null; try{ s=JSON.parse(localStorage.getItem(TSS_KEY)||'null'); }catch(e){} if(!s||s.v!==1) s={v:1,E:{}}; for(const e of TSS_EST) if(!s.E[e.id]) s.E[e.id]={h:[],c:null}; return TSS.st=s; }
+function tssSave(){ const s=TSS.st; if(!s) return; const cap=Math.max(50,+tssC().hist||300); for(const e of Object.values(s.E)) if(e.h.length>cap) e.h.splice(0,e.h.length-cap);
+  try{ localStorage.setItem(TSS_KEY,JSON.stringify(s)); }catch(e){ for(const x of Object.values(s.E)) x.h.splice(0,Math.floor(x.h.length/3)); try{ localStorage.setItem(TSS_KEY,JSON.stringify(s)); }catch(e2){} } }
+window.addEventListener('storage',e=>{ if(e.key===TSS_KEY&&!MCF.cerebro) TSS.st=null; });
+// em quais tempos (dos marcados) esse segundo existe: 35:20 → 5s, 10s, 20s
+function tssTempos(T){ return tssC().tempos.filter(w=>T%w===0); }
+// ---------- 1) varredura: TS de horas pagantes e horário fixo de cada vol (banco de 5s, a cada 10 min) ----------
+async function tssScanSym(sym){
+  const c=tssC(), bank=d5BankName(5,sym), now=Date.now(), agora=now/1000, lim=agora+65*60, out=[];
+  if(c.fonte!=='fixo'){ try{ const rows=await idbRange(bank,now-Math.max(c.hpMin+2,+c.hpPer||24)*3600e3,now+60000), G=rows&&rows.length?gridBuild(rows,5):null;
+    if(G) for(const r of hpScan(G,'all')){ const o=r.L[0]; if(o.cur>=c.hpMin){ const T=hpNext(r.off); if(T<=lim) out.push({T,sym,alvo:r.alvo,f:'hp',h:o.cur,d:0}); } } }catch(e){ console.warn('ts somado horas',e); } }
+  if(c.fonte!=='horas'){ try{ const rows=await idbRange(bank,now-(Math.max(c.hfDias+1,+c.hfJan||7))*86400e3-3600e3,now+60000), G=rows&&rows.length?gridBuild(rows,5):null, hr=new Date().getHours();
+    if(G) for(const h of [hr,(hr+1)%24]) for(const r of hfScan(G,String(h))){ const m=r.ts; if(m.n>=c.hfDias&&m.ok===m.n){ const T=hfNext(r.off); if(T<=lim) out.push({T,sym,alvo:r.alvo,f:'hf',h:0,d:m.n}); } } }catch(e){ console.warn('ts somado fixo',e); } }
+  TSS.scan[sym]={t:Date.now(),L:out}; tssMontaPool();
+}
+function tssMontaPool(){
+  const agora=dmNow(), M=new Map(), ws=tssC().tempos;
+  for(const s of Object.values(TSS.scan)) for(const x of s.L){ if(x.T<agora-1||!ws.some(w=>x.T%w===0)) continue;
+    const k=x.sym+'|'+x.T, o=M.get(k);
+    if(!o){ M.set(k,{...x}); continue; }
+    if(o.alvo!==x.alvo){ o.conf=1; continue; }                       // horas e fixo em cores diferentes no mesmo jogo: descarta
+    if(o.f!==x.f) o.f='hp+hf'; o.h=Math.max(o.h,x.h); o.d=Math.max(o.d,x.d); }
+  TSS.pool=[...M.values()].filter(x=>!x.conf).sort((a,b)=>a.T-b.T||tssForcaN(b)-tssForcaN(a));
+  try{ localStorage.setItem(TSS_PKEY,JSON.stringify({t:Date.now(),L:TSS.pool.filter(x=>x.T>=dmNow()).slice(0,80)})); }catch(e){}
+}
+function tssForcaN(x){ return (x.f==='hp+hf'?100:0)+x.d*10+x.h; }
+async function tssScanTick(){
+  if(TSS.busy||!MCF.cerebro) return; const syms=d5Syms(); if(!syms.length) return;
+  const sym=syms.find(s=>!TSS.scan[s]||Date.now()-TSS.scan[s].t>10*60e3); if(!sym) return;
+  TSS.busy=true; try{ await tssScanSym(sym); }finally{ TSS.busy=false; }
+}
+// ---------- 2) motor das cadeias (a cada 0,5s, só no cérebro) ----------
+function tssJogo(sym,T){ const W=LIVE[d5BankName(5,sym)]; if(!W||!W.length) return null; const t=T*1000; for(let i=W.length-1;i>=0&&i>=W.length-400;i--){ const x=W[i]; if(x.t===t) return x.p; if(x.t<t) break; } return null; }
+function tssForte(c){   // os círculos da ⭐ Confirmação apontam a mesma cor com o mínimo de confirmações (em algum dos tempos desse segundo)
+  const C=mcfC();
+  for(const w of tssTempos(c.T)){ let v=null; const V=MCF.votos&&MCF.votos[w+'|'+c.sym]; if(V&&V.T===c.T) v=V.v; else { try{ v=mcfVotar(w,c.T,c.sym); }catch(e){ v=null; } }
+    if(!v) continue; const f=mcfForca(v); if(f.alvo===c.alvo&&f.n>=C.min&&!(+C.semContra&&f.contra)) return {w,n:f.n}; }
+  return null;
+}
+function tssPodeSeguir(e,ch,c){
+  const S=ch.s, L=S[S.length-1], C=tssC();
+  if(c.T-L[0]<(c.sym===L[1]?C.gapM:C.gapO)) return false;            // não dá tempo de trocar / entrar
+  if(e.r==='mv'&&c.sym!==S[0][1]) return false;
+  if(e.r==='ov'&&S.some(x=>x[1]===c.sym)) return false;
+  if(e.r==='al'&&c.alvo===L[2]) return false;
+  return true;
+}
+function tssFecha(E,e,ch,r,k){ ch.r=r; ch.k=k; ch.fim=Math.round(dmNow()); E.h.push(ch); E.c=null; }
+function tssLoop(){
+  if(!MCF.cerebro) return;
+  const st=tssLoad(), C=tssC(), agora=dmNow(); let mud=false;
+  if(Date.now()-TSS.t>20000){ TSS.t=Date.now(); tssMontaPool(); }
+  for(const e of TSS_EST){ const E=st.E[e.id]; let ch=E.c;
+    // a) confere os passos que já passaram
+    if(ch){ const L=ch.s[ch.s.length-1];
+      if(L[3]==null&&agora>L[0]+1){ const p=tssJogo(L[1],L[0]);
+        if(p!=null){ L[3]=p===L[2]?1:0; mud=true;
+          if(L[3]===1) tssFecha(E,e,ch,'G',ch.s.length);
+          else if(ch.s.length>=C.passos) tssFecha(E,e,ch,'R',ch.s.length); }
+        else if(agora>L[0]+25){ L[3]=-1; tssFecha(E,e,ch,'X',ch.s.length); mud=true; } }       // sem o jogo no banco: anulada (não conta)
+      ch=E.c;
+      if(ch&&+C.espera>0){ const U=ch.s[ch.s.length-1]; if(U[3]===0&&agora-U[0]>C.espera*60){ tssFecha(E,e,ch,'T',ch.s.length); mud=true; ch=null; } } }
+    // b) escolhe o próximo passo (ou o 1º de uma cadeia nova) quando o jogo dele está a 2,7–4,3s
+    if(ch&&ch.s[ch.s.length-1][3]!==0) continue;                     // ainda esperando o resultado do passo atual
+    const cand=TSS.pool.filter(c=>c.T-agora>=2.7&&c.T-agora<=4.3&&(!ch||tssPodeSeguir(e,ch,c))).sort((a,b)=>tssForcaN(b)-tssForcaN(a));
+    for(const c of cand){ let fx=null; if(e.f){ fx=tssForte(c); if(!fx) continue; }
+      const passo=[c.T,c.sym,c.alvo,null,c.f,c.h||c.d,fx?fx.n:0];
+      if(!ch){ ch=E.c={t0:c.T,s:[passo]}; } else ch.s.push(passo);
+      mud=true; tssDemo(e,ch,c); break; }
+  }
+  if(mud){ tssSave(); if(S.tab==='tss') tssRender(); }
+}
+// ---------- 3) entrada na conta DEMO (opcional, uma regra por vez) ----------
+function tssDemo(e,ch,c){
+  const C=tssC(); if(C.demo!==e.id) return;
+  if(typeof DM==='undefined'||!DM.ok||!DM.virt) return;
+  const base=Math.max(0.35,+C.val||0.35), r=typeof mbRatio==='function'?mbRatio(5):0.95, perdeu=ch.s.length-1;
+  let perda=0, st=base; for(let i=0;i<perdeu;i++){ perda+=st; st=C.calc==='fixo'?base:C.calc==='lucro'?(perda+base*r)/r:Math.max(base,perda/r); }
+  st=Math.max(0.35,Math.round(st*100)/100);
+  const w=tssTempos(c.T)[0]||5;
+  dmRegistrar({key:`tss|${e.id}|${c.T}|${c.sym}`,src:'tss',man:1,nome:`🧩 TS somado · ${e.nome} · passo ${ch.s.length}`,sym:c.sym,T:c.T,step:w,maxN:0,ct:c.alvo?'DIGITODD':'DIGITEVEN',stakeBase:st,stakeFix:st,mcor:c.alvo});
+}
+setInterval(()=>{ try{ tssLoop(); }catch(e){ console.warn('ts somado',e); } },500);
+setInterval(()=>{ tssScanTick().catch(e=>console.warn('ts somado scan',e)); },4000);
+// ---------- 4) aba ----------
+function tssRender(){ const el=document.getElementById('tssR'); if(el) el.innerHTML=tssHtml(); TSS.ui=Date.now(); }
+function tssPoolVer(){ if(MCF.cerebro&&TSS.pool.length) return TSS.pool; try{ const o=JSON.parse(localStorage.getItem(TSS_PKEY)||'null'); return o&&o.L||[]; }catch(e){ return []; } }
+function tssHtml(){
+  if(!MCF.cerebro) TSS.st=null;
+  const st=tssLoad(), C=tssC(), agora=dmNow(), sn=s=>symNome(s).replace('Volatility','Vol'), cor=a=>`<span class="ps-tag ${a?'imp':'par'}">${a?'ÍMPAR':'PAR'}</span>`;
+  const fonteTx=x=>x[4]==='hp+hf'?'horas+fixo':x[4]==='hp'?`${x[5]}h pagando`:`${x[5]} dias 100%`;
+  const base=n=>100*(1-Math.pow(0.5,n));
+  const cards=TSS_EST.map(e=>{ const E=st.E[e.id], H=E.h.filter(x=>x.r!=='X'), n=H.length, g=H.filter(x=>x.r==='G').length, red=n-g, pk=[0,0,0,0,0];
+    H.forEach(x=>{ if(x.r==='G') pk[x.k]++; });
+    let ent=0, ac=0; H.forEach(x=>x.s.forEach(p=>{ if(p[3]===0||p[3]===1){ ent++; ac+=p[3]; } }));
+    let mr=0,cr=0; for(const x of H){ if(x.r!=='G'){ cr++; mr=Math.max(mr,cr); } else cr=0; }
+    const chips=H.slice(-120).map(x=>{ const l=x.r==='G'?(x.k===1?'1':x.k+'º'):x.r==='T'?'R⏱':'R', cls=x.r==='G'?(x.k===1?'t':'g'):'r', tt=x.s.map(p=>`${hmsOf(p[0])} ${sn(p[1])} ${p[2]?'ÍMPAR':'PAR'} ${p[3]===1?'✅':p[3]===0?'❌':'…'} (${fonteTx(p)}${p[6]?' · ⭐'+p[6]+' conf.':''})`).join('\n');
+      return `<span class="sf-ct" title="${tt}"><i class="sf-c ${cls}">${l}</i><small>${hmOf(x.t0)}</small></span>`; }).join('');
+    const ch=E.c, atual=ch?`<div class="nota" style="margin:4px 0">▶ em andamento: ${ch.s.map((p,i)=>`${i+1}º ${hmsOf(p[0])} ${sn(p[1])} ${cor(p[2])} ${p[3]===1?'✅':p[3]===0?'❌':'⏳'}`).join(' → ')}${ch.s.at(-1)[3]===0?' → esperando o próximo TS que dê tempo':''}</div>`:'';
+    const tx=n?`${n} sinais · <b class="ok">${g} green (${(100*g/n).toFixed(0)}%)</b> · ${pk.slice(1,C.passos+1).map((v,i)=>`${i+1}º passo <b>${v}</b>`).join(' · ')} · <b class="${red?'ruim':''}">${red} red</b> · maior seq. red <b class="${mr>=2?'ruim':''}">${mr}</b> · acerto por entrada (TS) <b class="${ent&&ac/ent>0.55?'ok':''}">${ent?(100*ac/ent).toFixed(0):'—'}%</b> (${ent} entradas; sorte = 50%) · sorte da cadeia de ${C.passos} = ${base(C.passos).toFixed(1)}%`:'ainda sem sinais registrados';
+    return `<div class="sf-row"><div class="sf-h"><b>${e.nome}</b>${C.demo===e.id?' <b style="color:#facc15">💼 entrando na DEMO</b>':''}<span>${tx}</span></div>${atual}<div class="sf-chips">${chips}</div></div>`; }).join('');
+  const P=tssPoolVer().filter(x=>x.T>=agora).slice(0,30);
+  const prox=P.length?`<table class="ps-tab"><tr><th>jogo</th><th>vol</th><th>cor</th><th>de onde vem</th><th>tempos</th><th>falta</th></tr>${P.map(x=>`<tr><td><b>${hmsOf(x.T)}</b></td><td>${sn(x.sym)}</td><td>${cor(x.alvo)}</td><td>${x.f==='hp+hf'?`horas ${x.h}h + fixo ${x.d} dias`:x.f==='hp'?`🕐 ${x.h}h seguidas pagando`:`🕒 ${x.d} dias 100%`}</td><td>${tssTempos(x.T).map(w=>w+'s').join(' ')}</td><td>${Math.round(x.T-agora)}s</td></tr>`).join('')}</table>`:`<div class="nota">Nenhum TS encontrado para a próxima hora ainda${MCF.cerebro?' — a varredura passa por todas as vols a cada 10 min':''}.</div>`;
+  return `${cards}<h4 style="margin:14px 0 6px">Próximos tiros secos encontrados (todas as vols)</h4>${prox}`;
+}
+VIEWS.tss={nome:'🧩 TS Somado',live(){ if(Date.now()-TSS.ui>3000) tssRender(); },html(){
+  const C=tssC(), sel=(k,o)=>`<select onchange="tssSet('${k}',${typeof C[k]==='string'?'this.value':'+this.value'})">${o.map(([v,t])=>`<option value="${v}" ${String(C[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
+  setTimeout(tssRender,0);
+  return `<div class="panel"><h3>🧩 TS Somado — vários tiros secos viram 1 sinal</h3>
+    <div class="ctl" style="flex-wrap:wrap">
+      <label>horas pagantes TS ≥ ${sel('hpMin',[[3,'3h'],[4,'4h'],[5,'5h'],[6,'6h'],[8,'8h'],[10,'10h']])}</label>
+      <label>horário fixo TS ≥ ${sel('hfDias',[[3,'3 dias'],[4,'4 dias'],[5,'5 dias'],[7,'7 dias']])} 100%</label>
+      <label>usar ${sel('fonte',[['ambos','horas + fixo'],['horas','só horas pagantes'],['fixo','só horário fixo']])}</label>
+      <label>tempos ${[5,10,20,30].map(w=>`<label style="margin-left:4px"><input type="checkbox" ${C.tempos.includes(w)?'checked':''} onchange="const L=new Set(tssC().tempos); this.checked?L.add(${w}):L.delete(${w}); tssSet('tempos',[...L].sort((a,b)=>a-b))"> ${w}s</label>`).join('')}</label>
+      <label>TS por sinal ${sel('passos',[[1,'1'],[2,'2'],[3,'3'],[4,'4']])}</label>
+      <label>mín. entre passos: mesma vol ${sel('gapM',[[5,'5s'],[10,'10s'],[15,'15s'],[20,'20s']])} · outra vol ${sel('gapO',[[5,'5s'],[10,'10s'],[15,'15s'],[20,'20s']])}</label>
+      <label>esperar o próximo TS até ${sel('espera',[[5,'5 min'],[10,'10 min'],[15,'15 min'],[30,'30 min'],[0,'sem limite']])}</label>
+    </div>
+    <div class="ctl" style="flex-wrap:wrap;margin-top:6px">
+      <label>💼 entrar na DEMO com ${sel('demo',[['','nenhuma (só registrar)'],...TSS_EST.map(e=>[e.id,e.nome])])}</label>
+      <label>valor ${sel('val',[[0.35,'$0,35'],[0.5,'$0,50'],[1,'$1'],[2,'$2']])}</label>
+      <label>depois de red no passo ${sel('calc',[['zero','recupera (só empata)'],['lucro','recupera + lucro'],['fixo','mesmo valor']])}</label>
+      <button onclick="if(confirm('Apagar o registro do TS Somado?')){ localStorage.removeItem(TSS_KEY); TSS.st=null; tssRender(); }">🗑 zerar registro</button>
+    </div>
+    <div class="nota">Pega os TS de <b>horas pagantes</b> e <b>horário fixo</b> de todas as vols escaneadas (${d5Syms().map(s=>symNome(s).replace('Volatility','Vol')).join(', ')}) nos segundos dos tempos marcados. Um sinal = até ${C.passos} TS seguidos: se o 1º der red, entra no próximo TS que <b>dê tempo</b> (mínimo de segundos acima e o resultado do anterior já ter saído); se não der tempo, pula para o seguinte. <b>⭐ forte</b> = o TS só entra se os círculos das ⭐ Confirmações apontarem a mesma cor com o mínimo de confirmações (${mcfC().min}).</div>
+    <div class="nota">⚠️ O jogo das 35:20 é o mesmo tick em 5s, 10s e 20s — por isso cada segundo conta uma vez só. Compare o <b>acerto por entrada</b> com 50% (sorte) e o green da cadeia com a sorte da cadeia: 2 TS = 75%, 3 TS = 87,5%, 4 TS = 93,8%. Só tem vantagem de verdade se ficar acima disso com muitos sinais.</div>
+    <div class="nota">🎲 No puro acaso, 1 em cada 32 segundos passa em “5h seguidas pagando” e 1 em cada 8 passa em “3 dias 100%” — por isso aparecem dezenas de TS por hora em cada vol. Aumentar as horas/dias deixa a lista menor e mais exigente.</div>
+    <div class="nota">${mcfQuemTxt()} · o motor roda só na página que calcula; esta aba mostra o registro.</div></div><div id="tssR" class="panel"></div>`; }};
+
+// abas tiradas (v4.27): Interligado, Scanner e Somas — os motores continuam (a Fábrica, a Confluência e os ⏱ 5s/10s usam)
+delete VIEWS.il; delete VIEWS.scan; delete VIEWS.soma;
+if(cfg.il_on){ cfg.il_on=0; try{ saveCfg(); }catch(e){} }
+// =====================================================================================
 // 🏭 FÁBRICA DE ROBÔS → CÍRCULO 9
 // Reaproveita o motor de descoberta do 🎯 Somente Robô (scScanFamily, srobScanCores, hpScan, srobStarts, srobChave, srobNome)
 // para criar robôs de TIRO SECO e até G1 em cada índice escaneado × 5s/10s. Nada é apostado: cada robô começa
@@ -12920,7 +13071,7 @@ function fbHtml(){ const c=fbCfg(), F=fbLoad(), A=F.robos.filter(r=>r.estado!=='
     <details style="margin-top:6px"><summary>📜 registro</summary><div class="nota" style="max-height:180px;overflow:auto">${F.log.slice().reverse().map(l=>`${new Date(l.t).toLocaleTimeString('pt-BR')} · ${esc(l.txt)}`).join('<br>')||'—'}</div></details>
     <div class="nota" style="margin-top:6px"><b>Como funciona:</b> a cada 5 min a fábrica passa por cada índice escaneado × tempo marcado (um por vez) e procura padrões 100% (números, duplas, trios, somas com e sem pular casas, sequências, cores${+c.hora?', horas pagantes':''}) em tiro seco e até G1 — descobertos na parte antiga do banco e conferidos na parte nova (mesmo motor do 🎯 Somente Robô). Cada robô novo fica <b>👀 em observação</b>: confere ao vivo sem apostar; ${c.minObs} greens seguidos → <b>✅ aprovado</b>; red na observação → reprovado. Aprovado só sai com ${c.maxRed} reds nos últimos ${c.janela} ao vivo (um red isolado não tira). Só os aprovados com o quadrinho "círculo 9" marcado votam no círculo 9 quando o jogo do robô é o jogo da vez. 100% no passado não garante o futuro.</div>`; }
 
-const TAB_ORDER = ['hist','sfortes', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'il', 'p5', 'p10', 'uo', 'demo', 'soma', 'scan', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
+const TAB_ORDER = ['hist','sfortes','tss', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'p5', 'p10', 'uo', 'demo', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
 let LAST_HEAVY = 0;
 function fillRes() {
