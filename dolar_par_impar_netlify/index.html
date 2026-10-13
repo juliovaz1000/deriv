@@ -568,6 +568,13 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 .ps-cfg summary{cursor:pointer}.ps-cfg .ctl{margin-top:8px;flex-wrap:wrap}
 #psPop{position:fixed;inset:0;z-index:10010;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.7)}.ps-popbox{background:#15121f;border:2px solid #fb923c;border-radius:16px;padding:20px 26px;text-align:center;min-width:280px}
 .ps-big{font-size:40px;font-weight:900;margin:6px 0;border-radius:12px;padding:6px 0;color:#fff}.ps-big.par{background:#16a34a}.ps-big.imp{background:#dc2626}
+/* 🧩 robôs criados */
+.tsr-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:10px;margin:8px 0}
+.tsr-card{background:#141b26;border:1px solid #2d3643;border-radius:12px;padding:10px 12px}.tsr-card.on{border-color:#22c55e;box-shadow:0 0 0 1px rgba(34,197,94,.25)}
+.tsr-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tsr-top button{background:#1f2630;color:#e6edf3;border:1px solid #2d3643;border-radius:7px;padding:3px 8px;cursor:pointer;font-size:12px}.tsr-top button.on{border-color:#22c55e;color:#86efac}
+.tsr-num{display:flex;flex-wrap:wrap;gap:6px 14px}.tsr-num div{display:flex;flex-direction:column}.tsr-num span{font-size:10px;color:#8b949e;letter-spacing:.04em}.tsr-num b{font-size:14px}
+.tsr-cor{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;margin-top:4px}
+@media (max-width:600px){.tsr-grade{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -633,6 +640,24 @@ tr.scativo td{background:rgba(245,197,24,.07)}
 <div id="cf2Pop"></div>
 <div id="mesaPop"></div>
 <div id="mkPop"></div>
+<div id="mesaRealPop" style="display:none;position:fixed;inset:0;z-index:10020;background:rgba(0,0,0,.82);align-items:center;justify-content:center;padding:16px">
+  <div style="width:min(520px,96vw);background:#15111f;border:1px solid #a855f7;border-radius:14px;padding:18px;color:#ece9f6">
+    <div style="font-size:19px;font-weight:900;margin-bottom:8px">🔐 Conectar conta REAL da Deriv</div>
+    <p style="font-size:12px;color:#a49dbb;margin:0 0 12px">Cole o token API da conta real e o App ID correspondente. A conexão mostrará o saldo real; confira a conta antes de qualquer operação.</p>
+    <label style="display:flex;flex-direction:column;align-items:stretch;gap:5px;margin-bottom:10px;color:#c9c3dc">Token API REAL
+      <input id="mesaRealTok" type="password" autocomplete="off" placeholder="Cole o token pat_..." style="width:100%;padding:10px">
+    </label>
+    <label style="display:flex;flex-direction:column;align-items:stretch;gap:5px;margin-bottom:10px;color:#c9c3dc">App ID da Deriv
+      <input id="mesaRealApp" type="text" placeholder="App ID do aplicativo Deriv" style="width:100%;padding:10px">
+    </label>
+    <label style="display:flex;gap:7px;align-items:center;margin-bottom:14px;color:#c9c3dc"><input id="mesaRealLembrar" type="checkbox"> Lembrar token real neste navegador</label>
+    <div id="mesaRealMsg" style="font-size:12px;margin:8px 0;color:#facc15"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="ms-x" onclick="mesaRealFechar()">Cancelar</button>
+      <button class="ms-con" onclick="mesaConectarReal()">🔌 CONECTAR REAL</button>
+    </div>
+  </div>
+</div>
 
 <script type="text/plain" id="userscript">// ==UserScript==
 // @name         Dólar Par/Ímpar — Ponte API
@@ -673,7 +698,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.32 · 13/10/2026 · 🧩 TS Somado: registro no IndexedDB (não corta mais quando a memória enche) · guarda 1000 por regra · 🧩 TS Somado: mostrar até 500 resultados por regra (guarda 500) · 🧩 TS Somado: opção “só quando os 2 confirmam” (horas pagantes + horário fixo no mesmo jogo) · 🧩 caixinhas do TS Somado na Mesa não fecham mais sozinhas · 🧩 quadro do TS Somado na Mesa (entra pela Mesa) · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
+const VERSAO='v4.33 · 13/10/2026 · 🧩 TS Somado: PAR/ÍMPAR separados · 🧪 validador de greens (TS/G1/G2, gale, cor, vols, gatilho X red + Y green, ciclo, recuperação) · 🤖 robôs criados na Mesa (saldo, ROI, curva, PAR/ÍMPAR, ranking, stops) · 🧩 TS Somado: registro no IndexedDB (não corta mais quando a memória enche) · guarda 1000 por regra · 🧩 TS Somado: mostrar até 500 resultados por regra (guarda 500) · 🧩 TS Somado: opção “só quando os 2 confirmam” (horas pagantes + horário fixo no mesmo jogo) · 🧩 caixinhas do TS Somado na Mesa não fecham mais sozinhas · 🧩 quadro do TS Somado na Mesa (entra pela Mesa) · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -10134,19 +10159,75 @@ function mesaEsqManual(qv){ return `
           <div id="msProx">${mcfProxHtml()}</div>
           <div id="msTss">${typeof tssMesaHtml==='function'?tssMesaHtml():''}</div>
 `; }
-function mesaRender(full){
-  const p=$('#mesaPop'); if(!p||!MESA.open) return;
-  if(cfg.mesa_modo==='ou'||cfg.mesa_modo==='ou2') return udRender(full);
-  if(full||!$('#msCentro')||(cfg.mesa_modo==='robo')!==!!$('#msFila')){
-    const qv=[0.35,1,2,5,10,25,50,100];
-    p.innerHTML=`<div class="ms">
-      <div class="ms-top"><div style="font-size:22px">💵</div><div class="ms-logo">MESA PLAY <small>Deriv · DEMO</small></div>
+function mesaSaldoHtml(){
+  if(DM.ok){
+    const real=!DM.virt;
+    return `<span>SALDO ${real?'REAL':'DEMO'}</span><b>${real?'':'$ '}${DM.bal!=null?DM.bal.toFixed(2):'—'} ${DM.cur||''}</b><div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap"><button class="ms-x" onclick="dmDesconectar();mesaRender(true)">DESCONECTAR</button>${real?'<span style="font-size:10px;color:#facc15">REAL CONECTADA</span>':'<button class="ms-con" onclick="mesaRealAbrir()">CONECTAR REAL</button>'}</div>`;
+  }
+  return `<div style="display:flex;gap:5px;flex-wrap:wrap"><button class="ms-x" onclick="mesaFechar();S.tab='demo';renderTab()">CONECTAR DEMO</button><button class="ms-con" onclick="mesaRealAbrir()">CONECTAR REAL</button></div>`;
+}
+function mesaRealAbrir(){
+  const pop=document.getElementById('mesaRealPop'); if(!pop) return;
+  const tok=document.getElementById('mesaRealTok'), app=document.getElementById('mesaRealApp');
+  try{tok.value=localStorage.getItem('dpi_real_tok')||'';}catch(e){}
+  app.value=dmAppId()||'';
+  const msg=document.getElementById('mesaRealMsg'); if(msg) msg.textContent='';
+  pop.style.display='flex';
+}
+function mesaRealFechar(){const p=document.getElementById('mesaRealPop');if(p)p.style.display='none';}
+async function mesaConectarReal(){
+  const tok=document.getElementById('mesaRealTok')?.value?.trim()||'';
+  const aid=(document.getElementById('mesaRealApp')?.value||'').trim().replace(/[^A-Za-z0-9_-]/g,'');
+  const msg=document.getElementById('mesaRealMsg');
+  const say=t=>{if(msg)msg.textContent=t;};
+  if(!tok){say('Cole o token API da conta REAL.');return;}
+  if(!aid){say('Informe o App ID do aplicativo Deriv.');return;}
+  if(!/^pat_/i.test(tok)){say('Este formulário usa token novo pat_ da Deriv.');return;}
+  say('Consultando as contas autorizadas na Deriv…');
+  try{
+    const a=await dmRest('GET','/trading/v1/options/accounts',tok,aid);
+    const L=Array.isArray(a.data)?a.data:Array.isArray(a.accounts)?a.accounts:Array.isArray(a)?a:(a.data&&Array.isArray(a.data.accounts)?a.data.accounts:[]);
+    const isDemo=x=>/demo|virtual/i.test(String(x.account_type??x.type??''))||x.is_virtual===1||x.is_virtual===true||/^VR/i.test(String(x.account_id??x.loginid??''));
+    const real=L.find(x=>!isDemo(x));
+    if(!real){say('Nenhuma conta REAL foi retornada por esse token. Confira as permissões e o App ID.');return;}
+    const id=real.account_id??real.id??real.loginid;
+    if(!id){say('A Deriv não retornou o identificador da conta real.');return;}
+    say('Solicitando conexão segura com a conta REAL…');
+    const o=await dmRest('POST',`/trading/v1/options/accounts/${encodeURIComponent(id)}/otp`,tok,aid);
+    const url=(o.data&&o.data.url)||o.url;
+    if(!url)throw new Error('A Deriv não retornou o endereço seguro de conexão.');
+    dmDesconectar(true);
+    await dmAbrir(url);
+    DM.novo=true; DM.ok=true; DM.virt=false; DM._tok=tok; DM.loginid=String(id); DM.cur=real.currency||'USD'; DM.bal=Number(real.balance)||0;
+    DM.querOn=true; DM.parado=''; DM.rcN=0;
+    try{const b=await dmSend({balance:1,subscribe:1},8000);if(b.balance)DM.bal=+b.balance.balance;}catch(e){}
+    try{if(document.getElementById('mesaRealLembrar')?.checked)localStorage.setItem('dpi_real_tok',tok);}catch(e){}
+    try{cfg.dm_appId=aid;saveCfg();}catch(e){}
+    say(`Conectada: conta REAL ${DM.loginid}. Confira o saldo exibido na Mesa.`);
+    mesaRealFechar(); mesaRender(true); dmHeader();
+  }catch(e){say('Falha ao conectar: '+(e.message||e));}
+}
+function mesaTopoHtml(){ return `      <div class="ms-top"><div style="font-size:22px">💵</div><div class="ms-logo">MESA PLAY <small>Deriv · DEMO / REAL</small></div>
         <select class="ms-sel" onchange="mesaSet('mesa_sym',this.value)">${d5Syms().map(s=>`<option value="${s}" ${mesaSym()===s?'selected':''}>${symNome(s)}</option>`).join('')}</select>
-        <div class="ms-modos"><button class="${cfg.mesa_modo!=='robo'?'on':''}" onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button class="${cfg.mesa_modo==='robo'?'on':''}" onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS${MESA_TEMPOS.some(w=>mbSt(w).on)?' ●':''}</button><button onclick="mesaSet('mesa_modo','ou')" title="gráfico dos últimos dígitos (estilo PLETSCH) + identificador de padrões">📊 DÍGITOS</button><button onclick="mesaSet('mesa_modo','ou2')" title="o mesmo gráfico para OVER/UNDER, com calculadora do gale">🎯 OVER/UNDER</button></div>
+        <div class="ms-modos"><button class="${!['robo','tssr'].includes(cfg.mesa_modo)?'on':''}" onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button class="${cfg.mesa_modo==='robo'?'on':''}" onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS${MESA_TEMPOS.some(w=>mbSt(w).on)?' ●':''}</button><button class="${cfg.mesa_modo==='tssr'?'on':''}" onclick="mesaSet('mesa_modo','tssr')" title="robôs criados no 🧪 validador do TS Somado">🧩 ROBÔS CRIADOS${typeof TSSR!=='undefined'&&TSSR.lista.some(r=>+r.on)?' ●':''}</button><button onclick="mesaSet('mesa_modo','ou')" title="gráfico dos últimos dígitos (estilo PLETSCH) + identificador de padrões">📊 DÍGITOS</button><button onclick="mesaSet('mesa_modo','ou2')" title="o mesmo gráfico para OVER/UNDER, com calculadora do gale">🎯 OVER/UNDER</button></div>
         <button class="ms-x" onclick="mkAbrir()" title="qual volatilidade está melhor agora">🌐 MERCADOS</button>
         ${MESA_TEMPOS.some(w=>mbSt(w).on)?`<button class="ms-x" style="border-color:#ef4444;color:#fca5a5" onclick="mbPararTodos()" title="desliga todos os robôs da Mesa">⏹ PARAR TODOS</button>`:''}
         <div class="ms-relogio" id="msClock"></div>
-        <div class="ms-saldo" id="msSaldo"></div><button class="ms-x" onclick="mesaSair()">${MESA_TAB?'↩ voltar ao início':'✕ sair'}</button></div>
+        <div class="ms-saldo" id="msSaldo"></div><button class="ms-x" onclick="mesaSair()">${MESA_TAB?'↩ voltar ao início':'✕ sair'}</button></div>`; }
+// 🧩 robôs criados: página própria dentro da Mesa
+function tssrMesaPagina(full){ const p=$('#mesaPop'); if(!p) return;
+  if(full||!document.getElementById('tsrGrade')) p.innerHTML=`<div class="ms">${mesaTopoHtml()}<div class="ms-corpo">${tssrMesaHtml()}</div></div>`;
+  else { const g=document.getElementById('tsrGrade'); if(g) g.innerHTML=tssrGradeHtml(); }
+  const sd=$('#msSaldo'); if(sd) sd.innerHTML=mesaSaldoHtml();
+  const ck=$('#msClock'); if(ck){ const d=new Date(); ck.innerHTML=`<span>🕒</span>${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; } }
+function mesaRender(full){
+  const p=$('#mesaPop'); if(!p||!MESA.open) return;
+  if(cfg.mesa_modo==='tssr') return tssrMesaPagina(full);
+  if(cfg.mesa_modo==='ou'||cfg.mesa_modo==='ou2') return udRender(full);
+  if(full||!$('#msCentro')||!$('#msTabs')||(cfg.mesa_modo==='robo')!==!!$('#msFila')){
+    const qv=[0.35,1,2,5,10,25,50,100];
+    p.innerHTML=`<div class="ms">
+      ${mesaTopoHtml()}
       <div class="ms-tabs" id="msTabs">${mesaTabsHtml()}</div><div id="msBest"></div>
       <div class="ms-corpo">
         <div class="ms-esq">${cfg.mesa_modo==='robo'?mbEsqHtml(mesaW()):mesaEsqManual(qv)}</div>
@@ -10159,7 +10240,7 @@ function mesaRender(full){
   }
   const w=mesaW(), W=LIVE[d5BankName(w,mesaSym())]||[];
   const k=[w,W.at(-1)?.t,DM.log.length,DM.orders.map(o=>o.estado+o.g).join(),Math.floor(dmNow())].join('|');
-  $('#msSaldo').innerHTML=DM.ok&&DM.virt?`<span>SALDO DEMO</span><b>$ ${DM.bal!=null?DM.bal.toFixed(2):'—'}</b>`:`<button class="ms-con" onclick="mesaFechar();S.tab='demo';renderTab()">CONECTAR DEMO</button>`;
+  $('#msSaldo').innerHTML=mesaSaldoHtml();
   const ck=$('#msClock'); if(ck){ const d=new Date(); ck.innerHTML=`<span>🕒</span>${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
   const rob=cfg.mesa_modo==='robo';
   const k2=k+'|'+(rob?mbSt(w).log.length+'|'+RB_PENDING.length+'|'+mbSt(w).on+'|'+(mbSt(w).vEstado||'')+'|'+(cfg.mb_histTudo||0):'');
@@ -10174,7 +10255,7 @@ function mesaRender(full){
   if(rob){ const re=$('#msRec'); if(re) re.innerHTML=mbRecTxt(w); const ss=mbSess(w); $('#msSess').innerHTML=`<div><b>${ss.ac}</b><span>ACERTOS</span></div><div><b>${ss.er}</b><span>ERROS</span></div><div><b class="${ss.pl>=0?'okc':'ruimc'}">${ss.pl>=0?'+':''}$ ${ss.pl.toFixed(2)}</b><span>RESULTADO</span></div>`; $('#msFila').innerHTML=mbFilaHtml(w); $('#msHist').innerHTML=mbHistHtml(w); }
   else { $('#msSess').innerHTML=mesaSessHtml(); $('#msHist').innerHTML=mesaHistHtml(); }
 }
-document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if(cfg.mesa_modo==='ou'||cfg.mesa_modo==='ou2'){ if(e.key==='Escape') mesaFechar(); return; } if(e.key==='p'||e.key==='P') mesaEntrar(0); if(e.key==='i'||e.key==='I') mesaEntrar(1); if(e.key==='Escape') mesaFechar(); if(['1','2','3','4','5'].includes(e.key)) mesaSet('mesa_w',MESA_TEMPOS[+e.key-1]); });
+document.addEventListener('keydown',e=>{ if(!MESA.open||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if(cfg.mesa_modo==='ou'||cfg.mesa_modo==='ou2'||cfg.mesa_modo==='tssr'){ if(e.key==='Escape') mesaFechar(); return; } if(e.key==='p'||e.key==='P') mesaEntrar(0); if(e.key==='i'||e.key==='I') mesaEntrar(1); if(e.key==='Escape') mesaFechar(); if(['1','2','3','4','5'].includes(e.key)) mesaSet('mesa_w',MESA_TEMPOS[+e.key-1]); });
 // =====================================================================================
 // 🔢 MESA · OVER / UNDER (tick a tick) — aba própria dentro da Mesa Play
 // Contratos de dígito da Deriv (OVER / UNDER / IGUAL / DIFERENTE) com duração em ticks, em várias volatilidades.
@@ -10534,7 +10615,7 @@ async function ouBacktest(){
 function ouTopHtml(){
   const ab=ouOpAberta();
   return `<div class="ms-top"><div style="font-size:22px">🔢</div><div class="ms-logo">MESA · OVER/UNDER <small>Deriv · DEMO · tick a tick</small></div>
-    <div class="ms-modos"><button onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS</button><button class="on">🔢 OVER/UNDER${OU.bot.on?' ●':''}</button></div>
+    <div class="ms-modos"><button onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS</button><button onclick="mesaSet('mesa_modo','tssr')">🧩 ROBÔS CRIADOS</button><button class="on">🔢 OVER/UNDER${OU.bot.on?' ●':''}</button></div>
     <span class="ou-con" id="ouCon"></span>
     ${OU.bot.on?`<button class="ms-x" style="border-color:#ef4444;color:#fca5a5" onclick="ouBotDesligar('⏹ parado por você')">⏹ PARAR ROBÔ</button>`:''}
     <div class="ms-relogio" id="msClock"></div>
@@ -10722,12 +10803,12 @@ function udRender(full){
   if(!fr0||fr0.dataset.q!==qual){
     MESA.lastFull='';
     p.innerHTML=`<div class="ms" style="max-width:1100px"><div class="ms-top"><div style="font-size:22px">${qual==='ou'?'🎯':'📊'}</div><div class="ms-logo">MESA · ${qual==='ou'?'OVER/UNDER':'ÚLTIMOS DÍGITOS'} <small>Deriv · tick a tick</small></div>
-      <div class="ms-modos"><button onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS</button><button class="${qual==='pi'?'on':''}" onclick="mesaSet('mesa_modo','ou')">📊 DÍGITOS</button><button class="${qual==='ou'?'on':''}" onclick="mesaSet('mesa_modo','ou2')">🎯 OVER/UNDER</button></div>
+      <div class="ms-modos"><button onclick="mesaSet('mesa_modo','manual')">🎮 MANUAL</button><button onclick="mesaSet('mesa_modo','robo')">🤖 ROBÔS</button><button onclick="mesaSet('mesa_modo','tssr')">🧩 ROBÔS CRIADOS</button><button class="${qual==='pi'?'on':''}" onclick="mesaSet('mesa_modo','ou')">📊 DÍGITOS</button><button class="${qual==='ou'?'on':''}" onclick="mesaSet('mesa_modo','ou2')">🎯 OVER/UNDER</button></div>
       <div class="ms-relogio" id="msClock"></div><div class="ms-saldo" id="msSaldo"></div><button class="ms-x" onclick="mesaSair()">${MESA_TAB?'↩ voltar ao início':'✕ sair'}</button></div>
       <iframe id="udFrame" title="Últimos Dígitos" style="width:100%;height:calc(100vh - 100px);min-height:620px;border:0;border-radius:12px;background:#050505"></iframe></div>`;
     $('#udFrame').dataset.q=qual; $('#udFrame').srcdoc=qual==='ou'?UD_OU_HTML:UD_HTML;
   }
-  $('#msSaldo').innerHTML=DM.ok&&DM.virt?`<span>SALDO DEMO</span><b>$ ${DM.bal!=null?DM.bal.toFixed(2):'—'}</b>`:`<button class="ms-con" onclick="mesaFechar();S.tab='demo';renderTab()">CONECTAR DEMO</button>`;
+  $('#msSaldo').innerHTML=mesaSaldoHtml();
   const ck=$('#msClock'); if(ck){ const d=new Date(); ck.innerHTML=`<span>🕒</span>${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
 }
 
@@ -10756,7 +10837,7 @@ function ouRender(full){
   }
   const sym=ouSym(), N=ouN(), A=OU.t[sym]||[];
   const con=$('#ouCon'); if(con) con.innerHTML=OU.on?`<span class="okc">● ticks ao vivo</span> <span class="mu">${Object.keys(OU.t).length}/${OU_SYMS.length} mercados</span>`:'<span class="ruimc">● conectando ticks…</span>';
-  $('#msSaldo').innerHTML=DM.ok&&DM.virt?`<span>SALDO DEMO</span><b>$ ${DM.bal!=null?DM.bal.toFixed(2):'—'}</b>`:`<button class="ms-con" onclick="mesaFechar();S.tab='demo';renderTab()">CONECTAR DEMO</button>`;
+  $('#msSaldo').innerHTML=mesaSaldoHtml();
   const ck=$('#msClock'); if(ck){ const d=new Date(); ck.innerHTML=`<span>🕒</span>${p2d(d.getHours())}:${p2d(d.getMinutes())}:${p2d(d.getSeconds())}`; }
   const op=OU.op;
   const k=[OU.n,op?op.estado+op.g+op.tent.length:'',DM.log.length,OU.bot.sim.length,OU.bot.on,OU.bot.msg,DM.bal].join('|');
@@ -12842,7 +12923,7 @@ VIEWS.sfortes={nome:'⭐ Sinais Fortes',live(){ if(Date.now()-SF.t>15000) sfRend
 // Por isso o mesmo segundo nunca conta duas vezes — a soma é por SEGUNDO diferente, e o banco de 5s já cobre todos.
 // Só a página que calcula (🧠 cérebro) roda o motor; as outras só leem o registro.
 // =====================================================================================
-const TSS_DEF={hpMin:5,hpPer:24,hfDias:3,hfJan:7,fonte:'ambos',tempos:[5,10,20,30],passos:3,gapM:5,gapO:5,espera:15,demo:'',val:0.35,calc:'zero',hist:500,mostrar:100};
+const TSS_DEF={hpMin:5,hpPer:24,hfDias:3,hfJan:7,fonte:'ambos',tempos:[5,10,20,30],passos:3,gapM:5,gapO:5,espera:15,demo:'',val:0.35,calc:'zero',hist:500,mostrar:100,sep:1};
 const TSS_REGRAS=[['mv','🎯 Mesma vol'],['ov','🔀 Vols diferentes'],['al','🔁 PAR/ÍMPAR alternado']];
 const TSS_EST=[]; for(const [r,n] of TSS_REGRAS) for(const f of [0,1]) TSS_EST.push({id:r+(f?'_f':''),r,f,nome:n+(f?' · ⭐ forte':' · normal')});
 const TSS_KEY='dpi_tss_v1', TSS_PKEY='dpi_tss_pool_v1';
@@ -12921,7 +13002,7 @@ function tssPodeSeguir(e,ch,c){
 function tssFecha(E,e,ch,r,k){ ch.r=r; ch.k=k; E.h.push(ch); E.c=null; }
 function tssLoop(){
   if(!MCF.cerebro){ TSS.eu=false; return; }
-  if(!TSS.eu){ if(!TSS.lendo){ TSS.lendo=true; tssCarrega().finally(()=>{ TSS.lendo=false; TSS.eu=true; }); } return; }
+  if(!TSS.eu){ if(!TSS.lendo){ TSS.lendo=true; Promise.all([tssCarrega(),typeof tssrCarrega==='function'?tssrCarrega():null]).finally(()=>{ TSS.lendo=false; TSS.eu=true; }); } return; }
   if(!TSS.ok||!TSS.st) return;
   const st=TSS.st, C=tssC(), agora=dmNow(); let mud=false;
   if(Date.now()-TSS.t>20000){ TSS.t=Date.now(); tssMontaPool(); }
@@ -12941,8 +13022,9 @@ function tssLoop(){
     for(const c of cand){ let fx=null; if(e.f){ fx=tssForte(c); if(!fx) continue; }
       const passo=[c.T,c.sym,c.alvo,null,c.f,c.h||c.d,fx?fx.n:0];
       if(!ch){ ch=E.c={t0:c.T,s:[passo]}; } else ch.s.push(passo);
-      mud=true; tssDemo(e,ch,c); break; }
+      mud=true; tssDemo(e,ch,c); try{ tssrPasso(e,ch); }catch(x){ console.warn('robôs criados',x); } break; }
   }
+  try{ tssrTick(st); }catch(x){ console.warn('robôs criados',x); }
   if(mud){ tssSave(); if(S.tab==='tss') tssRender(); }
 }
 // ---------- 3) entrada na conta DEMO (opcional, uma regra por vez) ----------
@@ -12953,7 +13035,10 @@ function tssDemo(e,ch,c){
   st=Math.max(0.35,Math.round(st*100)/100);
   const w=tssTempos(c.T)[0]||5;
   const o={key:`tss|${e.id}|${c.T}|${c.sym}`,src:'tss',man:1,nome:`🧩 TS somado · ${e.nome} · passo ${ch.s.length}`,sym:c.sym,T:c.T,step:w,maxN:0,ct:c.alvo?'DIGITODD':'DIGITEVEN',stakeBase:st,stakeFix:st,mcor:c.alvo};
-  // com a 🎮 Mesa aberta, quem entra é a Mesa (é lá que a conta DEMO costuma estar conectada); senão entra por esta página
+  tssEnviar(o);
+}
+// com a 🎮 Mesa aberta, quem entra é a Mesa (é lá que a conta DEMO costuma estar conectada); senão entra por esta página
+function tssEnviar(o){
   if(!MESA_TAB&&tssMesaAberta()&&MCF_BC){ try{ MCF_BC.postMessage({tipo:'tss',o}); }catch(x){} return; }
   if(typeof DM==='undefined'||!DM.ok||!DM.virt) return;
   dmRegistrar(o);
@@ -13003,7 +13088,14 @@ function tssHtml(){
       return `<span class="sf-ct" title="${tt}"><i class="sf-c ${cls}">${l}</i><small>${hmOf(x.t0)}</small></span>`; }).join('');
     const ch=E.c, atual=ch?`<div class="nota" style="margin:4px 0">▶ em andamento: ${ch.s.map((p,i)=>`${i+1}º ${hmsOf(p[0])} ${sn(p[1])} ${cor(p[2])} ${p[3]===1?'✅':p[3]===0?'❌':'⏳'}`).join(' → ')}${ch.s.at(-1)[3]===0?' → esperando o próximo TS que dê tempo':''}</div>`:'';
     const tx=n?`${n} sinais · <b class="ok">${g} green (${(100*g/n).toFixed(0)}%)</b> · ${pk.slice(1,C.passos+1).map((v,i)=>`${i+1}º passo <b>${v}</b>`).join(' · ')} · <b class="${red?'ruim':''}">${red} red</b> · maior seq. red <b class="${mr>=2?'ruim':''}">${mr}</b> · acerto por entrada (TS) <b class="${ent&&ac/ent>0.55?'ok':''}">${ent?(100*ac/ent).toFixed(0):'—'}%</b> (${ent} entradas; sorte = 50%) · sorte da cadeia de ${C.passos} = ${base(C.passos).toFixed(1)}%`:'ainda sem sinais registrados';
-    return `<div class="sf-row"><div class="sf-h"><b>${e.nome}</b>${C.demo===e.id?' <b style="color:#facc15">💼 entrando na DEMO</b>':''}<span>${tx}</span></div>${atual}<div class="sf-chips">${chips}</div></div>`; }).join('');
+    // ↔ PAR e ÍMPAR separados: cada TS (entrada) pela cor dele + os sinais pela cor do 1º TS
+    let sep=''; if(+C.sep&&n){ const v=Math.max(0.35,+C.val||0.35);
+      sep=[0,1].map(c=>{ const E2=[]; H.forEach(x=>x.s.forEach(p=>{ if(p[2]===c&&(p[3]===0||p[3]===1)) E2.push(p); }));
+        const a=E2.filter(p=>p[3]===1).length, sd=a*v*0.95-(E2.length-a)*v, S1=H.filter(x=>x.s[0][2]===c), g1=S1.filter(x=>x.r==='G').length;
+        let mr2=0,cr2=0; for(const p of E2){ if(p[3]===0){ cr2++; mr2=Math.max(mr2,cr2); } else cr2=0; }
+        const ch2=E2.slice(-Q).map(p=>`<span class="sf-ct" title="${hmsOf(p[0])} ${sn(p[1])} ${p[3]?'✅':'❌'}"><i class="sf-c ${p[3]?'t':'r'}">${p[3]?'✓':'✗'}</i><small>${hmOf(p[0])}</small></span>`).join('');
+        return `<div class="sf-row" style="margin-left:14px;border-left:3px solid ${c?'#f472b6':'#60a5fa'};padding-left:8px"><div class="sf-h"><b style="color:${c?'#f472b6':'#60a5fa'}">${c?'ÍMPAR':'PAR'}</b><span>${E2.length} entradas · <b class="ok">${a} ✅</b> (${E2.length?(100*a/E2.length).toFixed(0):'—'}%) · ${E2.length-a} ❌ · maior seq. ❌ <b class="${mr2>=3?'ruim':''}">${mr2}</b> · saldo <b class="${sd>=0?'ok':'ruim'}">${sd>=0?'+':''}$${sd.toFixed(2)}</b> <span class="mu">(entrada fixa de $${v.toFixed(2)}, sem gale)</span> · sinais que começaram ${c?'ÍMPAR':'PAR'}: ${S1.length} → ${g1} green</span></div><div class="sf-chips">${ch2}</div></div>`; }).join(''); }
+    return `<div class="sf-row"><div class="sf-h"><b>${e.nome}</b>${C.demo===e.id?' <b style="color:#facc15">💼 entrando na DEMO</b>':''}<span>${tx}</span></div>${atual}<div class="sf-chips">${chips}</div></div>${sep}`; }).join('');
   const P=tssPoolVer().filter(x=>x.T>=agora).slice(0,30);
   const prox=P.length?`<table class="ps-tab"><tr><th>jogo</th><th>vol</th><th>cor</th><th>de onde vem</th><th>tempos</th><th>falta</th></tr>${P.map(x=>`<tr><td><b>${hmsOf(x.T)}</b></td><td>${sn(x.sym)}</td><td>${cor(x.alvo)}</td><td>${x.f==='hp+hf'?`horas ${x.h}h + fixo ${x.d} dias`:x.f==='hp'?`🕐 ${x.h}h seguidas pagando`:`🕒 ${x.d} dias 100%`}</td><td>${tssTempos(x.T).map(w=>w+'s').join(' ')}</td><td>${Math.round(x.T-agora)}s</td></tr>`).join('')}</table>`:`<div class="nota">Nenhum TS encontrado para a próxima hora ainda${MCF.cerebro?' — a varredura passa por todas as vols a cada 10 min':''}.</div>`;
   return `${cards}<h4 style="margin:14px 0 6px">Próximos tiros secos encontrados (todas as vols)</h4>${prox}`;
@@ -13019,6 +13111,7 @@ VIEWS.tss={nome:'🧩 TS Somado',live(){ if(Date.now()-TSS.ui>3000) tssRender();
       <label>tempos ${[5,10,20,30].map(w=>`<label style="margin-left:4px"><input type="checkbox" ${C.tempos.includes(w)?'checked':''} onchange="const L=new Set(tssC().tempos); this.checked?L.add(${w}):L.delete(${w}); tssSet('tempos',[...L].sort((a,b)=>a-b))"> ${w}s</label>`).join('')}</label>
       <label>TS por sinal ${sel('passos',[[1,'1'],[2,'2'],[3,'3'],[4,'4']])}</label>
       <label>mín. entre passos: mesma vol ${sel('gapM',[[5,'5s'],[10,'10s'],[15,'15s'],[20,'20s']])} · outra vol ${sel('gapO',[[5,'5s'],[10,'10s'],[15,'15s'],[20,'20s']])}</label>
+      <label><input type="checkbox" ${+C.sep?'checked':''} onchange="tssSet('sep',this.checked?1:0)"> separar PAR / ÍMPAR</label>
       <label>mostrar os últimos ${sel('mostrar',[[50,'50'],[100,'100'],[200,'200'],[300,'300'],[500,'500']])} por regra</label>
       <label>esperar o próximo TS até ${sel('espera',[[5,'5 min'],[10,'10 min'],[15,'15 min'],[30,'30 min'],[0,'sem limite']])}</label>
     </div>
@@ -13031,7 +13124,208 @@ VIEWS.tss={nome:'🧩 TS Somado',live(){ if(Date.now()-TSS.ui>3000) tssRender();
     <div class="nota">Pega os TS de <b>horas pagantes</b> e <b>horário fixo</b> de todas as vols escaneadas (${d5Syms().map(s=>symNome(s).replace('Volatility','Vol')).join(', ')}) nos segundos dos tempos marcados. Um sinal = até ${C.passos} TS seguidos: se o 1º der red, entra no próximo TS que <b>dê tempo</b> (mínimo de segundos acima e o resultado do anterior já ter saído); se não der tempo, pula para o seguinte. <b>⭐ forte</b> = o TS só entra se os círculos das ⭐ Confirmações apontarem a mesma cor com o mínimo de confirmações (${mcfC().min}).</div>
     <div class="nota">⚠️ O jogo das 35:20 é o mesmo tick em 5s, 10s e 20s — por isso cada segundo conta uma vez só. Compare o <b>acerto por entrada</b> com 50% (sorte) e o green da cadeia com a sorte da cadeia: 2 TS = 75%, 3 TS = 87,5%, 4 TS = 93,8%. Só tem vantagem de verdade se ficar acima disso com muitos sinais.</div>
     <div class="nota">🎲 No puro acaso, 1 em cada 32 segundos passa em “5h seguidas pagando” e 1 em cada 8 passa em “3 dias 100%” — por isso aparecem dezenas de TS por hora em cada vol. Aumentar as horas/dias deixa a lista menor e mais exigente.</div>
-    <div class="nota">${mcfQuemTxt()} · o motor roda só na página que calcula; esta aba mostra o registro.</div></div><div id="tssR" class="panel"></div>`; }};
+    <div class="nota">${mcfQuemTxt()} · o motor roda só na página que calcula; esta aba mostra o registro.</div></div>${tssrValHtml()}<div id="tssR" class="panel"></div>`; }};
+
+// =====================================================================================
+// 🧪 VALIDADOR DE GREENS + 🤖 ROBÔS CRIADOS (em cima dos sinais do 🧩 TS Somado)
+// Um "sinal" é uma cadeia do TS Somado: 1º TS, 2º TS (= G1 do sinal) e 3º TS (= G2 do sinal).
+// O robô escolhe em qual TS do sinal entra (TS / G1 / G2), quantos TS seguintes do mesmo sinal usa como gale,
+// a cor, as vols, o gatilho (ex.: só depois de 2 red + 1 green) e o dinheiro (valor, gale, recuperação, stops).
+// O validador roda essas regras no histórico registrado e mostra green/red e saldo. Criou → vai para a 🎮 Mesa,
+// aba "🧩 ROBÔS CRIADOS". O robô roda na página que calcula (🧠) e as entradas saem pela Mesa, na conta DEMO.
+// =====================================================================================
+const TSSR_PAY=0.95;
+const TSSR_DEF={fonte:'todas',forte:0,entrada:0,gale:0,cor:-1,vols:[],volGale:'qualquer',gat:'sempre',X:2,Y:1,ciclo:'1',val:0.35,calc:'zero',fator:2.2,rec:0,recLucro:0,sl:0,sw:0};
+const TSSR_PRESETS=[
+  ['🐢 Conservador: G1 depois de 2 red + 1 green',{fonte:'todas',forte:0,entrada:1,gale:0,gat:'xy',X:2,Y:1,ciclo:'1'}],
+  ['🐢 Só sinais fortes, TS depois de 2 reds seguidos',{fonte:'todas',forte:1,entrada:0,gale:0,gat:'reds',X:2,ciclo:'g1'}],
+  ['⚖️ G1 → G2 (entra no 2º TS e usa o 3º de gale)',{fonte:'todas',forte:0,entrada:1,gale:1,gat:'sempre'}],
+  ['🎯 G2 seco (só o 3º TS do sinal)',{fonte:'todas',forte:0,entrada:2,gale:0,gat:'sempre'}],
+  ['🔥 Agressivo: TS em todos + 2 gales',{fonte:'todas',forte:0,entrada:0,gale:2,gat:'sempre'}],
+  ['🔥 Agressivo só PAR, mesma vol',{fonte:'mv',forte:0,entrada:0,gale:2,cor:0,gat:'sempre',volGale:'mesma'}],
+  ['🔁 Depois de 3 greens seguidos, entra até dar 1 green',{fonte:'todas',forte:0,entrada:0,gale:1,gat:'greens',X:3,ciclo:'g1'}],
+];
+let TSSR={lista:[],st:{},ok:false};
+function tssrV(){ return {...TSSR_DEF,...(cfg.tssv||{})}; }
+function tssrVSet(k,v){ cfg.tssv={...tssrV(),[k]:v}; saveCfg(); tssrValRender(); }
+function tssrRegras(R){ const ids=R.fonte==='todas'?TSS_REGRAS.map(x=>x[0]):[R.fonte]; return ids.map(id=>id+(+R.forte?'_f':'')); }
+function tssrPerm(R,p,first){ if(R.vols&&R.vols.length&&!R.vols.includes(p[1])) return false; if(+R.cor>=0&&p[2]!==+R.cor) return false; if(first&&R.volGale==='mesma'&&p[1]!==first[1]) return false; return true; }
+// quais TS do sinal o robô usa (índices), olhando o sinal já completo (histórico)
+function tssrIdx(R,ch){ const i0=+R.entrada; if(!ch.s||ch.s.length<=i0) return null; const f=ch.s[i0]; if(!tssrPerm(R,f,null)) return null;
+  const I=[i0]; for(let i=i0+1;i<=i0+(+R.gale);i++){ if(ch.s.length<=i||ch.s[i-1][3]!==0) break; if(!tssrPerm(R,ch.s[i],f)) break; I.push(i); } return I; }
+// valor de cada passo do robô dentro do sinal
+function tssrStake(R,base,j,stakes){ let st=base; if(j>0){ const perda=stakes.slice(0,j).reduce((a,b)=>a+b,0);
+    st=R.calc==='fixo'?base:R.calc==='lucro'?(perda+base*TSSR_PAY)/TSSR_PAY:R.calc==='zero'?Math.max(base,perda/TSSR_PAY):base*Math.pow(+R.fator||2.2,j); }
+  return Math.max(0.35,Math.round(st*100)/100); }
+function tssrBase(R,S){ const v=Math.max(0.35,+R.val||0.35), falta=Math.max(0,S.pico-S.pnl);
+  if(+R.rec>0&&S.k!=null&&falta>0.05) return Math.max(0.35,Math.round(((falta/S.k)+(+R.recLucro?v*TSSR_PAY:0))/TSSR_PAY*100)/100); return v; }
+function tssrNovoS(){ return {stream:'',arm:0,armG:0,pnl:0,pico:0,k:null,staked:0,n:0,g:0,curve:[0],cor:[[0,0,0],[0,0,0]],mr:0,cr:0,dd:0,ents:[],cur:null,parado:'',sess0:0,ini:Date.now()}; }
+function tssrArmado(R,S){ return R.gat==='sempre'||S.arm>0; }
+// depois de cada sinal (virtual ou real): atualiza o gatilho, o ciclo, a recuperação e o placar
+function tssrFechaS(R,S,o,real,profit,cor,ent){
+  if(real){ S.n++; if(o==='G') S.g++; S.pnl=Math.round((S.pnl+profit)*100)/100; S.staked+=ent.st; S.curve.push(S.pnl); if(S.curve.length>1000) S.curve.shift();
+    const c=S.cor[cor]; c[0]++; if(o==='G') c[1]++; c[2]=Math.round((c[2]+profit)*100)/100;
+    if(o==='R'){ S.cr++; S.mr=Math.max(S.mr,S.cr); } else S.cr=0;
+    if(S.pnl>=S.pico-0.005){ S.pico=Math.max(S.pico,S.pnl); S.k=null; } else { if(o==='R'&&S.k==null) S.k=+R.rec||null; else if(o==='G'&&S.k!=null){ S.k--; if(S.k<=0) S.k=+R.rec||null; } }
+    S.dd=Math.max(S.dd,S.pico-S.pnl);
+    if(R.gat!=='sempre'){ if(/^g/.test(R.ciclo)){ if(o==='G'){ S.armG++; if(S.armG>=+R.ciclo.slice(1)) S.arm=0; } } else S.arm=Math.max(0,S.arm-1); } }
+  S.stream=(S.stream+o).slice(-60);
+  if(R.gat!=='sempre'&&S.arm<=0){ const X=+R.X||1, Y=+R.Y||1, t=S.stream;
+    const ok=R.gat==='xy'?t.endsWith('R'.repeat(X)+'G'.repeat(Y)):R.gat==='reds'?t.endsWith('R'.repeat(X)):R.gat==='greens'?t.endsWith('G'.repeat(X)):false;
+    if(ok){ S.arm=/^g/.test(R.ciclo)?1e9:(+R.ciclo||1); S.armG=0; } }
+}
+// 🧪 simulação no histórico do TS Somado
+function tssrSim(R,st){
+  const regs=tssrRegras(R), L=[]; for(const id of regs){ const E=st.E[id]; if(!E) continue; for(const ch of E.h) if(ch.r!=='X') L.push({id,ch}); }
+  for(const x of L){ x.I=tssrIdx(R,x.ch); x.T=x.I?x.ch.s[x.I[0]][0]:0; }
+  const L2=L.filter(x=>x.I).sort((a,b)=>a.T-b.T||(a.id<b.id?-1:1));
+  const S=tssrNovoS(); let ocup=0, vis=0, visG=0; const chips=[];
+  for(const {ch,I,T} of L2){ if(T<=ocup) continue;
+    const res=I.map(i=>ch.s[i][3]); if(res.some(r=>r!==0&&r!==1)) continue;
+    const real=tssrArmado(R,S), base=tssrBase(R,S), stakes=[]; let o='R', profit=0, gi=-1;
+    for(let j=0;j<I.length;j++){ stakes.push(tssrStake(R,base,j,stakes)); if(res[j]===1){ gi=j; break; } }
+    if(gi>=0){ o='G'; profit=stakes[gi]*TSSR_PAY-stakes.slice(0,gi).reduce((a,b)=>a+b,0); } else profit=-stakes.reduce((a,b)=>a+b,0);
+    vis++; if(o==='G') visG++; ocup=ch.s[I[I.length-1]][0];
+    const cor=ch.s[I[0]][2]; tssrFechaS(R,S,o,real,profit,cor,{st:stakes.reduce((a,b)=>a+b,0)});
+    if(real) chips.push({t:ch.s[I[0]][0],o,k:gi,cor}); }
+  return {S,vis,visG,chips,base:1-Math.pow(0.5,(+R.gale)+1),nSinais:L.length};
+}
+function tssrSpark(curve,w=220,h=46){ if(!curve||curve.length<2) return `<svg width="${w}" height="${h}"></svg>`; const mn=Math.min(...curve,0), mx=Math.max(...curve,0), sp=(mx-mn)||1;
+  const pts=curve.map((v,i)=>`${(i/(curve.length-1)*w).toFixed(1)},${(h-2-(v-mn)/sp*(h-4)).toFixed(1)}`).join(' '), y0=(h-2-(0-mn)/sp*(h-4)).toFixed(1), up=curve.at(-1)>=0;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><line x1="0" y1="${y0}" x2="${w}" y2="${y0}" stroke="#475569" stroke-dasharray="3 3" stroke-width="1"/><polyline fill="none" stroke="${up?'#22c55e':'#ef4444'}" stroke-width="2" points="${pts}"/></svg>`; }
+function tssrDesc(R){ const pos=['TS (1º TS)','G1 (2º TS)','G2 (3º TS)'][+R.entrada], g=+R.gale?` + ${R.gale} gale${+R.gale>1?'s':''} nos TS seguintes${R.volGale==='mesma'?' (mesma vol)':''}`:'';
+  const gat=R.gat==='sempre'?'em todos os sinais':R.gat==='xy'?`depois de ${R.X} red + ${R.Y} green`:R.gat==='reds'?`depois de ${R.X} reds seguidos`:`depois de ${R.X} greens seguidos`;
+  const ci=R.gat==='sempre'?'':' → entra '+(/^g/.test(R.ciclo)?`até dar ${R.ciclo.slice(1)} green`:`${R.ciclo} sinal(is)`);
+  return `${pos}${g} · ${R.fonte==='todas'?'todas as regras':TSS_REGRAS.find(x=>x[0]===R.fonte)[1]}${+R.forte?' ⭐ fortes':''} · ${+R.cor<0?'PAR e ÍMPAR':+R.cor?'só ÍMPAR':'só PAR'} · ${R.vols&&R.vols.length?R.vols.map(s=>symNome(s).replace('Volatility','Vol')).join(', '):'todas as vols'} · ${gat}${ci}`; }
+function tssrStatsHtml(S,extra){ const pct=S.n?100*S.g/S.n:0, roi=S.staked?100*S.pnl/S.staked:0;
+  return `<div class="tsr-num"><div><span>SALDO</span><b class="${S.pnl>=0?'ok':'ruim'}" style="font-size:22px">${S.pnl>=0?'+':''}$${S.pnl.toFixed(2)}</b></div><div><span>ROI</span><b class="${roi>=0?'ok':'ruim'}">${roi.toFixed(1)}%</b></div><div><span>ENTRADAS</span><b>${S.n}</b></div><div><span>GREEN</span><b class="ok">${S.g} (${pct.toFixed(0)}%)</b></div><div><span>RED</span><b class="ruim">${S.n-S.g}</b></div><div><span>MAIOR SEQ. RED</span><b>${S.mr}</b></div><div><span>MAIOR QUEDA</span><b>$${S.dd.toFixed(2)}</b></div>${extra||''}</div>
+    <div class="tsr-cor">${[0,1].map(c=>{ const x=S.cor[c]; return `<span style="color:${c?'#f472b6':'#60a5fa'}"><b>${c?'ÍMPAR':'PAR'}</b> ${x[0]} entradas · ${x[1]} ✅ ${x[0]?'('+(100*x[1]/x[0]).toFixed(0)+'%)':''} · <b class="${x[2]>=0?'ok':'ruim'}">${x[2]>=0?'+':''}$${x[2].toFixed(2)}</b></span>`; }).join('')}</div>`; }
+// ---------- 🧪 validador (aba TS Somado) ----------
+function tssrValRender(){ const el=document.getElementById('tsrVal'); if(!el) return; try{ el.innerHTML=tssrValRes(); }catch(e){ el.innerHTML='erro: '+e.message; } }
+function tssrValRes(){
+  const R=tssrV(), r=tssrSim(R,tssLoad()), S=r.S;
+  const chips=r.chips.slice(-200).map(x=>`<span class="sf-ct" title="${new Date(x.t*1000).toLocaleString('pt-BR')} · ${x.cor?'ÍMPAR':'PAR'}"><i class="sf-c ${x.o==='G'?(x.k===0?'t':'g'):'r'}">${x.o==='G'?(x.k===0?'✓':(x.k+1)+'º'):'R'}</i><small>${hmOf(x.t)}</small></span>`).join('');
+  return `<div class="nota" style="margin:6px 0"><b>Regra:</b> ${tssrDesc(R)}</div>
+    ${r.nSinais?'':`<div class="nota">⚠️ Ainda não há sinais registrados no TS Somado para essa fonte — deixe a página principal rodando para juntar histórico.</div>`}
+    <div class="tsr-card">${tssrStatsHtml(S)}<div>${tssrSpark(S.curve,320,60)}</div></div>
+    <div class="nota">Sinais no histórico: <b>${r.nSinais}</b> · o robô teria olhado <b>${r.vis}</b> (green ${r.vis?(100*r.visG/r.vis).toFixed(0):'—'}% sem filtro de gatilho) e entrado em <b>${S.n}</b>. Sorte para essa entrada (${+R.gale+1} TS) = <b>${(100*r.base).toFixed(1)}%</b> de green — só tem vantagem se ficar acima disso com bastante entrada. Saldo com pagamento de 95%.</div>
+    <div class="sf-chips">${chips}</div>`;
+}
+function tssrValHtml(){
+  const R=tssrV(), sel=(k,o,num=1)=>`<select onchange="tssrVSet('${k}',${num?'+this.value':'this.value'})">${o.map(([v,t])=>`<option value="${v}" ${String(R[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
+  const vols=d5Syms();
+  setTimeout(tssrValRender,0);
+  return `<div class="panel" id="tsrPanel"><h3>🧪 Validador de greens → criar robô</h3>
+    <div class="ctl" style="flex-wrap:wrap">${TSSR_PRESETS.map((p,i)=>`<button onclick="cfg.tssv={...TSSR_DEF,...(cfg.tssv||{}),...TSSR_PRESETS[${i}][1]};saveCfg();tssrPainel()">${p[0]}</button>`).join('')}</div>
+    <div class="ctl" style="flex-wrap:wrap;margin-top:6px">
+      <label>sinais de ${sel('fonte',[['todas','todas as regras'],...TSS_REGRAS.map(x=>[x[0],x[1]])],0)}</label>
+      <label><input type="checkbox" ${+R.forte?'checked':''} onchange="tssrVSet('forte',this.checked?1:0)"> só sinais ⭐ fortes</label>
+      <label>entrar no ${sel('entrada',[[0,'TS (1º TS do sinal)'],[1,'G1 (2º TS do sinal)'],[2,'G2 (3º TS do sinal)']])}</label>
+      <label>gale do robô ${sel('gale',[[0,'sem gale'],[1,'1 (próximo TS)'],[2,'2 (próximos 2 TS)']])}</label>
+      <label>gale ${sel('volGale',[['qualquer','em qualquer vol'],['mesma','só na mesma vol']],0)}</label>
+      <label>cor ${sel('cor',[[-1,'PAR e ÍMPAR'],[0,'só PAR'],[1,'só ÍMPAR']])}</label>
+    </div>
+    <div class="ctl" style="flex-wrap:wrap;margin-top:6px"><b style="font-size:12px">vols:</b> <label><input type="checkbox" ${!R.vols.length?'checked':''} onchange="tssrVSet('vols',[])"> todas</label>${vols.map(s=>`<label><input type="checkbox" ${R.vols.includes(s)?'checked':''} onchange="const L=new Set(tssrV().vols); this.checked?L.add('${s}'):L.delete('${s}'); tssrVSet('vols',[...L])"> ${symNome(s).replace('Volatility','Vol')}</label>`).join('')}</div>
+    <div class="ctl" style="flex-wrap:wrap;margin-top:6px">
+      <label>gatilho ${sel('gat',[['sempre','entrar em todos'],['xy','depois de X red + Y green'],['reds','depois de X reds seguidos'],['greens','depois de X greens seguidos']],0)}</label>
+      <label>X ${sel('X',[[1,'1'],[2,'2'],[3,'3'],[4,'4'],[5,'5']])}</label><label>Y ${sel('Y',[[1,'1'],[2,'2'],[3,'3']])}</label>
+      <label>depois do gatilho entra ${sel('ciclo',[['1','em 1 sinal'],['2','em 2 sinais'],['3','em 3 sinais'],['g1','até dar 1 green'],['g2','até dar 2 greens'],['g3','até dar 3 greens']],0)}</label>
+    </div>
+    <div class="ctl" style="flex-wrap:wrap;margin-top:6px">
+      <label>valor ${sel('val',[[0.35,'$0,35'],[0.5,'$0,50'],[1,'$1'],[2,'$2'],[5,'$5']])}</label>
+      <label>gale ${sel('calc',[['fator','fator'],['zero','recupera (empata)'],['lucro','recupera + lucro'],['fixo','mesmo valor']],0)}</label>
+      <label>fator ${sel('fator',[[2,'2,0'],[2.1,'2,1'],[2.2,'2,2'],[2.5,'2,5'],[3,'3,0']])}</label>
+      <label>depois de um red, recuperar em ${sel('rec',[[0,'não recuperar'],[1,'1 green'],[2,'2 greens'],[3,'3 greens'],[5,'5 greens']])}</label>
+      <label><input type="checkbox" ${+R.recLucro?'checked':''} onchange="tssrVSet('recLucro',this.checked?1:0)"> + lucro</label>
+    </div>
+    <div id="tsrVal"></div>
+    <div class="ctl" style="flex-wrap:wrap;margin-top:8px;border-top:1px solid var(--bd);padding-top:8px">
+      <label>nome do robô <input id="tsrNome" placeholder="ex.: Conservador G1" style="width:180px"></label>
+      <label>stop loss $ <input id="tsrSl" type="number" min="0" step="0.5" value="${+R.sl||0}" style="width:70px"></label>
+      <label>stop win $ <input id="tsrSw" type="number" min="0" step="0.5" value="${+R.sw||0}" style="width:70px"></label>
+      <button class="pri" onclick="tssrCriar()">➕ criar robô e mandar para a Mesa</button>
+      <span class="mu">0 = sem stop. O robô fica na 🎮 Mesa → 🧩 ROBÔS CRIADOS (começa desligado).</span>
+    </div></div>`;
+}
+function tssrPainel(){ const el=document.getElementById('tsrPanel'); if(el) el.outerHTML=tssrValHtml(); }
+// ---------- lista e estado (IndexedDB 'dpi_kv') ----------
+async function tssrCarrega(){ try{ const l=await tssKvGet('tssr_lista'); if(Array.isArray(l)) TSSR.lista=l; }catch(e){} try{ const s=await tssKvGet('tssr_st'); if(s&&typeof s==='object') TSSR.st=s; }catch(e){} TSSR.ok=true; }
+function tssrSalvaLista(){ tssKvPut('tssr_lista',TSSR.lista).then(()=>{ try{ MCF_BC&&MCF_BC.postMessage({tipo:'tssr_cfg'}); }catch(x){} }).catch(e=>console.warn('robôs criados',e)); }
+let TSSR_SV=null;
+function tssrSalvaSt(){ clearTimeout(TSSR_SV); TSSR_SV=setTimeout(()=>{ tssKvPut('tssr_st',TSSR.st).then(()=>{ try{ MCF_BC&&MCF_BC.postMessage({tipo:'tss_upd'}); }catch(x){} }).catch(()=>{}); },300); }
+function tssrCriar(){
+  const R=tssrV(), nome=(document.getElementById('tsrNome')||{}).value||'', sl=+(document.getElementById('tsrSl')||{}).value||0, sw=+(document.getElementById('tsrSw')||{}).value||0;
+  const id='r'+Date.now().toString(36);
+  TSSR.lista.push({...R,id,nome:nome.trim()||('Robô '+(TSSR.lista.length+1)),sl,sw,on:0,criado:Date.now()});
+  tssrSalvaLista(); try{ atuAviso(`🤖 Robô “${TSSR.lista.at(-1).nome}” criado — está na 🎮 Mesa → 🧩 ROBÔS CRIADOS`,'tss'); }catch(e){}
+  const el=document.getElementById('tsrNome'); if(el) el.value='';
+  alert(`Robô “${TSSR.lista.at(-1).nome}” criado.\nAbra a 🎮 Mesa → aba 🧩 ROBÔS CRIADOS para ligar.`);
+}
+// comandos que mexem no estado vão para o cérebro (é ele que grava o estado dos robôs)
+function tssrCmd(acao,id){ if(MCF.cerebro) tssrAplica(acao,id); else { try{ MCF_BC&&MCF_BC.postMessage({tipo:'tssr_cmd',acao,id}); }catch(x){} } }
+function tssrAplica(acao,id){ if(acao==='reset'){ TSSR.st[id]=tssrNovoS(); } else if(acao==='retomar'){ const S=TSSR.st[id]; if(S){ S.parado=''; S.sess0=S.pnl; } } else if(acao==='apagar'){ delete TSSR.st[id]; } tssrSalvaSt(); }
+function tssrLigar(id,on){ const r=TSSR.lista.find(x=>x.id===id); if(!r) return; r.on=on?1:0; if(on&&TSSR.st[id]&&TSSR.st[id].parado) tssrCmd('retomar',id); tssrSalvaLista(); tssrMesaRender(true); }
+function tssrApagar(id){ const r=TSSR.lista.find(x=>x.id===id); if(!r||!confirm(`Apagar o robô “${r.nome}”?`)) return; TSSR.lista=TSSR.lista.filter(x=>x.id!==id); tssrSalvaLista(); tssrCmd('apagar',id); tssrMesaRender(true); }
+function tssrPararTodos(){ TSSR.lista.forEach(r=>r.on=0); tssrSalvaLista(); tssrMesaRender(true); }
+if(MCF_BC) MCF_BC.addEventListener('message',e=>{ const m=e.data||{};
+  if(m.tipo==='tssr_cfg') tssKvGet('tssr_lista').then(l=>{ if(Array.isArray(l)) TSSR.lista=l; tssrMesaRender(true); }).catch(()=>{});
+  else if(m.tipo==='tssr_cmd'&&MCF.cerebro) tssrAplica(m.acao,m.id);
+  else if(m.tipo==='tss_upd'&&!MCF.cerebro) tssKvGet('tssr_st').then(s=>{ if(s) TSSR.st=s; tssrMesaRender(false); }).catch(()=>{}); });
+tssrCarrega();
+// ---------- motor ao vivo (no cérebro, chamado pelo motor do TS Somado) ----------
+function tssrAtivo(R){ const S=TSSR.st[R.id]; return !!(+R.on&&!(S&&S.parado)); }
+function tssrEntrar(R,S,p,k){ const j=S.cur.idx.length, st=tssrStake(R,S.cur.base,j,S.cur.stakes); S.cur.idx.push(k); S.cur.stakes.push(st);
+  if(S.cur.real&&tssrAtivo(R)) tssEnviar({key:`tssr|${R.id}|${p[0]}|${p[1]}`,src:'tss',man:1,nome:`🤖 ${R.nome} · ${['TS','G1','G2','G3'][k]||'passo '+(k+1)}`,sym:p[1],T:p[0],step:tssTempos(p[0])[0]||5,maxN:0,ct:p[2]?'DIGITODD':'DIGITEVEN',stakeBase:st,stakeFix:st,mcor:p[2]}); }
+function tssrPasso(e,ch){   // um TS acabou de ser escolhido numa cadeia
+  if(!TSSR.ok) return; const k=ch.s.length-1, p=ch.s[k];
+  for(const R of TSSR.lista){ if(!tssrRegras(R).includes(e.id)) continue; const S=TSSR.st[R.id]||(TSSR.st[R.id]=tssrNovoS());
+    if(S.cur){ if(S.cur.e!==e.id||S.cur.t0!==ch.t0) continue; const I=S.cur.idx, last=I[I.length-1];
+      if(k===last+1&&k<=(+R.entrada)+(+R.gale)&&ch.s[last][3]===0&&tssrPerm(R,p,ch.s[I[0]])) tssrEntrar(R,S,p,k); continue; }
+    if(!+R.on&&R.gat==='sempre') continue;                                   // desligado e sem gatilho: nem acompanha
+    if(k!==+R.entrada||!tssrPerm(R,p,null)) continue;
+    S.cur={e:e.id,t0:ch.t0,idx:[],stakes:[],real:tssrArmado(R,S)&&tssrAtivo(R)?1:0,base:tssrBase(R,S)}; tssrEntrar(R,S,p,k); }
+  tssrSalvaSt();
+}
+function tssrTick(st){
+  if(!TSSR.ok) return; let mud=false;
+  for(const R of TSSR.lista){ const S=TSSR.st[R.id]; if(!S||!S.cur) continue; const c=S.cur, E=st.E[c.e];
+    let ch=E&&E.c&&E.c.t0===c.t0?E.c:null, fechado=false; if(!ch&&E){ for(let i=E.h.length-1;i>=0&&i>=E.h.length-50;i--) if(E.h[i].t0===c.t0){ ch=E.h[i]; fechado=true; break; } }
+    if(!ch){ S.cur=null; mud=true; continue; }
+    const res=c.idx.map(i=>ch.s[i]?ch.s[i][3]:null);
+    if(res.some(r=>r===-1)){ S.cur=null; mud=true; continue; }               // jogo sem dado: anulado
+    const gi=res.indexOf(1); let o=null;
+    if(gi>=0) o='G'; else if(res.every(r=>r===0)){ const last=c.idx[c.idx.length-1]; if(fechado||last>=(+R.entrada)+(+R.gale)||ch.s.length>last+1) o='R'; }
+    if(!o) continue;
+    const used=o==='G'?c.stakes.slice(0,gi+1):c.stakes, profit=o==='G'?c.stakes[gi]*TSSR_PAY-c.stakes.slice(0,gi).reduce((a,b)=>a+b,0):-c.stakes.reduce((a,b)=>a+b,0);
+    const cor=ch.s[c.idx[0]][2]; tssrFechaS(R,S,o,!!c.real,profit,cor,{st:used.reduce((a,b)=>a+b,0)});
+    if(c.real){ S.ents.push({t:ch.s[c.idx[0]][0],o,k:gi,cor,s:c.idx.map(i=>[ch.s[i][0],ch.s[i][1],ch.s[i][2],ch.s[i][3]]),st:c.stakes.slice(0,used.length),pnl:Math.round(profit*100)/100}); if(S.ents.length>1000) S.ents.shift();
+      const ss=S.pnl-(S.sess0||0); if(+R.sl>0&&ss<=-R.sl) S.parado=`stop loss ($${ss.toFixed(2)})`; else if(+R.sw>0&&ss>=+R.sw) S.parado=`stop win (+$${ss.toFixed(2)})`;
+      if(S.parado) try{ atuAviso(`🤖 ${R.nome}: parou por ${S.parado}`,'tss'); }catch(x){} }
+    S.cur=null; mud=true; }
+  if(mud) tssrSalvaSt();
+}
+// ---------- 🎮 Mesa → 🧩 ROBÔS CRIADOS ----------
+function tssrMesaRender(full){ if(typeof MESA==='undefined'||!MESA.open||cfg.mesa_modo!=='tssr') return; const el=document.getElementById('tsrGrade'); if(full||!el) return mesaRender(true); el.innerHTML=tssrGradeHtml(); }
+function tssrGradeHtml(){
+  const L=TSSR.lista.map(R=>({R,S:TSSR.st[R.id]||tssrNovoS()})).sort((a,b)=>b.S.pnl-a.S.pnl);
+  if(!L.length) return `<div class="nota" style="padding:20px">Nenhum robô criado ainda. Crie no 🧪 Validador da aba 🧩 TS Somado (página principal).</div>`;
+  const demo=k=>{ const D=(typeof DM!=='undefined'?DM.log:[]).filter(x=>String(x.key||'').startsWith('tssr|'+k+'|')&&(x.res==='green'||x.res==='red')); return D.length?D.reduce((a,x)=>a+(+x.profit||0),0):null; };
+  return L.map(({R,S},i)=>{ const at=tssrAtivo(R), dur=Date.now()-(S.ini||R.criado), h=Math.floor(dur/3600e3), d=Math.floor(h/24), dm=demo(R.id);
+    const estado=S.parado?`<b class="ruim">⏹ ${S.parado}</b>`:!+R.on?'<span class="mu">desligado</span>':S.cur?(S.cur.real?'<b class="ok">▶ entrando</b>':'👁 acompanhando (virtual)'):tssrArmado(R,S)?'<b class="ok">● armado — esperando sinal</b>':`<span class="mu">⏳ esperando o gatilho (${S.stream.slice(-6)||'—'})</span>`;
+    const chips=S.ents.slice(-24).map(x=>`<i class="sf-c ${x.o==='G'?(x.k===0?'t':'g'):'r'}" title="${new Date(x.t*1000).toLocaleString('pt-BR')} · ${x.cor?'ÍMPAR':'PAR'} · ${x.pnl>=0?'+':''}${x.pnl}">${x.o==='G'?(x.k===0?'✓':(x.k+1)+'º'):'R'}</i>`).join('');
+    return `<div class="tsr-card ${at?'on':''}"><div class="tsr-top"><b>#${i+1} ${R.nome}</b><span class="mu">${d?d+'d ':''}${h%24}h ${Math.floor(dur/60e3)%60}m</span>
+        <span style="margin-left:auto;display:flex;gap:6px"><button class="${+R.on?'on':''}" onclick="tssrLigar('${R.id}',${+R.on?0:1})">${+R.on?'⏸ desligar':'▶ ligar'}</button><button onclick="if(confirm('Zerar o placar deste robô?'))tssrCmd('reset','${R.id}')">↺ zerar</button><button onclick="tssrApagar('${R.id}')">🗑</button></span></div>
+      <div class="mu" style="font-size:11px;margin:2px 0 6px">${tssrDesc(R)} · $${(+R.val).toFixed(2)} · gale ${R.calc==='fator'?'×'+R.fator:R.calc==='zero'?'recupera':R.calc==='lucro'?'recupera+lucro':'fixo'}${+R.rec?` · recupera em ${R.rec} greens`:''} · stop loss ${+R.sl?'$'+R.sl:'—'} · stop win ${+R.sw?'$'+R.sw:'—'}</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:260px">${tssrStatsHtml(S,dm!=null?`<div><span>DEMO REAL</span><b class="${dm>=0?'ok':'ruim'}">${dm>=0?'+':''}$${dm.toFixed(2)}</b></div>`:'')}</div>${tssrSpark(S.curve,200,56)}</div>
+      <div style="margin-top:4px">${estado}</div><div class="sf-chips" style="margin-top:4px">${chips}</div></div>`; }).join('');
+}
+function tssrMesaHtml(){
+  return `<div class="ms-dir" style="flex:1"><div class="ms-lb">🧩 ROBÔS CRIADOS <span class="mu">— ordenados pelo saldo · os sinais vêm do 🧩 TS Somado (página principal aberta) · entradas na conta DEMO por esta Mesa</span>
+      <button class="ms-x" style="float:right;border-color:#ef4444;color:#fca5a5" onclick="tssrPararTodos()">⏹ desligar todos</button></div>
+    <div id="tsrGrade" class="tsr-grade">${tssrGradeHtml()}</div>
+    <div class="ms-nota">Saldo, ROI e green/red contam só as entradas que o robô fez (gatilho armado e ligado). Antes do gatilho ele acompanha no virtual. “DEMO REAL” soma o resultado de verdade das ordens na conta DEMO. Com poucos sinais o ranking muda muito por acaso.</div></div>`;
+}
+setInterval(()=>{ try{ if(typeof MESA!=='undefined'&&MESA.open&&cfg.mesa_modo==='tssr') tssrMesaRender(false); }catch(e){} },2000);
 
 // abas tiradas (v4.27): Interligado, Scanner e Somas — os motores continuam (a Fábrica, a Confluência e os ⏱ 5s/10s usam)
 delete VIEWS.il; delete VIEWS.scan; delete VIEWS.soma;
