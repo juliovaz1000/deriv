@@ -673,7 +673,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.30 · 12/10/2026 · 🧩 TS Somado: opção “só quando os 2 confirmam” (horas pagantes + horário fixo no mesmo jogo) · 🧩 caixinhas do TS Somado na Mesa não fecham mais sozinhas · 🧩 quadro do TS Somado na Mesa (entra pela Mesa) · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
+const VERSAO='v4.31 · 13/10/2026 · 🧩 TS Somado: mostrar até 500 resultados por regra (guarda 500) · 🧩 TS Somado: opção “só quando os 2 confirmam” (horas pagantes + horário fixo no mesmo jogo) · 🧩 caixinhas do TS Somado na Mesa não fecham mais sozinhas · 🧩 quadro do TS Somado na Mesa (entra pela Mesa) · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -12842,7 +12842,7 @@ VIEWS.sfortes={nome:'⭐ Sinais Fortes',live(){ if(Date.now()-SF.t>15000) sfRend
 // Por isso o mesmo segundo nunca conta duas vezes — a soma é por SEGUNDO diferente, e o banco de 5s já cobre todos.
 // Só a página que calcula (🧠 cérebro) roda o motor; as outras só leem o registro.
 // =====================================================================================
-const TSS_DEF={hpMin:5,hpPer:24,hfDias:3,hfJan:7,fonte:'ambos',tempos:[5,10,20,30],passos:3,gapM:5,gapO:5,espera:15,demo:'',val:0.35,calc:'zero',hist:300};
+const TSS_DEF={hpMin:5,hpPer:24,hfDias:3,hfJan:7,fonte:'ambos',tempos:[5,10,20,30],passos:3,gapM:5,gapO:5,espera:15,demo:'',val:0.35,calc:'zero',hist:500,mostrar:100};
 const TSS_REGRAS=[['mv','🎯 Mesma vol'],['ov','🔀 Vols diferentes'],['al','🔁 PAR/ÍMPAR alternado']];
 const TSS_EST=[]; for(const [r,n] of TSS_REGRAS) for(const f of [0,1]) TSS_EST.push({id:r+(f?'_f':''),r,f,nome:n+(f?' · ⭐ forte':' · normal')});
 const TSS_KEY='dpi_tss_v1', TSS_PKEY='dpi_tss_pool_v1';
@@ -12850,7 +12850,7 @@ let TSS={pool:[],scan:{},st:null,t:0,busy:false,ui:0};
 function tssC(){ const c={...TSS_DEF,...(cfg.tss||{})}; if(!Array.isArray(c.tempos)||!c.tempos.length) c.tempos=[5,10,20,30]; return c; }
 function tssSet(k,v){ cfg.tss={...tssC(),[k]:v}; saveCfg(); if(['hpMin','hpPer','hfDias','hfJan','fonte','tempos'].includes(k)) TSS.scan={}; tssRender(); }
 function tssLoad(){ if(TSS.st) return TSS.st; let s=null; try{ s=JSON.parse(localStorage.getItem(TSS_KEY)||'null'); }catch(e){} if(!s||s.v!==1) s={v:1,E:{}}; for(const e of TSS_EST) if(!s.E[e.id]) s.E[e.id]={h:[],c:null}; return TSS.st=s; }
-function tssSave(){ const s=TSS.st; if(!s) return; const cap=Math.max(50,+tssC().hist||300); for(const e of Object.values(s.E)) if(e.h.length>cap) e.h.splice(0,e.h.length-cap);
+function tssSave(){ const s=TSS.st; if(!s) return; const cap=Math.max(500,+tssC().hist||500); for(const e of Object.values(s.E)) if(e.h.length>cap) e.h.splice(0,e.h.length-cap);
   try{ localStorage.setItem(TSS_KEY,JSON.stringify(s)); }catch(e){ for(const x of Object.values(s.E)) x.h.splice(0,Math.floor(x.h.length/3)); try{ localStorage.setItem(TSS_KEY,JSON.stringify(s)); }catch(e2){} } }
 window.addEventListener('storage',e=>{ if(e.key===TSS_KEY&&!MCF.cerebro) TSS.st=null; });
 // em quais tempos (dos marcados) esse segundo existe: 35:20 → 5s, 10s, 20s
@@ -12896,7 +12896,7 @@ function tssPodeSeguir(e,ch,c){
   if(e.r==='al'&&c.alvo===L[2]) return false;
   return true;
 }
-function tssFecha(E,e,ch,r,k){ ch.r=r; ch.k=k; ch.fim=Math.round(dmNow()); E.h.push(ch); E.c=null; }
+function tssFecha(E,e,ch,r,k){ ch.r=r; ch.k=k; E.h.push(ch); E.c=null; }
 function tssLoop(){
   if(!MCF.cerebro) return;
   const st=tssLoad(), C=tssC(), agora=dmNow(); let mud=false;
@@ -12973,11 +12973,11 @@ function tssHtml(){
   const st=tssLoad(), C=tssC(), agora=dmNow(), sn=s=>symNome(s).replace('Volatility','Vol'), cor=a=>`<span class="ps-tag ${a?'imp':'par'}">${a?'ÍMPAR':'PAR'}</span>`;
   const fonteTx=x=>x[4]==='hp+hf'?'horas+fixo':x[4]==='hp'?`${x[5]}h pagando`:`${x[5]} dias 100%`;
   const base=n=>100*(1-Math.pow(0.5,n));
-  const cards=TSS_EST.map(e=>{ const E=st.E[e.id], H=E.h.filter(x=>x.r!=='X'), n=H.length, g=H.filter(x=>x.r==='G').length, red=n-g, pk=[0,0,0,0,0];
+  const Q=Math.max(10,+C.mostrar||100), cards=TSS_EST.map(e=>{ const E=st.E[e.id], H=E.h.filter(x=>x.r!=='X').slice(-Q), n=H.length, g=H.filter(x=>x.r==='G').length, red=n-g, pk=[0,0,0,0,0];
     H.forEach(x=>{ if(x.r==='G') pk[x.k]++; });
     let ent=0, ac=0; H.forEach(x=>x.s.forEach(p=>{ if(p[3]===0||p[3]===1){ ent++; ac+=p[3]; } }));
     let mr=0,cr=0; for(const x of H){ if(x.r!=='G'){ cr++; mr=Math.max(mr,cr); } else cr=0; }
-    const chips=H.slice(-120).map(x=>{ const l=x.r==='G'?(x.k===1?'1':x.k+'º'):x.r==='T'?'R⏱':'R', cls=x.r==='G'?(x.k===1?'t':'g'):'r', tt=x.s.map(p=>`${hmsOf(p[0])} ${sn(p[1])} ${p[2]?'ÍMPAR':'PAR'} ${p[3]===1?'✅':p[3]===0?'❌':'…'} (${fonteTx(p)}${p[6]?' · ⭐'+p[6]+' conf.':''})`).join('\n');
+    const chips=H.map(x=>{ const l=x.r==='G'?(x.k===1?'1':x.k+'º'):x.r==='T'?'R⏱':'R', cls=x.r==='G'?(x.k===1?'t':'g'):'r', tt=x.s.map(p=>`${hmsOf(p[0])} ${sn(p[1])} ${p[2]?'ÍMPAR':'PAR'} ${p[3]===1?'✅':p[3]===0?'❌':'…'} (${fonteTx(p)}${p[6]?' · ⭐'+p[6]+' conf.':''})`).join('\n');
       return `<span class="sf-ct" title="${tt}"><i class="sf-c ${cls}">${l}</i><small>${hmOf(x.t0)}</small></span>`; }).join('');
     const ch=E.c, atual=ch?`<div class="nota" style="margin:4px 0">▶ em andamento: ${ch.s.map((p,i)=>`${i+1}º ${hmsOf(p[0])} ${sn(p[1])} ${cor(p[2])} ${p[3]===1?'✅':p[3]===0?'❌':'⏳'}`).join(' → ')}${ch.s.at(-1)[3]===0?' → esperando o próximo TS que dê tempo':''}</div>`:'';
     const tx=n?`${n} sinais · <b class="ok">${g} green (${(100*g/n).toFixed(0)}%)</b> · ${pk.slice(1,C.passos+1).map((v,i)=>`${i+1}º passo <b>${v}</b>`).join(' · ')} · <b class="${red?'ruim':''}">${red} red</b> · maior seq. red <b class="${mr>=2?'ruim':''}">${mr}</b> · acerto por entrada (TS) <b class="${ent&&ac/ent>0.55?'ok':''}">${ent?(100*ac/ent).toFixed(0):'—'}%</b> (${ent} entradas; sorte = 50%) · sorte da cadeia de ${C.passos} = ${base(C.passos).toFixed(1)}%`:'ainda sem sinais registrados';
@@ -12997,6 +12997,7 @@ VIEWS.tss={nome:'🧩 TS Somado',live(){ if(Date.now()-TSS.ui>3000) tssRender();
       <label>tempos ${[5,10,20,30].map(w=>`<label style="margin-left:4px"><input type="checkbox" ${C.tempos.includes(w)?'checked':''} onchange="const L=new Set(tssC().tempos); this.checked?L.add(${w}):L.delete(${w}); tssSet('tempos',[...L].sort((a,b)=>a-b))"> ${w}s</label>`).join('')}</label>
       <label>TS por sinal ${sel('passos',[[1,'1'],[2,'2'],[3,'3'],[4,'4']])}</label>
       <label>mín. entre passos: mesma vol ${sel('gapM',[[5,'5s'],[10,'10s'],[15,'15s'],[20,'20s']])} · outra vol ${sel('gapO',[[5,'5s'],[10,'10s'],[15,'15s'],[20,'20s']])}</label>
+      <label>mostrar os últimos ${sel('mostrar',[[50,'50'],[100,'100'],[200,'200'],[300,'300'],[500,'500']])} por regra</label>
       <label>esperar o próximo TS até ${sel('espera',[[5,'5 min'],[10,'10 min'],[15,'15 min'],[30,'30 min'],[0,'sem limite']])}</label>
     </div>
     <div class="ctl" style="flex-wrap:wrap;margin-top:6px">
