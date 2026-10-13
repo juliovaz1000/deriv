@@ -673,7 +673,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.28 · 12/10/2026 · 🧩 quadro do TS Somado na Mesa (entra pela Mesa) · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
+const VERSAO='v4.29 · 12/10/2026 · 🧩 caixinhas do TS Somado na Mesa não fecham mais sozinhas · 🧩 quadro do TS Somado na Mesa (entra pela Mesa) · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -12938,25 +12938,30 @@ function tssMesaAberta(){ try{ const N=JSON.parse(localStorage.getItem('dpi_mcf_
 if(MCF_BC) MCF_BC.addEventListener('message',e=>{ const m=e.data||{}; if(m.tipo==='tss'&&m.o&&MESA_TAB&&MESA.open){ if(!DM.ok||!DM.virt){ try{ atuAviso('🧩 TS somado: conecte a conta DEMO na Mesa para entrar','tss'); }catch(x){} return; } dmRegistrar(m.o); } });
 // ---------- quadro na 🎮 Mesa ----------
 let TSS_MT=0;
-function tssMesaHtml(){
+function tssMesaHtml(soDados){
   if(!MCF.cerebro&&Date.now()-TSS_MT>3000){ TSS.st=null; TSS_MT=Date.now(); }
   const C=tssC(), st=tssLoad(), agora=dmNow(), sn=x=>symNome(x).replace('Volatility','Vol'), tag=a=>`<b style="color:${a?'#f472b6':'#60a5fa'}">${a?'ÍMPAR':'PAR'}</b>`;
-  const sel=(k,o)=>`<select onchange="tssSet('${k}',${typeof C[k]==='string'?'this.value':'+this.value'});tssMesaAtu()">${o.map(([v,t])=>`<option value="${v}" ${String(C[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
+  const sel=(k,o)=>`<select onchange="tssSet('${k}',${typeof C[k]==='string'?'this.value':'+this.value'});tssMesaAtu(1)">${o.map(([v,t])=>`<option value="${v}" ${String(C[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
   const linhas=TSS_EST.filter(e=>!C.demo||e.id===C.demo).map(e=>{ const E=st.E[e.id], H=E.h.filter(x=>x.r!=='X'), n=H.length, g=H.filter(x=>x.r==='G').length; let ent=0,ac=0; H.forEach(x=>x.s.forEach(p=>{ if(p[3]===0||p[3]===1){ ent++; ac+=p[3]; } }));
     const ch=E.c, and=ch?` · ▶ ${ch.s.map((p,i)=>`${i+1}º ${hmsOf(p[0])} ${sn(p[1])} ${tag(p[2])} ${p[3]===1?'✅':p[3]===0?'❌':'⏳'}`).join(' → ')}`:'';
     const chips=H.slice(-20).map(x=>`<i class="sf-c ${x.r==='G'?(x.k===1?'t':'g'):'r'}" title="${hmOf(x.t0)}">${x.r==='G'?(x.k===1?'1':x.k+'º'):'R'}</i>`).join('');
     return `<div style="margin:4px 0"><b>${e.nome}</b> <span class="mu">${n?`${g}/${n} green · acerto por TS ${ent?(100*ac/ent).toFixed(0):'—'}%`:'sem sinais ainda'}</span>${and}<div class="sf-chips">${chips}</div></div>`; }).join('');
   let P=[]; try{ P=(MCF.cerebro&&TSS.pool.length?TSS.pool:(JSON.parse(localStorage.getItem(TSS_PKEY)||'null')||{L:[]}).L).filter(x=>x.T>=agora).slice(0,5); }catch(e){}
   const L=(typeof DM!=='undefined'?DM.log:[]).filter(x=>x.src==='tss').slice(-6).reverse();
-  return `<div class="ms-box" style="margin-top:8px;border:1px solid #a78bfa">
-    <span class="ms-lb">🧩 TS SOMADO · TESTE</span>
-    <div class="ms-nota">entrar na DEMO com ${sel('demo',[['','nenhuma (só registrar)'],...TSS_EST.map(e=>[e.id,e.nome])])} · valor ${sel('val',[[0.35,'$0,35'],[0.5,'$0,50'],[1,'$1'],[2,'$2']])} · após red ${sel('calc',[['zero','recupera'],['lucro','recupera+lucro'],['fixo','mesmo valor']])}</div>
-    ${linhas}
+  const dados=`${linhas}
     <div class="ms-nota">próximos TS: ${P.length?P.map(x=>`${hmsOf(x.T)} ${sn(x.sym)} ${tag(x.alvo)}`).join(' · '):'nenhum na próxima hora ainda'}</div>
     ${L.length?`<div class="ms-nota">entradas na DEMO: ${L.map(x=>`${hmsOf(x.planT||x.T)} ${sn(x.sym)} ${x.res==='green'?'✅':x.res==='red'?'❌':x.res||'…'}${x.profit?' '+(+x.profit).toFixed(2):''}`).join(' · ')}</div>`:''}
-    <div class="ms-nota">Os sinais são calculados na página principal (aba 🧩 TS Somado) — deixe ela aberta. Com a Mesa aberta, a entrada sai por aqui.</div></div>`;
+    <div class="ms-nota">Os sinais são calculados na página principal (aba 🧩 TS Somado) — deixe ela aberta. Com a Mesa aberta, a entrada sai por aqui.</div>`;
+  if(soDados) return dados;
+  // as caixinhas de escolha ficam fora da parte que atualiza sozinha (senão a lista fecha enquanto você escolhe)
+  return `<div class="ms-box" style="margin-top:8px;border:1px solid #a78bfa">
+    <span class="ms-lb">🧩 TS SOMADO · TESTE</span>
+    <div class="ms-nota" id="msTssC">entrar na DEMO com ${sel('demo',[['','nenhuma (só registrar)'],...TSS_EST.map(e=>[e.id,e.nome])])} · valor ${sel('val',[[0.35,'$0,35'],[0.5,'$0,50'],[1,'$1'],[2,'$2']])} · após red ${sel('calc',[['zero','recupera'],['lucro','recupera+lucro'],['fixo','mesmo valor']])}</div>
+    <div id="msTssD">${dados}</div></div>`;
 }
-function tssMesaAtu(){ const el=document.getElementById('msTss'); if(el) el.innerHTML=tssMesaHtml(); }
+function tssMesaAtu(full){ const d=document.getElementById('msTssD'); const fa=document.activeElement; if(!full&&fa&&fa.tagName==='SELECT'&&fa.closest&&fa.closest('#msTss')) return;
+  if(d&&!full){ d.innerHTML=tssMesaHtml(true); return; }
+  const el=document.getElementById('msTss'); if(el) el.innerHTML=tssMesaHtml(); }
 setInterval(()=>{ if(MESA.open) try{ tssMesaAtu(); }catch(e){} },2000);
 setInterval(()=>{ try{ tssLoop(); }catch(e){ console.warn('ts somado',e); } },500);
 setInterval(()=>{ tssScanTick().catch(e=>console.warn('ts somado scan',e)); },4000);
