@@ -10935,7 +10935,7 @@ function piStats(L,lvl){
 // Cada círculo e cada combinação (ex.: 1+3+7) guarda o placar TS/G1/G2/red, por tempo de jogo.
 // =====================================================================================
 const MCF_DEF={jan:25,lim:12,verde:20,min:3,fD:16,fMin:5,tend:58,nMin:20,auto:0,gat:'',gatIdx:0,umPor:1,semContra:0,excl:[],filt:'todos',minAuto:0,minCrit:1,minN:20,simH:24,simG:1,simRk:2,prMode:'R',prPop:1,nivel:1};
-const MCF_CIRC=[[1,'🕒','Horário fixo 100%'],[2,'🕐','Horas pagantes'],[3,'🖼','Figura gráfica'],[4,'🟨','Linha amarela'],[5,'🤖','Robôs ligados'],[6,'🧭','Tendência'],[7,'🔢','Número chama'],[8,'🔥','Pressure Strategy'],[9,'🏭','Fábrica de robôs']];
+const MCF_CIRC=[[1,'🕒','Horário fixo 100%'],[2,'🕐','Horas pagantes'],[3,'🖼','Figura gráfica'],[4,'🟨','Linha amarela'],[5,'🤖','Robôs ligados'],[6,'🧭','Tendência'],[7,'🔢','Número chama'],[8,'🔥','Pressure Strategy'],[9,'🏭','Fábrica de robôs'],[10,'🔁','Devendo (TS)']];
 const MCF_2S=['R_10','R_25','R_50','R_75','R_100','RDBEAR','RDBULL'];
 // 🎯 nível de análise das confirmações (0 = tiro seco, 1 = até G1, 2 = até G2): todos os círculos e regras obedecem
 function mcfNv(){ const n=+mcfC().nivel; return n>=0&&n<=2?n:1; }
@@ -11026,6 +11026,7 @@ function mcfVotar(w,T,sym){
   v[7]=mcfNumero(W,c)||{alvo:null,txt:'juntando jogos'};
   try{ v[8]=mcfPressure(W,w,bank,T)||{alvo:null,txt:'juntando jogos'}; }catch(e){ v[8]={alvo:null,txt:'—'}; }
   try{ v[9]=typeof fbVoto==='function'?fbVoto(w,T,sym,bank,W):{alvo:null,txt:'—'}; }catch(e){ v[9]={alvo:null,txt:'—'}; }
+  try{ v[10]=devVoto(sym,T); }catch(e){ v[10]={alvo:null,txt:'—'}; }
   return v;
 }
 function mcfForca(v){ const a=[0,1].map(cor=>MCF_CIRC.filter(([id])=>v[id]&&v[id].alvo===cor).map(([id])=>id)); if(a[0].length===a[1].length) return {n:0,alvo:null,ids:[],contra:a[0].length}; const cor=a[0].length>a[1].length?0:1; return {n:a[cor].length,alvo:cor,ids:a[cor],contra:a[1-cor].length}; }
@@ -12960,6 +12961,7 @@ async function tssCarrega(){
   let db=null, ls=null; try{ db=await tssKvGet('tss_v1'); }catch(e){} try{ ls=JSON.parse(localStorage.getItem(TSS_KEY)||'null'); }catch(e){}
   if(ls&&ls.v===1){ TSS.st=tssJunta(db,ls); try{ await tssKvPut('tss_v1',TSS.st); localStorage.removeItem(TSS_KEY); }catch(e){} }   // migra o que estava no localStorage
   else TSS.st=db&&db.v===1?tssJunta(db,null):(TSS.st||tssBlank());
+  try{ for(const e of Object.values(TSS.st.E)) e.h=e.h.filter(x=>x.r!=='T'); }catch(x){}
   TSS.ok=true; return TSS.st; }
 let TSS_SV=null;
 function tssSave(){ const s=TSS.st; if(!s) return; for(const e of Object.values(s.E)) if(e.h.length>TSS_CAP) e.h.splice(0,e.h.length-TSS_CAP);
@@ -12973,9 +12975,10 @@ function tssTempos(T){ return tssC().tempos.filter(w=>T%w===0); }
 // ---------- 1) varredura: TS de horas pagantes e horário fixo de cada vol (banco de 5s, a cada 10 min) ----------
 async function tssScanSym(sym){
   const c=tssC(), bank=d5BankName(5,sym), now=Date.now(), agora=now/1000, lim=agora+65*60, out=[];
-  if(c.fonte!=='fixo'){ try{ const rows=await idbRange(bank,now-Math.max(c.hpMin+2,+c.hpPer||24)*3600e3,now+60000), G=rows&&rows.length?gridBuild(rows,5):null;
+  if(c.fonte!=='fixo'&&c.fonte!=='dev'){ try{ const rows=await idbRange(bank,now-Math.max(c.hpMin+2,+c.hpPer||24)*3600e3,now+60000), G=rows&&rows.length?gridBuild(rows,5):null;
     if(G) for(const r of hpScan(G,'all')){ const o=r.L[0]; if(o.cur>=c.hpMin){ const T=hpNext(r.off); if(T<=lim) out.push({T,sym,alvo:r.alvo,f:'hp',h:o.cur,d:0}); } } }catch(e){ console.warn('ts somado horas',e); } }
-  if(c.fonte!=='horas'&&Array.isArray(cfg.tssFixo)&&cfg.tssFixo.length){ for(const it of cfg.tssFixo){ if(it.sym!==sym) continue; const T=hfNext(it.off); if(T<=lim) out.push({T,sym,alvo:it.alvo,f:'hf',h:0,d:it.n}); } }
+  if(c.fonte==='dev'){ const rows=await hfAgCalc(); for(const x of devCandidatos(rows)){ if(x.sym===sym&&x.T<=lim) out.push({T:x.T,sym,alvo:x.alvo,f:'dev',h:0,d:x.n}); } }
+  else if(c.fonte!=='horas'&&Array.isArray(cfg.tssFixo)&&cfg.tssFixo.length){ for(const it of cfg.tssFixo){ if(it.sym!==sym) continue; const T=hfNext(it.off); if(T<=lim) out.push({T,sym,alvo:it.alvo,f:'hf',h:0,d:it.n}); } }
   else if(c.fonte!=='horas'){ try{ const rows=await idbRange(bank,now-(Math.max(c.hfDias+1,+c.hfJan||7))*86400e3-3600e3,now+60000), G=rows&&rows.length?gridBuild(rows,5):null, hr=new Date().getHours();
     if(G) for(const h of [hr,(hr+1)%24]) for(const r of hfScan(G,String(h))){ const m=r.ts; if(m.n>=c.hfDias&&m.ok===m.n){ const T=hfNext(r.off); if(T<=lim) out.push({T,sym,alvo:r.alvo,f:'hf',h:0,d:m.n}); } } }catch(e){ console.warn('ts somado fixo',e); } }
   TSS.scan[sym]={t:Date.now(),L:out}; tssMontaPool();
@@ -13012,7 +13015,7 @@ function tssPodeSeguir(e,ch,c){
   if(e.r==='al'&&c.alvo===L[2]) return false;
   return true;
 }
-function tssFecha(E,e,ch,r,k){ ch.r=r; ch.k=k; E.h.push(ch); E.c=null; }
+function tssFecha(E,e,ch,r,k){ ch.r=r; ch.k=k; if(r!=='T') E.h.push(ch); E.c=null; }
 function tssLoop(){
   if(!MCF.cerebro){ TSS.eu=false; return; }
   if(!TSS.eu){ if(!TSS.lendo){ TSS.lendo=true; Promise.all([tssCarrega(),typeof tssrCarrega==='function'?tssrCarrega():null]).finally(()=>{ TSS.lendo=false; TSS.eu=true; }); } return; }
@@ -13035,7 +13038,7 @@ function tssLoop(){
     for(const c of cand){ let fx=null; if(e.f){ fx=tssForte(c); if(!fx) continue; }
       const passo=[c.T,c.sym,c.alvo,null,c.f,c.h||c.d,fx?fx.n:0];
       if(!ch){ ch=E.c={t0:c.T,s:[passo]}; } else ch.s.push(passo);
-      mud=true; tssDemo(e,ch,c); try{ tssrPasso(e,ch); }catch(x){ console.warn('robôs criados',x); } break; }
+      mud=true; tssDemo(e,ch,c); if(c.f==='dev') try{ devAviso(e,ch,c); }catch(x){} try{ tssrPasso(e,ch); }catch(x){ console.warn('robôs criados',x); } break; }
   }
   try{ tssrTick(st); }catch(x){ console.warn('robôs criados',x); }
   try{ agendaTick(); }catch(x){ console.warn('robôs por agenda',x); }
@@ -13064,7 +13067,7 @@ let TSS_MT=0;
 function tssMesaHtml(soDados){
   const C=tssC(), st=tssLoad(), agora=dmNow(), sn=x=>symNome(x).replace('Volatility','Vol'), tag=a=>`<b style="color:${a?'#f472b6':'#60a5fa'}">${a?'ÍMPAR':'PAR'}</b>`;
   const sel=(k,o)=>`<select onchange="tssSet('${k}',${typeof C[k]==='string'?'this.value':'+this.value'});tssMesaAtu(1)">${o.map(([v,t])=>`<option value="${v}" ${String(C[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
-  const linhas=TSS_EST.filter(e=>!C.demo||e.id===C.demo).map(e=>{ const E=st.E[e.id], H=E.h.filter(x=>x.r!=='X'), n=H.length, g=H.filter(x=>x.r==='G').length; let ent=0,ac=0; H.forEach(x=>x.s.forEach(p=>{ if(p[3]===0||p[3]===1){ ent++; ac+=p[3]; } }));
+  const linhas=TSS_EST.filter(e=>!C.demo||e.id===C.demo).map(e=>{ const E=st.E[e.id], H=E.h.filter(x=>x.r!=='X'&&x.r!=='T'), n=H.length, g=H.filter(x=>x.r==='G').length; let ent=0,ac=0; H.forEach(x=>x.s.forEach(p=>{ if(p[3]===0||p[3]===1){ ent++; ac+=p[3]; } }));
     const ch=E.c, and=ch?` · ▶ ${ch.s.map((p,i)=>`${i+1}º ${hmsOf(p[0])} ${sn(p[1])} ${tag(p[2])} ${p[3]===1?'✅':p[3]===0?'❌':'⏳'}`).join(' → ')}`:'';
     const chips=H.slice(-20).map(x=>`<i class="sf-c ${x.r==='G'?(x.k===1?'t':'g'):'r'}" title="${hmOf(x.t0)}">${x.r==='G'?(x.k===1?'1':x.k+'º'):'R'}</i>`).join('');
     return `<div style="margin:4px 0"><b>${e.nome}</b> <span class="mu">${n?`${g}/${n} green · acerto por TS ${ent?(100*ac/ent).toFixed(0):'—'}%`:'sem sinais ainda'}</span>${and}<div class="sf-chips">${chips}</div></div>`; }).join('');
@@ -13092,9 +13095,9 @@ function tssRender(){ const el=document.getElementById('tssR'); if(el) el.innerH
 function tssPoolVer(){ if(MCF.cerebro&&TSS.pool.length) return TSS.pool; try{ const o=JSON.parse(localStorage.getItem(TSS_PKEY)||'null'); return o&&o.L||[]; }catch(e){ return []; } }
 function tssHtml(){
   const st=tssLoad(), C=tssC(), agora=dmNow(), sn=s=>symNome(s).replace('Volatility','Vol'), cor=a=>`<span class="ps-tag ${a?'imp':'par'}">${a?'ÍMPAR':'PAR'}</span>`;
-  const fonteTx=x=>x[4]==='hp+hf'?'horas+fixo':x[4]==='hp'?`${x[5]}h pagando`:`${x[5]} dias 100%`;
+  const fonteTx=x=>x[4]==='dev'?`🔁 devendo · ${x[5]} dias pagos antes`:x[4]==='hp+hf'?'horas+fixo':x[4]==='hp'?`${x[5]}h pagando`:`${x[5]} dias 100%`;
   const base=n=>100*(1-Math.pow(0.5,n));
-  const Q=Math.max(10,+C.mostrar||100), cards=TSS_EST.map(e=>{ const E=st.E[e.id], H=E.h.filter(x=>x.r!=='X').slice(-Q), n=H.length, g=H.filter(x=>x.r==='G').length, red=n-g, pk=[0,0,0,0,0];
+  const Q=Math.max(10,+C.mostrar||100), cards=TSS_EST.map(e=>{ const E=st.E[e.id], H=E.h.filter(x=>x.r!=='X'&&x.r!=='T').slice(-Q), n=H.length, g=H.filter(x=>x.r==='G').length, red=n-g, pk=[0,0,0,0,0];
     H.forEach(x=>{ if(x.r==='G') pk[x.k]++; });
     let ent=0, ac=0; H.forEach(x=>x.s.forEach(p=>{ if(p[3]===0||p[3]===1){ ent++; ac+=p[3]; } }));
     let mr=0,cr=0; for(const x of H){ if(x.r!=='G'){ cr++; mr=Math.max(mr,cr); } else cr=0; }
@@ -13111,7 +13114,7 @@ function tssHtml(){
         return `<div class="sf-row" style="margin-left:14px;border-left:3px solid ${c?'#f472b6':'#60a5fa'};padding-left:8px"><div class="sf-h"><b style="color:${c?'#f472b6':'#60a5fa'}">${c?'ÍMPAR':'PAR'}</b><span>${E2.length} entradas · <b class="ok">${a} ✅</b> (${E2.length?(100*a/E2.length).toFixed(0):'—'}%) · ${E2.length-a} ❌ · maior seq. ❌ <b class="${mr2>=3?'ruim':''}">${mr2}</b> · saldo <b class="${sd>=0?'ok':'ruim'}">${sd>=0?'+':''}$${sd.toFixed(2)}</b> <span class="mu">(entrada fixa de $${v.toFixed(2)}, sem gale)</span> · sinais que começaram ${c?'ÍMPAR':'PAR'}: ${S1.length} → ${g1} green</span></div><div class="sf-chips">${ch2}</div></div>`; }).join(''); }
     return `<div class="sf-row"><div class="sf-h"><b>${e.nome}</b>${C.demo===e.id?' <b style="color:#facc15">💼 entrando na DEMO</b>':''}<span>${tx}</span></div>${atual}<div class="sf-chips">${chips}</div></div>${sep}`; }).join('');
   const P=tssPoolVer().filter(x=>x.T>=agora).slice(0,30);
-  const prox=P.length?`<table class="ps-tab"><tr><th>jogo</th><th>vol</th><th>cor</th><th>de onde vem</th><th>tempos</th><th>falta</th></tr>${P.map(x=>`<tr><td><b>${hmsOf(x.T)}</b></td><td>${sn(x.sym)}</td><td>${cor(x.alvo)}</td><td>${x.f==='hp+hf'?`horas ${x.h}h + fixo ${x.d} dias`:x.f==='hp'?`🕐 ${x.h}h seguidas pagando`:`🕒 ${x.d} dias 100%`}</td><td>${tssTempos(x.T).map(w=>w+'s').join(' ')}</td><td>${Math.round(x.T-agora)}s</td></tr>`).join('')}</table>`:`<div class="nota">Nenhum TS encontrado para a próxima hora ainda${MCF.cerebro?' — a varredura passa por todas as vols a cada 10 min':''}.</div>`;
+  const prox=P.length?`<table class="ps-tab"><tr><th>jogo</th><th>vol</th><th>cor</th><th>de onde vem</th><th>tempos</th><th>falta</th></tr>${P.map(x=>`<tr><td><b>${hmsOf(x.T)}</b></td><td>${sn(x.sym)}</td><td>${cor(x.alvo)}</td><td>${x.f==='hp+hf'?`horas ${x.h}h + fixo ${x.d} dias`:x.f==='dev'?`🔁 devendo · ${x.d} dias pagos antes`:x.f==='hp'?`🕐 ${x.h}h seguidas pagando`:`🕒 ${x.d} dias 100%`}</td><td>${tssTempos(x.T).map(w=>w+'s').join(' ')}</td><td>${Math.round(x.T-agora)}s</td></tr>`).join('')}</table>`:`<div class="nota">Nenhum TS encontrado para a próxima hora ainda${MCF.cerebro?' — a varredura passa por todas as vols a cada 10 min':''}.</div>`;
   return `${cards}<h4 style="margin:14px 0 6px">Próximos tiros secos encontrados (todas as vols)</h4>${prox}`;
 }
 VIEWS.tss={nome:'🧩 TS Somado',live(){ if(Date.now()-TSS.ui>3000) tssRender(); },html(){
@@ -13121,7 +13124,7 @@ VIEWS.tss={nome:'🧩 TS Somado',live(){ if(Date.now()-TSS.ui>3000) tssRender();
     <div class="ctl" style="flex-wrap:wrap">
       <label>horas pagantes TS ≥ ${sel('hpMin',[[3,'3h'],[4,'4h'],[5,'5h'],[6,'6h'],[8,'8h'],[10,'10h']])}</label>
       <label>horário fixo TS ≥ ${sel('hfDias',[[3,'3 dias'],[4,'4 dias'],[5,'5 dias'],[7,'7 dias']])} 100%</label>
-      <label>usar ${sel('fonte',[['ambos','horas OU fixo'],['juntos','só quando os 2 confirmam'],['horas','só horas pagantes'],['fixo','só horário fixo']])}</label>
+      <label>usar ${sel('fonte',[['ambos','horas OU fixo'],['juntos','só quando os 2 confirmam'],['horas','só horas pagantes'],['fixo','só horário fixo'],['dev','só devendo (🔁 aba Devendo)']])}</label>
       <label>tempos ${[5,10,20,30].map(w=>`<label style="margin-left:4px"><input type="checkbox" ${C.tempos.includes(w)?'checked':''} onchange="const L=new Set(tssC().tempos); this.checked?L.add(${w}):L.delete(${w}); tssSet('tempos',[...L].sort((a,b)=>a-b))"> ${w}s</label>`).join('')}</label>
       <label>TS por sinal ${sel('passos',[[1,'1'],[2,'2'],[3,'3'],[4,'4']])}</label>
       <label>mín. entre passos: mesma vol ${sel('gapM',[[5,'5s'],[10,'10s'],[15,'15s'],[20,'20s']])} · outra vol ${sel('gapO',[[5,'5s'],[10,'10s'],[15,'15s'],[20,'20s']])}</label>
@@ -13190,7 +13193,7 @@ function tssrFechaS(R,S,o,real,profit,cor,ent){
 }
 // 🧪 simulação no histórico do TS Somado
 function tssrSim(R,st){
-  const regs=tssrRegras(R), L=[]; for(const id of regs){ const E=st.E[id]; if(!E) continue; for(const ch of E.h) if(ch.r!=='X') L.push({id,ch}); }
+  const regs=tssrRegras(R), L=[]; for(const id of regs){ const E=st.E[id]; if(!E) continue; for(const ch of E.h) if(ch.r!=='X'&&ch.r!=='T') L.push({id,ch}); }
   for(const x of L){ x.I=tssrIdx(R,x.ch); x.T=x.I?x.ch.s[x.I[0]][0]:0; }
   const L2=L.filter(x=>x.I).sort((a,b)=>a.T-b.T||(a.id<b.id?-1:1));
   const S=tssrNovoS(); let ocup=0, vis=0, visG=0; const chips=[];
@@ -13364,6 +13367,7 @@ async function hfAgCalc(force){
   }catch(e){ HFA.rows=[]; HFA.err=e.message||String(e); console.warn('horários fixos (todas as vols)',e); }
   finally{ HFA.k=key; HFA.t=Date.now(); HFA.busy=false; }
   try{ const e=$('#hfAgBox'); if(e) e.outerHTML=hfAgBoxHtml(); }catch(e){}
+  try{ devRebuild(); const d=$('#devBox'); if(d) d.innerHTML=devHtml(); }catch(e){}
   return HFA.rows||[];
 }
 function hfAgSet(k,v){ cfg[k]=v; saveCfg(); const e=$('#hfAgBox'); if(e) e.outerHTML=hfAgBoxHtml(); }
@@ -13556,6 +13560,44 @@ VIEWS.tssr={nome:'🧪 Validador de greens',html(){
   </div>`;
 }};
 
+// =====================================================================================
+// 🔁 DEVENDO — horários fixos que pagaram N dias seguidos e agora estão devendo D dias em tiro seco (todas as vols)
+// Entram no 🧩 TS Somado (fonte "só devendo", reunidos de 3 em 3) e no círculo 🔁 da Mesa.
+// =====================================================================================
+let DEV={list:[],idx:new Map()};
+function devCandidatos(rows){
+  const N=+cfg.devN||7, D=+cfg.devD||2, out=[];
+  for(const r of rows||[]){ const h=(r.ts&&r.ts.hist)||[]; if(h.length<N+D) continue;
+    const tail=h.slice(-D), pre=h.slice(-(N+D),-D);
+    if(!tail.every(x=>!x.r)||!pre.every(x=>x.r)) continue;          // N greens seguidos antes, D reds seguidos agora
+    out.push({T:hfNext(r.off),sym:r.sym,vol:r.vol,alvo:r.alvo,slot:r.slotKey,n:N,d:D,dias:r.ts.n});
+  }
+  return out.sort((a,b)=>a.T-b.T);
+}
+function devRebuild(){ DEV.list=devCandidatos(HFA.rows||[]); DEV.idx=new Map(DEV.list.map(x=>[x.sym+'|'+x.T,x])); }
+function devVoto(sym,T){ const x=DEV.idx.get(sym+'|'+T); return x?{alvo:x.alvo,txt:`${x.n} dias pagando antes · devendo ${x.d} (${x.slot})`}:{alvo:null,txt:'nenhum devendo neste jogo'}; }
+function devAviso(e,ch,c){ try{ beep(); }catch(x){} try{ atuAviso(`🔁 SINAL DEVENDO · ${symNome(c.sym).replace('Volatility','Vol')} · ${hmsOf(c.T)} ${c.alvo?'ÍMPAR':'PAR'} · TS ${ch.s.length} de ${tssC().passos}`,'tss'); }catch(x){} }
+function devSel(k,o,def){ return `<select onchange="devSet('${k}',+this.value)">${o.map(([v,t])=>`<option value="${v}" ${String(cfg[k]??def)===String(v)?'selected':''}>${t}</option>`).join('')}</select>`; }
+function devSet(k,v){ cfg[k]=v; saveCfg(); devRebuild(); const b=$('#devBox'); if(b) b.innerHTML=devHtml(); }
+function devUsar(){ tssSet('fonte','dev'); S.tab='tss'; renderTab(); }
+function devHtml(){
+  if(!HFA.rows) return '<div class="nota">⏳ calculando os horários de todas as vols (30 dias)…</div>';
+  const now=Date.now()/1000, L=DEV.list.filter(x=>x.T>now).slice(0,200);
+  if(!L.length) return `<div class="nota">Nenhum horário de todas as vols pagou ${+cfg.devN||7} dias seguidos e está devendo ${+cfg.devD||2} dia(s) agora. O filtro é exigente: mude os dias ou espere o histórico crescer.</div>`;
+  return `<div class="nota"><b>${DEV.list.length}</b> horário(s) devendo · mostrando as próximas ${L.length}. Eles entram no 🧩 TS Somado (fonte "só devendo") e no círculo 🔁 da Mesa.</div>
+  <div class="tw"><table><tr><th>Próxima vez</th><th>Vol</th><th>Horário</th><th>Alvo</th><th>Pagou seguido</th><th>Devendo agora</th></tr>
+  ${L.map(x=>`<tr><td><b>${hmsOf(x.T)}</b> <span class="mu">${new Date(x.T*1000).toLocaleDateString('pt-BR')}</span></td><td>${x.vol}</td><td>${x.slot}</td><td>${hfColor(x.alvo)}</td><td>${x.n} dias</td><td class="ruim">${x.d} dias</td></tr>`).join('')}</table></div>`;
+}
+async function devRender(){ const b=$('#devBox'); if(!b) return; if(!HFA.rows&&!HFA.busy) hfAgCalc(); devRebuild(); b.innerHTML=devHtml(); }
+VIEWS.dev={nome:'🔁 Devendo',html(){ setTimeout(devRender,0); return `<div class="panel"><h3>🔁 Horários fixos devendo — tiro seco, todas as vols</h3>
+  <div class="ctl" style="flex-wrap:wrap">
+    <label>pagou seguido por ${devSel('devN',[[5,'5 dias'],[7,'7 dias'],[10,'10 dias']],7)}</label>
+    <label>e agora está devendo ${devSel('devD',[[1,'1 dia'],[2,'2 dias'],[3,'3 dias']],2)} em TS</label>
+    <button class="pri" onclick="devUsar()">🧩 usar só estes no TS Somado</button>
+  </div>
+  <div class="nota">Um horário entra aqui quando o TS dele deu green em todos os dias seguidos do período escolhido e depois deu red nos dias seguintes. No 🧩 TS Somado eles são reunidos de 3 em 3 num sinal (entre vols diferentes ou alternando PAR/ÍMPAR). Cada passo do sinal avisa no alerta, e o círculo 🔁 da Mesa vota junto com os outros.</div>
+  <div id="devBox"></div></div>`;}};
+
 // abas tiradas (v4.27): Interligado, Scanner e Somas — os motores continuam (a Fábrica, a Confluência e os ⏱ 5s/10s usam)
 delete VIEWS.il; delete VIEWS.scan; delete VIEWS.soma;
 if(cfg.il_on){ cfg.il_on=0; try{ saveCfg(); }catch(e){} }
@@ -13650,7 +13692,7 @@ function fbHtml(){ const c=fbCfg(), F=fbLoad(), A=F.robos.filter(r=>r.estado!=='
     <details style="margin-top:6px"><summary>📜 registro</summary><div class="nota" style="max-height:180px;overflow:auto">${F.log.slice().reverse().map(l=>`${new Date(l.t).toLocaleTimeString('pt-BR')} · ${esc(l.txt)}`).join('<br>')||'—'}</div></details>
     <div class="nota" style="margin-top:6px"><b>Como funciona:</b> a cada 5 min a fábrica passa por cada índice escaneado × tempo marcado (um por vez) e procura padrões 100% (números, duplas, trios, somas com e sem pular casas, sequências, cores${+c.hora?', horas pagantes':''}) em tiro seco e até G1 — descobertos na parte antiga do banco e conferidos na parte nova (mesmo motor do 🎯 Somente Robô). Cada robô novo fica <b>👀 em observação</b>: confere ao vivo sem apostar; ${c.minObs} greens seguidos → <b>✅ aprovado</b>; red na observação → reprovado. Aprovado só sai com ${c.maxRed} reds nos últimos ${c.janela} ao vivo (um red isolado não tira). Só os aprovados com o quadrinho "círculo 9" marcado votam no círculo 9 quando o jogo do robô é o jogo da vez. 100% no passado não garante o futuro.</div>`; }
 
-const TAB_ORDER = ['hist','sfortes','tss','tssr', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'p5', 'p10', 'uo', 'demo', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
+const TAB_ORDER = ['hist','sfortes','tss','tssr', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix','dev', 'robos', 'srob', 'p5', 'p10', 'uo', 'demo', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
 let LAST_HEAVY = 0;
 function fillRes() {
