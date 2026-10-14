@@ -3438,19 +3438,7 @@ VIEWS.hfix={nome:'🕒 Horários Fixos',html(){
       ${prox.map(r=>`<tr><td><b>${hmsOf(r.next)}</b></td><td>${hfColor(r.alvo)}</td><td class="mu">${[0,1,2].slice(0,lvl+1).map(g=>NIVEL[g]+' '+hmsOf(r.next+g*step)).join(' → ')}</td><td>${hfMetric(r.metric)}</td><td>${r.metric.current}d (máx ${r.metric.max}d)</td><td>${r.metric.n}</td></tr>`).join('')}
     </table></div>`:'<div class="nota">Nenhum horário do filtro nos próximos 60 minutos.</div>'}
   </div>
-  <div class="panel"><h3>🔥 Melhores horários fixos</h3>
-    <div class="tw"><table>
-      <tr><th>Horário</th><th>Alvo</th><th>TS %</th><th>TS atual</th><th>TS máx.</th><th>G1 %</th><th>G1 atual</th><th>G1 máx.</th><th>G2 %</th><th>G2 atual</th><th>G2 máx.</th><th>Dias</th><th>Últimos dias</th></tr>
-      ${top.map(r=>`<tr>
-        <td><b>${r.slotKey}</b></td><td>${hfColor(r.alvo)}</td>
-        <td>${hfMetric(r.ts)}</td><td>${r.ts.current}d</td><td>${r.ts.max}d</td>
-        <td>${hfMetric(r.g1)}</td><td>${r.g1.current}d</td><td>${r.g1.max}d</td>
-        <td>${hfMetric(r.g2)}</td><td>${r.g2.current}d</td><td>${r.g2.max}d</td>
-        <td>${r.metric.n}</td>
-        <td style="text-align:left">${r.metric.hist.slice(-10).reverse().map(x=>x.r?`<span class="hppill g" title="${fmtT(x.T*1000)}">✅${NIVEL[x.h]}</span>`:`<span class="hppill v" title="${fmtT(x.T*1000)}">❌</span>`).join('')}</td>
-      </tr>`).join('')}
-    </table></div>
-  </div>
+  ${hfAgBoxHtml()}
   <div class="panel"><h3>📊 Onde pagou <small>top 100 · até G2</small></h3>
     <div class="tw"><table><tr><th>Horário</th><th>Alvo</th><th>TS</th><th>G1</th><th>G2</th><th>RED</th><th>Taxa até G2</th></tr>
       ${top.slice(0,100).map(r=>`<tr><td><b>${r.slotKey}</b></td><td>${hfColor(r.alvo)}</td>
@@ -12987,7 +12975,8 @@ async function tssScanSym(sym){
   const c=tssC(), bank=d5BankName(5,sym), now=Date.now(), agora=now/1000, lim=agora+65*60, out=[];
   if(c.fonte!=='fixo'){ try{ const rows=await idbRange(bank,now-Math.max(c.hpMin+2,+c.hpPer||24)*3600e3,now+60000), G=rows&&rows.length?gridBuild(rows,5):null;
     if(G) for(const r of hpScan(G,'all')){ const o=r.L[0]; if(o.cur>=c.hpMin){ const T=hpNext(r.off); if(T<=lim) out.push({T,sym,alvo:r.alvo,f:'hp',h:o.cur,d:0}); } } }catch(e){ console.warn('ts somado horas',e); } }
-  if(c.fonte!=='horas'){ try{ const rows=await idbRange(bank,now-(Math.max(c.hfDias+1,+c.hfJan||7))*86400e3-3600e3,now+60000), G=rows&&rows.length?gridBuild(rows,5):null, hr=new Date().getHours();
+  if(c.fonte!=='horas'&&Array.isArray(cfg.tssFixo)&&cfg.tssFixo.length){ for(const it of cfg.tssFixo){ if(it.sym!==sym) continue; const T=hfNext(it.off); if(T<=lim) out.push({T,sym,alvo:it.alvo,f:'hf',h:0,d:it.n}); } }
+  else if(c.fonte!=='horas'){ try{ const rows=await idbRange(bank,now-(Math.max(c.hfDias+1,+c.hfJan||7))*86400e3-3600e3,now+60000), G=rows&&rows.length?gridBuild(rows,5):null, hr=new Date().getHours();
     if(G) for(const h of [hr,(hr+1)%24]) for(const r of hfScan(G,String(h))){ const m=r.ts; if(m.n>=c.hfDias&&m.ok===m.n){ const T=hfNext(r.off); if(T<=lim) out.push({T,sym,alvo:r.alvo,f:'hf',h:0,d:m.n}); } } }catch(e){ console.warn('ts somado fixo',e); } }
   TSS.scan[sym]={t:Date.now(),L:out}; tssMontaPool();
 }
@@ -13049,6 +13038,7 @@ function tssLoop(){
       mud=true; tssDemo(e,ch,c); try{ tssrPasso(e,ch); }catch(x){ console.warn('robôs criados',x); } break; }
   }
   try{ tssrTick(st); }catch(x){ console.warn('robôs criados',x); }
+  try{ agendaTick(); }catch(x){ console.warn('robôs por agenda',x); }
   if(mud){ tssSave(); if(S.tab==='tss') tssRender(); }
 }
 // ---------- 3) entrada na conta DEMO (opcional, uma regra por vez) ----------
@@ -13148,7 +13138,7 @@ VIEWS.tss={nome:'🧩 TS Somado',live(){ if(Date.now()-TSS.ui>3000) tssRender();
     <div class="nota">Pega os TS de <b>horas pagantes</b> e <b>horário fixo</b> de todas as vols escaneadas (${d5Syms().map(s=>symNome(s).replace('Volatility','Vol')).join(', ')}) nos segundos dos tempos marcados. Um sinal = até ${C.passos} TS seguidos: se o 1º der red, entra no próximo TS que <b>dê tempo</b> (mínimo de segundos acima e o resultado do anterior já ter saído); se não der tempo, pula para o seguinte. <b>⭐ forte</b> = o TS só entra se os círculos das ⭐ Confirmações apontarem a mesma cor com o mínimo de confirmações (${mcfC().min}).</div>
     <div class="nota">⚠️ O jogo das 35:20 é o mesmo tick em 5s, 10s e 20s — por isso cada segundo conta uma vez só. Compare o <b>acerto por entrada</b> com 50% (sorte) e o green da cadeia com a sorte da cadeia: 2 TS = 75%, 3 TS = 87,5%, 4 TS = 93,8%. Só tem vantagem de verdade se ficar acima disso com muitos sinais.</div>
     <div class="nota">🎲 No puro acaso, 1 em cada 32 segundos passa em “5h seguidas pagando” e 1 em cada 8 passa em “3 dias 100%” — por isso aparecem dezenas de TS por hora em cada vol. Aumentar as horas/dias deixa a lista menor e mais exigente.</div>
-    <div class="nota">${mcfQuemTxt()} · o motor roda só na página que calcula; esta aba mostra o registro.</div></div>${tssrValHtml()}<div id="tssR" class="panel"></div>`; }};
+    <div class="nota">${mcfQuemTxt()} · o motor roda só na página que calcula; esta aba mostra o registro.</div></div><div id="tssR" class="panel"></div>`; }};
 
 // =====================================================================================
 // 🧪 VALIDADOR DE GREENS + 🤖 ROBÔS CRIADOS (em cima dos sinais do 🧩 TS Somado)
@@ -13217,7 +13207,7 @@ function tssrSim(R,st){
 function tssrSpark(curve,w=220,h=46){ if(!curve||curve.length<2) return `<svg width="${w}" height="${h}"></svg>`; const mn=Math.min(...curve,0), mx=Math.max(...curve,0), sp=(mx-mn)||1;
   const pts=curve.map((v,i)=>`${(i/(curve.length-1)*w).toFixed(1)},${(h-2-(v-mn)/sp*(h-4)).toFixed(1)}`).join(' '), y0=(h-2-(0-mn)/sp*(h-4)).toFixed(1), up=curve.at(-1)>=0;
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><line x1="0" y1="${y0}" x2="${w}" y2="${y0}" stroke="#475569" stroke-dasharray="3 3" stroke-width="1"/><polyline fill="none" stroke="${up?'#22c55e':'#ef4444'}" stroke-width="2" points="${pts}"/></svg>`; }
-function tssrDesc(R){ const pos=['TS (1º TS)','G1 (2º TS)','G2 (3º TS)'][+R.entrada], g=+R.gale?` + ${R.gale} gale${+R.gale>1?'s':''} nos TS seguintes${R.volGale==='mesma'?' (mesma vol)':''}`:'';
+function tssrDesc(R){ if(R.agenda) return R.descA||'agenda'; const pos=['TS (1º TS)','G1 (2º TS)','G2 (3º TS)'][+R.entrada], g=+R.gale?` + ${R.gale} gale${+R.gale>1?'s':''} nos TS seguintes${R.volGale==='mesma'?' (mesma vol)':''}`:'';
   const gat=R.gat==='sempre'?'em todos os sinais':R.gat==='xy'?`depois de ${R.X} red + ${R.Y} green`:R.gat==='reds'?`depois de ${R.X} reds seguidos`:`depois de ${R.X} greens seguidos`;
   const ci=R.gat==='sempre'?'':' → entra '+(/^g/.test(R.ciclo)?`até dar ${R.ciclo.slice(1)} green`:`${R.ciclo} sinal(is)`);
   return `${pos}${g} · ${R.fonte==='todas'?'todas as regras':TSS_REGRAS.find(x=>x[0]===R.fonte)[1]}${+R.forte?' ⭐ fortes':''} · ${+R.cor<0?'PAR e ÍMPAR':+R.cor?'só ÍMPAR':'só PAR'} · ${R.vols&&R.vols.length?R.vols.map(s=>symNome(s).replace('Volatility','Vol')).join(', '):'todas as vols'} · ${gat}${ci}`; }
@@ -13335,7 +13325,7 @@ function tssrGradeHtml(){
   if(!L.length) return `<div class="nota" style="padding:20px">Nenhum robô criado ainda. Crie no 🧪 Validador da aba 🧩 TS Somado (página principal).</div>`;
   const demo=k=>{ const D=(typeof DM!=='undefined'?DM.log:[]).filter(x=>String(x.key||'').startsWith('tssr|'+k+'|')&&(x.res==='green'||x.res==='red')); return D.length?D.reduce((a,x)=>a+(+x.profit||0),0):null; };
   return L.map(({R,S},i)=>{ const at=tssrAtivo(R), dur=Date.now()-(S.ini||R.criado), h=Math.floor(dur/3600e3), d=Math.floor(h/24), dm=demo(R.id);
-    const estado=S.parado?`<b class="ruim">⏹ ${S.parado}</b>`:!+R.on?'<span class="mu">desligado</span>':S.cur?(S.cur.real?'<b class="ok">▶ entrando</b>':'👁 acompanhando (virtual)'):tssrArmado(R,S)?'<b class="ok">● armado — esperando sinal</b>':`<span class="mu">⏳ esperando o gatilho (${S.stream.slice(-6)||'—'})</span>`;
+    const estado=R.agenda?agendaEstadoTxt(R,S):S.parado?`<b class="ruim">⏹ ${S.parado}</b>`:!+R.on?'<span class="mu">desligado</span>':S.cur?(S.cur.real?'<b class="ok">▶ entrando</b>':'👁 acompanhando (virtual)'):tssrArmado(R,S)?'<b class="ok">● armado — esperando sinal</b>':`<span class="mu">⏳ esperando o gatilho (${S.stream.slice(-6)||'—'})</span>`;
     const chips=S.ents.slice(-24).map(x=>`<i class="sf-c ${x.o==='G'?(x.k===0?'t':'g'):'r'}" title="${new Date(x.t*1000).toLocaleString('pt-BR')} · ${x.cor?'ÍMPAR':'PAR'} · ${x.pnl>=0?'+':''}${x.pnl}">${x.o==='G'?(x.k===0?'✓':(x.k+1)+'º'):'R'}</i>`).join('');
     return `<div class="tsr-card ${at?'on':''}"><div class="tsr-top"><b>#${i+1} ${R.nome}</b><span class="mu">${d?d+'d ':''}${h%24}h ${Math.floor(dur/60e3)%60}m</span>
         <span style="margin-left:auto;display:flex;gap:6px"><button class="${+R.on?'on':''}" onclick="tssrLigar('${R.id}',${+R.on?0:1})">${+R.on?'⏸ desligar':'▶ ligar'}</button><button onclick="if(confirm('Zerar o placar deste robô?'))tssrCmd('reset','${R.id}')">↺ zerar</button><button onclick="tssrApagar('${R.id}')">🗑</button></span></div>
@@ -13350,6 +13340,221 @@ function tssrMesaHtml(){
     <div class="ms-nota">Saldo, ROI e green/red contam só as entradas que o robô fez (gatilho armado e ligado). Antes do gatilho ele acompanha no virtual. “DEMO REAL” soma o resultado de verdade das ordens na conta DEMO. Com poucos sinais o ranking muda muito por acaso.</div></div>`;
 }
 setInterval(()=>{ try{ if(typeof MESA!=='undefined'&&MESA.open&&cfg.mesa_modo==='tssr') tssrMesaRender(false); }catch(e){} },2000);
+
+// =====================================================================================
+// 🌐 MELHORES HORÁRIOS FIXOS (todas as vols) · 🗓 robôs por agenda · 🔎 busca automática do validador
+// =====================================================================================
+let HFA={k:'',t:0,rows:null,busy:false,err:''};
+const HFA_JAN=30;                                         // janela da tabela: últimos 30 dias de cada vol
+async function hfAgCalc(force){
+  const syms=d5Syms(), key=syms.join(',');
+  if(!force&&HFA.rows&&HFA.k===key&&Date.now()-HFA.t<10*60e3) return HFA.rows;
+  if(HFA.busy) return HFA.rows||[];
+  HFA.busy=true; HFA.err='';
+  const now=Date.now(), out=[];
+  try{
+    for(const sym of syms){
+      const rows=await idbRange(d5BankName(5,sym), now-HFA_JAN*86400e3-3600e3, now+60000);
+      const G=rows&&rows.length?gridBuild(rows,5,now-HFA_JAN*86400e3):null;
+      if(!G) continue;
+      for(const r of hfScan(G,'all')){ if(r.ts.n<5&&r.g1.n<5&&r.g2.n<5) continue;
+        out.push({sym,vol:symNome(sym).replace('Volatility','Vol'),off:r.off,slotKey:r.slotKey,alvo:r.alvo,ts:r.ts,g1:r.g1,g2:r.g2}); }
+    }
+    HFA.rows=out;
+  }catch(e){ HFA.rows=[]; HFA.err=e.message||String(e); console.warn('horários fixos (todas as vols)',e); }
+  finally{ HFA.k=key; HFA.t=Date.now(); HFA.busy=false; }
+  try{ const e=$('#hfAgBox'); if(e) e.outerHTML=hfAgBoxHtml(); }catch(e){}
+  return HFA.rows||[];
+}
+function hfAgSet(k,v){ cfg[k]=v; saveCfg(); const e=$('#hfAgBox'); if(e) e.outerHTML=hfAgBoxHtml(); }
+function hfAgSel(k,o,def,num=1){ return `<select onchange="hfAgSet('${k}',${num?'+this.value':'this.value'})">${o.map(([v,t])=>`<option value="${v}" ${String(cfg[k]??def)===String(v)?'selected':''}>${t}</option>`).join('')}</select>`; }
+function hfAgFiltra(){
+  const minD=+cfg.hfAgMin||7, minR=cfg.hfAgRate==null?100:+cfg.hfAgRate, key=cfg.hfAgSort||'ts';
+  return (HFA.rows||[]).filter(r=>r[key].n>=minD&&r[key].rate>=minR)
+    .sort((a,b)=>b[key].rate-a[key].rate||b[key].current-a[key].current||b[key].n-a[key].n||a.slotKey.localeCompare(b.slotKey));
+}
+function hfAgBoxHtml(){
+  if(!HFA.rows){
+    if(HFA.err) return `<div class="panel" id="hfAgBox"><h3>🌐 Melhores horários fixos — todas as vols</h3><div class="nota">⛔ Não consegui calcular: ${HFA.err} <button onclick="hfAgCalc(true)">tentar de novo</button></div></div>`;
+    if(!HFA.busy) hfAgCalc();
+    return `<div class="panel" id="hfAgBox"><h3>🌐 Melhores horários fixos — todas as vols</h3><div class="nota">⏳ Calculando os horários de ${d5Syms().length} vol(s) nos últimos ${HFA_JAN} dias…</div></div>`;
+  }
+  const key=cfg.hfAgSort||'ts', minD=+cfg.hfAgMin||7;
+  const rows=hfAgFiltra(), top=rows.slice(0,300), vols=new Set(rows.map(r=>r.sym)).size;
+  const tssN=Array.isArray(cfg.tssFixo)?cfg.tssFixo.length:0;
+  return `<div class="panel" id="hfAgBox"><h3>🔥 Melhores horários fixos — todas as vols <small>mínimo ${minD} dias · janela ${HFA_JAN} dias</small></h3>
+    <div class="ctl" style="flex-wrap:wrap">
+      <label>mín. dias ${hfAgSel('hfAgMin',[[7,'7 dias'],[10,'10 dias'],[15,'15 dias'],[20,'20 dias'],[30,'30 dias']],7)}</label>
+      <label>taxa mín. ${hfAgSel('hfAgRate',[[100,'100%'],[95,'95%'],[90,'90%'],[80,'80%'],[0,'sem filtro']],100)}</label>
+      <label>ordenar ${hfAgSel('hfAgSort',[['ts','tiro seco'],['g1','até G1'],['g2','até G2']],'ts',0)}</label>
+      <button onclick="hfAgCalc(true)">🔄 recalcular</button>
+    </div>
+    <div class="ctl" style="flex-wrap:wrap;margin-top:6px">
+      <button class="pri" onclick="hfAgEnviarTss()">🧩 enviar estes ao TS Somado (${Math.min(500,rows.length)})</button>
+      <button onclick="cfg.tssFixo=[];saveCfg();TSS.scan={};const e=$('#hfAgBox');if(e)e.outerHTML=hfAgBoxHtml();">🧹 tirar do TS Somado</button>
+      <span class="mu">TS Somado usando ${tssN?tssN+' horários desta lista':'a varredura automática (padrão)'}</span>
+    </div>
+    <div class="ctl" style="flex-wrap:wrap;margin-top:6px">
+      <button class="pri" onclick="agendaCriarFixo(+cfg.hfAgQtd||20)">🤖 criar robô nos próximos ${+cfg.hfAgQtd||20} horários fixos</button>
+      <label>quantos ${hfAgSel('hfAgQtd',[[5,'5'],[10,'10'],[20,'20'],[50,'50']],20)}</label>
+      <span class="mu">o robô começa ligado e entra sozinho em cada horário (🧪 Validador de greens → ROBÔS POR AGENDA)</span>
+    </div>
+    <div class="nota">${rows.length} horário(s) em ${vols} vol(s) passam no filtro. Cada linha vale para a vol indicada: o mesmo hh:mm:ss todo dia, conferido dia a dia. Dia sem dado é pulado (não vira RED). TS = o próprio segundo; G1 = +5s; G2 = +10s.${HFA.err?` <b class="ruim">${HFA.err}</b>`:''}</div>
+    ${!rows.length?`<div class="panel dvbad"><b>Nenhum horário passou no filtro.</b> <span class="nota">Diminua a taxa mínima ou o mínimo de dias, ou baixe mais histórico em 📥 Histórico.</span></div>`:''}
+    <div class="tw"><table>
+      <tr><th>Vol</th><th>Horário</th><th>Alvo</th><th>TS %</th><th>TS atual</th><th>TS máx.</th><th>G1 %</th><th>G1 atual</th><th>G1 máx.</th><th>G2 %</th><th>G2 máx.</th><th>Dias</th><th>Últimos dias</th></tr>
+      ${top.map(r=>`<tr>
+        <td>${r.vol}</td><td><b>${r.slotKey}</b></td><td>${hfColor(r.alvo)}</td>
+        <td>${hfMetric(r.ts)}</td><td>${r.ts.current}d</td><td>${r.ts.max}d</td>
+        <td>${hfMetric(r.g1)}</td><td>${r.g1.current}d</td><td>${r.g1.max}d</td>
+        <td>${hfMetric(r.g2)}</td><td>${r.g2.max}d</td>
+        <td>${r.ts.n}</td>
+        <td style="text-align:left">${r.ts.hist.slice(-10).reverse().map(x=>x.r?`<span class="hppill g" title="${fmtT(x.T*1000)}">✅</span>`:`<span class="hppill v" title="${fmtT(x.T*1000)}">❌</span>`).join('')}</td>
+      </tr>`).join('')}
+    </table></div></div>`;
+}
+// envia a lista filtrada para o TS Somado: a varredura passa a usar estes horários (de preferência os de mais dias)
+function hfAgEnviarTss(){
+  const L=hfAgFiltra().slice(0,500).map(r=>({sym:r.sym,off:r.off,alvo:r.alvo,n:r.ts.n}));
+  if(!L.length){ alert('Nenhum horário passa no filtro.'); return; }
+  cfg.tssFixo=L; saveCfg(); TSS.scan={};
+  const e=$('#hfAgBox'); if(e) e.outerHTML=hfAgBoxHtml();
+  alert(`${L.length} horários enviados ao 🧩 TS Somado. Eles entram na próxima varredura (até 1 min) e têm prioridade sobre o horário fixo automático.`);
+}
+// ---------- 🗓 robôs por agenda (usam o motor TSSR: aparecem em 🎮 Mesa → 🧩 ROBÔS CRIADOS) ----------
+async function agendaColeta(kind,opt){
+  if(!HFA.rows||HFA.busy){ while(HFA.busy) await new Promise(r=>setTimeout(r,300)); if(!HFA.rows) await hfAgCalc(true); }
+  const now=Date.now()/1000, out=[];
+  if(kind==='fixo'){
+    const minD=+cfg.hfAgMin||7, minR=cfg.hfAgRate==null?100:+cfg.hfAgRate;
+    for(const r of (HFA.rows||[])){ if(r.ts.n<minD||r.ts.rate<minR) continue;
+      for(let k=0;k<2;k++){ const T=hfNext(r.off)+k*86400; if(T>now+1) out.push({T,sym:r.sym,alvo:r.alvo,n:r.ts.n,rate:r.ts.rate}); } }
+  }else{
+    const hMin=+opt.hpMin||3, H=+opt.horas||1;
+    for(const sym of d5Syms()){
+      const rows=await idbRange(d5BankName(5,sym), Date.now()-Math.max(hMin+2,24)*3600e3, Date.now()+60000);
+      const G=rows&&rows.length?gridBuild(rows,5):null; if(!G) continue;
+      for(const r of hpScan(G,'all')){ const o=r.L[0]; if(o.cur<hMin) continue; const b=hpNext(r.off);
+        for(let k=0;k<H;k++){ const T=b+k*3600; if(T>now+1&&T<=now+H*3600) out.push({T,sym,alvo:r.alvo,n:o.cur,rate:100}); } }
+    }
+  }
+  out.sort((a,b)=>a.T-b.T||b.rate-a.rate);
+  const seen=new Set(), uniq=[]; for(const x of out){ if(seen.has(x.T)) continue; seen.add(x.T); uniq.push(x); }   // um horário por segundo
+  return uniq;
+}
+function agendaCriar(nomeBase,items,desc){
+  if(!items.length){ alert('Nenhum horário encontrado com esses filtros. Baixe mais dias ou diminua o filtro.'); return; }
+  const val=Math.max(0.35,+((document.getElementById('agVal')||{}).value)||0.35), sl=+((document.getElementById('agSl')||{}).value)||0, sw=+((document.getElementById('agSw')||{}).value)||0;
+  const id='g'+Date.now().toString(36);
+  TSSR.lista.push({...TSSR_DEF,id,kind:'agenda',nome:`${nomeBase} · ${items.length} sinais`,descA:desc,
+    agenda:items.map(x=>({T:x.T,sym:x.sym,alvo:x.alvo,s:0,stake:0})),val,sl,sw,on:1,criado:Date.now(),gat:'sempre'});
+  tssrSalvaLista();
+  alert(`Robô criado com ${items.length} entradas agendadas e já ligado.\nCada entrada sai pela 🎮 Mesa (conta DEMO) no segundo do horário, com o valor escolhido.\nAcompanhe em 🎮 Mesa → 🧩 ROBÔS CRIADOS. O TS Somado precisa estar aberto para o robô rodar.`);
+  try{ atuAviso(`🗓 Robô por agenda criado: ${items.length} entradas`,'tss'); }catch(e){}
+}
+async function agendaCriarFixo(n){
+  const items=(await agendaColeta('fixo')).slice(0,+n||20);
+  agendaCriar('🕒 horário fixo',items,`🕒 próximos ${items.length} horários fixos · taxa ≥ ${cfg.hfAgRate==null?100:+cfg.hfAgRate}% · ≥ ${+cfg.hfAgMin||7} dias · todas as vols`);
+}
+async function agendaCriarHp(){
+  const H=+((document.getElementById('agHoras')||{}).value)||1, N=+((document.getElementById('agN')||{}).value)||0, hm=+((document.getElementById('agHpMin')||{}).value)||3;
+  let items=await agendaColeta('hp',{horas:H,hpMin:hm}); if(N>0) items=items.slice(0,N);
+  agendaCriar('🕐 horas pagantes',items,`🕐 horas pagantes ≥ ${hm}h · próximas ${H}h · ${items.length} sinais`);
+}
+function agendaEstadoTxt(R,S){
+  if(S.parado) return `<b class="ruim">⏹ ${S.parado}</b>`;
+  if(!+R.on) return '<span class="mu">desligado</span>';
+  const pend=R.agenda.filter(x=>x.s===0), ent=R.agenda.filter(x=>x.s===1), nx=pend[0];
+  if(!pend.length&&!ent.length) return '<span class="mu">✔ agenda concluída</span>';
+  return `<b class="ok">🗓 ${pend.length} pendentes · ${ent.length} aguardando resultado</b>${nx?` · próximo ${hmsOf(nx.T)} ${symNome(nx.sym).replace('Volatility','Vol')} ${nx.alvo?'ÍMPAR':'PAR'}`:''}`;
+}
+// motor: roda no cérebro, a cada 0,5s. Dispara a entrada 2,7–4,3s antes do segundo e confere o resultado no banco de 5s
+function agendaTick(){
+  if(!TSSR.ok) return; const agora=dmNow(); let mud=false, mudL=false;
+  for(const R of TSSR.lista){ if(!R.agenda) continue; const S=TSSR.st[R.id]||(TSSR.st[R.id]=tssrNovoS());
+    for(const it of R.agenda){
+      if(it.s===0){
+        if(!+R.on||S.parado) continue;
+        if(agora>=it.T-4.3&&agora<=it.T-2.7){
+          it.s=1; it.stake=Math.max(0.35,Math.round((+R.val||0.35)*100)/100); mudL=true;
+          tssEnviar({key:`agenda|${R.id}|${it.T}|${it.sym}`,src:'tss',man:1,nome:`🗓 ${R.nome} · ${hmsOf(it.T)} ${symNome(it.sym).replace('Volatility','Vol')}`,sym:it.sym,T:it.T,step:5,maxN:0,ct:it.alvo?'DIGITODD':'DIGITEVEN',stakeBase:it.stake,stakeFix:it.stake,mcor:it.alvo});
+        } else if(agora>it.T-2.7){ it.s=4; mudL=true; }                       // chegou tarde: perdeu a janela
+      } else if(it.s===1){
+        const p=tssJogo(it.sym,it.T);
+        if(p!=null){
+          const o=p===it.alvo?'G':'R', profit=o==='G'?it.stake*TSSR_PAY:-it.stake;
+          it.s=o==='G'?2:3; mudL=true; mud=true;
+          tssrFechaS(R,S,o,true,profit,it.alvo,{st:it.stake});
+          S.ents.push({t:it.T,o,k:0,cor:it.alvo,s:[[it.T,it.sym,it.alvo,o==='G'?1:0]],st:[it.stake],pnl:Math.round(profit*100)/100}); if(S.ents.length>1000) S.ents.shift();
+          const ss=S.pnl-(S.sess0||0); if(+R.sl>0&&ss<=-R.sl) S.parado=`stop loss ($${ss.toFixed(2)})`; else if(+R.sw>0&&ss>=+R.sw) S.parado=`stop win (+$${ss.toFixed(2)})`;
+          if(S.parado) try{ atuAviso(`🗓 ${R.nome}: parou por ${S.parado}`,'tss'); }catch(x){}
+        } else if(agora>it.T+25){ it.s=4; mudL=true; }                          // sem o jogo no banco: anulada
+      }
+    }
+    if(R.agenda.every(x=>x.s>=2)&&+R.on){ R.on=0; mudL=true; }
+  }
+  if(mudL) tssrSalvaLista(); if(mud) tssrSalvaSt();
+}
+// ---------- 🔎 busca automática (100% e depois até 90%) ----------
+let TSSR_AUTO=[];
+function tssrAutoBusca(minPct,minN){
+  const st=tssLoad(), res=[], fontes=['todas',...TSS_REGRAS.map(x=>x[0])];
+  const gats=[{gat:'sempre',X:1,Y:1,ciclo:'1'}];
+  for(const X of [1,2,3]) gats.push({gat:'reds',X,Y:1,ciclo:'1'},{gat:'greens',X,Y:1,ciclo:'1'});
+  for(const [X,Y] of [[2,1],[3,1],[2,2]]) gats.push({gat:'xy',X,Y,ciclo:'1'});
+  let n=0;
+  for(const fonte of fontes) for(const forte of [0,1]) for(const [entrada,gale] of [[0,0],[0,1],[0,2],[1,0],[1,1],[2,0]]) for(const cor of [-1,0,1]) for(const g of gats){
+    const R={...TSSR_DEF,fonte,forte,entrada,gale,cor,gat:g.gat,X:g.X,Y:g.Y,ciclo:g.ciclo,volGale:'qualquer',vols:[],val:0.35,calc:'zero',rec:0,recLucro:0,sl:0,sw:0};
+    const S=tssrSim(R,st).S; n++;
+    if(S.n>=minN){ const pct=100*S.g/S.n; if(pct>=minPct-1e-9) res.push({R,pct,n:S.n,pnl:S.pnl}); }
+  }
+  res.sort((a,b)=>b.pct-a.pct||b.n-a.n||b.pnl-a.pnl);
+  return {res,n};
+}
+function tssrAutoRodar(){
+  const minN=+((document.getElementById('agAutoN')||{}).value)||30, box=document.getElementById('tssrAuto'); if(!box) return;
+  box.innerHTML='<div class="nota">⏳ testando as combinações no histórico…</div>';
+  setTimeout(()=>{
+    const {res,n}=tssrAutoBusca(90,minN); TSSR_AUTO=res.slice(0,60);
+    const c100=res.filter(x=>x.pct>=100-1e-9).length;
+    box.innerHTML=`<div class="nota"><b>${n}</b> combinações testadas · <b>${c100}</b> com 100% · <b>${res.length-c100}</b> entre 90% e 99%, todas com ≥ ${minN} entradas. Mostrando as ${TSSR_AUTO.length} melhores.</div>`+
+      (TSSR_AUTO.length?`<div class="tw"><table><tr><th>Regra</th><th>Green</th><th>Entradas</th><th>Sorte (acaso)</th><th>Saldo</th><th></th></tr>${TSSR_AUTO.map((x,i)=>`<tr><td style="text-align:left">${tssrDesc(x.R)}</td><td><b class="ok">${x.pct.toFixed(0)}%</b></td><td>${x.n}</td><td class="mu">${(100*(1-Math.pow(0.5,(+x.R.gale)+1))).toFixed(1)}%</td><td class="${x.pnl>=0?'ok':'ruim'}">${x.pnl>=0?'+':''}$${x.pnl.toFixed(2)}</td><td><button onclick="tssrUsarAuto(${i})">usar esta regra</button></td></tr>`).join('')}</table></div>`:'<div class="nota">Nenhuma regra chegou a 90% com esse mínimo de entradas. Diminua o mínimo ou espere o histórico crescer.</div>');
+  },20);
+}
+function tssrUsarAuto(i){ const x=TSSR_AUTO[i]; if(!x) return; cfg.tssv={...TSSR_DEF,...x.R,vols:[]}; saveCfg(); tssrPainel(); window.scrollTo({top:0,behavior:'smooth'}); }
+// ---------- 🧪 aba própria do validador ----------
+VIEWS.tssr={nome:'🧪 Validador de greens',html(){
+  setTimeout(()=>{ try{ tssrValRender(); }catch(e){} },0);
+  return `${tssrValHtml()}
+  <div class="panel"><h3>🗓 Robôs por agenda <small>entram sozinhos nos horários marcados</small></h3>
+    <div class="ctl" style="flex-wrap:wrap">
+      <label>🕒 horário fixo · próximos <select id="agQtdF">${[5,10,20,50].map(v=>`<option value="${v}" ${v===20?'selected':''}>${v}</option>`).join('')}</select></label>
+      <button class="pri" onclick="agendaCriarFixo(+document.getElementById('agQtdF').value)">🤖 criar robô nos próximos horários fixos</button>
+      <span class="mu">usa a lista 🌐 Melhores horários fixos (todas as vols, taxa e dias do filtro)</span>
+    </div>
+    <div class="ctl" style="flex-wrap:wrap;margin-top:8px">
+      <label>🕐 horas pagantes ≥ <select id="agHpMin">${[3,4,5,6,8,10].map(v=>`<option value="${v}" ${v===3?'selected':''}>${v}h</option>`).join('')}</select></label>
+      <label>nas próximas <select id="agHoras">${[[1,'1 hora'],[2,'2 horas'],[6,'6 horas'],[24,'todas as horas (24h)']].map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select></label>
+      <label>quantos sinais <select id="agN">${[[0,'todos'],[5,'5'],[10,'10'],[20,'20'],[50,'50']].map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select></label>
+      <button class="pri" onclick="agendaCriarHp()">🤖 criar robô de horas pagantes</button>
+    </div>
+    <div class="ctl" style="flex-wrap:wrap;margin-top:8px">
+      <label>valor por entrada <select id="agVal">${[0.35,0.5,1,2,5].map(v=>`<option value="${v}">$ ${String(v).replace('.',',')}</option>`).join('')}</select></label>
+      <label>stop loss $ <input id="agSl" type="number" min="0" step="0.5" value="0" style="width:70px"></label>
+      <label>stop win $ <input id="agSw" type="number" min="0" step="0.5" value="0" style="width:70px"></label>
+    </div>
+    <div class="nota">Cada entrada é um TS sem gale, no segundo exato do horário, com o valor escolhido. O robô começa ligado. O TS Somado precisa estar aberto (é ele que calcula e dispara). Acompanhe em 🎮 Mesa → 🧩 ROBÔS CRIADOS.</div>
+  </div>
+  <div class="panel"><h3>🔎 Buscar robôs automáticos — 100% e depois até 90%</h3>
+    <div class="ctl" style="flex-wrap:wrap">
+      <label>mín. de entradas no histórico <select id="agAutoN">${[5,10,20,30,50].map(v=>`<option value="${v}" ${v===30?'selected':''}>${v}</option>`).join('')}</select></label>
+      <button class="pri" onclick="tssrAutoRodar()">🔎 buscar agora</button>
+    </div>
+    <div class="nota"><b>Por que aparece 100% no histórico?</b> A busca testa cerca de 1.400 combinações (fonte × força × entrada × gale × cor × gatilho) nos mesmos sinais e mostra as que deram green em todas as entradas. Isso é escolher o melhor entre muitas opções olhando o passado. Com poucas entradas, acertar tudo acontece por sorte: um sinal sem gale tem 50% de chance de green, com 1 gale 75%, com 2 gales 87,5%. Cinco entradas sem gale acertam todas só em 3% das vezes, mas testando 1.400 combinações algumas sempre vão dar 100% por acaso.</div>
+    <div class="nota"><b>Como confirmar que não é sorte:</b> exija pelo menos 30 entradas, compare o green com a coluna "sorte" e deixe a regra rodando no DEMO em dados novos. Se o green cair para perto da sorte, o 100% era do passado e não se repete.</div>
+    <div id="tssrAuto"></div>
+  </div>`;
+}};
 
 // abas tiradas (v4.27): Interligado, Scanner e Somas — os motores continuam (a Fábrica, a Confluência e os ⏱ 5s/10s usam)
 delete VIEWS.il; delete VIEWS.scan; delete VIEWS.soma;
@@ -13445,7 +13650,7 @@ function fbHtml(){ const c=fbCfg(), F=fbLoad(), A=F.robos.filter(r=>r.estado!=='
     <details style="margin-top:6px"><summary>📜 registro</summary><div class="nota" style="max-height:180px;overflow:auto">${F.log.slice().reverse().map(l=>`${new Date(l.t).toLocaleTimeString('pt-BR')} · ${esc(l.txt)}`).join('<br>')||'—'}</div></details>
     <div class="nota" style="margin-top:6px"><b>Como funciona:</b> a cada 5 min a fábrica passa por cada índice escaneado × tempo marcado (um por vez) e procura padrões 100% (números, duplas, trios, somas com e sem pular casas, sequências, cores${+c.hora?', horas pagantes':''}) em tiro seco e até G1 — descobertos na parte antiga do banco e conferidos na parte nova (mesmo motor do 🎯 Somente Robô). Cada robô novo fica <b>👀 em observação</b>: confere ao vivo sem apostar; ${c.minObs} greens seguidos → <b>✅ aprovado</b>; red na observação → reprovado. Aprovado só sai com ${c.maxRed} reds nos últimos ${c.janela} ao vivo (um red isolado não tira). Só os aprovados com o quadrinho "círculo 9" marcado votam no círculo 9 quando o jogo do robô é o jogo da vez. 100% no passado não garante o futuro.</div>`; }
 
-const TAB_ORDER = ['hist','sfortes','tss', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'p5', 'p10', 'uo', 'demo', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
+const TAB_ORDER = ['hist','sfortes','tss','tssr', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix', 'robos', 'srob', 'p5', 'p10', 'uo', 'demo', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
 let LAST_HEAVY = 0;
 function fillRes() {
