@@ -698,7 +698,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.33 · 13/10/2026 · 🧩 TS Somado: PAR/ÍMPAR separados · 🧪 validador de greens (TS/G1/G2, gale, cor, vols, gatilho X red + Y green, ciclo, recuperação) · 🤖 robôs criados na Mesa (saldo, ROI, curva, PAR/ÍMPAR, ranking, stops) · 🧩 TS Somado: registro no IndexedDB (não corta mais quando a memória enche) · guarda 1000 por regra · 🧩 TS Somado: mostrar até 500 resultados por regra (guarda 500) · 🧩 TS Somado: opção “só quando os 2 confirmam” (horas pagantes + horário fixo no mesmo jogo) · 🧩 caixinhas do TS Somado na Mesa não fecham mais sozinhas · 🧩 quadro do TS Somado na Mesa (entra pela Mesa) · 🧩 TS Somado: TS de horas pagantes + horário fixo de todas as vols/tempos viram 1 sinal (mesma vol · vols diferentes · PAR/ÍMPAR alternado · normal e forte) · abas Interligado/Scanner/Somas retiradas';
+const VERSAO='v4.52';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -1611,6 +1611,7 @@ function d5OnTick(epoch,quote,sym='R_100'){
       if(meu.length) afterUpdate(true); else if(S.tab==='deriv5s') fillRes();
       rbWatchNew();
       if(typeof uoOnSlots==='function') uoOnSlots(recs);
+      if(typeof tspOnSlots==='function') tspOnSlots(recs);
     }catch(e){ d5Ui(false,'erro ao gravar: '+(e.message||e)); }
   });
 }
@@ -2058,7 +2059,19 @@ async function dvHistoryRange(symbol,startSec,endSec){
     }
     return {times,prices};
   }
-  return one(startSec,endSec,0);
+  // a Deriv devolve só uma parte dos ticks por pedido (cerca de 1.000): continua a partir do último tick recebido até o fim do período
+  const T=[], P=[];
+  let cur=startSec;
+  while(cur<=endSec){
+    const r=await one(cur,endSec,0);
+    if(!r.times.length) break;
+    for(let i=0;i<r.times.length;i++){ T.push(r.times[i]); P.push(r.prices[i]); }
+    const last=r.times[r.times.length-1];
+    if(last>=endSec || Math.floor(last)+1<=cur) break;
+    cur=Math.floor(last)+1;
+    await dvSleep(60);
+  }
+  return {times:T,prices:P};
 }
 function dvBuildMap(hist,dec){
   const M=new Map();
@@ -3471,17 +3484,18 @@ function arqNome(bancos,de,ate){
 }
 function arqResumeKey(stepSel,dias){ return `dpi_arq_resume_${stepSel}_${dias}`; }
 
-async function arqBaixar(){
+// over: opcional { sym, stepSel, dias, gravar } — usado pelo "baixar todas as vols"; sem ele, age como sempre
+async function arqBaixar(over){
   ARQ_CANCEL=false; HDL_CANCEL=false; DV_CANCEL=false;
-  const stepSel=$('#arqStep')?.value||'20';
+  const stepSel=over?.stepSel??($('#arqStep')?.value||'20');
   const steps=stepSel==='all'?D5_STEPS:[+stepSel];
-  const dias=+($('#arqDias')?.value||15);
-  const gravar=!!$('#arqGravar')?.checked;
+  const dias=+(over?.dias??($('#arqDias')?.value||15));
+  const gravar=over?.gravar??!!$('#arqGravar')?.checked;
   const btn=$('#arqBtn'); if(btn) btn.disabled=true;
-  const key=arqResumeKey(stepSel,dias);
+  const key=over?.sym?`dpi_arq_resume_${over.sym}_${stepSel}_${dias}`:arqResumeKey(stepSel,dias);
   try{
     let R=null; try{ R=JSON.parse(localStorage.getItem(key)||'null'); }catch(e){}
-    const pode=R && R.v===1 && Date.now()-(+R.ts||0)<12*3600e3 && R.next<=R.end;
+    const pode=R && R.v===2 && Date.now()-(+R.ts||0)<12*3600e3 && R.next<=R.end;   // v2: descarta progresso antigo, que ficou incompleto
     const now=Math.floor(Date.now()/1000);
     const end=pode?R.end:now-(now%60);
     const start=pode?R.start:end-dias*86400;            // múltiplo de 60 → serve para 5/10/15/20/30
@@ -3492,7 +3506,7 @@ async function arqBaixar(){
     const chunk=dias<=3?6*3600:12*3600;
     const total=Math.ceil((end-start)/chunk);
     let part=Math.floor((a-start)/chunk);
-    const HS=histSym();
+    const HS=over?.sym||histSym();
     arqSet(1,pode?`Retomando · bloco ${part+1}/${total}…`:`Baixando ${dias} dias do ${HS} · ${steps.map(s=>s+'s').join(', ')} · ${total} blocos…`);
     while(a<=end){
       if(ARQ_CANCEL) throw new Error('cancelado');
@@ -3512,20 +3526,39 @@ async function arqBaixar(){
       const k=Math.min(20,tt.length);
       carry=tt.slice(-k).map((t,i)=>[t,pp[pp.length-k+i]]);
       part++; a=b+1;
-      try{ localStorage.setItem(key,JSON.stringify({v:1,start,end,next:a,procFrom,carry,feitos,ts:Date.now(),dig:Object.fromEntries(steps.map(s=>[s,arqDec(buf[s])]))})); }catch(e){}
+      try{ localStorage.setItem(key,JSON.stringify({v:2,start,end,next:a,procFrom,carry,feitos,ts:Date.now(),dig:Object.fromEntries(steps.map(s=>[s,arqDec(buf[s])]))})); }catch(e){}
       arqSet(2+95*(part/Math.max(1,total)),`Bloco ${part}/${total} · até ${fmtT(b*1000)} · ${num(feitos)} jogos`);
       if(a<=end) await new Promise(r=>setTimeout(r,1200));
     }
     const bancos=steps.map(s=>({banco:d5BankName(s,HS),step:s,t0:start,jogos:[...buf[s]].filter(c=>c!==45).length,digitos:arqDec(buf[s])}));
     const obj={formato:ARQ_FMT,versao:1,simbolo:HS,regra:'último tick até o segundo',criado:new Date().toISOString(),de:start,ate:end,bancos};
-    baixar(arqNome(bancos,start,end),JSON.stringify(obj),'application/json');
+    baixar(arqNome(bancos,start,end).replace('deriv_R100',`deriv_${HS.replace('_','')}`),JSON.stringify(obj),'application/json');
     try{ localStorage.removeItem(key); }catch(e){}
     if(gravar){ for(const s of steps){ LIVE[d5BankName(s,HS)]=await idbTail(d5BankName(s,HS),LIVE_CAP); } await loadBank(); await refreshBanks(); fillRes(); }
     arqSet(100,`✅ Arquivo criado: ${bancos.map(b=>`${b.step}s ${num(b.jogos)} jogos`).join(' · ')} · ${fmtT(start*1000)} → ${fmtT(end*1000)}${gravar?' · também gravado no banco':''}. Salve no PC.`);
+    return true;
   }catch(e){
     if(e.message==='cancelado') arqSet(null,'⏸ Pausado. O que já baixou ficou guardado — clique em BAIXAR de novo (mesmo intervalo e período) para continuar, por até 12h.');
     else arqSet(null,'Erro: '+(e.message||e)+' — o progresso ficou guardado, clique de novo para continuar.');
+    ARQ_LAST_ERR=String(e.message||e);
+    return false;
   }finally{ if(btn) btn.disabled=false; }
+}
+// 📥 baixa o histórico de TODAS as volatilidades (uma após a outra), um arquivo por vol, com o mesmo intervalo e período escolhidos acima
+let ARQ_LAST_ERR='';
+async function arqBaixarTodas(){
+  const syms=SYMS_ALL.map(x=>x[0]);
+  const feitas=[], falhas=[];
+  for(let i=0;i<syms.length;i++){
+    const sym=syms[i];
+    arqSet(null,`Vol ${i+1}/${syms.length} · ${sym} — iniciando…`);
+    ARQ_LAST_ERR='';
+    const ok=await arqBaixar({sym});
+    if(ok) feitas.push(sym); else falhas.push(`${sym} (${ARQ_LAST_ERR||'motivo desconhecido'})`);
+    if(ARQ_CANCEL) break;                 // pausou: para a fila (o progresso de cada vol fica guardado)
+  }
+  if(ARQ_CANCEL) arqSet(null,`⏸ Pausado em ${feitas.length}/${syms.length} vols. Clique de novo para continuar.`);
+  else arqSet(100,`✅ ${feitas.length} de ${syms.length} vols baixadas (um arquivo por vol)${falhas.length?` · falharam: ${falhas.join(', ')}`:''}. Salve os arquivos no PC.`);
 }
 async function arqRecarregar(steps){
   for(const s of steps){ LIVE[d5BankName(s)]=await idbTail(d5BankName(s),LIVE_CAP); }
@@ -3607,6 +3640,7 @@ function arqPainelHtml(){
       <button class="pri" onclick="$('#arqFile').click()">📂 ENVIAR ARQUIVO PARA O HTML</button>
       <input type="file" id="arqFile" accept=".json" multiple style="display:none" onchange="arqEnviar(this.files);this.value=''">
       <button onclick="arqSalvarBanco()">💾 SALVAR ARQUIVO DO QUE JÁ ESTÁ NO BANCO</button>
+      <button class="pri" onclick="arqBaixarTodas()">📥 BAIXAR TODAS AS VOLS (1 arquivo por vol)</button>
     </div>
     <div class="hdlprog" id="arqProg"><i></i></div>
     <div id="arqStatus" class="nota" style="margin-top:7px">Cada 12h de R_100 são ~9 pedidos à Deriv, com pausas para não levar bloqueio: 15 dias levam alguns minutos. Se parar no meio, clique de novo que ele continua de onde parou.</div>
@@ -6689,7 +6723,7 @@ async function dmOAuth(){
   location.href='https://auth.deriv.com/oauth2/auth?'+q.toString();
 }
 async function dmApi(corpo){
-  const r=await fetch('/api/deriv',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(corpo)});
+  const r=await fetch('api/deriv.php',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(corpo)});
   let j={}; try{ j=await r.json(); }catch(e){ j={erro:'função /api/deriv não respondeu ('+r.status+')'}; }
   if(!r.ok||j.erro){ const e=new Error(j.erro||('erro '+r.status)); e.status=r.status; throw e; }
   return j;
@@ -7593,6 +7627,9 @@ function uoPerLbl(h){ return (UO_PER.find(x=>x[0]===+h)||[0,'todo o banco'])[1];
 function uoMsg(m){ const e=$('#uoMsg'); if(e) e.innerHTML=m; }
 const uoSleep=ms=>new Promise(r=>setTimeout(r,ms));
 function uoLoadStore(){
+  // padrão inicial: OVER 4 (só se o usuário ainda não escolheu nada na aba)
+  if(cfg.uo_tipo===undefined) cfg.uo_tipo='O';
+  if(cfg.uo_bar===undefined) cfg.uo_bar=4;
   try{ UOB=JSON.parse(localStorage.getItem('dpi_uo_robos_v1')||'[]')||[]; }catch(e){ UOB=[]; }
   try{ UO_LOG=JSON.parse(localStorage.getItem('dpi_uo_log_v1')||'[]')||[]; }catch(e){ UO_LOG=[]; }
 }
@@ -11026,6 +11063,7 @@ function mcfVotar(w,T,sym){
   v[7]=mcfNumero(W,c)||{alvo:null,txt:'juntando jogos'};
   try{ v[8]=mcfPressure(W,w,bank,T)||{alvo:null,txt:'juntando jogos'}; }catch(e){ v[8]={alvo:null,txt:'—'}; }
   try{ v[9]=typeof fbVoto==='function'?fbVoto(w,T,sym,bank,W):{alvo:null,txt:'—'}; }catch(e){ v[9]={alvo:null,txt:'—'}; }
+  try{ if(!TSP_NO_VOTO&&(!v[9]||v[9].alvo==null)){ const tv=tspVoto(sym,T); if(tv) v[9]=tv; } }catch(e){}
   try{ v[10]=devVoto(sym,T); }catch(e){ v[10]={alvo:null,txt:'—'}; }
   return v;
 }
@@ -12977,10 +13015,12 @@ async function tssScanSym(sym){
   const c=tssC(), bank=d5BankName(5,sym), now=Date.now(), agora=now/1000, lim=agora+65*60, out=[];
   if(c.fonte!=='fixo'&&c.fonte!=='dev'){ try{ const rows=await idbRange(bank,now-Math.max(c.hpMin+2,+c.hpPer||24)*3600e3,now+60000), G=rows&&rows.length?gridBuild(rows,5):null;
     if(G) for(const r of hpScan(G,'all')){ const o=r.L[0]; if(o.cur>=c.hpMin){ const T=hpNext(r.off); if(T<=lim) out.push({T,sym,alvo:r.alvo,f:'hp',h:o.cur,d:0}); } } }catch(e){ console.warn('ts somado horas',e); } }
-  if(c.fonte==='dev'){ const rows=await hfAgCalc(); for(const x of devCandidatos(rows)){ if(x.sym===sym&&x.T<=lim) out.push({T:x.T,sym,alvo:x.alvo,f:'dev',h:0,d:x.n}); } }
-  else if(c.fonte!=='horas'&&Array.isArray(cfg.tssFixo)&&cfg.tssFixo.length){ for(const it of cfg.tssFixo){ if(it.sym!==sym) continue; const T=hfNext(it.off); if(T<=lim) out.push({T,sym,alvo:it.alvo,f:'hf',h:0,d:it.n}); } }
+  if(c.fonte==='dev'){ const rows=await hfAgCalc(); for(const x of devCandidatos(rows)){ if(x.sym===sym&&x.T<=lim) out.push({T:x.T,sym,alvo:x.alvo,f:'dev',h:0,d:x.n,st:x.st||5}); } }
+  else if(c.fonte!=='horas'&&Array.isArray(cfg.tssFixo)&&cfg.tssFixo.length){ for(const it of cfg.tssFixo){ if(it.sym!==sym) continue; const T=hfNext(it.off); if(T<=lim) out.push({T,sym,alvo:it.alvo,f:'hf',h:0,d:it.n,st:it.st||5}); } }
   else if(c.fonte!=='horas'){ try{ const rows=await idbRange(bank,now-(Math.max(c.hfDias+1,+c.hfJan||7))*86400e3-3600e3,now+60000), G=rows&&rows.length?gridBuild(rows,5):null, hr=new Date().getHours();
-    if(G) for(const h of [hr,(hr+1)%24]) for(const r of hfScan(G,String(h))){ const m=r.ts; if(m.n>=c.hfDias&&m.ok===m.n){ const T=hfNext(r.off); if(T<=lim) out.push({T,sym,alvo:r.alvo,f:'hf',h:0,d:m.n}); } } }catch(e){ console.warn('ts somado fixo',e); } }
+    if(G) for(const h of [hr,(hr+1)%24]) for(const r of hfScan(G,String(h))){ const m=r.ts; if(m.n>=c.hfDias&&m.ok===m.n){ const T=hfNext(r.off); if(T<=lim) out.push({T,sym,alvo:r.alvo,f:'hf',h:0,d:m.n,st:5}); } }
+    const rows60=rows.filter(x=>x.t%60000===0), G60=rows60.length?gridBuild(rows60,60):null;      // horário fixo de 1 minuto
+    if(G60) for(const h of [hr,(hr+1)%24]) for(const r of hfScan(G60,String(h))){ const m=r.ts; if(m.n>=c.hfDias&&m.ok===m.n){ const T=hfNext(r.off); if(T<=lim) out.push({T,sym,alvo:r.alvo,f:'hf',h:0,d:m.n,st:60}); } } }catch(e){ console.warn('ts somado fixo',e); } }
   TSS.scan[sym]={t:Date.now(),L:out}; tssMontaPool();
 }
 function tssMontaPool(){
@@ -13003,7 +13043,7 @@ async function tssScanTick(){
 function tssJogo(sym,T){ const W=LIVE[d5BankName(5,sym)]; if(!W||!W.length) return null; const t=T*1000; for(let i=W.length-1;i>=0&&i>=W.length-400;i--){ const x=W[i]; if(x.t===t) return x.p; if(x.t<t) break; } return null; }
 function tssForte(c){   // os círculos da ⭐ Confirmação apontam a mesma cor com o mínimo de confirmações (em algum dos tempos desse segundo)
   const C=mcfC();
-  for(const w of tssTempos(c.T)){ let v=null; const V=MCF.votos&&MCF.votos[w+'|'+c.sym]; if(V&&V.T===c.T) v=V.v; else { try{ v=mcfVotar(w,c.T,c.sym); }catch(e){ v=null; } }
+  for(const w of tssTempos(c.T)){ let v=null; const V=MCF.votos&&MCF.votos[w+'|'+c.sym]; if(V&&V.T===c.T) v=V.v; else { const W=LIVE[mcfBank(w,c.sym)]||[], u=W.at(-1); if(u&&Math.round(u.t/1000)===c.T-w){ try{ v=mcfVotar(w,c.T,c.sym); }catch(e){ v=null; } } }   // só calcula se o jogo anterior (T−w) já chegou; senão os círculos seriam do jogo errado — tenta de novo em 0,5s
     if(!v) continue; const f=mcfForca(v); if(f.alvo===c.alvo&&f.n>=C.min&&!(+C.semContra&&f.contra)) return {w,n:f.n}; }
   return null;
 }
@@ -13036,7 +13076,7 @@ function tssLoop(){
     if(ch&&ch.s[ch.s.length-1][3]!==0) continue;                     // ainda esperando o resultado do passo atual
     const cand=TSS.pool.filter(c=>c.T-agora>=2.7&&c.T-agora<=4.3&&(!ch||tssPodeSeguir(e,ch,c))).sort((a,b)=>tssForcaN(b)-tssForcaN(a));
     for(const c of cand){ let fx=null; if(e.f){ fx=tssForte(c); if(!fx) continue; }
-      const passo=[c.T,c.sym,c.alvo,null,c.f,c.h||c.d,fx?fx.n:0];
+      const passo=[c.T,c.sym,c.alvo,null,c.f,c.h||c.d,fx?fx.n:0,c.st||5];
       if(!ch){ ch=E.c={t0:c.T,s:[passo]}; } else ch.s.push(passo);
       mud=true; tssDemo(e,ch,c); if(c.f==='dev') try{ devAviso(e,ch,c); }catch(x){} try{ tssrPasso(e,ch); }catch(x){ console.warn('robôs criados',x); } break; }
   }
@@ -13115,7 +13155,7 @@ function tssHtml(){
     return `<div class="sf-row"><div class="sf-h"><b>${e.nome}</b>${C.demo===e.id?' <b style="color:#facc15">💼 entrando na DEMO</b>':''}<span>${tx}</span></div>${atual}<div class="sf-chips">${chips}</div></div>${sep}`; }).join('');
   const P=tssPoolVer().filter(x=>x.T>=agora).slice(0,30);
   const prox=P.length?`<table class="ps-tab"><tr><th>jogo</th><th>vol</th><th>cor</th><th>de onde vem</th><th>tempos</th><th>falta</th></tr>${P.map(x=>`<tr><td><b>${hmsOf(x.T)}</b></td><td>${sn(x.sym)}</td><td>${cor(x.alvo)}</td><td>${x.f==='hp+hf'?`horas ${x.h}h + fixo ${x.d} dias`:x.f==='dev'?`🔁 devendo · ${x.d} dias pagos antes`:x.f==='hp'?`🕐 ${x.h}h seguidas pagando`:`🕒 ${x.d} dias 100%`}</td><td>${tssTempos(x.T).map(w=>w+'s').join(' ')}</td><td>${Math.round(x.T-agora)}s</td></tr>`).join('')}</table>`:`<div class="nota">Nenhum TS encontrado para a próxima hora ainda${MCF.cerebro?' — a varredura passa por todas as vols a cada 10 min':''}.</div>`;
-  return `${cards}<h4 style="margin:14px 0 6px">Próximos tiros secos encontrados (todas as vols)</h4>${prox}`;
+  return `${cards}${min1Html(st)}<h4 style="margin:14px 0 6px">Próximos tiros secos encontrados (todas as vols)</h4>${prox}`;
 }
 VIEWS.tss={nome:'🧩 TS Somado',live(){ if(Date.now()-TSS.ui>3000) tssRender(); },html(){
   const C=tssC(), sel=(k,o)=>`<select onchange="tssSet('${k}',${typeof C[k]==='string'?'this.value':'+this.value'})">${o.map(([v,t])=>`<option value="${v}" ${String(C[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
@@ -13141,7 +13181,7 @@ VIEWS.tss={nome:'🧩 TS Somado',live(){ if(Date.now()-TSS.ui>3000) tssRender();
     <div class="nota">Pega os TS de <b>horas pagantes</b> e <b>horário fixo</b> de todas as vols escaneadas (${d5Syms().map(s=>symNome(s).replace('Volatility','Vol')).join(', ')}) nos segundos dos tempos marcados. Um sinal = até ${C.passos} TS seguidos: se o 1º der red, entra no próximo TS que <b>dê tempo</b> (mínimo de segundos acima e o resultado do anterior já ter saído); se não der tempo, pula para o seguinte. <b>⭐ forte</b> = o TS só entra se os círculos das ⭐ Confirmações apontarem a mesma cor com o mínimo de confirmações (${mcfC().min}).</div>
     <div class="nota">⚠️ O jogo das 35:20 é o mesmo tick em 5s, 10s e 20s — por isso cada segundo conta uma vez só. Compare o <b>acerto por entrada</b> com 50% (sorte) e o green da cadeia com a sorte da cadeia: 2 TS = 75%, 3 TS = 87,5%, 4 TS = 93,8%. Só tem vantagem de verdade se ficar acima disso com muitos sinais.</div>
     <div class="nota">🎲 No puro acaso, 1 em cada 32 segundos passa em “5h seguidas pagando” e 1 em cada 8 passa em “3 dias 100%” — por isso aparecem dezenas de TS por hora em cada vol. Aumentar as horas/dias deixa a lista menor e mais exigente.</div>
-    <div class="nota">${mcfQuemTxt()} · o motor roda só na página que calcula; esta aba mostra o registro.</div></div><div id="tssR" class="panel"></div>`; }};
+    <div class="nota">${mcfQuemTxt()} · o motor roda só na página que calcula; esta aba mostra o registro.</div></div>${tspTsPainel()}<div id="tssR" class="panel"></div>`; }};
 
 // =====================================================================================
 // 🧪 VALIDADOR DE GREENS + 🤖 ROBÔS CRIADOS (em cima dos sinais do 🧩 TS Somado)
@@ -13349,6 +13389,7 @@ setInterval(()=>{ try{ if(typeof MESA!=='undefined'&&MESA.open&&cfg.mesa_modo===
 // =====================================================================================
 let HFA={k:'',t:0,rows:null,busy:false,err:''};
 const HFA_JAN=30;                                         // janela da tabela: últimos 30 dias de cada vol
+function hfAgPush(out,sym,step,r){ if(r.ts.n<5&&r.g1.n<5&&r.g2.n<5) return; out.push({sym,step,vol:symNome(sym).replace('Volatility','Vol')+(step===60?' · 1 min':''),off:r.off,slotKey:r.slotKey,alvo:r.alvo,ts:r.ts,g1:r.g1,g2:r.g2}); }
 async function hfAgCalc(force){
   const syms=d5Syms(), key=syms.join(',');
   if(!force&&HFA.rows&&HFA.k===key&&Date.now()-HFA.t<10*60e3) return HFA.rows;
@@ -13360,8 +13401,9 @@ async function hfAgCalc(force){
       const rows=await idbRange(d5BankName(5,sym), now-HFA_JAN*86400e3-3600e3, now+60000);
       const G=rows&&rows.length?gridBuild(rows,5,now-HFA_JAN*86400e3):null;
       if(!G) continue;
-      for(const r of hfScan(G,'all')){ if(r.ts.n<5&&r.g1.n<5&&r.g2.n<5) continue;
-        out.push({sym,vol:symNome(sym).replace('Volatility','Vol'),off:r.off,slotKey:r.slotKey,alvo:r.alvo,ts:r.ts,g1:r.g1,g2:r.g2}); }
+      for(const r of hfScan(G,'all')) hfAgPush(out,sym,5,r);
+      const rows60=rows.filter(x=>x.t%60000===0), G60=rows60.length?gridBuild(rows60,60,now-HFA_JAN*86400e3):null;
+      if(G60) for(const r of hfScan(G60,'all')) hfAgPush(out,sym,60,r);      // horário fixo de 1 minuto: hh:mm:00, G1 = +60s, G2 = +120s
     }
     HFA.rows=out;
   }catch(e){ HFA.rows=[]; HFA.err=e.message||String(e); console.warn('horários fixos (todas as vols)',e); }
@@ -13374,7 +13416,8 @@ function hfAgSet(k,v){ cfg[k]=v; saveCfg(); const e=$('#hfAgBox'); if(e) e.outer
 function hfAgSel(k,o,def,num=1){ return `<select onchange="hfAgSet('${k}',${num?'+this.value':'this.value'})">${o.map(([v,t])=>`<option value="${v}" ${String(cfg[k]??def)===String(v)?'selected':''}>${t}</option>`).join('')}</select>`; }
 function hfAgFiltra(){
   const minD=+cfg.hfAgMin||7, minR=cfg.hfAgRate==null?100:+cfg.hfAgRate, key=cfg.hfAgSort||'ts';
-  return (HFA.rows||[]).filter(r=>r[key].n>=minD&&r[key].rate>=minR)
+  const stp=String(cfg.hfAgStep??'todos');
+  return (HFA.rows||[]).filter(r=>(stp==='todos'||String(r.step||5)===stp)&&r[key].n>=minD&&r[key].rate>=minR)
     .sort((a,b)=>b[key].rate-a[key].rate||b[key].current-a[key].current||b[key].n-a[key].n||a.slotKey.localeCompare(b.slotKey));
 }
 function hfAgBoxHtml(){
@@ -13391,6 +13434,7 @@ function hfAgBoxHtml(){
       <label>mín. dias ${hfAgSel('hfAgMin',[[7,'7 dias'],[10,'10 dias'],[15,'15 dias'],[20,'20 dias'],[30,'30 dias']],7)}</label>
       <label>taxa mín. ${hfAgSel('hfAgRate',[[100,'100%'],[95,'95%'],[90,'90%'],[80,'80%'],[0,'sem filtro']],100)}</label>
       <label>ordenar ${hfAgSel('hfAgSort',[['ts','tiro seco'],['g1','até G1'],['g2','até G2']],'ts',0)}</label>
+      <label>intervalo ${hfAgSel('hfAgStep',[['todos','5s + 1 min'],['5','só 5s'],['60','só 1 min']],'todos',0)}</label>
       <button onclick="hfAgCalc(true)">🔄 recalcular</button>
     </div>
     <div class="ctl" style="flex-wrap:wrap;margin-top:6px">
@@ -13400,6 +13444,7 @@ function hfAgBoxHtml(){
     </div>
     <div class="ctl" style="flex-wrap:wrap;margin-top:6px">
       <button class="pri" onclick="agendaCriarFixo(+cfg.hfAgQtd||20)">🤖 criar robô nos próximos ${+cfg.hfAgQtd||20} horários fixos</button>
+      <button class="pri" onclick="agendaCriarFixo(+cfg.hfAgQtd||20,60)">🤖 criar robô só de 1 min</button>
       <label>quantos ${hfAgSel('hfAgQtd',[[5,'5'],[10,'10'],[20,'20'],[50,'50']],20)}</label>
       <span class="mu">o robô começa ligado e entra sozinho em cada horário (🧪 Validador de greens → ROBÔS POR AGENDA)</span>
     </div>
@@ -13419,7 +13464,7 @@ function hfAgBoxHtml(){
 }
 // envia a lista filtrada para o TS Somado: a varredura passa a usar estes horários (de preferência os de mais dias)
 function hfAgEnviarTss(){
-  const L=hfAgFiltra().slice(0,500).map(r=>({sym:r.sym,off:r.off,alvo:r.alvo,n:r.ts.n}));
+  const L=hfAgFiltra().slice(0,500).map(r=>({sym:r.sym,off:r.off,alvo:r.alvo,n:r.ts.n,st:r.step||5}));
   if(!L.length){ alert('Nenhum horário passa no filtro.'); return; }
   cfg.tssFixo=L; saveCfg(); TSS.scan={};
   const e=$('#hfAgBox'); if(e) e.outerHTML=hfAgBoxHtml();
@@ -13431,7 +13476,7 @@ async function agendaColeta(kind,opt){
   const now=Date.now()/1000, out=[];
   if(kind==='fixo'){
     const minD=+cfg.hfAgMin||7, minR=cfg.hfAgRate==null?100:+cfg.hfAgRate;
-    for(const r of (HFA.rows||[])){ if(r.ts.n<minD||r.ts.rate<minR) continue;
+    for(const r of (HFA.rows||[])){ if(r.ts.n<minD||r.ts.rate<minR) continue; if(opt&&opt.step&&+(r.step||5)!==+opt.step) continue;
       for(let k=0;k<2;k++){ const T=hfNext(r.off)+k*86400; if(T>now+1) out.push({T,sym:r.sym,alvo:r.alvo,n:r.ts.n,rate:r.ts.rate}); } }
   }else{
     const hMin=+opt.hpMin||3, H=+opt.horas||1;
@@ -13457,8 +13502,9 @@ function agendaCriar(nomeBase,items,desc){
   try{ atuAviso(`🗓 Robô por agenda criado: ${items.length} entradas`,'tss'); }catch(e){}
 }
 async function agendaCriarFixo(n){
-  const items=(await agendaColeta('fixo')).slice(0,+n||20);
-  agendaCriar('🕒 horário fixo',items,`🕒 próximos ${items.length} horários fixos · taxa ≥ ${cfg.hfAgRate==null?100:+cfg.hfAgRate}% · ≥ ${+cfg.hfAgMin||7} dias · todas as vols`);
+  const step=arguments[1]?+arguments[1]:0;
+  const items=(await agendaColeta('fixo',{step})).slice(0,+n||20);
+  agendaCriar(step===60?'🕒 horário fixo 1 min':'🕒 horário fixo',items,`🕒 próximos ${items.length} horários fixos · taxa ≥ ${cfg.hfAgRate==null?100:+cfg.hfAgRate}% · ≥ ${+cfg.hfAgMin||7} dias · todas as vols`);
 }
 async function agendaCriarHp(){
   const H=+((document.getElementById('agHoras')||{}).value)||1, N=+((document.getElementById('agN')||{}).value)||0, hm=+((document.getElementById('agHpMin')||{}).value)||3;
@@ -13570,7 +13616,7 @@ function devCandidatos(rows){
   for(const r of rows||[]){ const h=(r.ts&&r.ts.hist)||[]; if(h.length<N+D) continue;
     const tail=h.slice(-D), pre=h.slice(-(N+D),-D);
     if(!tail.every(x=>!x.r)||!pre.every(x=>x.r)) continue;          // N greens seguidos antes, D reds seguidos agora
-    out.push({T:hfNext(r.off),sym:r.sym,vol:r.vol,alvo:r.alvo,slot:r.slotKey,n:N,d:D,dias:r.ts.n});
+    out.push({T:hfNext(r.off),sym:r.sym,vol:r.vol,alvo:r.alvo,slot:r.slotKey,n:N,d:D,dias:r.ts.n,st:r.step||5});
   }
   return out.sort((a,b)=>a.T-b.T);
 }
@@ -13598,6 +13644,19 @@ VIEWS.dev={nome:'🔁 Devendo',html(){ setTimeout(devRender,0); return `<div cla
   <div class="nota">Um horário entra aqui quando o TS dele deu green em todos os dias seguidos do período escolhido e depois deu red nos dias seguintes. No 🧩 TS Somado eles são reunidos de 3 em 3 num sinal (entre vols diferentes ou alternando PAR/ÍMPAR). Cada passo do sinal avisa no alerta, e o círculo 🔁 da Mesa vota junto com os outros.</div>
   <div id="devBox"></div></div>`;}};
 
+// ⏱ SINAIS DE 1 MINUTO — separados por vol, PAR e ÍMPAR (passos com intervalo 60s no histórico do TS Somado)
+function min1Html(st){
+  const V={}, C={n:0,g:0};
+  for(const e of TSS_EST){ const E=st.E[e.id]; if(!E) continue;
+    for(const x of E.h){ if(x.r==='X'||x.r==='T') continue; if(!x.s.some(p=>p[7]===60)) continue; C.n++; if(x.r==='G') C.g++;
+      for(const p of x.s){ if(p[7]!==60||(p[3]!==0&&p[3]!==1)) continue; const v=V[p[1]]||(V[p[1]]={P:{n:0,g:0},I:{n:0,g:0}}); const q=p[2]?v.I:v.P; q.n++; if(p[3]===1) q.g++; } } }
+  const keys=Object.keys(V).sort(), pc=(g,n)=>n?(100*g/n).toFixed(0)+'%':'—';
+  if(!keys.length) return `<div class="panel"><h3>⏱ Sinais de 1 minuto</h3><div class="nota">Ainda sem sinais de 1 minuto no histórico. Eles entram quando o horário fixo de 1 min chega a ${tssC().hfDias} dias 100% (ou quando você envia a lista de 1 min ao TS Somado).</div></div>`;
+  return `<div class="panel"><h3>⏱ Sinais de 1 minuto — separados por vol</h3><div class="nota">${C.n} cadeia(s) com pelo menos um passo de 1 min · <b class="${C.g/C.n>0.5?'ok':'ruim'}">${C.g} green</b> (${C.n?(100*C.g/C.n).toFixed(0):'—'}%). Cada passo confere o jogo hh:mm:00 (G1 = +60s).</div>
+    <div class="tw"><table><tr><th>Vol</th><th>PAR entradas</th><th>PAR acerto</th><th>ÍMPAR entradas</th><th>ÍMPAR acerto</th><th>Total</th><th>Sorte (sem gale)</th></tr>
+    ${keys.map(k=>{ const v=V[k], n=v.P.n+v.I.n, g=v.P.g+v.I.g; return `<tr><td>${symNome(k).replace('Volatility','Vol')}</td><td>${v.P.n}</td><td>${pc(v.P.g,v.P.n)}</td><td>${v.I.n}</td><td>${pc(v.I.g,v.I.n)}</td><td><b class="${g/n>0.5?'ok':'ruim'}">${pc(g,n)}</b> (${n})</td><td class="mu">50%</td></tr>`; }).join('')}
+    </table></div></div>`;
+}
 // abas tiradas (v4.27): Interligado, Scanner e Somas — os motores continuam (a Fábrica, a Confluência e os ⏱ 5s/10s usam)
 delete VIEWS.il; delete VIEWS.scan; delete VIEWS.soma;
 if(cfg.il_on){ cfg.il_on=0; try{ saveCfg(); }catch(e){} }
@@ -13692,7 +13751,7 @@ function fbHtml(){ const c=fbCfg(), F=fbLoad(), A=F.robos.filter(r=>r.estado!=='
     <details style="margin-top:6px"><summary>📜 registro</summary><div class="nota" style="max-height:180px;overflow:auto">${F.log.slice().reverse().map(l=>`${new Date(l.t).toLocaleTimeString('pt-BR')} · ${esc(l.txt)}`).join('<br>')||'—'}</div></details>
     <div class="nota" style="margin-top:6px"><b>Como funciona:</b> a cada 5 min a fábrica passa por cada índice escaneado × tempo marcado (um por vez) e procura padrões 100% (números, duplas, trios, somas com e sem pular casas, sequências, cores${+c.hora?', horas pagantes':''}) em tiro seco e até G1 — descobertos na parte antiga do banco e conferidos na parte nova (mesmo motor do 🎯 Somente Robô). Cada robô novo fica <b>👀 em observação</b>: confere ao vivo sem apostar; ${c.minObs} greens seguidos → <b>✅ aprovado</b>; red na observação → reprovado. Aprovado só sai com ${c.maxRed} reds nos últimos ${c.janela} ao vivo (um red isolado não tira). Só os aprovados com o quadrinho "círculo 9" marcado votam no círculo 9 quando o jogo do robô é o jogo da vez. 100% no passado não garante o futuro.</div>`; }
 
-const TAB_ORDER = ['hist','sfortes','tss','tssr', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix','dev', 'robos', 'srob', 'p5', 'p10', 'uo', 'demo', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
+const TAB_ORDER = ['hist','sfortes','tss','tssr','tsp', 'press', 'deriv5s', 'min10', 'hrcol', 'hpag', 'hfix','dev', 'robos', 'srob', 'p5', 'p10', 'uo', 'demo', 'pad', 'max', 'dig', 'bt', 'hora', 'rng', 'r100hist', 'dvcheck', 'ddlimit', 'ia', 'fonte'];
 const HEAVY = new Set(['hpag', 'hfix']);
 let LAST_HEAVY = 0;
 function fillRes() {
@@ -13710,6 +13769,322 @@ function renderTab() {
   $('#view').innerHTML = v.html ? v.html() : '<div id="res"></div>';
   fillRes();
 }
+// ===================== 🎯 ROBÔS TIRO SECO · PAR / ÍMPAR (todas as vols) =====================
+// Robô = depois de K resultados iguais seguidos (PAR ou ÍMPAR) aposta:
+//   quebra → na cor oposta (o padrão volta)      continua → na mesma cor
+// Cada sinal vira 3 TIROS SECOS independentes, sem gale: o jogo seguinte e mais 2 (+1, +2, +3 jogos). Cada um conta sozinho.
+// Validação: passa só se acertar o mínimo escolhido nos ÚLTIMOS 1000 jogos E nos ÚLTIMOS 500.
+// Robôs ativos rodam ao vivo na página com a captura ligada. Os TS vão para o painel 🎯 Robôs TS (dentro de 🧩 TS Somado).
+const TSP_KEY='dpi_tsp_v1', TSP_KS=[2,3,4,5,6];
+let TSP={robos:[],sinais:[],cand:null,candTotal:0,busy:false,msg:'',ser:{},dig:{},saiu:[],trocas:[],pendVagas:0};
+const TSP_DUP_G=[0,1,2,3,4,5];   // duplas: a no jogo T-(g+1) e b no jogo T; g = casas puladas entre elas
+function tspC(){ return {thr:55,gMin:5,janelas:'1000-500',auto:1,redSai:2,intercala:1,famSeq:1,famDup:1,mercado:-1,maxRobos:0,fila:2,...(cfg.tsp||{})}; }
+function tspSet(k,v){ cfg.tsp={...tspC(),[k]:v}; saveCfg(); if(k==='maxRobos'){ tspAplicaLimite(); tspSave(); tspSeedAll(); } if(k==='mercado') TSP.cand=null; tspRender(); }
+// 🏆 limite de robôs ligados: ficam os X melhores (menor acerto das 2 janelas; empate → mais greens); os outros pausam
+function tspNota(x){ return Math.min(+x.p1||0,+x.p2||0); }
+function tspOrdem(a,b){ return tspNota(b)-tspNota(a)||(+b.g1||0)-(+a.g1||0); }
+function tspAplicaLimite(){ const lim=+tspC().maxRobos||0; if(!lim) return; const L=TSP.robos.filter(r=>+r.on).sort(tspOrdem); L.slice(lim).forEach(r=>r.on=0); }
+function tspLoad(){ try{ const o=JSON.parse(localStorage.getItem(TSP_KEY)||'null'); if(o&&typeof o==='object'){ TSP.robos=Array.isArray(o.robos)?o.robos:[]; TSP.sinais=Array.isArray(o.sinais)?o.sinais:[]; TSP.saiu=Array.isArray(o.saiu)?o.saiu:[]; TSP.trocas=Array.isArray(o.trocas)?o.trocas:[]; } }catch(e){}
+  // limpa histórico: 1 sinal por segundo (prefere sinal real ao conflito; o mais antigo criado)
+  try{ const by=new Map(); for(const x of TSP.sinais){ const y=by.get(x.T); if(!y||(y.conflito&&!x.conflito)||(!!y.conflito===!!x.conflito&&(x.criado||0)<(y.criado||0))) by.set(x.T,x); } const keep=new Set(by.values()); TSP.sinais=TSP.sinais.filter(x=>keep.has(x)); }catch(e){} }
+function tspSave(){ try{ localStorage.setItem(TSP_KEY,JSON.stringify({robos:TSP.robos.slice(0,200),sinais:TSP.sinais.slice(0,1500),saiu:TSP.saiu.slice(-500),trocas:TSP.trocas.slice(0,30)})); }catch(e){} }
+function tspNome(r){
+  const v=symNome(r.sym).replace('Volatility','Vol'), sfx=r.inter?` · 🔀 intercalador (${symNome(r.alt).replace('Volatility','Vol')})`:'';
+  if(r.kind==='dupla') return `${v} · ${r.step}s · dupla ${r.a} e ${r.b}${r.g?' (pula '+r.g+')':' juntos'} → vem ${r.bet?'ÍMPAR':'PAR'}${sfx}`;
+  return `${v} · ${r.step}s · ${r.k} iguais seguidos → ${r.modo==='quebra'?'cor oposta':'mesma cor'}${+r.cor>=0?(r.cor?' · só ÍMPAR':' · só PAR'):''}${sfx}`;
+}
+// chave única de um robô/candidato (sequência ou dupla)
+function tspKey(c){ return c.kind==='dupla'?`${c.sym}|${c.step}|D${c.a}${c.b}${c.g}|${c.bet}`:`${c.sym}|${c.step}|${c.k}|${c.modo}${+c.cor>=0?'|c'+c.cor:''}`; }
+// série de dígitos (0–9) de um banco
+async function tspSerieDig(bank,n){
+  const rows=await idbTail(bank,n), M=new Map();
+  for(const r of rows){ const T=Math.round(r.t/1000); if(Number.isFinite(T)&&r.d!=null) M.set(T,r.d); }
+  return M;
+}
+// estatística das duplas nos últimos W jogos: para cada (a,b,g), quantos tiros (+1,+2,+3) saíram PAR e ÍMPAR
+function tspDuplaStats(D,step,W){
+  const Ts=[...D.keys()].sort((a,b)=>a-b), st=new Map();
+  if(!Ts.length) return st;
+  const last=Ts[Ts.length-1], ini=last-W*step;
+  for(const T of Ts){ const b=D.get(T);
+    for(const g of TSP_DUP_G){ const a=D.get(T-(g+1)*step); if(a===undefined||a===b) continue;
+      const key=`${a}|${b}|${g}`; if(!st.has(key)) st.set(key,{n:0,c:[0,0]}); const o=st.get(key);
+      for(let e=1;e<=3;e++){ const Sl=T+e*step; if(Sl<=ini||Sl>last) continue; const v=D.get(Sl); if(v===undefined) continue; o.n++; o.c[v%2]++; }
+    } }
+  return st;
+}
+// série de paridade de um banco (segundo do jogo → 0 par / 1 ímpar), só os N jogos mais novos
+async function tspSerie(bank,n){
+  const rows=await idbTail(bank,n), M=new Map();
+  for(const r of rows){ const T=Math.round(r.t/1000); if(Number.isFinite(T)&&r.d!=null) M.set(T,r.d%2); }
+  return M;
+}
+// avalia um robô nos últimos W jogos: cada TS (1º, 2º e 3º) conta separadamente
+function tspAvalia(M,step,k,modo,W,cor=-1){
+  const Ts=[...M.keys()].sort((a,b)=>a-b), out={n:0,g:0,sig:0};
+  if(Ts.length<k+3) return out;
+  const last=Ts[Ts.length-1], ini=last-W*step;
+  for(const T of Ts){
+    const c=M.get(T); let ok=true;
+    for(let j=1;j<k;j++){ if(M.get(T-j*step)!==c){ ok=false; break; } }
+    if(!ok) continue;
+    const bet=modo==='quebra'?1-c:c; if(cor>=0&&bet!==cor) continue; let any=false;
+    for(let e=1;e<=3;e++){ const Sl=T+e*step; if(Sl<=ini||Sl>last) continue; const v=M.get(Sl); if(v===undefined) continue; out.n++; any=true; if(v===bet) out.g++; }
+    if(any) out.sig++;
+  }
+  return out;
+}
+// 🔎 busca nas vols que o TS Somado escaneia e nos tempos marcados no TS: valida pelas duas janelas e pelo mínimo de greens
+async function tspBuscar(opts={}){
+  if(TSP.busy) return;
+  TSP.busy=true; const C=tspC(), out=[], semDados=[];
+  const [W1,W2]=String(C.janelas).split('-').map(Number);
+  try{
+    const syms=d5Syms().length?d5Syms():SYMS_ALL.map(x=>x[0]);
+    const tempos=tssC().tempos||[5,10,20,30];
+    const total=syms.length*tempos.length; let feito=0;
+    for(const sym of syms) for(const step of tempos){
+      feito++;
+      TSP.msg=`⏳ testando ${symNome(sym)} · ${step}s (${feito}/${total})…`; tspRender();
+      await new Promise(r=>setTimeout(r,0));
+      const M=await tspSerie(d5BankName(step,sym),W1);
+      if(M.size<W2+10){ semDados.push(`${symNome(sym).replace('Volatility','Vol')} ${step}s`); continue; }
+      if(C.famDup!==0){ const Dg=await tspSerieDig(d5BankName(step,sym),W1); const s1=tspDuplaStats(Dg,step,W1), s2=tspDuplaStats(Dg,step,W2);
+        for(const [key,o] of s1){ const [a,b,g]=key.split('|').map(Number); const bet=+C.mercado>=0?+C.mercado:(o.c[1]>o.c[0]?1:0); const x=o.c[bet], q=s2.get(key), y=q?q.c[bet]:0, n2=q?q.n:0;
+          const p1=o.n?100*x/o.n:0, p2=n2?100*y/n2:0;
+          if(x>=C.gMin&&y>=C.gMin&&p1>=C.thr&&p2>=C.thr) out.push({sym,step,kind:'dupla',a,b,g,bet,p1,n1:o.n,g1:x,p2,n2,g2:y}); } }
+      if(C.famSeq!==0) for(const k of TSP_KS) for(const modo of ['quebra','continua']){
+        const a=tspAvalia(M,step,k,modo,W1,+C.mercado), b=tspAvalia(M,step,k,modo,W2,+C.mercado);
+        const p1=a.n?100*a.g/a.n:0, p2=b.n?100*b.g/b.n:0;
+        if(a.g>=C.gMin && b.g>=C.gMin && p1>=C.thr && p2>=C.thr) out.push({sym,step,k,modo,cor:+C.mercado,p1,n1:a.n,g1:a.g,p2,n2:b.n,g2:b.g});
+      }
+    }
+    out.sort(tspOrdem);
+    TSP.candTotal=out.length; TSP.cand=out.slice(0,80);
+    let criados=0; const novos=[];
+    const lim=+C.maxRobos||Infinity, ligados=()=>TSP.robos.filter(r=>+r.on).length;
+    const entra=(c,inter)=>{ if(TSP.saiu.includes(tspKey(c)+(inter?'|I':''))) return false; if(ligados()>=lim) return false; if(tspAddRobo(c,inter)){ criados++; novos.push(tspNome({...c,inter:!!inter,alt:inter?tspAltSym(c.sym):null})); return true; } return false; };
+    if(opts.vagas!==undefined){ for(const c of out){ if(criados>=opts.vagas) break; entra(c); } }
+    else if(+C.auto){
+      if(lim===Infinity){ for(const c of out) entra(c); }
+      else {   // junta os ligados + os candidatos novos e fica só com os X melhores
+        const ids=new Set(TSP.robos.map(r=>r.id)), novosC=out.filter(c=>!ids.has(tspKey(c))&&!TSP.saiu.includes(tspKey(c)));
+        const P=[...TSP.robos.filter(r=>+r.on).map(r=>({r,p1:r.p1,p2:r.p2,g1:r.g1})),...novosC.map(c=>({c,p1:c.p1,p2:c.p2,g1:c.g1}))].sort(tspOrdem), top=P.slice(0,lim);
+        for(const x of P.slice(lim)) if(x.r) x.r.on=0;
+        for(const x of top) if(x.c) entra(x.c);
+      } }
+    if(opts.vagas!==undefined){ const pend=TSP.trocas.filter(t=>!t.entrou).slice(0,opts.vagas); pend.forEach((t,i)=>t.entrou=novos[i]||'(nenhum candidato passou agora)'); }
+    TSP.msg=opts.vagas!==undefined?(novos.length?`🔁 ${novos.length} robô(s) entraram no lugar: ${novos.join(' · ')}`:'🔁 Nenhum candidato passou agora para substituir. Tente buscar de novo mais tarde.'):`✅ ${total} combinações (vol × tempo) testadas · ${out.length} passaram nas janelas ${W1} e ${W2} com ${C.gMin}+ greens`+(+C.auto?` · ${criados} robô(s) novo(s) criados e ativados`:'')+(semDados.length?` · sem dados suficientes (menos de ${W2+10} jogos): ${semDados.join(', ')}`:'');
+    tspSave(); tspSeedAll();
+  }catch(e){ TSP.msg='Erro na busca: '+(e.message||e); }
+  finally{ TSP.busy=false; tspRender(); tspTsRender(); if(TSP.pendVagas>0){ const v=TSP.pendVagas; TSP.pendVagas=0; tspBuscar({vagas:v}); } }
+}
+// reds dos tiros secos de um robô desde que ele foi criado
+function tspRedsDo(r){ return TSP.sinais.filter(x=>x.res==='R'&&x.criado>=r.criado&&x.robos.some(q=>q.rid===r.id)).length; }
+// robô que chegou ao limite de reds sai sozinho; se a criação automática estiver ligada, entra outro no lugar
+function tspCheckTrocas(){
+  const lim=+tspC().redSai||0; if(!lim) return;
+  const ruins=TSP.robos.filter(r=>+r.on && tspRedsDo(r)>=lim);
+  if(!ruins.length) return;
+  for(const r of ruins){ const n=tspRedsDo(r); TSP.saiu.push(tspKey(r)); TSP.trocas.unshift({t:Date.now(),saiu:tspNome(r),motivo:`${n} red${n>1?'s':''}`,entrou:''}); }
+  TSP.robos=TSP.robos.filter(r=>!ruins.includes(r));
+  TSP.saiu=TSP.saiu.slice(-500); TSP.trocas=TSP.trocas.slice(0,30);
+  tspSave(); tspSeedAll();
+  if(+tspC().auto){ if(TSP.busy) TSP.pendVagas+=ruins.length; else tspBuscar({vagas:ruins.length}); }
+  else TSP.trocas.filter(t=>!t.entrou).forEach(t=>t.entrou='(criação automática desligada)');
+  tspRender();
+}
+function tspTodos(v){ TSP.robos.forEach(r=>r.on=v); if(v) tspAplicaLimite(); tspSave(); tspSeedAll(); tspRender(); }
+// adiciona um robô sem duplicar; devolve true se criou
+// intercalador: tiro 1 e 3 numa vol diferente (a próxima vol do TS), tiro 2 e 4 no próprio robô
+function tspAltSym(sym){ const L=d5Syms(); if(L.length<2) return null; const i=L.indexOf(sym); return L[(i+1)%L.length]; }
+function tspAddRobo(c,inter){
+  const id=tspKey(c)+(inter?'|I':'');
+  if(TSP.robos.some(r=>r.id===id)) return false;
+  const alt=inter?tspAltSym(c.sym):null;
+  if(inter&&!alt){ TSP.msg='Para o intercalador precisa de pelo menos 2 vols marcadas no TS.'; return false; }
+  TSP.robos.push({id,cor:+c.cor>=0?+c.cor:-1,kind:c.kind||'seq',a:c.a,b:c.b,g:c.g,bet:c.bet,sym:c.sym,step:c.step,k:c.k,modo:c.modo,bank:d5BankName(c.step,c.sym),inter:!!inter,alt:alt,altBank:alt?d5BankName(c.step,alt):null,on:1,p1:c.p1,n1:c.n1,g1:c.g1,p2:c.p2,n2:c.n2,g2:c.g2,criado:Date.now()});
+  return true;
+}
+function tspAtivar(i,inter){
+  const c=(TSP.cand||[])[i]; if(!c) return;
+  if(!tspAddRobo(c,inter)){ if(!TSP.msg||!/intercalador/.test(TSP.msg)) TSP.msg='Esse robô já está ativo.'; tspRender(); return; }
+  tspSave(); tspSeedAll();
+  TSP.msg=`✅ Robô ativado: ${tspNome(c)}${inter?' · 🔀 intercalador':''}`;
+  tspRender(); tspTsRender();
+}
+function tspToggle(i){ const r=TSP.robos[i]; if(!r) return; r.on=+r.on?0:1; tspSave(); tspSeedAll(); tspRender(); }
+function tspApagar(i){ const r=TSP.robos[i]; if(!r||!confirm('Apagar este robô? Os sinais dele continuam no acompanhamento.')) return; TSP.robos.splice(i,1); tspSave(); tspRender(); tspTsRender(); }
+// preenche a memória de jogos recentes dos robôs ativos (para o gatilho funcionar logo após abrir a página)
+async function tspSeedAll(){
+  for(const r of TSP.robos){
+    if(!+r.on) continue;
+    if(r.kind==='dupla'){ const m=TSP.dig[r.bank]; if(m&&m.size>=r.g+4) continue; try{ const rows=await idbTail(r.bank,80); const M=new Map(TSP.dig[r.bank]||[]); for(const x of rows){ if(x.d!=null) M.set(Math.round(x.t/1000),x.d); } TSP.dig[r.bank]=M; }catch(e){} continue; }
+    const m=TSP.ser[r.bank]; if(m&&m.size>=r.k+3) continue;
+    try{ const rows=await idbTail(r.bank,80); const M=new Map(TSP.ser[r.bank]||[]); for(const x of rows){ if(x.d!=null) M.set(Math.round(x.t/1000),x.d%2); } TSP.ser[r.bank]=M; }catch(e){}
+  }
+}
+// chamado a cada lote de jogos novos (mesmo ponto do 🧩 Under/Over)
+// Cada segundo T é processado em ordem: 1º os jogos que chegaram (andam as cadeias abertas), 2º os gatilhos desse segundo.
+// Gatilhos do mesmo segundo: PAR e ÍMPAR juntos → conflito, ninguém envia. Senão, 1 sinal por vol + intervalo;
+// robôs da mesma vol, intervalo e cor que disparam no mesmo segundo se juntam nesse sinal.
+// Cada sinal é uma cadeia: TS → G1 → G2 → G3 (4 entradas). Fecha no 1º green; se G3 perder, é red.
+function tspOnSlots(recs){
+  try{
+    if(!recs||!recs.length) return;
+    if(!TSP.robos.some(r=>+r.on) && !TSP.sinais.some(x=>x.res===null)) return;
+    let mudou=false; const TC=tspC();
+    const porT=new Map();
+    for(const rec of recs){ const T=Math.round(rec.t/1000); if(!Number.isFinite(T)||rec.d==null||!rec.s) continue; if(!porT.has(T)) porT.set(T,[]); porT.get(T).push(rec); }
+    for(const T of [...porT.keys()].sort((a,b)=>a-b)){
+      const disparos=[];
+      for(const rec of porT.get(T)){
+        const bank=rec.s, par=rec.d%2, step=rec.w;
+        const ser=TSP.ser[bank]||(TSP.ser[bank]=new Map());
+        if(ser.has(T)) continue;
+        ser.set(T,par);
+        const dg=TSP.dig[bank]||(TSP.dig[bank]=new Map()); dg.set(T,rec.d);
+        if(dg.size>400){ const ks=[...dg.keys()].sort((a,b)=>a-b); for(const kk of ks.slice(0,ks.length-300)) dg.delete(kk); }
+        // 1) cadeias abertas deste banco: o próximo jogo da cadeia chegou?
+        for(const x of TSP.sinais){
+          if(x.res!==null||tspBancoPos(x,x.prox)!==bank) continue;
+          const esperado=x.T+x.prox*x.step;
+          if(T===esperado){
+            if(par===x.bet){ x.res='G'; x.nivel=x.prox-1; }
+            else if(x.prox===4){ x.res='R'; }
+            else x.prox++;
+            mudou=true;
+          } else if(T>esperado+2*x.step){ x.res='X'; mudou=true; }   // o jogo não chegou (falha de captura)
+        }
+        // 2) guarda só os jogos recentes
+        if(ser.size>400){ const ks=[...ser.keys()].sort((a,b)=>a-b); for(const kk of ks.slice(0,ks.length-300)) ser.delete(kk); }
+        // 3) gatilhos deste segundo: K iguais seguidos terminando neste jogo
+        for(const r of TSP.robos){
+          if(!+r.on||r.bank!==bank) continue;
+          if(r.kind==='dupla'){ if(rec.d!==r.b||dg.get(T-(r.g+1)*step)!==r.a) continue; }
+          else { let ok=true; for(let j=1;j<r.k;j++){ if(ser.get(T-j*step)!==par){ ok=false; break; } } if(!ok) continue; }
+          { const itc=!!r.inter||!!tspC().intercala, altS=r.inter?r.alt:(itc?tspAltSym(r.sym):null);
+          disparos.push({r,bet:r.kind==='dupla'?r.bet:(r.modo==='quebra'?1-par:par),sym:r.sym,step,bank,inter:itc&&!!altS,alt:altS?d5BankName(r.step,altS):null,altSym:altS||null}); }
+        }
+      }
+      // 3a) mercado escolhido (só PAR / só ÍMPAR) e a cor em que o robô foi validado
+      for(let i=disparos.length-1;i>=0;i--){ const d=disparos[i]; if((+TC.mercado>=0&&d.bet!==+TC.mercado)||(+d.r.cor>=0&&d.bet!==+d.r.cor)) disparos.splice(i,1); }
+      if(!disparos.length) continue;
+      // fila: no máximo N sinais abertos ao mesmo tempo — os outros não aparecem até sair green/red
+      const cheia=+TC.fila>0&&TSP.sinais.filter(q=>q.res===null&&!q.conflito).length>=+TC.fila;
+      // 3b) UM sinal por segundo: se já existe sinal neste segundo (outra vol/intervalo), só junta robôs iguais e não cria outro
+      { const ex=TSP.sinais.find(q=>q.T===T);
+        if(ex){ if(!ex.conflito){ for(const d of disparos) if(d.sym===ex.sym&&d.step===ex.step&&d.bet===ex.bet&&!!d.inter===!!ex.inter&&!ex.robos.some(q=>q.rid===d.r.id)){ ex.robos.push({rid:d.r.id,nome:tspNome(d.r),bet:d.bet}); mudou=true; } } continue; } }
+      // 4) conflito: PAR e ÍMPAR no mesmo segundo → ninguém envia
+      const conflito=disparos.some(d=>d.bet===0)&&disparos.some(d=>d.bet===1);
+      if(conflito){
+        if(cheia) continue;
+        TSP.sinais.unshift({id:`${T}|conflito`,T,sym:'',step:0,bank:'',bet:null,conflito:true,robos:disparos.map(d=>({rid:d.r.id,nome:tspNome(d.r),bet:d.bet})),res:'C',nivel:-1,prox:1,criado:Date.now()});
+        mudou=true; continue;
+      }
+      // 5) um sinal por vol + intervalo (robôs da mesma cor se juntam)
+      const grupos=new Map(); for(const d of disparos){ const k=`${d.sym}|${d.step}|${d.inter?'I':'N'}`; if(!grupos.has(k)) grupos.set(k,[]); grupos.get(k).push(d); }
+      // só o MELHOR grupo vira sinal (mais robôs; empate → maior acerto) — nunca 2 sinais no mesmo segundo
+      const _av=G=>G.reduce((a,d)=>a+(+d.r.p2||+d.r.p1||0),0)/G.length;
+      const melhor=[...grupos.values()].sort((a,b)=>(b.length-a.length)||(_av(b)-_av(a)))[0];
+      for(const G of [melhor]){
+        const d0=G[0], id=`${T}|${d0.sym}|${d0.step}${d0.inter?'|I':''}`;
+        let x=TSP.sinais.find(q=>q.id===id);
+        if(!x){
+          // um robô sozinho já manda o sinal; um robô DIFERENTE, de outro segundo, pode completar um sinal aberto (1 robô só)
+          x=TSP.sinais.find(q=>q.res===null&&!q.conflito&&q.bank===d0.bank&&q.sym===d0.sym&&q.step===d0.step&&q.bet===d0.bet&&q.robos.length===1&&!q.robos.some(z=>z.rid===d0.r.id)&&q.T<T&&!!q.inter===!!d0.inter&&q.alt===d0.alt);
+          if(!x&&cheia) continue;
+          if(!x){ x={id,T,sym:d0.sym,step:d0.step,bank:d0.bank,bet:d0.bet,conflito:false,robos:[],res:null,nivel:-1,prox:1,criado:Date.now(),inter:!!d0.inter,alt:d0.alt,altSym:d0.altSym,forte:tspEhForte(d0.sym,T+d0.step,d0.bet)}; TSP.sinais.unshift(x); }
+        }
+        for(const d of G) if(!x.robos.some(q=>q.rid===d.r.id)) x.robos.push({rid:d.r.id,nome:tspNome(d.r),bet:d.bet});
+        mudou=true;
+      }
+    }
+    if(mudou){ tspCheckTrocas(); tspSave(); if(S.tab==='tsp') tspRender(); if(S.tab==='tss') tspTsRender(); }
+  }catch(e){ console.warn('robôs tiro seco',e); }
+}
+function tspStats(rid){ const L=TSP.sinais.filter(x=>x.robos.some(q=>q.rid===rid)); return {g:L.filter(x=>x.res==='G').length,r:L.filter(x=>x.res==='R').length,pend:L.filter(x=>x.res===null).length}; }
+function tspHtml(){
+  const C=tspC(), W=String(C.janelas).split('-').map(Number);
+  const selA=(k,o)=>`<select onchange="tspSet('${k}',+this.value)">${o.map(([v,t])=>`<option value="${v}" ${String(C[k])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
+  const cand=TSP.cand||[];
+  const candRows=cand.map((c,i)=>`<tr><td style="text-align:left"><b>${symNome(c.sym).replace('Volatility','Vol')}</b> · ${c.step}s</td><td style="text-align:left">${tspNome(c)}</td><td><b class="ok">${c.p1.toFixed(1)}%</b> <span class="mu">${c.g1} greens de ${c.n1}</span></td><td><b class="ok">${c.p2.toFixed(1)}%</b> <span class="mu">${c.g2} greens de ${c.n2}</span></td><td><button onclick="tspAtivar(${i})">➕ ativar</button> <button onclick="tspAtivar(${i},1)">🔀 intercalador</button></td></tr>`).join('');
+  const ativos=TSP.robos.map((r,i)=>{ const st=tspStats(r.id), tot=st.g+st.r, pct=tot?100*st.g/tot:0; return `<tr><td style="text-align:left"><b>${symNome(r.sym).replace('Volatility','Vol')}</b> · ${r.step}s</td><td style="text-align:left">${tspNome(r)}</td><td>${st.g} ✅ · ${st.r} ❌ · ${st.pend} ⏳</td><td><b class="${tot&&pct>=50?'ok':'ruim'}">${tot?pct.toFixed(0)+'%':'—'}</b></td><td>${+r.on?'<b class="ok">ligado</b>':'<span class="mu">pausado</span>'}</td><td><button onclick="tspToggle(${i})">${+r.on?'⏸ pausar':'▶ ligar'}</button> <button onclick="tspApagar(${i})">🗑</button></td></tr>`; }).join('');
+  const volsTxt=(d5Syms().length?d5Syms():SYMS_ALL.map(x=>x[0])).map(s=>symNome(s).replace('Volatility','Vol')).join(', ');
+  return `<div class="panel" style="border-color:#f472b6"><h3>🎯 Robôs tiro seco · PAR / ÍMPAR</h3>
+    <div class="nota">Robô = depois de K resultados iguais seguidos, aposta na cor oposta (quebra) ou na mesma (continua). Cada gatilho vira <b>1 sinal</b> com até 4 entradas (TS, G1, G2, G3): fecha no 1º green; se as 4 perderem, é red. A busca usa as vols do TS Somado (${volsTxt}) nos tempos ${(tssC().tempos||[]).map(t=>t+'s').join(', ')}. Passa quem tiver o mínimo de greens e de acerto nas duas janelas (${W[0]} e ${W[1]} jogos).</div>
+    <div class="ctl" style="flex-wrap:wrap">
+      <label>janelas <select onchange="tspSet('janelas',this.value)">${[['1000-500','1000 e 500 jogos'],['500-200','500 e 200 jogos']].map(([v,t])=>`<option value="${v}" ${C.janelas===v?'selected':''}>${t}</option>`).join('')}</select></label>
+      <label>acerto mínimo ${selA('thr',[[52,'52%'],[55,'55%'],[58,'58%'],[60,'60%']])}</label>
+      <label>mínimo de greens para validar ${selA('gMin',[[5,'5'],[10,'10'],[20,'20']])}</label>
+      <label><input type="checkbox" ${+C.auto?'checked':''} onchange="tspSet('auto',this.checked?1:0)"> criar e ativar sozinho os que passarem</label>
+      <label title="os tiros 1 e 3 saem na vol diferente (próxima vol marcada) e os tiros 2 e 4 no próprio robô, conforme as jogadas acontecem"><input type="checkbox" ${C.intercala!==0?'checked':''} onchange="tspSet('intercala',this.checked?1:0)"> 🔀 intercalar os sinais dos robôs</label>
+      <label>mercado ${selA('mercado',[[-1,'PAR e ÍMPAR'],[0,'só PAR'],[1,'só ÍMPAR']])}</label>
+      <label title="ficam ligados só os X melhores (acerto nas 2 janelas); os outros pausam">robôs ligados no máx. ${selA('maxRobos',[[0,'sem limite'],[3,'3'],[5,'5'],[10,'10'],[15,'15'],[20,'20'],[30,'30']])}</label>
+      <label title="enquanto houver esse número de sinais esperando green/red, os outros não aparecem">sinais abertos ao mesmo tempo ${selA('fila',[[1,'1'],[2,'2'],[3,'3'],[5,'5'],[0,'sem limite']])}</label>
+      <label>robô sai após ${selA('redSai',[[1,'1 red'],[2,'2 reds'],[3,'3 reds'],[5,'5 reds'],[0,'nunca']])}</label>
+      <label><input type="checkbox" ${C.famSeq!==0?'checked':''} onchange="tspSet('famSeq',this.checked?1:0)"> 🔁 sequências (K iguais)</label>
+      <label><input type="checkbox" ${C.famDup!==0?'checked':''} onchange="tspSet('famDup',this.checked?1:0)"> 🎲 duplas numéricas</label>
+      <button class="pri" onclick="tspBuscar()" ${TSP.busy?'disabled':''}>🔎 BUSCAR ROBÔS</button>
+    </div>
+    ${TSP.msg?`<div class="nota">${TSP.msg}</div>`:''}
+    <h4 style="margin:10px 0 6px">Candidatos${cand.length?` (${TSP.candTotal})`:''}</h4>
+    ${cand.length?`<div class="tw"><table><tr><th>Vol</th><th>Regra</th><th>1ª janela</th><th>2ª janela</th><th></th></tr>${candRows}</table></div>`:'<div class="nota">Clique em buscar. Os candidatos aparecem aqui.</div>'}
+    <h4 style="margin:10px 0 6px">Robôs ativos (${TSP.robos.length}) <button onclick="tspTodos(1)">✅ ativar todos</button> <button onclick="tspTodos(0)">⏸ desativar todos</button></h4>
+    ${TSP.robos.length?`<div class="tw"><table><tr><th>Vol</th><th>Regra</th><th>TS ✅ · ❌ · ⏳</th><th>acerto</th><th>status</th><th></th></tr>${ativos}</table></div>`:'<div class="nota">Nenhum robô ativo.</div>'}
+    <h4 style="margin:10px 0 6px">Trocas automáticas (últimas 30)</h4>
+    ${TSP.trocas.length?`<div class="tw"><table><tr><th>quando</th><th>saiu</th><th>motivo</th><th>entrou no lugar</th></tr>${TSP.trocas.map(t=>`<tr><td>${new Date(t.t).toLocaleTimeString('pt-BR')}</td><td style="text-align:left">${t.saiu}</td><td>${t.motivo}</td><td style="text-align:left">${t.entrou||'…'}</td></tr>`).join('')}</table></div>`:'<div class="nota">Nenhuma troca ainda.</div>'}
+    <div class="nota">Os robôs ativos rodam ao vivo na página com a captura ligada: as vols do TS precisam estar marcadas em ⚡ Deriv R_100.</div>
+  </div>`;
+}
+function tspRender(){ const el=document.getElementById('tspRoot'); if(el) el.innerHTML=tspHtml(); }
+// painel de acompanhamento dentro da aba 🧩 TS Somado
+// robô + cruzamento do círculo (mesma cor, no jogo de entrada) = sinal forte
+var TSP_NO_VOTO=false;
+// voto do robô TS para o círculo 🏭 Fábrica de robôs: sinal de robô cujo TS cai neste jogo (mesma vol)
+function tspBancoPos(x,p){ return x.inter&&p%2===1?x.alt:x.bank; }
+function tspVoto(sym,T){
+  const L=TSP.sinais.filter(x=>x.sym===sym&&!x.inter&&!x.conflito&&x.res!=='X'&&x.res!=='C'&&x.T+x.step===T);
+  if(!L.length) return null;
+  const bets=new Set(L.map(x=>x.bet));
+  if(bets.size>1) return {alvo:null,txt:'robôs TS em cores diferentes'};
+  const nomes=[...new Set(L.flatMap(x=>x.robos.map(q=>q.nome)))];
+  return {alvo:L[0].bet,txt:`🎯 robô TS: ${nomes.join(' + ')}`};
+}
+// robô + cruzamento do círculo: os círculos (sem contar o próprio robô) apontam a mesma cor com o mínimo
+function tspEhForte(sym,E,bet){
+  TSP_NO_VOTO=true;
+  try{ const C=mcfC(); for(const w of tssTempos(E)){ const v=mcfVotar(w,E,sym); if(!v) continue; const f=mcfForca(v); if(f.alvo===bet&&f.n>=C.min&&!(+C.semContra&&f.contra)) return true; } return false; }
+  catch(e){ return false; } finally{ TSP_NO_VOTO=false; }
+}
+function tspTabelaSinais(forte){
+  const ROT=['1º','2º','3º','4º'];
+  const L=TSP.sinais.filter(x=>!!x.forte===forte).slice(0,160).reverse();   // mais antigo à esquerda
+  const g=L.filter(x=>x.res==='G'), r=L.filter(x=>x.res==='R'), c=L.filter(x=>x.res==='C').length, p=L.filter(x=>x.res===null).length;
+  const cnt=k=>g.filter(x=>x.nivel===k).length;
+  const acerto=g.length+r.length?(100*g.length/(g.length+r.length)).toFixed(1):'—';
+  const cel=x=>{
+    const nomes=x.robos.map(q=>q.nome).join(' + ');
+    const lado=x.bet===null||x.bet===undefined?'':(x.bet?'ÍMPAR':'PAR');
+    const info=`${hmsOf(x.T)} · ${x.conflito?'conflito PAR×ÍMPAR · não enviado':symNome(x.sym).replace('Volatility','Vol')+(x.inter?' ↔ '+symNome(x.altSym).replace('Volatility','Vol'):'')+' · '+x.step+'s · '+lado+' · '+nomes}`;
+    const hora=hmsOf(x.T).slice(0,8);
+    if(x.res==='C') return `<div title="${info}" style="width:44px;text-align:center"><div style="background:#64748b;color:#fff;border-radius:6px;padding:7px 0;font-weight:900">⚠</div><div class="mu" style="font-size:10px">${hora}</div></div>`;
+    const bg=x.res==='G'?'#16a34a':x.res==='R'?'#dc2626':'#334155';
+    const txt=x.res==='G'?ROT[x.nivel]:x.res==='R'?'R':x.res==='X'?'–':'…';
+    return `<div title="${info}" style="width:44px;text-align:center"><div style="background:${bg};color:#fff;border-radius:6px;padding:7px 0;font-weight:900">${txt}</div><div class="mu" style="font-size:10px">${hora}</div></div>`;
+  };
+  const titulo=forte?'⭐ Sinais fortes <small>robô + cruzamento do círculo · fecha em green ou red</small>':'🎯 Robôs TS <small>resultados dos sinais dos robôs · cadeia TS → G1 → G2 → G3</small>';
+  const resumo=`<b class="ok">${g.length}</b> green (1º ${cnt(0)} · 2º ${cnt(1)} · 3º ${cnt(2)} · 4º ${cnt(3)}) · <b class="ruim">${r.length}</b> red · ${c} conflito(s) · ${p} aguardando · acerto <b>${acerto}%</b> (sorte 50%)`;
+  return `<div id="${forte?'tspFortes':'tspTs'}" class="panel" style="border:2px solid ${forte?'#facc15':'#f472b6'}"><h3>${titulo}</h3>
+    <div class="nota">${resumo}</div>
+    ${L.length?`<div style="display:flex;flex-wrap:wrap;gap:6px 4px;margin-top:8px">${L.map(cel).join('')}</div>`:`<div class="nota">${forte?'Nenhum sinal forte ainda.':'Ainda sem sinais. Ative um robô na aba 🎯 Robôs Tiro Seco.'}</div>`}
+    <div class="nota" style="margin-top:8px">1º / 2º / 3º / 4º = em qual entrada ganhou (TS, G1, G2, G3) · R = red · ⚠ = conflito · … = aguardando · passe o mouse para ver vol, aposta e robô.</div>
+  </div>`;
+}
+function tspTsPainel(){ return `<div id="tspTsWrap">${tspTabelaSinais(false)}${tspTabelaSinais(true)}</div>`; }
+function tspTsRender(){ const el=document.getElementById('tspTsWrap'); if(el) el.outerHTML=tspTsPainel(); }
+VIEWS.tsp={nome:'🎯 Robôs Tiro Seco',html(){ return `<div id="tspRoot">${tspHtml()}</div>`; },res(){ return ''; }};
+
 // ===================== 🎯 SOMENTE ROBÔ (SROB) · v2 =====================
 // 10 robôs que só entram em padrões 100% (sem nenhum red) e que também confirmaram 100% na parte mais nova do banco.
 // Famílias: números, duplas, trios, somas (Σ dos últimos N), sequências (X× par/ímpar), padrões de cor (ex.: PIP),
@@ -14324,6 +14699,7 @@ function afterUpdate(novo) {
   setTimeout(() => { setPonte(); if (S.tab === 'fonte') VIEWS.fonte.after(); }, 1500);
   rbLoad();
   uoLoadStore();
+  tspLoad(); setTimeout(tspSeedAll, 4000);
   dmLoadLog();
   cfLoad();
   cfHistLoad();
@@ -14398,13 +14774,14 @@ async function pacAbrir(){
       <div class="mu" style="font-size:12px;margin:4px 0">Banco daqui: <b>${num(tot)}</b> jogos em ${B.length} banco(s)</div>
       <div class="pac-bk">${B.map(b=>`<label><input type="checkbox" class="pacB" value="${b.replace(/"/g,'&quot;')}" checked> ${b} <span class="mu">${num(N[b])}</span></label>`).join('')||'<span class="mu">banco vazio</span>'}</div>
       <div class="ctl" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px">
-        <label>jogos de <select id="pacDias"><option value="0">tudo</option><option value="1">último 1 dia</option><option value="3">últimos 3 dias</option><option value="7" >últimos 7 dias</option><option value="30">últimos 30 dias</option></select></label>
+        <label>jogos de <select id="pacDias"><option value="0">tudo</option><option value="24">últimas 24h</option><option value="36">últimas 36h</option><option value="48">últimas 48h</option><option value="72">últimos 3 dias</option><option value="168">últimos 7 dias</option><option value="720">últimos 30 dias</option></select></label>
         <label><input type="checkbox" id="pacCfg" checked> configurações e estatísticas</label>
         <button onclick="pacExportar()">📦 baixar pacote</button></div></div>
     <div class="pac-box"><b>2 · Importar pacote aqui</b>
       <div class="ctl" style="display:flex;flex-direction:column;gap:5px;margin-top:6px">
         <label><input type="radio" name="pacModo" value="tudo" checked> jogos + configurações e estatísticas (fica igual ao outro navegador)</label>
         <label><input type="radio" name="pacModo" value="jogos"> só os jogos (mantém a configuração daqui)</label>
+        <label><input type="radio" name="pacModo" value="repor"> 🩹 só repor os jogos que faltam aqui — das últimas <select id="pacRepH" onclick="event.stopPropagation()" onchange="document.querySelector('input[name=pacModo][value=repor]').checked=true"><option value="24">24h</option><option value="36">36h</option><option value="48" selected>48h</option><option value="72">3 dias</option><option value="0">tudo do pacote</option></select> <span class="mu">(não regrava o que já existe, não mexe na configuração)</span></label>
         <input type="file" id="pacArq" accept=".gz,.json,.dpi" onchange="pacImportar(this.files[0])"></div>
       <div class="mu" style="font-size:11.5px;margin-top:4px">Feche as outras abas deste HTML (Mesa, robôs) antes de importar, para nenhuma delas regravar a configuração antiga por cima.</div></div>
     <div id="pacSt" style="font-size:13px;margin-top:8px">${PAC.msg||''}</div>
@@ -14416,7 +14793,7 @@ function pacPagina(b,depois,lim){ return new Promise(res=>{ try{ const hi=b+'|�
 async function pacExportar(){
   if(PAC.busy) return; PAC.busy=true;
   try{
-    const B=[...document.querySelectorAll('.pacB:checked')].map(x=>x.value), dias=+document.getElementById('pacDias').value, desde=dias?Date.now()-dias*86400e3:0, comCfg=document.getElementById('pacCfg').checked;
+    const B=[...document.querySelectorAll('.pacB:checked')].map(x=>x.value), dias=+document.getElementById('pacDias').value, desde=dias?Date.now()-dias*3600e3:0, comCfg=document.getElementById('pacCfg').checked;
     const ls={}; if(comCfg) for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&!PAC_SEGREDO.test(k)&&!/^dpi_nuvem_/.test(k)) ls[k]=localStorage.getItem(k); }
     const N={}; let previsto=0; for(const b of B){ N[b]=await pacContar(b); previsto+=N[b]; }
     const enc=new TextEncoder(), gz=typeof CompressionStream!=='undefined';
@@ -14428,7 +14805,7 @@ async function pacExportar(){
     let tss=null; if(comCfg){ try{ tss=await tssKvGet('tss_v1'); }catch(e){} }
     await escrever(JSON.stringify({formato:'dpi_pacote_v2',criado:Date.now(),origem:location.host||'arquivo',desde,ls,tss,cols:['id','t','d','p','q','src','sym','w','te'],bancos:B})+'\n');
     let tot=0, lidos=0;
-    for(const b of B){ let ult=null;
+    for(const b of B){ let ult=desde?b+'|'+String(Math.floor(desde-3600e3)).padStart(13,'0'):null;   // com período: começa direto perto da data (não lê o banco todo)
       for(;;){ const pg=await pacPagina(b,ult,20000); if(!pg.length) break; ult=pg[pg.length-1].k; lidos+=pg.length;
         const rows=[]; for(const x of pg) if(!desde||x.t>=desde) rows.push([x.id,x.t,x.d??null,x.p??null,x.q??'',x.src||'',x.sym||'',x.w||0,x.te||0]);
         if(rows.length){ await escrever(JSON.stringify({b,rows})+'\n'); tot+=rows.length; }
@@ -14446,18 +14823,25 @@ async function pacImportar(f){
     pacSet('lendo o arquivo…',1); const head=new Uint8Array(await f.slice(0,2).arrayBuffer()), gz=head[0]===0x1f&&head[1]===0x8b;
     if(gz&&typeof DecompressionStream==='undefined') throw new Error('este navegador não descompacta .gz — use Chrome/Edge atualizado');
     let st=f.stream(); if(gz) st=st.pipeThrough(new DecompressionStream('gzip')); const rd=st.pipeThrough(new TextDecoderStream()).getReader();
-    let buf='', H=null, total=0, lidoBytes=0, v1=false; const tam=f.size;
+    let buf='', H=null, total=0, lidoBytes=0, v1=false, jaTinha=0, foraJan=0; const tam=f.size;
+    // 🩹 repor: só grava o segundo que este banco ainda NÃO tem (compara por banco + segundo do jogo, não pelo id)
+    const repor=modo==='repor', repH=+((document.getElementById('pacRepH')||{}).value||48), desdeR=repor&&repH?Date.now()-repH*3600e3:0, TEM={};
+    const temSet=async b=>{ if(TEM[b]) return TEM[b]; const rows=await idbRange(b,desdeR?desdeR-120000:0,9999999999999), S2=new Set(); for(const x of rows) S2.add(Math.round(x.t/1000)); return TEM[b]=S2; };
+    const gravar=async(b,rows)=>{ let R=pacRecs(b,rows,H.cols);
+      if(repor){ const S2=await temSet(b), n0=R.length; R=R.filter(x=>{ if(desdeR&&x.t<desdeR){ foraJan++; return false; } const sg=Math.round(x.t/1000); if(S2.has(sg)){ jaTinha++; return false; } S2.add(sg); return true; }); }
+      if(R.length) await idbPut(R); return R.length; };
     const linha=async L=>{ if(!L.trim()) return; const j=JSON.parse(L);
       if(!H){ if(j.formato==='dpi_pacote_v1'){ v1=true; H=j; return; } if(j.formato!=='dpi_pacote_v2') throw new Error('este arquivo não é um pacote 📦 do Dólar Par/Ímpar'); H=j; return; }
-      for(let i=0;i<j.rows.length;i+=20000){ await idbPut(pacRecs(j.b,j.rows.slice(i,i+20000),H.cols)); } total+=j.rows.length; pacSet(`gravando jogos · ${j.b} · ${num(total)} jogos`,Math.min(97,gz?Math.min(97,5+total/1e4):100*lidoBytes/tam)); };
+      for(let i=0;i<j.rows.length;i+=20000){ total+=await gravar(j.b,j.rows.slice(i,i+20000)); } pacSet(`${repor?'repondo':'gravando'} jogos · ${j.b} · ${num(total)} ${repor?`novos · ${num(jaTinha)} já existiam`:'jogos'}`,Math.min(97,gz?Math.min(97,5+total/1e4):100*lidoBytes/tam)); };
     for(;;){ const {done,value}=await rd.read(); if(done) break; lidoBytes+=value.length; buf+=value;
       if(!H&&buf.length>2&&buf.trimStart()[0]==='{'&&!buf.includes('\n')&&buf.length<5e8) continue;   // cabeçalho ainda chegando (ou pacote v1 inteiro numa linha)
       let k; while((k=buf.indexOf('\n'))>=0){ const L=buf.slice(0,k); buf=buf.slice(k+1); await linha(L); } }
     if(buf.trim()) await linha(buf);
-    if(v1){ for(const bk of H.bancos){ for(let i=0;i<bk.rows.length;i+=20000) await idbPut(pacRecs(bk.b,bk.rows.slice(i,i+20000),H.cols)); total+=bk.rows.length; } }
+    if(v1){ for(const bk of H.bancos){ for(let i=0;i<bk.rows.length;i+=20000) total+=await gravar(bk.b,bk.rows.slice(i,i+20000)); } }
     if(!H) throw new Error('arquivo vazio');
     let nls=0; if(modo==='tudo'&&H.ls) for(const [k,v] of Object.entries(H.ls)){ if(PAC_SEGREDO.test(k)||/^dpi_nuvem_/.test(k)) continue; try{ localStorage.setItem(k,v); nls++; }catch(e){ lsLiberar(); try{ localStorage.setItem(k,v); nls++; }catch(e2){} } }
     if(modo==='tudo'&&H.tss){ try{ let cur=null; try{ cur=await tssKvGet('tss_v1'); }catch(e){} await tssKvPut('tss_v1',tssJunta(cur,H.tss)); nls++; }catch(e){ console.warn('pacote ts somado',e); } }   // 🧩 registro do TS Somado (junta, não apaga)
+    if(repor){ PAC.busy=false; pacSet(`✅ Reposição de <b>${H.origem}</b> (${new Date(H.criado).toLocaleString('pt-BR')})${repH?` · últimas ${repH}h`:''}: <b>${num(total)}</b> jogos que faltavam foram gravados · ${num(jaTinha)} já existiam (não mexi)${foraJan?` · ${num(foraJan)} fora do período`:''}. Recarregando…`,100); setTimeout(()=>location.reload(),2500); return; }
     PAC.busy=false; pacSet(`✅ Importado de <b>${H.origem}</b> (${new Date(H.criado).toLocaleString('pt-BR')}): <b>${num(total)}</b> jogos${nls?` + ${nls} configurações/estatísticas`:''}. Recarregando…`,100);
     if(modo==='tudo'){ window.saveCfg=function(){}; }
     setTimeout(()=>location.reload(),1800);
