@@ -698,7 +698,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.54';
+const VERSAO='v4.55';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -13404,11 +13404,31 @@ function tssrTick(st){
 }
 // ---------- 🎮 Mesa → 🧩 ROBÔS CRIADOS ----------
 function tssrMesaRender(full){ if(typeof MESA==='undefined'||!MESA.open||cfg.mesa_modo!=='tssr') return; const el=document.getElementById('tsrGrade'); if(full||!el) return mesaRender(true); el.innerHTML=tssrGradeHtml(); }
+// ⛏ Minerar ouro também nos 🧩 ROBÔS CRIADOS: lucro = saldo do robô; ouro se positivo, terra se negativo
+function tssrMinaCard(R,S,i){
+  const at=tssrAtivo(R), u=+S.pnl||0, g=S.ents.filter(x=>x.o==='G').length, r=S.ents.filter(x=>x.o!=='G').length;
+  const agora=Date.now()/1000, ouro=u>0;
+  const fx=S.ents.filter(x=>agora-x.t<8).slice(-6).map((x,k)=> x.o==='G'
+      ? `<span class="mn-fx mn-coin" style="left:${58+k*4}%;top:30%;animation-delay:${k*0.15}s"></span>`
+      : `<span class="mn-fx mn-dirt" style="left:${20+k*3}%;top:62%;animation-delay:${k*0.1}s"></span>`).join('');
+  const pts=[[10,70],[30,40],[55,62],[20,20],[70,25]];
+  const pilha=pts.map(([x,y])=> ouro
+      ? `<span style="position:absolute;left:${x}%;top:${y}%;width:12px;height:12px;background:#facc15;border-radius:3px;box-shadow:0 0 5px #facc15"></span>`
+      : `<span style="position:absolute;left:${x}%;top:${y}%;width:12px;height:10px;background:#8b5a2b;border-radius:3px"></span>`).join('');
+  return `<div class="tsr-card ${at?'on':''}" style="padding:0;overflow:hidden">${MN_CSS}
+    <div class="mn-wrap ${+R.on?'mn-on':''}"><div class="mn-rock"></div><div class="mn-pile">${pilha}</div>${fx}
+      <svg class="mn-man" viewBox="0 0 70 110"><circle cx="30" cy="16" r="9" fill="#111"/><rect x="20" y="26" width="20" height="40" rx="6" fill="#111"/><line x1="24" y1="66" x2="18" y2="104" stroke="#111" stroke-width="7"/><line x1="36" y1="66" x2="46" y2="104" stroke="#111" stroke-width="7"/><g class="mn-arm"><line x1="40" y1="34" x2="62" y2="6" stroke="#111" stroke-width="6"/><path d="M56 2 L70 -2 L66 12 Z" fill="#555"/></g></svg></div>
+    <div class="mn-box"><span class="${u>=0?'ok':'ruim'}">${u>=0?'+':'−'}$${Math.abs(u).toFixed(2)}</span> <span class="mu" style="font-weight:400">· ${g} ✅ · ${r} ❌ · ${+R.on?'⛏ minerando':'⏸ parado'}</span></div>
+    <div style="padding:8px 10px"><div class="tsr-top"><b>#${i+1} ⛏ ${R.nome}</b>
+      <span style="margin-left:auto;display:flex;gap:6px"><button class="${+R.on?'on':''}" onclick="tssrLigar('${R.id}',${+R.on?0:1})">${+R.on?'⏸ desligar':'▶ ligar'}</button><button onclick="tssrSkin('${R.id}')">▫ normal</button><button onclick="tssrApagar('${R.id}')">🗑</button></span></div></div></div>`;
+}
+function tssrSkin(id){ const r=TSSR.lista.find(x=>x.id===id); if(!r) return; r.skin='normal'; tssrSalvaLista(); tssrMesaRender(true); }
+function tssrSkinCtl(){ return `<label style="margin-left:10px;font-size:12px"><input type="checkbox" ${cfg.rb_skin==='mine'?'checked':''} onchange="cfg.rb_skin=this.checked?'mine':'';saveCfg();tssrMesaRender(true)"> ⛏ robôs animados (Minerar ouro)</label>`; }
 function tssrGradeHtml(){
   const L=TSSR.lista.map(R=>({R,S:TSSR.st[R.id]||tssrNovoS()})).sort((a,b)=>b.S.pnl-a.S.pnl);
   if(!L.length) return `<div class="nota" style="padding:20px">Nenhum robô criado ainda. Crie no 🧪 Validador da aba 🧩 TS Somado (página principal).</div>`;
   const demo=k=>{ const D=(typeof DM!=='undefined'?DM.log:[]).filter(x=>String(x.key||'').startsWith('tssr|'+k+'|')&&(x.res==='green'||x.res==='red')); return D.length?D.reduce((a,x)=>a+(+x.profit||0),0):null; };
-  return L.map(({R,S},i)=>{ const at=tssrAtivo(R), dur=Date.now()-(S.ini||R.criado), h=Math.floor(dur/3600e3), d=Math.floor(h/24), dm=demo(R.id);
+  return L.map(({R,S},i)=>{ if(cfg.rb_skin==='mine'&&R.skin!=='normal') return tssrMinaCard(R,S,i); const at=tssrAtivo(R), dur=Date.now()-(S.ini||R.criado), h=Math.floor(dur/3600e3), d=Math.floor(h/24), dm=demo(R.id);
     const estado=R.agenda?agendaEstadoTxt(R,S):S.parado?`<b class="ruim">⏹ ${S.parado}</b>`:!+R.on?'<span class="mu">desligado</span>':S.cur?(S.cur.real?'<b class="ok">▶ entrando</b>':'👁 acompanhando (virtual)'):tssrArmado(R,S)?'<b class="ok">● armado — esperando sinal</b>':`<span class="mu">⏳ esperando o gatilho (${S.stream.slice(-6)||'—'})</span>`;
     const chips=S.ents.slice(-24).map(x=>`<i class="sf-c ${x.o==='G'?(x.k===0?'t':'g'):'r'}" title="${new Date(x.t*1000).toLocaleString('pt-BR')} · ${x.cor?'ÍMPAR':'PAR'} · ${x.pnl>=0?'+':''}${x.pnl}">${x.o==='G'?(x.k===0?'✓':(x.k+1)+'º'):'R'}</i>`).join('');
     return `<div class="tsr-card ${at?'on':''}"><div class="tsr-top"><b>#${i+1} ${R.nome}</b><span class="mu">${d?d+'d ':''}${h%24}h ${Math.floor(dur/60e3)%60}m</span>
@@ -13419,7 +13439,7 @@ function tssrGradeHtml(){
 }
 function tssrMesaHtml(){
   return `<div class="ms-dir" style="flex:1"><div class="ms-lb">🧩 ROBÔS CRIADOS <span class="mu">— ordenados pelo saldo · os sinais vêm do 🧩 TS Somado (página principal aberta) · entradas na conta DEMO por esta Mesa</span>
-      <button class="ms-x" style="float:right;border-color:#ef4444;color:#fca5a5" onclick="tssrPararTodos()">⏹ desligar todos</button></div>
+      <button class="ms-x" style="float:right;border-color:#ef4444;color:#fca5a5" onclick="tssrPararTodos()">⏹ desligar todos</button>${tssrSkinCtl()}</div>
     <div id="tsrGrade" class="tsr-grade">${tssrGradeHtml()}</div>
     <div class="ms-nota">Saldo, ROI e green/red contam só as entradas que o robô fez (gatilho armado e ligado). Antes do gatilho ele acompanha no virtual. “DEMO REAL” soma o resultado de verdade das ordens na conta DEMO. Com poucos sinais o ranking muda muito por acaso.</div></div>`;
 }
