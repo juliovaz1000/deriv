@@ -698,7 +698,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.59';
+const VERSAO='v4.61';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -3956,7 +3956,7 @@ VIEWS.max = { nome: '📏 Máximas', res() {
     <tr><th>Dígito</th><th>Sem vir agora</th><th>Máxima</th><th>Média</th></tr>${secas}</table></div>
   <div class="panel"><h3>📏 Máximas por vol e tempo <small>PAR e ÍMPAR · últimos 1000 jogos de cada vol × tempo</small></h3><div id="maxVolsBox"><div class="nota">calculando…</div></div></div>`;
 } };
-// 🔗 MÁXIMAS AO VIVO: a sequência atual de uma vol×tempo chega na máxima dela (1000 jogos) → evento. 3 eventos da mesma cor
+// 🔗 MÁXIMAS AO VIVO: a sequência atual de uma vol×tempo chega na máxima dela (1000 jogos) → evento. 3 eventos (PAR e ÍMPAR podem alternar)
 //    viram 1 sinal (aposta na cor oposta = a máxima quebra), entrando no próximo jogo da vol que completou o trio.
 const MXV={run:{},pend:[]};
 function mxLim(bank){ const o=MAXV.rows&&MAXV.rows.find(x=>x.bank===bank); return o?[o.best[0].len,o.best[1].len]:null; }
@@ -3987,15 +3987,16 @@ function maxOnSlots(recs){
     if(!novosEv.length) return;
     const tMax=Math.max(...MXV.pend.map(e=>e.T));
     MXV.pend=MXV.pend.filter(e=>e.T>=tMax-600);
-    for(const bet of [0,1]){
-      let L=MXV.pend.filter(e=>e.bet===bet).sort((a,b)=>a.T-b.T);
-      while(L.length>=3){
-        const t3=L.slice(-3), c=t3[2];
-        MXV.pend=MXV.pend.filter(e=>!t3.includes(e));
-        L=L.slice(0,-3);
-        TSP.sinais.unshift({id:`${c.T}|max|${c.bank}`,T:c.T,sym:c.sym,step:c.step,bank:c.bank,bet,conflito:false,maxima:true,forte:false,
-          robos:t3.map(e=>({rid:'max',nome:`${e.nome} ${e.len}× ${e.cor?'ÍMPAR':'PAR'}`,bet})),res:null,nivel:-1,prox:1,criado:Date.now()});
-      }
+    // 3 máximas seguidas viram 1 sinal, na ordem em que aconteceram (PAR e ÍMPAR podem alternar entre elas).
+    // A aposta do sinal é a do 3º evento (o que fechou o trio); cada evento aparece com a sua cor.
+    // Máxima de PAR e de ÍMPAR no mesmo segundo → nada é enviado nesse segundo (tratado acima).
+    let L=MXV.pend.slice().sort((x,y)=>x.T-y.T);
+    while(L.length>=3){
+      const t3=L.slice(0,3), c=t3[2];
+      MXV.pend=MXV.pend.filter(e=>!t3.includes(e));
+      L=L.slice(3);
+      TSP.sinais.unshift({id:`${c.T}|max|${c.bank}`,T:c.T,sym:c.sym,step:c.step,bank:c.bank,bet:c.bet,conflito:false,maxima:true,forte:false,
+        robos:t3.map(e=>({rid:'max',nome:`${e.nome} ${e.len}× ${e.cor?'ÍMPAR':'PAR'}`,bet:e.bet})),res:null,nivel:-1,prox:1,criado:Date.now()});
     }
     tspSave(); if(S.tab==='tss') tspTsRender(); if(S.tab==='tsp') tspRender();
   }catch(e){ console.warn('máximas',e); }
@@ -4007,7 +4008,7 @@ setInterval(()=>{ try{ if(S.tab==='max') maxVolsFill(); }catch(e){} },2000);
 const MAXV={t:0,rows:null,busy:false};
 async function maxVolsCalc(){
   const L=[];
-  for(const [sym,nome] of SYMS_ALL) for(const st of D5_STEPS){
+  for(const [sym,nome] of SYMS_ALL) for(const st of D5_STEPS.filter(x=>x!==2)){
     const bank=d5BankName(st,sym); let rows=[]; try{ rows=await idbTail(bank,1000); }catch(e){}
     const o={vol:nome.replace('Volatility','Vol'),sym,bank,st,n:0,best:[{len:0},{len:0}],cur:null};
     let cur=null;
@@ -13316,20 +13317,35 @@ VIEWS.tss={nome:'🧩 TS Somado',live(){ if(Date.now()-TSS.ui>3000) tssRender();
 // aba "🧩 ROBÔS CRIADOS". O robô roda na página que calcula (🧠) e as entradas saem pela Mesa, na conta DEMO.
 // =====================================================================================
 const TSSR_PAY=0.95;
-const TSSR_DEF={fonte:'todas',forte:0,entrada:0,gale:0,cor:-1,vols:[],volGale:'qualquer',gat:'sempre',X:2,Y:1,ciclo:'1',val:0.35,calc:'zero',fator:2.2,rec:0,recLucro:0,sl:0,sw:0};
+const TSSR_DEF={fv:1,fonte:'todas_nf',forte:0,entrada:0,gale:0,cor:-1,vols:[],volGale:'qualquer',gat:'sempre',X:2,Y:1,ciclo:'1',val:0.35,calc:'zero',fator:2.2,rec:0,recLucro:0,sl:0,sw:0};
 const TSSR_PRESETS=[
-  ['🐢 Conservador: G1 depois de 2 red + 1 green',{fonte:'todas',forte:0,entrada:1,gale:0,gat:'xy',X:2,Y:1,ciclo:'1'}],
-  ['🐢 Só sinais fortes, TS depois de 2 reds seguidos',{fonte:'todas',forte:1,entrada:0,gale:0,gat:'reds',X:2,ciclo:'g1'}],
-  ['⚖️ G1 → G2 (entra no 2º TS e usa o 3º de gale)',{fonte:'todas',forte:0,entrada:1,gale:1,gat:'sempre'}],
-  ['🎯 G2 seco (só o 3º TS do sinal)',{fonte:'todas',forte:0,entrada:2,gale:0,gat:'sempre'}],
-  ['🔥 Agressivo: TS em todos + 2 gales',{fonte:'todas',forte:0,entrada:0,gale:2,gat:'sempre'}],
+  ['🐢 Conservador: G1 depois de 2 red + 1 green',{fonte:'todas_n',forte:0,entrada:1,gale:0,gat:'xy',X:2,Y:1,ciclo:'1'}],
+  ['🐢 Só sinais fortes, TS depois de 2 reds seguidos',{fonte:'todas_f',forte:0,entrada:0,gale:0,gat:'reds',X:2,ciclo:'g1'}],
+  ['⚖️ G1 → G2 (entra no 2º TS e usa o 3º de gale)',{fonte:'todas_n',forte:0,entrada:1,gale:1,gat:'sempre'}],
+  ['🎯 G2 seco (só o 3º TS do sinal)',{fonte:'todas_n',forte:0,entrada:2,gale:0,gat:'sempre'}],
+  ['🔥 Agressivo: TS em todos + 2 gales',{fonte:'todas_n',forte:0,entrada:0,gale:2,gat:'sempre'}],
   ['🔥 Agressivo só PAR, mesma vol',{fonte:'mv',forte:0,entrada:0,gale:2,cor:0,gat:'sempre',volGale:'mesma'}],
-  ['🔁 Depois de 3 greens seguidos, entra até dar 1 green',{fonte:'todas',forte:0,entrada:0,gale:1,gat:'greens',X:3,ciclo:'g1'}],
+  ['🔁 Depois de 3 greens seguidos, entra até dar 1 green',{fonte:'todas_n',forte:0,entrada:0,gale:1,gat:'greens',X:3,ciclo:'g1'}],
 ];
 let TSSR={lista:[],st:{},ok:false};
 function tssrV(){ return {...TSSR_DEF,...(cfg.tssv||{})}; }
 function tssrVSet(k,v){ cfg.tssv={...tssrV(),[k]:v}; saveCfg(); tssrValRender(); }
-function tssrRegras(R){ const ids=R.fonte==='todas'?TSS_REGRAS.map(x=>x[0]):[R.fonte]; return ids.map(id=>id+(+R.forte?'_f':'')); }
+// mercados do TS Somado usados pelo robô: um mercado (normal ou ⭐ forte), todos normais, todos fortes ou todos (6)
+// fv = versão do menu de mercados; robôs antigos (sem fv) mantêm o jeito antigo (o ⭐ marcado vale para a regra escolhida)
+function tssrRegras(R){
+  const f=R.fonte||'todas', rs=TSS_REGRAS.map(x=>x[0]), sf=+R.forte?'_f':'';
+  if(!R.fv) return f==='todas'?rs.map(id=>id+sf):[f+sf];
+  if(f==='todas_nf') return TSS_EST.map(e=>e.id);
+  if(f==='todas_n') return rs;
+  if(f==='todas_f') return rs.map(id=>id+'_f');
+  return [f];
+}
+const TSSR_MERC=[['todas_nf','todos os mercados (normal + ⭐ forte)'],['todas_n','todos os mercados · normal'],['todas_f','todos os mercados · ⭐ forte'],...TSS_EST.map(e=>[e.id,e.nome])];
+function tssrFonteNorm(R){ const f=R.fonte||'todas_nf'; if(!R.fv){ if(f==='todas') return +R.forte?'todas_f':'todas_n'; if(TSS_REGRAS.some(x=>x[0]===f)) return f+(+R.forte?'_f':''); } return f; }
+function tssrMercNome(R){ const f=R.fonte||'todas_nf', rs=TSS_REGRAS.find(x=>x[0]===f);
+  if(!R.fv&&(rs||f==='todas')) return (rs?rs[1]:'todas as regras')+(+R.forte?(rs?' · ⭐ forte':' ⭐ fortes'):'');
+  const M={todas_nf:'todos os mercados (normal + ⭐ forte)',todas_n:'todos os mercados · normal',todas_f:'todos os mercados · ⭐ forte'};
+  if(M[f]) return M[f]; const e=TSS_EST.find(x=>x.id===f); return e?e.nome:f; }
 function tssrPerm(R,p,first){ if(R.vols&&R.vols.length&&!R.vols.includes(p[1])) return false; if(+R.cor>=0&&p[2]!==+R.cor) return false; if(first&&R.volGale==='mesma'&&p[1]!==first[1]) return false; return true; }
 // quais TS do sinal o robô usa (índices), olhando o sinal já completo (histórico)
 function tssrIdx(R,ch){ const i0=+R.entrada; if(!ch.s||ch.s.length<=i0) return null; const f=ch.s[i0]; if(!tssrPerm(R,f,null)) return null;
@@ -13377,7 +13393,7 @@ function tssrSpark(curve,w=220,h=46){ if(!curve||curve.length<2) return `<svg wi
 function tssrDesc(R){ if(R.agenda) return R.descA||'agenda'; const pos=['TS (1º TS)','G1 (2º TS)','G2 (3º TS)'][+R.entrada], g=+R.gale?` + ${R.gale} gale${+R.gale>1?'s':''} nos TS seguintes${R.volGale==='mesma'?' (mesma vol)':''}`:'';
   const gat=R.gat==='sempre'?'em todos os sinais':R.gat==='xy'?`depois de ${R.X} red + ${R.Y} green`:R.gat==='reds'?`depois de ${R.X} reds seguidos`:`depois de ${R.X} greens seguidos`;
   const ci=R.gat==='sempre'?'':' → entra '+(/^g/.test(R.ciclo)?`até dar ${R.ciclo.slice(1)} green`:`${R.ciclo} sinal(is)`);
-  return `${pos}${g} · ${R.fonte==='todas'?'todas as regras':TSS_REGRAS.find(x=>x[0]===R.fonte)[1]}${+R.forte?' ⭐ fortes':''} · ${+R.cor<0?'PAR e ÍMPAR':+R.cor?'só ÍMPAR':'só PAR'} · ${R.vols&&R.vols.length?R.vols.map(s=>symNome(s).replace('Volatility','Vol')).join(', '):'todas as vols'} · ${gat}${ci}`; }
+  return `${pos}${g} · ${tssrMercNome(R)} · ${+R.cor<0?'PAR e ÍMPAR':+R.cor?'só ÍMPAR':'só PAR'} · ${R.vols&&R.vols.length?R.vols.map(s=>symNome(s).replace('Volatility','Vol')).join(', '):'todas as vols'} · ${gat}${ci}`; }
 function tssrStatsHtml(S,extra){ const pct=S.n?100*S.g/S.n:0, roi=S.staked?100*S.pnl/S.staked:0;
   return `<div class="tsr-num"><div><span>SALDO</span><b class="${S.pnl>=0?'ok':'ruim'}" style="font-size:22px">${S.pnl>=0?'+':''}$${S.pnl.toFixed(2)}</b></div><div><span>ROI</span><b class="${roi>=0?'ok':'ruim'}">${roi.toFixed(1)}%</b></div><div><span>ENTRADAS</span><b>${S.n}</b></div><div><span>GREEN</span><b class="ok">${S.g} (${pct.toFixed(0)}%)</b></div><div><span>RED</span><b class="ruim">${S.n-S.g}</b></div><div><span>MAIOR SEQ. RED</span><b>${S.mr}</b></div><div><span>MAIOR QUEDA</span><b>$${S.dd.toFixed(2)}</b></div>${extra||''}</div>
     <div class="tsr-cor">${[0,1].map(c=>{ const x=S.cor[c]; return `<span style="color:${c?'#f472b6':'#60a5fa'}"><b>${c?'ÍMPAR':'PAR'}</b> ${x[0]} entradas · ${x[1]} ✅ ${x[0]?'('+(100*x[1]/x[0]).toFixed(0)+'%)':''} · <b class="${x[2]>=0?'ok':'ruim'}">${x[2]>=0?'+':''}$${x[2].toFixed(2)}</b></span>`; }).join('')}</div>`; }
@@ -13399,8 +13415,7 @@ function tssrValHtml(){
   return `<div class="panel" id="tsrPanel"><h3>🧪 Validador de greens → criar robô</h3>
     <div class="ctl" style="flex-wrap:wrap">${TSSR_PRESETS.map((p,i)=>`<button onclick="cfg.tssv={...TSSR_DEF,...(cfg.tssv||{}),...TSSR_PRESETS[${i}][1]};saveCfg();tssrPainel()">${p[0]}</button>`).join('')}</div>
     <div class="ctl" style="flex-wrap:wrap;margin-top:6px">
-      <label>sinais de ${sel('fonte',[['todas','todas as regras'],...TSS_REGRAS.map(x=>[x[0],x[1]])],0)}</label>
-      <label><input type="checkbox" ${+R.forte?'checked':''} onchange="tssrVSet('forte',this.checked?1:0)"> só sinais ⭐ fortes</label>
+      <label>mercado do TS marcado <select onchange="tssrVSet('fonte',this.value)">${TSSR_MERC.map(([v,t])=>`<option value="${v}" ${tssrFonteNorm(R)===v?'selected':''}>${t}</option>`).join('')}</select></label>
       <label>entrar no ${sel('entrada',[[0,'TS (1º TS do sinal)'],[1,'G1 (2º TS do sinal)'],[2,'G2 (3º TS do sinal)']])}</label>
       <label>gale do robô ${sel('gale',[[0,'sem gale'],[1,'1 (próximo TS)'],[2,'2 (próximos 2 TS)']])}</label>
       <label>gale ${sel('volGale',[['qualquer','em qualquer vol'],['mesma','só na mesma vol']],0)}</label>
@@ -13414,7 +13429,7 @@ function tssrValHtml(){
     </div>
     <div class="ctl" style="flex-wrap:wrap;margin-top:6px">
       <label>valor ${sel('val',[[0.35,'$0,35'],[0.5,'$0,50'],[1,'$1'],[2,'$2'],[5,'$5']])}</label>
-      <label>gale ${sel('calc',[['fator','fator'],['zero','recupera (empata)'],['lucro','recupera + lucro'],['fixo','mesmo valor']],0)}</label>
+      <label>gale ${sel('calc',[['fator','fator'],['zero','recupera (empata)'],['lucro','recupera + lucro'],['fixo','💵 mão fixa (mesmo valor em todas as entradas)']],0)}</label>
       <label>fator ${sel('fator',[[2,'2,0'],[2.1,'2,1'],[2.2,'2,2'],[2.5,'2,5'],[3,'3,0']])}</label>
       <label>depois de um red, recuperar em ${sel('rec',[[0,'não recuperar'],[1,'1 green'],[2,'2 greens'],[3,'3 greens'],[5,'5 greens']])}</label>
       <label><input type="checkbox" ${+R.recLucro?'checked':''} onchange="tssrVSet('recLucro',this.checked?1:0)"> + lucro</label>
@@ -13698,7 +13713,7 @@ function tssrAutoBusca(minPct,minN){
   for(const [X,Y] of [[2,1],[3,1],[2,2]]) gats.push({gat:'xy',X,Y,ciclo:'1'});
   let n=0;
   for(const fonte of fontes) for(const forte of [0,1]) for(const [entrada,gale] of [[0,0],[0,1],[0,2],[1,0],[1,1],[2,0]]) for(const cor of [-1,0,1]) for(const g of gats){
-    const R={...TSSR_DEF,fonte,forte,entrada,gale,cor,gat:g.gat,X:g.X,Y:g.Y,ciclo:g.ciclo,volGale:'qualquer',vols:[],val:0.35,calc:'zero',rec:0,recLucro:0,sl:0,sw:0};
+    const R={...TSSR_DEF,fv:0,fonte,forte,entrada,gale,cor,gat:g.gat,X:g.X,Y:g.Y,ciclo:g.ciclo,volGale:'qualquer',vols:[],val:0.35,calc:'zero',rec:0,recLucro:0,sl:0,sw:0};
     const S=tssrSim(R,st).S; n++;
     if(S.n>=minN){ const pct=100*S.g/S.n; if(pct>=minPct-1e-9) res.push({R,pct,n:S.n,pnl:S.pnl}); }
   }
