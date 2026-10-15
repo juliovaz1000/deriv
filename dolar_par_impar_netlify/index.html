@@ -698,7 +698,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.58';
+const VERSAO='v4.59';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -3963,7 +3963,7 @@ function mxLim(bank){ const o=MAXV.rows&&MAXV.rows.find(x=>x.bank===bank); retur
 function maxOnSlots(recs){
   try{
     if(!MAXV.rows||!recs||!recs.length) return;
-    let novos=0;
+    const evs=[];
     for(const rec of recs){
       if(rec.d==null||!rec.s) continue;
       const lim=mxLim(rec.s); if(!lim) continue;
@@ -3972,13 +3972,19 @@ function maxOnSlots(recs){
       if(R&&R.lastT===T) continue;
       if(R&&R.p===p){ R.len++; } else { R=MXV.run[rec.s]={p,len:1,fired:false,lastT:0}; }
       R.lastT=T;
-      if(!R.fired&&lim[p]>=4&&R.len===lim[p]){
+      // só máxima boa: a sequência chega na máxima da vol×tempo (1000 jogos) e tem no mínimo 5 seguidos
+      if(!R.fired&&lim[p]>=5&&R.len===lim[p]&&R.len>=5){
         R.fired=true;
-        MXV.pend.push({bank:rec.s,sym:rec.s.split(' ')[1],step:rec.w,bet:1-p,T,len:R.len,cor:p,nome:`${symNome(rec.s.split(' ')[1]).replace('Volatility','Vol')} ${rec.w}s`});
-        novos++;
+        evs.push({bank:rec.s,sym:rec.s.split(' ')[1],step:rec.w,bet:1-p,T,len:R.len,cor:p,nome:`${symNome(rec.s.split(' ')[1]).replace('Volatility','Vol')} ${rec.w}s`});
       }
     }
-    if(!novos) return;
+    // máxima de PAR e máxima de ÍMPAR no mesmo segundo → não envia nada nesse segundo
+    const Tc=new Map(); for(const e of [...evs,...MXV.pend]){ if(!Tc.has(e.T)) Tc.set(e.T,new Set()); Tc.get(e.T).add(e.bet); }
+    const conf=new Set([...Tc].filter(([T,st])=>st.size>1).map(([T])=>T));
+    if(conf.size) MXV.pend=MXV.pend.filter(e=>!conf.has(e.T));
+    const novosEv=evs.filter(e=>!conf.has(e.T));
+    MXV.pend.push(...novosEv);
+    if(!novosEv.length) return;
     const tMax=Math.max(...MXV.pend.map(e=>e.T));
     MXV.pend=MXV.pend.filter(e=>e.T>=tMax-600);
     for(const bet of [0,1]){
