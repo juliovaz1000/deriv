@@ -698,7 +698,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.55';
+const VERSAO='v4.58';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -1612,6 +1612,7 @@ function d5OnTick(epoch,quote,sym='R_100'){
       rbWatchNew();
       if(typeof uoOnSlots==='function') uoOnSlots(recs);
       if(typeof tspOnSlots==='function') tspOnSlots(recs);
+      if(typeof maxOnSlots==='function') maxOnSlots(recs);
     }catch(e){ d5Ui(false,'erro ao gravar: '+(e.message||e)); }
   });
 }
@@ -3938,6 +3939,7 @@ VIEWS.max = { nome: '📏 Máximas', res() {
   const lastIdx = Array(10).fill(-1), maxGap = Array(10).fill(0), sumGap = Array(10).fill(0), nGap = Array(10).fill(0);
   W.forEach((x, i) => { if (x.d == null) return; const g = i - lastIdx[x.d] - 1; if (lastIdx[x.d] >= 0) { sumGap[x.d] += g; nGap[x.d]++; } if (g > maxGap[x.d]) maxGap[x.d] = g; lastIdx[x.d] = i; });
   const secas = [...Array(10).keys()].map(d => { const at = lastIdx[d] < 0 ? n : n - 1 - lastIdx[d]; return `<tr><td><span class="b ${d % 2 ? 'v' : 'g'}">${d}</span></td><td class="${at >= maxGap[d] * 0.8 && at > 20 ? 'ruim' : ''}"><b>${at}</b></td><td>${Math.max(maxGap[d], at)}</td><td>${nGap[d] ? (sumGap[d] / nGap[d]).toFixed(1) : '—'}</td></tr>`; }).join('');
+  setTimeout(maxVolsFill,0);
   return `<div class="cards">
     ${card('Máx. 🔴 ímpar', mV.len, mV.len ? 'terminou ' + fmtT(W[mV.e].t) : '')}
     ${card('Máx. 🟢 par', mG.len, mG.len ? 'terminou ' + fmtT(W[mG.e].t) : '')}
@@ -3951,8 +3953,83 @@ VIEWS.max = { nome: '📏 Máximas', res() {
      ${top.map(r => `<tr><td>${tagc(r.c)}</td><td><b>${r.len}</b></td><td>${fmtT(W[r.s].t)}</td><td>${fmtH(W[r.e].t)}</td></tr>`).join('')}</table></div>
   </div>
   <div class="panel"><h3>⌛ Secas dos dígitos <small>(quantos ticks sem vir)</small></h3><table>
-    <tr><th>Dígito</th><th>Sem vir agora</th><th>Máxima</th><th>Média</th></tr>${secas}</table></div>`;
+    <tr><th>Dígito</th><th>Sem vir agora</th><th>Máxima</th><th>Média</th></tr>${secas}</table></div>
+  <div class="panel"><h3>📏 Máximas por vol e tempo <small>PAR e ÍMPAR · últimos 1000 jogos de cada vol × tempo</small></h3><div id="maxVolsBox"><div class="nota">calculando…</div></div></div>`;
 } };
+// 🔗 MÁXIMAS AO VIVO: a sequência atual de uma vol×tempo chega na máxima dela (1000 jogos) → evento. 3 eventos da mesma cor
+//    viram 1 sinal (aposta na cor oposta = a máxima quebra), entrando no próximo jogo da vol que completou o trio.
+const MXV={run:{},pend:[]};
+function mxLim(bank){ const o=MAXV.rows&&MAXV.rows.find(x=>x.bank===bank); return o?[o.best[0].len,o.best[1].len]:null; }
+function maxOnSlots(recs){
+  try{
+    if(!MAXV.rows||!recs||!recs.length) return;
+    let novos=0;
+    for(const rec of recs){
+      if(rec.d==null||!rec.s) continue;
+      const lim=mxLim(rec.s); if(!lim) continue;
+      const p=rec.d%2, T=Math.round(rec.t/1000);
+      let R=MXV.run[rec.s];
+      if(R&&R.lastT===T) continue;
+      if(R&&R.p===p){ R.len++; } else { R=MXV.run[rec.s]={p,len:1,fired:false,lastT:0}; }
+      R.lastT=T;
+      if(!R.fired&&lim[p]>=4&&R.len===lim[p]){
+        R.fired=true;
+        MXV.pend.push({bank:rec.s,sym:rec.s.split(' ')[1],step:rec.w,bet:1-p,T,len:R.len,cor:p,nome:`${symNome(rec.s.split(' ')[1]).replace('Volatility','Vol')} ${rec.w}s`});
+        novos++;
+      }
+    }
+    if(!novos) return;
+    const tMax=Math.max(...MXV.pend.map(e=>e.T));
+    MXV.pend=MXV.pend.filter(e=>e.T>=tMax-600);
+    for(const bet of [0,1]){
+      let L=MXV.pend.filter(e=>e.bet===bet).sort((a,b)=>a.T-b.T);
+      while(L.length>=3){
+        const t3=L.slice(-3), c=t3[2];
+        MXV.pend=MXV.pend.filter(e=>!t3.includes(e));
+        L=L.slice(0,-3);
+        TSP.sinais.unshift({id:`${c.T}|max|${c.bank}`,T:c.T,sym:c.sym,step:c.step,bank:c.bank,bet,conflito:false,maxima:true,forte:false,
+          robos:t3.map(e=>({rid:'max',nome:`${e.nome} ${e.len}× ${e.cor?'ÍMPAR':'PAR'}`,bet})),res:null,nivel:-1,prox:1,criado:Date.now()});
+      }
+    }
+    tspSave(); if(S.tab==='tss') tspTsRender(); if(S.tab==='tsp') tspRender();
+  }catch(e){ console.warn('máximas',e); }
+}
+setTimeout(()=>{ maxVolsRefresh().catch(()=>{}); },3000);
+setInterval(()=>{ maxVolsRefresh().catch(()=>{}); },20000);
+setInterval(()=>{ try{ if(S.tab==='max') maxVolsFill(); }catch(e){} },2000);
+// máximas de PAR e de ÍMPAR seguidos para TODAS as vols × TODOS os tempos (com o horário em que terminou)
+const MAXV={t:0,rows:null,busy:false};
+async function maxVolsCalc(){
+  const L=[];
+  for(const [sym,nome] of SYMS_ALL) for(const st of D5_STEPS){
+    const bank=d5BankName(st,sym); let rows=[]; try{ rows=await idbTail(bank,1000); }catch(e){}
+    const o={vol:nome.replace('Volatility','Vol'),sym,bank,st,n:0,best:[{len:0},{len:0}],cur:null};
+    let cur=null;
+    for(const x of rows){ if(x.d==null) continue; o.n++; const p=x.d%2;
+      if(cur&&cur.p===p){ cur.len++; cur.e=x.t; } else { cur={p,len:1,s:x.t,e:x.t}; }
+      if(cur.len>o.best[p].len) o.best[p]={len:cur.len,s:cur.s,e:cur.e};
+    }
+    o.cur=cur; L.push(o);
+  }
+  return L;
+}
+async function maxVolsRefresh(){
+  if(MAXV.busy) return; MAXV.busy=true;
+  try{ MAXV.rows=await maxVolsCalc(); MAXV.t=Date.now(); } finally{ MAXV.busy=false; }
+}
+async function maxVolsFill(){
+  const el=document.getElementById('maxVolsBox'); if(!el) return;
+  if(!(MAXV.rows&&Date.now()-MAXV.t<20000)) await maxVolsRefresh();
+  if(!MAXV.rows) return;
+  const L=[...MAXV.rows].sort((a,b)=>Math.max(b.best[0].len,b.best[1].len)-Math.max(a.best[0].len,a.best[1].len));
+  const fmt=t=>t?hmsOf(Math.round(t/1000)):'—';
+  const linha=o=>{ const I=o.best[1], G=o.best[0];
+    return `<tr><td style="text-align:left"><b>${o.vol}</b></td><td>${o.st}s</td>
+      <td><b class="ruim">${I.len||'—'}</b></td><td class="mu">${I.len?fmt(I.e):''}</td>
+      <td><b class="ok">${G.len||'—'}</b></td><td class="mu">${G.len?fmt(G.e):''}</td>
+      <td class="mu">${(()=>{ const R=MXV.run[o.bank]; return R?`${R.len}× ${R.p?'ÍMPAR':'PAR'}`:(o.cur?`${o.cur.len}× ${o.cur.p?'ÍMPAR':'PAR'}`:'—'); })()}</td><td class="mu">${o.n}</td></tr>`; };
+  el.innerHTML=L.some(o=>o.n)?`<div class="tw" style="max-height:520px"><table><tr><th>Vol</th><th>Tempo</th><th>🔴 ÍMPAR máx</th><th>terminou</th><th>🟢 PAR máx</th><th>terminou</th><th>agora</th><th>jogos</th></tr>${L.map(linha).join('')}</table></div>`:'<div class="nota">Sem dados gravados ainda nas vols × tempos.</div>';
+}
 
 // ---- 🎯 Padrões ----
 VIEWS.pad = { nome: '🎯 Padrões', html() {
@@ -14053,7 +14130,7 @@ function tspOnSlots(recs){
         let x=TSP.sinais.find(q=>q.id===id);
         if(!x){
           // um robô sozinho já manda o sinal; um robô DIFERENTE, de outro segundo, pode completar um sinal aberto (1 robô só)
-          x=TSP.sinais.find(q=>q.res===null&&!q.conflito&&q.bank===d0.bank&&q.sym===d0.sym&&q.step===d0.step&&q.bet===d0.bet&&q.robos.length===1&&!q.robos.some(z=>z.rid===d0.r.id)&&q.T<T&&!!q.inter===!!d0.inter&&q.alt===d0.alt);
+          x=TSP.sinais.find(q=>q.res===null&&!q.conflito&&q.bank===d0.bank&&q.sym===d0.sym&&q.step===d0.step&&q.bet===d0.bet&&q.robos.length===1&&!q.robos.some(z=>z.rid===d0.r.id)&&q.T<T&&!!q.inter===!!d0.inter&&(q.alt||null)===(d0.alt||null));
           if(!x&&cheia) continue;
           if(!x){ x={id,T,sym:d0.sym,step:d0.step,bank:d0.bank,bet:d0.bet,conflito:false,robos:[],res:null,nivel:-1,prox:1,criado:Date.now(),inter:!!d0.inter,alt:d0.alt,altSym:d0.altSym,forte:tspEhForte(d0.sym,T+d0.step,d0.bet)}; TSP.sinais.unshift(x); }
         }
@@ -14105,7 +14182,7 @@ var TSP_NO_VOTO=false;
 // voto do robô TS para o círculo 🏭 Fábrica de robôs: sinal de robô cujo TS cai neste jogo (mesma vol)
 function tspBancoPos(x,p){ return x.inter&&p%2===1?x.alt:x.bank; }
 function tspVoto(sym,T){
-  const L=TSP.sinais.filter(x=>x.sym===sym&&!x.inter&&!x.conflito&&x.res!=='X'&&x.res!=='C'&&x.T+x.step===T);
+  const L=TSP.sinais.filter(x=>x.sym===sym&&!x.inter&&!x.maxima&&!x.conflito&&x.res!=='X'&&x.res!=='C'&&x.T+x.step===T);
   if(!L.length) return null;
   const bets=new Set(L.map(x=>x.bet));
   if(bets.size>1) return {alvo:null,txt:'robôs TS em cores diferentes'};
@@ -14118,9 +14195,9 @@ function tspEhForte(sym,E,bet){
   try{ const C=mcfC(); for(const w of tssTempos(E)){ const v=mcfVotar(w,E,sym); if(!v) continue; const f=mcfForca(v); if(f.alvo===bet&&f.n>=C.min&&!(+C.semContra&&f.contra)) return true; } return false; }
   catch(e){ return false; } finally{ TSP_NO_VOTO=false; }
 }
-function tspTabelaSinais(forte){
-  const ROT=['1º','2º','3º','4º'];
-  const L=TSP.sinais.filter(x=>!!x.forte===forte).slice(0,160).reverse();   // mais antigo à esquerda
+function tspTabelaSinais(tipo){
+  const ROT=['1º','2º','3º','4º'], forte=tipo==='forte', mx=tipo==='max';
+  const L=TSP.sinais.filter(x=>mx?!!x.maxima:(forte?!!x.forte&&!x.maxima:!x.forte&&!x.maxima)).slice(0,160).reverse();   // mais antigo à esquerda
   const g=L.filter(x=>x.res==='G'), r=L.filter(x=>x.res==='R'), c=L.filter(x=>x.res==='C').length, p=L.filter(x=>x.res===null).length;
   const cnt=k=>g.filter(x=>x.nivel===k).length;
   const acerto=g.length+r.length?(100*g.length/(g.length+r.length)).toFixed(1):'—';
@@ -14134,15 +14211,15 @@ function tspTabelaSinais(forte){
     const txt=x.res==='G'?ROT[x.nivel]:x.res==='R'?'R':x.res==='X'?'–':'…';
     return `<div title="${info}" style="width:44px;text-align:center"><div style="background:${bg};color:#fff;border-radius:6px;padding:7px 0;font-weight:900">${txt}</div><div class="mu" style="font-size:10px">${hora}</div></div>`;
   };
-  const titulo=forte?'⭐ Sinais fortes <small>robô + cruzamento do círculo · fecha em green ou red</small>':'🎯 Robôs TS <small>resultados dos sinais dos robôs · cadeia TS → G1 → G2 → G3</small>';
+  const titulo=mx?'📏 Sinais de máximas <small>3 máximas (vol × tempo) = 1 sinal · aposta na cor oposta · fecha em green ou red</small>':forte?'⭐ Sinais fortes <small>robô + cruzamento do círculo · fecha em green ou red</small>':'🎯 Robôs TS <small>resultados dos sinais dos robôs · cadeia TS → G1 → G2 → G3</small>';
   const resumo=`<b class="ok">${g.length}</b> green (1º ${cnt(0)} · 2º ${cnt(1)} · 3º ${cnt(2)} · 4º ${cnt(3)}) · <b class="ruim">${r.length}</b> red · ${c} conflito(s) · ${p} aguardando · acerto <b>${acerto}%</b> (sorte 50%)`;
-  return `<div id="${forte?'tspFortes':'tspTs'}" class="panel" style="border:2px solid ${forte?'#facc15':'#f472b6'}"><h3>${titulo}</h3>
+  return `<div id="${mx?'tspMaxs':forte?'tspFortes':'tspTs'}" class="panel" style="border:2px solid ${mx?'#38bdf8':forte?'#facc15':'#f472b6'}"><h3>${titulo}</h3>
     <div class="nota">${resumo}</div>
-    ${L.length?`<div style="display:flex;flex-wrap:wrap;gap:6px 4px;margin-top:8px">${L.map(cel).join('')}</div>`:`<div class="nota">${forte?'Nenhum sinal forte ainda.':'Ainda sem sinais. Ative um robô na aba 🎯 Robôs Tiro Seco.'}</div>`}
+    ${L.length?`<div style="display:flex;flex-wrap:wrap;gap:6px 4px;margin-top:8px">${L.map(cel).join('')}</div>`:`<div class="nota">${mx?'Nenhum sinal de máximas ainda. Quando 3 máximas da mesma cor acontecerem, o sinal aparece aqui.':forte?'Nenhum sinal forte ainda.':'Ainda sem sinais. Ative um robô na aba 🎯 Robôs Tiro Seco.'}</div>`}
     <div class="nota" style="margin-top:8px">1º / 2º / 3º / 4º = em qual entrada ganhou (TS, G1, G2, G3) · R = red · ⚠ = conflito · … = aguardando · passe o mouse para ver vol, aposta e robô.</div>
   </div>`;
 }
-function tspTsPainel(){ return `<div id="tspTsWrap">${tspTabelaSinais(false)}${tspTabelaSinais(true)}</div>`; }
+function tspTsPainel(){ return `<div id="tspTsWrap">${tspTabelaSinais('normal')}${tspTabelaSinais('forte')}${tspTabelaSinais('max')}</div>`; }
 function tspTsRender(){ const el=document.getElementById('tspTsWrap'); if(el) el.outerHTML=tspTsPainel(); }
 VIEWS.tsp={nome:'🎯 Robôs Tiro Seco',html(){ return `<div id="tspRoot">${tspHtml()}</div>`; },res(){ return ''; }};
 
