@@ -698,7 +698,7 @@ tr.scativo td{background:rgba(245,197,24,.07)}
    Ímpar = VERMELHO (V) · Par = VERDE (G)
    Ticks acumulados no IndexedDB, um banco por símbolo/mercado
    ========================================================= */
-const VERSAO='v4.61';
+const VERSAO='v4.62';
 const $ = s => document.querySelector(s);
 const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 const num = n => Number(n).toLocaleString('pt-BR');
@@ -751,7 +751,9 @@ let derivWS=null, derivPip=2, derivSeenBucket='', derivReconnect=null, lastPrima
 
 // ---------- IndexedDB ----------
 let DB;
-function openDB() { return new Promise((res, rej) => { const r = indexedDB.open('dolar_par_impar', 1); r.onupgradeneeded = () => { const st = r.result.createObjectStore('ticks', { keyPath: 'k' }); st.createIndex('b', 'b'); }; r.onsuccess = () => { DB = r.result; res(); }; r.onerror = () => rej(r.error); }); }
+function openDB() { return new Promise((res, rej) => { const r = indexedDB.open('dolar_par_impar', 1); r.onupgradeneeded = () => { const st = r.result.createObjectStore('ticks', { keyPath: 'k' }); st.createIndex('b', 'b'); }; r.onsuccess = () => { DB = r.result; DB.onversionchange = () => { try { DB.close(); } catch (e) {} DB = null; }; res(); }; r.onerror = () => rej(r.error); }); }
+// grava; se a conexão tiver sido fechada pelo navegador ("The database connection is closing"), reabre e tenta de novo
+async function idbPutSafe(list) { if (!DB) await openDB(); try { return await idbPut(list); } catch (e) { if (!/clos|null|undefined|Invalid/i.test((e && (e.message || e.name)) || '')) throw e; await openDB(); return await idbPut(list); } }
 function idbPut(list) { return new Promise((res, rej) => { let tx; try { tx = DB.transaction('ticks', 'readwrite', { durability: 'relaxed' }); } catch (e) { tx = DB.transaction('ticks', 'readwrite'); } const st = tx.objectStore('ticks'); for (const x of list) st.put(x); tx.onabort = () => rej(tx.error || new Error('gravação cancelada pelo navegador')); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
 function idbBank(b) { return new Promise((res, rej) => { const q = DB.transaction('ticks').objectStore('ticks').index('b').getAll(b); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 function idbBanks() { return new Promise(res => { const out = []; const q = DB.transaction('ticks').objectStore('ticks').index('b').openKeyCursor(null, 'nextunique'); q.onsuccess = () => { const c = q.result; if (c) { out.push(c.key); c.continue(); } else res(out); }; q.onerror = () => res(out); }); }
@@ -834,7 +836,7 @@ function normalize(arr) {
 async function ingest(list, opt = {}) {
   if (!list.length) return 0;
   const recs = list.map(x => { const b = x.s || opt.bank || cfg.bank; const o = { k: b + '|' + x.id, b, id: x.id, t: x.t, d: x.d, p: x.p, q: x.q, src: x.src || '' }; const sy = x.sym || bankSym(b); if (sy) o.sym = sy; const w = x.w || bankIntervalSec(b); if (w) o.w = w; if (x.te) o.te = x.te; return o; });
-  await idbPut(recs);
+  await idbPutSafe(recs);
   let novos = 0, mudouCfg = false;
   const lastId = S.all.length ? S.all.at(-1).id : -Infinity, meus = [], byBank = new Map();
   for (const r of recs) {
